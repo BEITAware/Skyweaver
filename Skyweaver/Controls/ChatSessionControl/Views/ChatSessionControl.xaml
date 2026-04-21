@@ -1,0 +1,806 @@
+﻿<UserControl x:Class="Skyweaver.Controls.ChatSessionControl.Views.ChatSessionControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:Skyweaver.Controls.ChatSessionControl.Views"
+             xmlns:models="clr-namespace:Skyweaver.Controls.ChatSessionControl.Models"
+             xmlns:viewModels="clr-namespace:Skyweaver.Controls.ChatSessionControl.ViewModels"
+             x:Name="Root"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewModels:ChatSessionControlViewModel, IsDesignTimeCreatable=False}"
+             d:DesignHeight="600"
+             d:DesignWidth="800">
+    <UserControl.Resources>
+        <RadialGradientBrush x:Key="ChatHeaderButtonIdleBrush"
+                             RadiusX="2.152"
+                             RadiusY="1.684"
+                             Center="0.5,0.993"
+                             GradientOrigin="0.5,0.993">
+            <GradientStop Color="#26FFFFFF" Offset="0"/>
+            <GradientStop Color="#00000004" Offset="0.38"/>
+            <GradientStop Color="#00FFFFFF" Offset="0.417"/>
+            <GradientStop Color="#56D4FFF9" Offset="0.77"/>
+            <GradientStop Color="#4A8CF1E4" Offset="0.892"/>
+        </RadialGradientBrush>
+
+        <LinearGradientBrush x:Key="ChatHeaderButtonHoverBrush"
+                             StartPoint="0.5,-0.667875"
+                             EndPoint="0.5,1.66787">
+            <GradientStop Color="#00FFFFFF" Offset="0"/>
+            <GradientStop Color="#1AFFFFFF" Offset="0.135436"/>
+            <GradientStop Color="#14FFFFFF" Offset="0.487941"/>
+            <GradientStop Color="#00000004" Offset="0.517625"/>
+            <GradientStop Color="#FF2AAE9A" Offset="0.729128"/>
+        </LinearGradientBrush>
+
+        <DrawingBrush x:Key="ChatHeaderButtonPressedBrush" Stretch="Fill">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <DrawingGroup.Children>
+                        <GeometryDrawing>
+                            <GeometryDrawing.Geometry>
+                                <EllipseGeometry Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5"/>
+                            </GeometryDrawing.Geometry>
+                            <GeometryDrawing.Brush>
+                                <RadialGradientBrush RadiusX="0.5"
+                                                     RadiusY="0.833333"
+                                                     Center="0.5,0.5"
+                                                     GradientOrigin="0.5,0.5">
+                                    <GradientStop Color="#FF76F1E4" Offset="0"/>
+                                    <GradientStop Color="#00000000" Offset="0.662338"/>
+                                    <RadialGradientBrush.RelativeTransform>
+                                        <RotateTransform CenterX="0.5" CenterY="0.5" Angle="-90"/>
+                                    </RadialGradientBrush.RelativeTransform>
+                                </RadialGradientBrush>
+                            </GeometryDrawing.Brush>
+                        </GeometryDrawing>
+                        <GeometryDrawing>
+                            <GeometryDrawing.Geometry>
+                                <RectangleGeometry Rect="0,0,1,1"/>
+                            </GeometryDrawing.Geometry>
+                            <GeometryDrawing.Brush>
+                                <LinearGradientBrush StartPoint="0.5,-0.667873" EndPoint="0.5,1.66787">
+                                    <GradientStop Color="#00FFFFFF" Offset="0"/>
+                                    <GradientStop Color="#1AFFFFFF" Offset="0.135436"/>
+                                    <GradientStop Color="#14FFFFFF" Offset="0.487941"/>
+                                    <GradientStop Color="#00000004" Offset="0.517625"/>
+                                    <GradientStop Color="#FF29E1C8" Offset="0.717996"/>
+                                </LinearGradientBrush>
+                            </GeometryDrawing.Brush>
+                        </GeometryDrawing>
+                    </DrawingGroup.Children>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+
+        <Style x:Key="ChatHeaderButtonStyle" TargetType="Button">
+            <Setter Property="Margin" Value="8,0,0,0"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="MinWidth" Value="72"/>
+            <Setter Property="Foreground" Value="#FFF4FFFD"/>
+            <Setter Property="Background" Value="{StaticResource ChatHeaderButtonIdleBrush}"/>
+            <Setter Property="BorderBrush" Value="#FF000000"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontFamily" Value="Segoe UI, Microsoft YaHei UI, Arial"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3"
+                                SnapsToDevicePixels="True"
+                                RenderTransformOrigin="0.5,0.5">
+                            <Border.RenderTransform>
+                                <ScaleTransform ScaleX="1.0" ScaleY="1.0"/>
+                            </Border.RenderTransform>
+                            <ContentPresenter x:Name="contentPresenter"
+                                              Focusable="False"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Margin="{TemplateBinding Padding}"
+                                              RecognizesAccessKey="True"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background"
+                                        TargetName="border"
+                                        Value="{StaticResource ChatHeaderButtonHoverBrush}"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="#552FFFF2"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background"
+                                        TargetName="border"
+                                        Value="{StaticResource ChatHeaderButtonPressedBrush}"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="#6634FFF0"/>
+                                <Setter Property="Opacity" TargetName="border" Value="0.96"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="border"
+                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                             To="0.97"
+                                                             Duration="0:0:0.08"/>
+                                            <DoubleAnimation Storyboard.TargetName="border"
+                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                             To="0.97"
+                                                             Duration="0:0:0.08"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="border"
+                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                             To="1.0"
+                                                             Duration="0:0:0.12"/>
+                                            <DoubleAnimation Storyboard.TargetName="border"
+                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                             To="1.0"
+                                                             Duration="0:0:0.12"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" TargetName="border" Value="0.45"/>
+                                <Setter Property="Foreground" Value="#99FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ChatDeleteButtonStyle" TargetType="Button">
+            <Setter Property="Padding" Value="8,2"/>
+            <Setter Property="Margin" Value="10,0,0,0"/>
+            <Setter Property="MinWidth" Value="54"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="#FFD8FBFF"/>
+            <Setter Property="Background" Value="#33000000"/>
+            <Setter Property="BorderBrush" Value="#4496FCFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style x:Key="ChatHeaderCapsuleBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource ButtonIdleBrush}"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="MinWidth" Value="58"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Margin" Value="0,0,6,6"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="BorderBrush" Value="#332EC5C0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style x:Key="ChatHeaderStatusCapsuleBorderStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource ChatHeaderCapsuleBorderStyle}">
+            <Setter Property="BorderBrush" Value="#44F3C96B"/>
+        </Style>
+
+        <Style x:Key="ChatHeaderCapsuleTextStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="#CCFFFFFF"/>
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
+
+        <Style x:Key="ChatHeaderStatusCapsuleTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource ChatHeaderCapsuleTextStyle}">
+            <Setter Property="Foreground" Value="#FFF3E4AE"/>
+        </Style>
+
+        <Style x:Key="ChatComposerTextBoxStyle"
+               TargetType="{x:Type TextBox}"
+               BasedOn="{StaticResource DefaultTextBoxStyle}">
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TextBox}">
+                        <Border x:Name="border"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                SnapsToDevicePixels="True">
+                            <Border.Background>
+                                <LinearGradientBrush x:Name="backgroundBrush" StartPoint="0.438,5.527" EndPoint="0.438,-4.527">
+                                    <GradientStop x:Name="gradientStop1" Color="#91007BFF" Offset="0.143"/>
+                                    <GradientStop x:Name="gradientStop2" Color="#00FFFFFF" Offset="0.503"/>
+                                    <GradientStop x:Name="gradientStop3" Color="#C30099FF" Offset="0.792"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Focusable="False"
+                                          Padding="{TemplateBinding Padding}"
+                                          Style="{DynamicResource AeroScrollViewerStyle}"
+                                          HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                          VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource AccentColor}"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource AccentColor}"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation Storyboard.TargetName="gradientStop1"
+                                                            Storyboard.TargetProperty="Color"
+                                                            To="#AF00C7FF"
+                                                            Duration="0:0:0.08"
+                                                            EasingFunction="{StaticResource BackEaseOut}"/>
+                                            <ColorAnimation Storyboard.TargetName="gradientStop2"
+                                                            Storyboard.TargetProperty="Color"
+                                                            To="#00FFFFFF"
+                                                            Duration="0:0:0.08"
+                                                            EasingFunction="{StaticResource ExpoEaseOut}"/>
+                                            <ColorAnimation Storyboard.TargetName="gradientStop3"
+                                                            Storyboard.TargetProperty="Color"
+                                                            To="#FF00ECFF"
+                                                            Duration="0:0:0.08"
+                                                            EasingFunction="{StaticResource BackEaseOut}"/>
+                                            <DoubleAnimation Storyboard.TargetName="gradientStop1"
+                                                             Storyboard.TargetProperty="Offset"
+                                                             To="0.414"
+                                                             Duration="0:0:0.1"
+                                                             EasingFunction="{StaticResource ExpoEaseOut}"/>
+                                            <DoubleAnimation Storyboard.TargetName="gradientStop2"
+                                                             Storyboard.TargetProperty="Offset"
+                                                             To="0.495"
+                                                             Duration="0:0:0.1"
+                                                             EasingFunction="{StaticResource ExpoEaseOut}"/>
+                                            <DoubleAnimation Storyboard.TargetName="gradientStop3"
+                                                             Storyboard.TargetProperty="Offset"
+                                                             To="0.692"
+                                                             Duration="0:0:0.1"
+                                                             EasingFunction="{StaticResource ExpoEaseOut}"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation Storyboard.TargetName="gradientStop1"
+                                                            Storyboard.TargetProperty="Color"
+                                                            To="#91007BFF"
+                                                            Duration="0:0:0.12"
+                                                            EasingFunction="{StaticResource QuinticEaseInOut}"/>
+                                            <ColorAnimation Storyboard.TargetName="gradientStop2"
+                                                            Storyboard.TargetProperty="Color"
+                                                            To="#00FFFFFF"
+                                                            Duration="0:0:0.12"
+                                                            EasingFunction="{StaticResource QuinticEaseInOut}"/>
+                                            <ColorAnimation Storyboard.TargetName="gradientStop3"
+                                                            Storyboard.TargetProperty="Color"
+                                                            To="#C30099FF"
+                                                            Duration="0:0:0.12"
+                                                            EasingFunction="{StaticResource QuinticEaseInOut}"/>
+                                            <DoubleAnimation Storyboard.TargetName="gradientStop1"
+                                                             Storyboard.TargetProperty="Offset"
+                                                             To="0.143"
+                                                             Duration="0:0:0.15"
+                                                             EasingFunction="{StaticResource QuinticEaseInOut}"/>
+                                            <DoubleAnimation Storyboard.TargetName="gradientStop2"
+                                                             Storyboard.TargetProperty="Offset"
+                                                             To="0.503"
+                                                             Duration="0:0:0.15"
+                                                             EasingFunction="{StaticResource QuinticEaseInOut}"/>
+                                            <DoubleAnimation Storyboard.TargetName="gradientStop3"
+                                                             Storyboard.TargetProperty="Offset"
+                                                             To="0.792"
+                                                             Duration="0:0:0.15"
+                                                             EasingFunction="{StaticResource QuinticEaseInOut}"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ChatMessageListItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <ContentPresenter/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="TextMessagePartTemplate" DataType="{x:Type models:ChatMessagePartModel}">
+            <StackPanel>
+                <TextBlock Text="{Binding Title}"
+                           Foreground="#FFBDEBFF"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,4"
+                           TextWrapping="Wrap"
+                           Visibility="{Binding Title, Converter={StaticResource NullToVisibilityConverter}}"/>
+                <TextBlock Text="{Binding Content}"
+                           Foreground="White"
+                           TextWrapping="Wrap"
+                           FontSize="14"
+                           FontFamily="Segoe UI, Microsoft YaHei UI"/>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="CodeMessagePartTemplate" DataType="{x:Type models:ChatMessagePartModel}">
+            <Border Background="#24000000"
+                    BorderBrush="#4496FCFF"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="10">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,8" LastChildFill="False">
+                        <TextBlock Text="{Binding Title}"
+                                   Foreground="#FFBDEBFF"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   Visibility="{Binding Title, Converter={StaticResource NullToVisibilityConverter}}"/>
+                        <Border DockPanel.Dock="Right"
+                                Background="#22000000"
+                                BorderBrush="#3388D7E8"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="6,2"
+                                Visibility="{Binding Language, Converter={StaticResource NullToVisibilityConverter}}">
+                            <TextBlock Text="{Binding Language}" Foreground="#FF9CDCFE" FontSize="11"/>
+                        </Border>
+                    </DockPanel>
+                    <TextBlock Text="{Binding Content}"
+                               Foreground="#FF9CDCFE"
+                               FontFamily="Consolas"
+                               FontSize="13"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="StatusMessagePartTemplate" DataType="{x:Type models:ChatMessagePartModel}">
+            <Border Background="#241C7488"
+                    BorderBrush="#5584E7F4"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="10,8">
+                <StackPanel>
+                    <TextBlock Text="{Binding Title}"
+                               Foreground="#FFBDEBFF"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,4"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding Title, Converter={StaticResource NullToVisibilityConverter}}"/>
+                    <TextBlock Text="{Binding Content}"
+                               Foreground="#FFE7FBFF"
+                               TextWrapping="Wrap"
+                               FontSize="13"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="PlaceholderMessagePartTemplate" DataType="{x:Type models:ChatMessagePartModel}">
+            <Border Background="#15000000"
+                    BorderBrush="#5596FCFF"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="10">
+                <StackPanel>
+                    <TextBlock Text="{Binding Title}"
+                               Foreground="#FFBDEBFF"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,4"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding Title, Converter={StaticResource NullToVisibilityConverter}}"/>
+                    <TextBlock Text="{Binding Content}"
+                               Foreground="#CCFFFFFF"
+                               FontStyle="Italic"
+                               TextWrapping="Wrap"
+                               FontSize="13"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ToolCallMessagePartTemplate" DataType="{x:Type models:ChatMessagePartModel}">
+            <StackPanel>
+                <ContentControl Content="{Binding ToolPresentationView}"/>
+                <TextBlock Text="{Binding Content}"
+                           Foreground="#FFFFF2CF"
+                           TextWrapping="Wrap"
+                           FontFamily="Consolas"
+                           FontSize="13"
+                           Margin="0,8,0,0">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ToolPresentationView}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <TextBlock Margin="0,6,0,0"
+                           Foreground="#CCFFFFFF"
+                           FontSize="11"
+                           Text="等待工具执行回填。"
+                           Visibility="{Binding IsStreaming, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ToolOutputMessagePartTemplate" DataType="{x:Type models:ChatMessagePartModel}">
+            <Border Background="#20162B34"
+                    BorderBrush="#55A8F0FF"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="10">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,6" LastChildFill="False">
+                        <TextBlock Text="{Binding Title}"
+                                   Foreground="#FFBDEBFF"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   Visibility="{Binding Title, Converter={StaticResource NullToVisibilityConverter}}"/>
+                        <Border DockPanel.Dock="Right"
+                                Background="#22000000"
+                                BorderBrush="#3388D7E8"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="6,2">
+                            <TextBlock Text="{Binding BadgeText}" Foreground="#FF9CDCFE" FontSize="11"/>
+                        </Border>
+                    </DockPanel>
+                    <TextBlock Text="{Binding Content}"
+                               Foreground="#FFEAFDFF"
+                               TextWrapping="Wrap"
+                               FontFamily="Consolas"
+                               FontSize="13"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <HierarchicalDataTemplate x:Key="StructuredXmlNodeTemplate"
+                                  DataType="{x:Type models:ChatStructuredXmlNodeModel}"
+                                  ItemsSource="{Binding Children}">
+            <TextBlock Text="{Binding DisplayText}"
+                       Foreground="White"
+                       FontSize="12"/>
+        </HierarchicalDataTemplate>
+
+        <DataTemplate x:Key="StructuredXmlMessagePartTemplate" DataType="{x:Type models:ChatMessagePartModel}">
+            <Border Background="#18191F32"
+                    BorderBrush="#55B0A7FF"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="10">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,6" LastChildFill="False">
+                        <TextBlock Text="{Binding Title}"
+                                   Foreground="#FFBDEBFF"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   Visibility="{Binding Title, Converter={StaticResource NullToVisibilityConverter}}"/>
+                        <Border DockPanel.Dock="Right"
+                                Background="#22000000"
+                                BorderBrush="#33B0A7FF"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="6,2">
+                            <TextBlock Text="{Binding BadgeText}" Foreground="#FFB0A7FF" FontSize="11"/>
+                        </Border>
+                    </DockPanel>
+                    <TreeView ItemsSource="{Binding StructuredXmlNodes}"
+                              ItemTemplate="{StaticResource StructuredXmlNodeTemplate}"
+                              Background="Transparent"
+                              BorderThickness="0"
+                              Foreground="White"/>
+                    <TextBlock Margin="0,8,0,0"
+                               Text="{Binding Content}"
+                               Foreground="#B8FFFFFF"
+                               FontFamily="Consolas"
+                               FontSize="12"
+                               TextWrapping="Wrap">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasStructuredXmlNodes}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <local:ChatMessagePartTemplateSelector x:Key="ChatMessagePartTemplateSelector"
+                                               TextTemplate="{StaticResource TextMessagePartTemplate}"
+                                               CodeTemplate="{StaticResource CodeMessagePartTemplate}"
+                                               StatusTemplate="{StaticResource StatusMessagePartTemplate}"
+                                               PlaceholderTemplate="{StaticResource PlaceholderMessagePartTemplate}"
+                                               ToolCallTemplate="{StaticResource ToolCallMessagePartTemplate}"
+                                               ToolOutputTemplate="{StaticResource ToolOutputMessagePartTemplate}"
+                                               StructuredXmlTemplate="{StaticResource StructuredXmlMessagePartTemplate}"/>
+
+        <DataTemplate x:Key="BubbleMessageContentTemplate" DataType="{x:Type models:ChatMessageModel}">
+            <StackPanel>
+                <DockPanel Margin="0,0,0,8" LastChildFill="False">
+                    <TextBlock Text="{Binding DisplayName}"
+                               Foreground="#FFBDEBFF"
+                               FontWeight="SemiBold"
+                               FontSize="12"
+                               TextWrapping="Wrap"/>
+                    <TextBlock DockPanel.Dock="Right"
+                               Text="{Binding TimestampText}"
+                               Foreground="#99FFFFFF"
+                               FontSize="11"
+                               VerticalAlignment="Center"/>
+                    <Button DockPanel.Dock="Right"
+                            Style="{StaticResource ChatDeleteButtonStyle}"
+                            Content="删除"
+                            Command="{Binding DataContext.RemoveMessageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            CommandParameter="{Binding}"/>
+                </DockPanel>
+
+                <ItemsControl ItemsSource="{Binding Parts}"
+                              ItemTemplateSelector="{StaticResource ChatMessagePartTemplateSelector}">
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="Margin" Value="0,0,0,8"/>
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+                </ItemsControl>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="UserMessageTemplate" DataType="{x:Type models:ChatMessageModel}">
+            <Grid Margin="0,0,0,18">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="60"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0"
+                        HorizontalAlignment="Right"
+                        MaxWidth="620"
+                        Margin="70,0,10,0"
+                        Padding="15,12"
+                        Background="{DynamicResource ChatBubbleObjectIdleBrush}">
+                    <ContentControl Content="{Binding}" ContentTemplate="{StaticResource BubbleMessageContentTemplate}"/>
+                </Border>
+
+                <Grid Grid.Column="1" Width="50" Height="50" VerticalAlignment="Top">
+                    <Rectangle Fill="{DynamicResource ChatAvatarBackgroundGlassBrush}" RadiusX="25" RadiusY="25"/>
+                    <Border CornerRadius="25" Margin="5" Background="#22FFFFFF">
+                        <Image Source="{Binding AvatarPath}" Stretch="Uniform" Margin="5"/>
+                    </Border>
+                </Grid>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="AssistantMessageTemplate" DataType="{x:Type models:ChatMessageModel}">
+            <Grid Margin="0,0,0,18">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="60"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0" Width="50" Height="50" VerticalAlignment="Top">
+                    <Rectangle Fill="{DynamicResource ChatAvatarBackgroundGlassBrush}" RadiusX="25" RadiusY="25"/>
+                    <Border CornerRadius="25" Margin="5" Background="#22FFFFFF">
+                        <Image Source="{Binding AvatarPath}" Stretch="Uniform" Margin="5"/>
+                    </Border>
+                </Grid>
+
+                <Border Grid.Column="1"
+                        HorizontalAlignment="Left"
+                        MaxWidth="620"
+                        Margin="10,0,70,0"
+                        Padding="15,12"
+                        Background="{DynamicResource ChatBubbleObjectHoverBrush}">
+                    <ContentControl Content="{Binding}" ContentTemplate="{StaticResource BubbleMessageContentTemplate}"/>
+                </Border>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="SystemMessageTemplate" DataType="{x:Type models:ChatMessageModel}">
+            <Border Margin="90,0,90,18"
+                    Padding="14,12"
+                    CornerRadius="10"
+                    Background="#33111824"
+                    BorderBrush="#5596FCFF"
+                    BorderThickness="1">
+                <ContentControl Content="{Binding}" ContentTemplate="{StaticResource BubbleMessageContentTemplate}"/>
+            </Border>
+        </DataTemplate>
+
+        <local:ChatMessageTemplateSelector x:Key="ChatMessageTemplateSelector"
+                                           UserTemplate="{StaticResource UserMessageTemplate}"
+                                           AssistantTemplate="{StaticResource AssistantMessageTemplate}"
+                                           SystemTemplate="{StaticResource SystemMessageTemplate}"/>
+    </UserControl.Resources>
+
+    <Border Style="{DynamicResource WorkAreaStyle}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Rectangle Grid.RowSpan="3"
+                       Stretch="Fill"
+                       IsHitTestVisible="False">
+                <Rectangle.Fill>
+                    <SolidColorBrush Color="White"/>
+                </Rectangle.Fill>
+                <Rectangle.Effect>
+                    <local:ChatRibbonBackgroundEffect Time="{Binding RibbonTime, ElementName=Root}"
+                                                      AspectRatio="{Binding RibbonAspectRatio, ElementName=Root}"/>
+                </Rectangle.Effect>
+            </Rectangle>
+
+            <Rectangle Grid.RowSpan="3"
+                       Fill="{DynamicResource ChatBackgroundBrush}"
+                       IsHitTestVisible="False"/>
+
+            <Border Grid.Row="0" Style="{DynamicResource ChatSessionHeaderBorderStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <WrapPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding SessionTitle}"
+                                   Foreground="#FF96FCFF"
+                                   FontWeight="SemiBold"
+                                   FontSize="14"
+                                   Margin="0,0,12,6"/>
+                        <Border Style="{StaticResource ChatHeaderCapsuleBorderStyle}"
+                                Visibility="{Binding SessionSubtitle, Converter={StaticResource NullToVisibilityConverter}}">
+                            <TextBlock Text="{Binding SessionSubtitle}"
+                                       Style="{StaticResource ChatHeaderCapsuleTextStyle}"/>
+                        </Border>
+                        <Border Style="{StaticResource ChatHeaderCapsuleBorderStyle}">
+                            <TextBlock Text="{Binding Messages.Count, StringFormat=当前消息 {0} 条}"
+                                       Style="{StaticResource ChatHeaderCapsuleTextStyle}"/>
+                        </Border>
+                        <Border Style="{StaticResource ChatHeaderCapsuleBorderStyle}"
+                                ToolTip="{Binding SessionFlowValidationSummary}">
+                            <TextBlock Text="{Binding BoundSessionFlowName, StringFormat=会话流：{0}}"
+                                       Style="{StaticResource ChatHeaderCapsuleTextStyle}"/>
+                        </Border>
+                        <Border Style="{StaticResource ChatHeaderStatusCapsuleBorderStyle}">
+                            <TextBlock Text="{Binding ExecutionStatusText}"
+                                       Style="{StaticResource ChatHeaderStatusCapsuleTextStyle}"/>
+                        </Border>
+                    </WrapPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                        <Button Style="{StaticResource ChatHeaderButtonStyle}" Content="取消执行" Command="{Binding CancelExecutionCommand}"/>
+                        <Button Style="{StaticResource ChatHeaderButtonStyle}" Content="删除选中" Command="{Binding RemoveSelectedMessageCommand}"/>
+                        <Button Style="{StaticResource ChatHeaderButtonStyle}" Content="清空" Command="{Binding ClearMessagesCommand}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="1" Margin="10,10,10,8">
+                <Border Background="#18000000"
+                        BorderBrush="#3396FCFF"
+                        BorderThickness="1"
+                        CornerRadius="2"/>
+
+                <ListBox x:Name="MessagesList"
+                         ItemsSource="{Binding Messages}"
+                         SelectedItem="{Binding SelectedMessage, Mode=TwoWay}"
+                         ItemTemplateSelector="{StaticResource ChatMessageTemplateSelector}"
+                         ItemContainerStyle="{StaticResource ChatMessageListItemStyle}"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Padding="12"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+                <TextBlock Text="这里还没有消息，可以先在下方输入一条用户消息，然后发送并让会话流开始执行。"
+                           Margin="26"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Foreground="#AAFFFFFF"
+                           FontSize="13"
+                           TextWrapping="Wrap"
+                           Visibility="{Binding IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            </Grid>
+
+            <Border Grid.Row="2"
+                    Margin="10,0,10,10"
+                    Padding="12"
+                    Background="{DynamicResource ChatSessionHeaderBackgroundBrush}"
+                    BorderBrush="#3396FCFF"
+                    BorderThickness="1"
+                    CornerRadius="2">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="{Binding ComposerHintText}"
+                                   Foreground="#99FFFFFF"
+                                   FontSize="11"
+                                   Margin="0,0,0,8"/>
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="128"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox x:Name="ComposerTextBox"
+                                     Style="{StaticResource ChatComposerTextBoxStyle}"
+                                     Text="{Binding DraftMessageText, UpdateSourceTrigger=PropertyChanged}"
+                                     MinHeight="82"
+                                     MaxHeight="180"
+                                     Padding="10"
+                                     AcceptsReturn="True"
+                                     TextWrapping="Wrap"
+                                     VerticalScrollBarVisibility="Auto"
+                                     HorizontalScrollBarVisibility="Disabled"
+                                     Background="#14000000"
+                                     Foreground="White"
+                                     BorderBrush="#5596FCFF"
+                                     BorderThickness="1"
+                                     PreviewKeyDown="ComposerTextBox_PreviewKeyDown"/>
+
+                            <Button Grid.Column="1"
+                                    Margin="10,0,0,0"
+                                    Style="{DynamicResource ChatSessionSendButtonStyle}"
+                                    Content="{Binding ComposerPrimaryButtonText}"
+                                    Command="{Binding ComposerPrimaryCommand}"
+                                    Tag="{Binding IsComposerPrimaryButtonLatched}"/>
+
+                            <Button Grid.Column="1"
+                                    Visibility="Collapsed"
+                                    Margin="10,0,0,0"
+                                    Style="{StaticResource ChatHeaderButtonStyle}"
+                                    Content="取消执行"
+                                    Command="{Binding CancelExecutionCommand}"/>
+
+                            <Button Grid.Column="1"
+                                    Visibility="Collapsed"
+                                    Margin="10,0,0,0"
+                                    Style="{DynamicResource ChatSessionSendButtonStyle}"
+                                    Content="发送"
+                                    Command="{Binding SendMessageCommand}"
+                                    />
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

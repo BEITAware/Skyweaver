@@ -1,0 +1,58 @@
+<UserControl x:Class="Skyweaver.Controls.SkyweaverPreferencesControl.Views.SkyweaverPreferencesControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewModels:SkyweaverPreferencesControlViewModel, IsDesignTimeCreatable=True}"
+             d:DesignHeight="420"
+             d:DesignWidth="640">
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#FF19222D" Offset="0"/>
+                <GradientStop Color="#FF10161E" Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <Border Margin="18"
+                Padding="20"
+                Background="#16000000"
+                BorderBrush="#335596FC"
+                BorderThickness="1"
+                CornerRadius="12">
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="{Binding Title}"
+                           FontSize="15"
+                           FontWeight="SemiBold"
+                           Foreground="#FF96FCFF"/>
+                <TextBlock Margin="0,12,0,0"
+                           Text="{Binding Description}"
+                           TextWrapping="Wrap"
+                           Foreground="#E6FFFFFF"
+                           FontSize="13"/>
+                <TextBlock Margin="0,12,0,0"
+                           Text="{Binding Hint}"
+                           TextWrapping="Wrap"
+                           Foreground="#AAFFFFFF"
+                           FontSize="12"/>
+                <Separator Margin="0,16,0,16" Opacity="0.35"/>
+                <TextBlock Text="{Binding Scaffold.EmptyStateTitle}"
+                           Foreground="White"
+                           FontWeight="SemiBold"
+                           FontSize="14"/>
+                <TextBlock Margin="0,10,0,0"
+                           Text="{Binding Scaffold.EmptyStateDescription}"
+                           Foreground="#D9FFFFFF"
+                           TextWrapping="Wrap"
+                           FontSize="12"/>
+                <TextBlock Margin="0,10,0,0"
+                           Text="{Binding Scaffold.EmptyStateHint}"
+                           Foreground="#A6FFFFFF"
+                           TextWrapping="Wrap"
+                           FontSize="12"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,0 +1,366 @@
+using System.Collections.Concurrent;
+using Skyweaver.Controls.AgentConfigurationControl.Models;
+using Skyweaver.Controls.AgentConfigurationControl.Services;
+using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
+using Skyweaver.Controls.WorkflowEditorControl.Models;
+using Skyweaver.Controls.WorkflowEditorControl.Services;
+
+namespace Skyweaver.Services.ChatSession
+{
+    public sealed class ChatSessionRuntimeService
+    {
+        private static readonly ConcurrentDictionary<string, CancellationTokenSource> s_activeExecutions =
+            new(StringComparer.OrdinalIgnoreCase);
+
+        private readonly ChatSessionFlowBindingService _flowBindingService;
+        private readonly AgentConfigurationRepository _agentConfigurationRepository;
+        private readonly IAgentLanguageModelResolver _languageModelResolver;
+        private readonly SessionFlowExecutionService _executionService;
+        private readonly SemaphoreSlim _executionGate = new(1, 1);
+
+        private CancellationTokenSource? _activeExecutionCancellationSource;
+        private string? _activeSessionId;
+        private bool _isExecutionActive;
+
+        public ChatSessionRuntimeService()
+            : this(
+                new ChatSessionFlowBindingService(),
+                new AgentConfigurationRepository(new AgentConfigurationPathProvider()),
+                new AgentLanguageModelResolver(),
+                new SessionFlowExecutionService())
+        {
+        }
+
+        public ChatSessionRuntimeService(
+            ChatSessionFlowBindingService flowBindingService,
+            AgentConfigurationRepository agentConfigurationRepository,
+            IAgentLanguageModelResolver languageModelResolver,
+            SessionFlowExecutionService executionService)
+        {
+            _flowBindingService = flowBindingService ?? throw new ArgumentNullException(nameof(flowBindingService));
+            _agentConfigurationRepository = agentConfigurationRepository ?? throw new ArgumentNullException(nameof(agentConfigurationRepository));
+            _languageModelResolver = languageModelResolver ?? throw new ArgumentNullException(nameof(languageModelResolver));
+            _executionService = executionService ?? throw new ArgumentNullException(nameof(executionService));
+        }
+
+        public bool IsExecutionActive => _isExecutionActive;
+
+        public bool CancelActiveExecution(string? sessionId = null)
+        {
+            if (!string.IsNullOrWhiteSpace(sessionId) &&
+                s_activeExecutions.TryGetValue(sessionId, out var globalCancellationSource))
+            {
+                globalCancellationSource.Cancel();
+                return true;
+            }
+
+            var cancellationSource = _activeExecutionCancellationSource;
+            if (cancellationSource == null)
+            {
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(sessionId) &&
+                !string.Equals(sessionId, _activeSessionId, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            cancellationSource.Cancel();
+            return true;
+        }
+
+        public async Task<ChatSessionRuntimeResult> ExecuteTurnAsync(
+            ChatSessionRuntimeRequest request,
+            Func<ChatSessionRuntimeEvent, CancellationToken, ValueTask>? onEventAsync = null,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            ArgumentNullException.ThrowIfNull(request.Session);
+
+            var trimmedUserText = request.UserText?.Trim() ?? string.Empty;
+            if (trimmedUserText.Length == 0)
+            {
+                throw new InvalidOperationException("用户输入不能为空。");
+            }
+
+            var sessionId = request.Session.SessionId?.Trim() ?? string.Empty;
+            if (sessionId.Length == 0)
+            {
+                throw new InvalidOperationException("当前 ChatSession 缺少有效的 SessionId，无法启动运行时执行。");
+            }
+
+            if (!await _executionGate.WaitAsync(0, cancellationToken).ConfigureAwait(false))
+            {
+                throw new InvalidOperationException("当前 ChatSession 已有一个活动请求正在执行。");
+            }
+
+            var hasRegisteredExecution = false;
+            ChatSessionConversationHistoryRecorder? conversationHistoryRecorder = null;
+            using var linkedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
+            async ValueTask PublishRuntimeEventAsync(
+                ChatSessionRuntimeEvent runtimeEvent,
+                CancellationToken token)
+            {
+                conversationHistoryRecorder?.Record(runtimeEvent);
+                await PublishAsync(onEventAsync, runtimeEvent, token).ConfigureAwait(false);
+            }
+
+            try
+            {
+                if (!s_activeExecutions.TryAdd(sessionId, linkedCancellationSource))
+                {
+                    throw new InvalidOperationException("当前 ChatSession 已有一个活动请求正在执行。");
+                }
+
+                hasRegisteredExecution = true;
+                _activeExecutionCancellationSource = linkedCancellationSource;
+                _activeSessionId = sessionId;
+                _isExecutionActive = true;
+
+                var conversationHistory = ChatSessionTurnHistoryBuilder.BuildForNextTurn(
+                    request.Session,
+                    trimmedUserText);
+                request.Session.ConversationHistory.Clear();
+                foreach (var historyMessage in conversationHistory)
+                {
+                    request.Session.ConversationHistory.Add(historyMessage.Clone());
+                }
+
+                conversationHistoryRecorder = new ChatSessionConversationHistoryRecorder(
+                    request.Session,
+                    trimmedUserText);
+
+                var compilationResult = _flowBindingService.CompileBinding(request.Session.FlowBinding);
+                if (!compilationResult.IsSuccess || compilationResult.Graph == null)
+                {
+                    var message = BuildCompilationFailureMessage(compilationResult);
+                    await PublishRuntimeEventAsync(
+                        new ChatSessionRuntimeEvent
+                        {
+                            Kind = ChatSessionRuntimeEventKind.ExecutionFailed,
+                            SessionId = sessionId,
+                            SessionTitle = request.Session.Name,
+                            FlowName = request.Session.BoundFlowDisplayName,
+                            Message = message,
+                            CompilationIssues = compilationResult.Issues
+                        },
+                        linkedCancellationSource.Token).ConfigureAwait(false);
+
+                    return new ChatSessionRuntimeResult
+                    {
+                        FailureReason = message
+                    };
+                }
+
+                var graph = compilationResult.Graph;
+                var agentsById = LoadAgentMap();
+                var preflightErrors = ValidatePreflight(graph, agentsById);
+                if (preflightErrors.Count > 0)
+                {
+                    var message = string.Join(Environment.NewLine, preflightErrors);
+                    await PublishRuntimeEventAsync(
+                        new ChatSessionRuntimeEvent
+                        {
+                            Kind = ChatSessionRuntimeEventKind.ExecutionFailed,
+                            SessionId = sessionId,
+                            SessionTitle = request.Session.Name,
+                            FlowName = graph.Document.Name,
+                            Message = message,
+                            CompilationIssues = compilationResult.Issues
+                        },
+                        linkedCancellationSource.Token).ConfigureAwait(false);
+
+                    return new ChatSessionRuntimeResult
+                    {
+                        Graph = graph,
+                        FailureReason = message
+                    };
+                }
+
+                await PublishRuntimeEventAsync(
+                    new ChatSessionRuntimeEvent
+                    {
+                        Kind = ChatSessionRuntimeEventKind.ExecutionStarted,
+                        SessionId = sessionId,
+                        SessionTitle = request.Session.Name,
+                        FlowName = graph.Document.Name,
+                        Message = compilationResult.Issues.Count == 0
+                            ? "会话流编译与运行时预检查通过，开始执行。"
+                            : $"会话流编译通过，伴随 {compilationResult.Issues.Count} 条提示或警告，开始执行。",
+                        CompilationIssues = compilationResult.Issues
+                    },
+                    linkedCancellationSource.Token).ConfigureAwait(false);
+
+                var executionResult = await _executionService.ExecuteAsync(
+                    new SessionFlowExecutionRequest
+                    {
+                        Session = request.Session,
+                        Graph = graph,
+                        InitialPayload = SessionFlowPayload.FromNaturalLanguage(trimmedUserText),
+                        ConversationHistory = request.Session.ConversationHistory,
+                        AgentsById = agentsById,
+                        ToolConfirmationCallback = request.ToolConfirmationCallback
+                    },
+                    PublishRuntimeEventAsync,
+                    linkedCancellationSource.Token).ConfigureAwait(false);
+
+                await PublishRuntimeEventAsync(
+                    new ChatSessionRuntimeEvent
+                    {
+                        Kind = ChatSessionRuntimeEventKind.ExecutionCompleted,
+                        SessionId = sessionId,
+                        SessionTitle = request.Session.Name,
+                        FlowName = graph.Document.Name,
+                        Message = "本轮会话执行完成。",
+                        Payload = executionResult.ReturnPayload,
+                        IsPayloadAlreadyPresented = executionResult.IsReturnPayloadAlreadyPresented,
+                        CompilationIssues = compilationResult.Issues
+                    },
+                    linkedCancellationSource.Token).ConfigureAwait(false);
+
+                return new ChatSessionRuntimeResult
+                {
+                    IsCompleted = true,
+                    Graph = graph,
+                    ReturnPayload = executionResult.ReturnPayload
+                };
+            }
+            catch (OperationCanceledException)
+            {
+                await PublishRuntimeEventAsync(
+                    new ChatSessionRuntimeEvent
+                    {
+                        Kind = ChatSessionRuntimeEventKind.ExecutionCancelled,
+                        SessionId = sessionId,
+                        SessionTitle = request.Session.Name,
+                        FlowName = request.Session.BoundFlowDisplayName,
+                        Message = "当前执行已取消。"
+                    },
+                    CancellationToken.None).ConfigureAwait(false);
+
+                return new ChatSessionRuntimeResult
+                {
+                    IsCancelled = true
+                };
+            }
+            catch (Exception ex)
+            {
+                await PublishRuntimeEventAsync(
+                    new ChatSessionRuntimeEvent
+                    {
+                        Kind = ChatSessionRuntimeEventKind.ExecutionFailed,
+                        SessionId = sessionId,
+                        SessionTitle = request.Session.Name,
+                        FlowName = request.Session.BoundFlowDisplayName,
+                        Message = ex.Message
+                    },
+                    CancellationToken.None).ConfigureAwait(false);
+
+                return new ChatSessionRuntimeResult
+                {
+                    FailureReason = ex.Message
+                };
+            }
+            finally
+            {
+                if (hasRegisteredExecution)
+                {
+                    s_activeExecutions.TryRemove(sessionId, out _);
+                }
+
+                _isExecutionActive = false;
+                _activeSessionId = null;
+                _activeExecutionCancellationSource = null;
+                _executionGate.Release();
+            }
+        }
+
+        private Dictionary<string, AgentDefinition> LoadAgentMap()
+        {
+            return _agentConfigurationRepository.Load()
+                .Where(agent => !string.IsNullOrWhiteSpace(agent.AgentId))
+                .ToDictionary(
+                    agent => agent.AgentId,
+                    agent => agent.DeepClone(),
+                    StringComparer.OrdinalIgnoreCase);
+        }
+
+        private List<string> ValidatePreflight(
+            SessionFlowCompiledGraph graph,
+            IReadOnlyDictionary<string, AgentDefinition> agentsById)
+        {
+            var errors = new List<string>();
+
+            var compressionCandidates = _languageModelResolver.GetCandidateModelsForCapabilityLayer(
+                CapabilityLayerBuiltIns.ContextCompressionLayerKey);
+            if (compressionCandidates.Count == 0)
+            {
+                errors.Add("内置 capability layer“上下文压缩”当前没有绑定任何候选模型。请先在语言模型配置中为它绑定至少一个模型。");
+            }
+            else if (compressionCandidates.All(model => !model.InterfaceSettings.IsFullyConfigured))
+            {
+                errors.Add("内置 capability layer“上下文压缩”虽然已绑定模型，但没有任何一个模型的接口配置完整可用。");
+            }
+
+            foreach (var compiledNode in graph.NodesById.Values.Where(node => node.Node.Kind == SessionFlowNodeKind.Agent))
+            {
+                if (string.IsNullOrWhiteSpace(compiledNode.Node.AgentId))
+                {
+                    errors.Add($"代理节点“{compiledNode.Node.Title}”尚未绑定 AgentDefinition。");
+                    continue;
+                }
+
+                if (!agentsById.TryGetValue(compiledNode.Node.AgentId, out var agent))
+                {
+                    errors.Add($"代理节点“{compiledNode.Node.Title}”引用的代理“{compiledNode.Node.AgentId}”不存在。");
+                    continue;
+                }
+
+                var candidates = _languageModelResolver.GetCandidateModels(agent);
+                if (candidates.Count == 0)
+                {
+                    errors.Add($"代理“{agent.DisplayNameOrFallback}”没有解析出任何可用的语言模型候选项。");
+                    continue;
+                }
+
+                if (candidates.All(model => !model.InterfaceSettings.IsFullyConfigured))
+                {
+                    errors.Add($"代理“{agent.DisplayNameOrFallback}”的候选语言模型均未完成接口配置。");
+                }
+            }
+
+            return errors;
+        }
+
+        private static string BuildCompilationFailureMessage(SessionFlowCompilationResult compilationResult)
+        {
+            var issues = compilationResult.Errors.Any()
+                ? compilationResult.Errors
+                : compilationResult.Issues;
+
+            if (issues.Count == 0)
+            {
+                return "会话流编译失败，但没有返回可读错误。";
+            }
+
+            return string.Join(
+                Environment.NewLine,
+                issues.Take(8).Select(issue => $"• {issue.Message}"));
+        }
+
+        private static async ValueTask PublishAsync(
+            Func<ChatSessionRuntimeEvent, CancellationToken, ValueTask>? onEventAsync,
+            ChatSessionRuntimeEvent runtimeEvent,
+            CancellationToken cancellationToken)
+        {
+            if (onEventAsync == null)
+            {
+                return;
+            }
+
+            await onEventAsync(runtimeEvent, cancellationToken).ConfigureAwait(false);
+        }
+    }
+}

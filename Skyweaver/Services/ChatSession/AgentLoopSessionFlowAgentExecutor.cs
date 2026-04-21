@@ -1,0 +1,47 @@
+using Skyweaver.Services.AgentLoop;
+
+namespace Skyweaver.Services.ChatSession
+{
+    public sealed class AgentLoopSessionFlowAgentExecutor : ISessionFlowAgentExecutor
+    {
+        private readonly AgentLoopService _agentLoopService;
+
+        public AgentLoopSessionFlowAgentExecutor()
+            : this(new AgentLoopService())
+        {
+        }
+
+        public AgentLoopSessionFlowAgentExecutor(AgentLoopService agentLoopService)
+        {
+            _agentLoopService = agentLoopService ?? throw new ArgumentNullException(nameof(agentLoopService));
+        }
+
+        public async Task<AgentLoopResult> ExecuteAsync(
+            SessionFlowAgentExecutionRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            ArgumentNullException.ThrowIfNull(request.Agent);
+
+            var agentLoopRequest = new AgentLoopRequest
+            {
+                Agent = request.Agent,
+                Input = request.Input,
+                History = request.History,
+                ToolContext = request.ToolContext,
+                MaxIterations = request.MaxIterations,
+                ToolConfirmationCallback = request.ToolConfirmationCallback
+            };
+
+            if (request.EventSink != null)
+            {
+                return await _agentLoopService.RunStreamingAsync(
+                    agentLoopRequest,
+                    request.EventSink,
+                    cancellationToken).ConfigureAwait(false);
+            }
+
+            return await _agentLoopService.RunAsync(agentLoopRequest, cancellationToken).ConfigureAwait(false);
+        }
+    }
+}

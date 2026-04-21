@@ -1,0 +1,114 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RootNamespace>Skyweaver</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationIcon>Resources\SkyweaverAppLogo.ico</ApplicationIcon>
+    <PackageIcon>SkyweaverAppLogo.png</PackageIcon>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Copyright>BEITAware © 2025，在MPL 2.0协议下授权。</Copyright>
+    <Company>BEITAware</Company>
+    <Product>Skyweaver Application</Product>
+    <Authors>BEITAware</Authors>
+    <SignAssembly>False</SignAssembly>
+    <!-- <ApplicationIcon>Resources\imgpp.ico</ApplicationIcon> -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ComputeSharp" Version="3.2.0" />
+    <PackageReference Include="ComputeSharp.D2D1" Version="3.2.0" />
+    <PackageReference Include="ComputeSharp.Dxc" Version="3.2.0" />
+    <PackageReference Include="ComputeSharp.Dynamic" Version="2.1.0" />
+    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="4.14.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Scripting" Version="4.14.0" />
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.4.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="OpenAI" Version="2.9.1" />
+    <PackageReference Include="OpenCvSharp4" Version="4.11.0.20250507" />
+    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.6.0.20220608" />
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.11.0.20250507" />
+    <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.11.0.20250507" />
+    <PackageReference Include="Sdcb.LibRaw" Version="0.21.1.7" />
+    <PackageReference Include="Sdcb.LibRaw.runtime.win64" Version="0.21.1" />
+    <PackageReference Include="SharpDX" Version="4.2.0" />
+    <PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" />
+    <PackageReference Include="SharpDX.Direct2D1" Version="4.2.0" />
+    <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
+    <PackageReference Include="SharpDX.DXGI" Version="4.2.0" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.11" />
+    <PackageReference Include="System.Reactive" Version="6.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Remove="System.Drawing" />
+    <Using Remove="System.Windows.Forms" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\*.png" />
+    <Resource Include="Resources\*.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\SkyweaverAppLogo.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Icons\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Resources\SkyweaverAppLogo.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Licenses\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>Licenses\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Controls\aurora.png" />
+    <None Remove="Controls\Aurora4.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Controls\aurora.png" />
+    <Resource Include="Controls\Aurora4.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="workfolders.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Icons\" />
+    <Folder Include="Extensions\" />
+    <Folder Include="Models\" />
+    <Folder Include="Utils\" />
+  </ItemGroup>
+
+</Project>

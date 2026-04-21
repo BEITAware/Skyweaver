@@ -1,0 +1,227 @@
+<UserControl x:Class="Skyweaver.Controls.ChatSessionControl.Views.ToolInvocationCardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="180"
+             d:DesignWidth="420">
+    <UserControl.Resources>
+        <DrawingBrush x:Key="ToolInvocationCardBackgroundBrush" Stretch="Fill">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <DrawingGroup.Children>
+                        <GeometryDrawing Geometry="F1 M 0.160156,0.159668L 1386.16,0.159668L 1386.16,223.646L 0.160156,223.646L 0.160156,0.159668 Z ">
+                            <GeometryDrawing.Brush>
+                                <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                    <GradientStop Color="#6A253A43" Offset="0"/>
+                                    <GradientStop Color="#5430424B" Offset="0.52"/>
+                                    <GradientStop Color="#42232F36" Offset="1"/>
+                                </LinearGradientBrush>
+                            </GeometryDrawing.Brush>
+                        </GeometryDrawing>
+                        <GeometryDrawing Geometry="F1 M 0.160156,0.159668L 1386.16,0.159668L 1386.16,223.646L 0.160156,223.646L 0.160156,0.159668 Z ">
+                            <GeometryDrawing.Pen>
+                                <Pen Thickness="0.32" LineJoin="Round" Brush="#66172227"/>
+                            </GeometryDrawing.Pen>
+                            <GeometryDrawing.Brush>
+                                <LinearGradientBrush StartPoint="0.10059,1.65236" EndPoint="2.53982,1.65236">
+                                    <LinearGradientBrush.RelativeTransform>
+                                        <TransformGroup>
+                                            <SkewTransform CenterX="0.10059" CenterY="1.65236" AngleX="-59.7491" AngleY="0"/>
+                                            <RotateTransform CenterX="0.10059" CenterY="1.65236" Angle="-70.8836"/>
+                                        </TransformGroup>
+                                    </LinearGradientBrush.RelativeTransform>
+                                    <GradientStop Color="#3BFFFFFF" Offset="0"/>
+                                    <GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>
+                                    <GradientStop Color="#07FFFFFF" Offset="0.109195"/>
+                                    <GradientStop Color="#04FFFFFF" Offset="0.298851"/>
+                                    <GradientStop Color="#3AFFFFFF" Offset="0.327586"/>
+                                    <GradientStop Color="#1AFFFFFF" Offset="0.465517"/>
+                                    <GradientStop Color="#14FFFFFF" Offset="0.591954"/>
+                                    <GradientStop Color="#05FFFFFF" Offset="0.758621"/>
+                                    <GradientStop Color="#44FFFFFF" Offset="1"/>
+                                </LinearGradientBrush>
+                            </GeometryDrawing.Brush>
+                        </GeometryDrawing>
+                    </DrawingGroup.Children>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+
+        <LinearGradientBrush x:Key="ToolInvocationFieldIdleBrush"
+                             StartPoint="0.438,5.527"
+                             EndPoint="0.438,-4.527">
+            <GradientStop Color="#91007BFF" Offset="0.143"/>
+            <GradientStop Color="#00FFFFFF" Offset="0.503"/>
+            <GradientStop Color="#C30099FF" Offset="0.792"/>
+        </LinearGradientBrush>
+
+        <Style x:Key="ToolInvocationFieldBorderStyle" TargetType="Border">
+            <Setter Property="Margin" Value="0,0,0,6"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="Background" Value="{StaticResource ToolInvocationFieldIdleBrush}"/>
+            <Setter Property="BorderBrush" Value="#660D1320"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+        </Style>
+
+        <Style x:Key="ToolInvocationStreamingBadgeBorderStyle" TargetType="Border">
+            <Setter Property="Margin" Value="8,0,0,0"/>
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Background" Value="{DynamicResource ButtonIdleBrush}"/>
+            <Setter Property="BorderBrush" Value="#55A9FFF7"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Padding="12"
+            CornerRadius="2,2,2,2"
+            Background="{StaticResource ToolInvocationCardBackgroundBrush}"
+            BorderBrush="#0036D9D1"
+            BorderThickness="1"
+            SnapsToDevicePixels="True">
+        <StackPanel>
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="40"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Width="32"
+                        Height="32"
+                        Margin="0,0,8,0"
+                        Background="{DynamicResource ButtonIdleBrush}"
+                        BorderBrush="#0036D9D1"
+                        BorderThickness="1"
+                        CornerRadius="5"
+                        VerticalAlignment="Top">
+                    <Image Source="{Binding IconPath}"
+                           Stretch="Uniform"
+                           Margin="4"/>
+                </Border>
+
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="{Binding State.ToolName}"
+                               FontFamily="{DynamicResource AeroFontFamily}"
+                               FontSize="{DynamicResource AeroLargeFontSize}"
+                               FontWeight="SemiBold"
+                               Foreground="#FFF5FAFF"
+                               TextWrapping="Wrap"/>
+                    <TextBlock Margin="0,2,0,0"
+                               Text="{Binding Description}"
+                               FontFamily="{DynamicResource AeroFontFamily}"
+                               FontSize="{DynamicResource AeroFontSize}"
+                               Foreground="#FFD6E8FF"
+                               TextWrapping="Wrap"/>
+                    <TextBlock Margin="0,4,0,0"
+                               FontFamily="{DynamicResource AeroFontFamily}"
+                               FontSize="{DynamicResource AeroSmallFontSize}"
+                               Foreground="#FFE2FFF8">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="正在接收参数"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding State.IsInvocationClosed}" Value="True">
+                                        <Setter Property="Text" Value="参数已接收，等待执行"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+
+            <ItemsControl ItemsSource="{Binding Fields}">
+                <ItemsControl.Style>
+                    <Style TargetType="ItemsControl">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasFields}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ItemsControl.Style>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource ToolInvocationFieldBorderStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="110"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                                           Margin="0,0,8,0"
+                                           VerticalAlignment="Top"
+                                           FontFamily="{DynamicResource AeroFontFamily}"
+                                           FontSize="{DynamicResource AeroFontSize}"
+                                           Foreground="#FFE7F3FF"
+                                           TextWrapping="Wrap"
+                                           Text="{Binding Label}"/>
+
+                                <Grid Grid.Column="1">
+                                    <TextBlock Text="{Binding Parameter.Value}"
+                                               FontFamily="Consolas, Microsoft YaHei UI"
+                                               FontSize="12"
+                                               Foreground="#FFF7FBFF"
+                                               TextWrapping="Wrap">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Parameter.HasValue}" Value="False">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+
+                                    <TextBlock Text="{Binding EmptyValueText}"
+                                               FontFamily="{DynamicResource AeroFontFamily}"
+                                               FontSize="{DynamicResource AeroFontSize}"
+                                               Foreground="#CCEAF7FF"
+                                               FontStyle="Italic"
+                                               TextWrapping="Wrap">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Parameter.HasValue}" Value="False">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+
+                                <Border Grid.Column="2">
+                                    <Border.Style>
+                                        <Style TargetType="Border" BasedOn="{StaticResource ToolInvocationStreamingBadgeBorderStyle}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Parameter.IsStreaming}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="流式更新"
+                                               FontFamily="{DynamicResource AeroFontFamily}"
+                                               FontSize="{DynamicResource AeroSmallFontSize}"
+                                               Foreground="#FFF5FAFF"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </Border>
+</UserControl>

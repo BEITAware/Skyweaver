@@ -1,0 +1,65 @@
+<Window x:Class="Skyweaver.Windows.CreateChatSessionDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="创建会话..."
+        Width="420"
+        Height="250"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource Layer_1}">
+    <Border Padding="16"
+            BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="1"
+            Background="{DynamicResource Layer_1}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="是否创建新的 ChatSession？"
+                       FontSize="15"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,10"/>
+
+            <TextBlock Grid.Row="1"
+                       Text="会话名称"
+                       Margin="0,0,0,6"/>
+
+            <TextBox x:Name="SessionNameTextBox"
+                     Grid.Row="2"
+                     Height="30"
+                     VerticalContentAlignment="Center"
+                     Margin="0,0,0,12"/>
+
+            <TextBlock Grid.Row="3"
+                       Text="绑定会话流"
+                       Margin="0,0,0,6"/>
+
+            <ComboBox x:Name="SessionFlowComboBox"
+                      Grid.Row="4"
+                      Height="30"
+                      DisplayMemberPath="DisplayName"
+                      Margin="0,0,0,12"/>
+
+            <StackPanel Grid.Row="5"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <Button Width="82"
+                        Height="30"
+                        Margin="0,0,8,0"
+                        IsCancel="True"
+                        Content="取消"/>
+                <Button Width="82"
+                        Height="30"
+                        IsDefault="True"
+                        Click="CreateButton_Click"
+                        Content="创建"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

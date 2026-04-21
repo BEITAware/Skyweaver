@@ -1,0 +1,100 @@
+using Skyweaver.Models.LateralFileSystem;
+
+namespace Skyweaver.Services.LateralFileSystem
+{
+    public sealed class LateralFileSystemProjectionHost : IDisposable
+    {
+        private readonly Dictionary<string, LateralFileSystemVirtualizationInstance> _instances = new(StringComparer.OrdinalIgnoreCase);
+        private readonly LateralFileSystemTreeRepository _treeRepository;
+        private readonly object _syncRoot = new();
+        private bool _disposed;
+
+        public LateralFileSystemProjectionHost(LateralFileSystemTreeRepository treeRepository)
+        {
+            _treeRepository = treeRepository;
+        }
+
+        public event EventHandler<LateralFileSystemSourceChangedEventArgs>? SourceChanged;
+
+        public void Activate(LateralFileSystemNodeModel node, string workingRootDirectory, string sourceRootDirectory)
+        {
+            ArgumentNullException.ThrowIfNull(node);
+            ArgumentException.ThrowIfNullOrWhiteSpace(workingRootDirectory);
+            ArgumentException.ThrowIfNullOrWhiteSpace(sourceRootDirectory);
+
+            lock (_syncRoot)
+            {
+                ThrowIfDisposed();
+
+                if (_instances.ContainsKey(node.Id))
+                {
+                    return;
+                }
+
+                var instance = new LateralFileSystemVirtualizationInstance(node, workingRootDirectory, sourceRootDirectory, _treeRepository);
+                instance.SourceChanged += OnSourceChanged;
+                instance.Start();
+                _instances.Add(node.Id, instance);
+            }
+        }
+
+        public void Deactivate(string nodeId)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+
+            lock (_syncRoot)
+            {
+                if (!_instances.Remove(nodeId, out var instance))
+                {
+                    return;
+                }
+
+                instance.SourceChanged -= OnSourceChanged;
+                instance.Dispose();
+            }
+        }
+
+        public void Sync(string nodeId)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(nodeId);
+
+            lock (_syncRoot)
+            {
+                if (_instances.TryGetValue(nodeId, out var instance))
+                {
+                    instance.SyncAllPlaceholders();
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            lock (_syncRoot)
+            {
+                if (_disposed)
+                {
+                    return;
+                }
+
+                foreach (var instance in _instances.Values)
+                {
+                    instance.SourceChanged -= OnSourceChanged;
+                    instance.Dispose();
+                }
+
+                _instances.Clear();
+                _disposed = true;
+            }
+        }
+
+        private void OnSourceChanged(object? sender, LateralFileSystemSourceChangedEventArgs e)
+        {
+            SourceChanged?.Invoke(this, e);
+        }
+
+        private void ThrowIfDisposed()
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+        }
+    }
+}

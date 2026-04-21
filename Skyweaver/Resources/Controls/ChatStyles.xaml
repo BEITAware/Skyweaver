@@ -1,0 +1,572 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Chat session header background -->
+    <DrawingBrush x:Key="ChatSessionHeaderBackgroundBrush" Stretch="Fill">
+        <DrawingBrush.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.Children>
+                    <GeometryDrawing Geometry="F1 M 0.160156,0.159668L 1386.16,0.159668L 1386.16,223.646L 0.160156,223.646L 0.160156,0.159668 Z ">
+                        <GeometryDrawing.Brush>
+                            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                <GradientStop Color="#66304B62" Offset="0"/>
+                                <GradientStop Color="#44202F3F" Offset="0.52"/>
+                                <GradientStop Color="#38202A36" Offset="1"/>
+                            </LinearGradientBrush>
+                        </GeometryDrawing.Brush>
+                    </GeometryDrawing>
+                    <GeometryDrawing Geometry="F1 M 0.160156,0.159668L 1386.16,0.159668L 1386.16,223.646L 0.160156,223.646L 0.160156,0.159668 Z ">
+                        <GeometryDrawing.Pen>
+                            <Pen Thickness="0.32" LineJoin="Round" Brush="#FF000000"/>
+                        </GeometryDrawing.Pen>
+                        <GeometryDrawing.Brush>
+                            <LinearGradientBrush StartPoint="0.10059,1.65236" EndPoint="2.53982,1.65236">
+                                <LinearGradientBrush.RelativeTransform>
+                                    <TransformGroup>
+                                        <SkewTransform CenterX="0.10059" CenterY="1.65236" AngleX="-59.7491" AngleY="0"/>
+                                        <RotateTransform CenterX="0.10059" CenterY="1.65236" Angle="-70.8836"/>
+                                    </TransformGroup>
+                                </LinearGradientBrush.RelativeTransform>
+                                <LinearGradientBrush.GradientStops>
+                                    <GradientStop Color="#3BFFFFFF" Offset="0"/>
+                                    <GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>
+                                    <GradientStop Color="#07FFFFFF" Offset="0.109195"/>
+                                    <GradientStop Color="#04FFFFFF" Offset="0.298851"/>
+                                    <GradientStop Color="#3AFFFFFF" Offset="0.327586"/>
+                                    <GradientStop Color="#1AFFFFFF" Offset="0.465517"/>
+                                    <GradientStop Color="#14FFFFFF" Offset="0.591954"/>
+                                    <GradientStop Color="#05FFFFFF" Offset="0.758621"/>
+                                    <GradientStop Color="#44FFFFFF" Offset="1"/>
+                                </LinearGradientBrush.GradientStops>
+                            </LinearGradientBrush>
+                        </GeometryDrawing.Brush>
+                    </GeometryDrawing>
+                </DrawingGroup.Children>
+            </DrawingGroup>
+        </DrawingBrush.Drawing>
+    </DrawingBrush>
+
+    <Style x:Key="ChatSessionHeaderBorderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource ChatSessionHeaderBackgroundBrush}"/>
+        <Setter Property="Padding" Value="12,10"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+
+    <!-- Shared send-button chrome -->
+    <Style x:Key="ChatSessionSendButtonStyle" TargetType="Button">
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="16,8"/>
+        <Setter Property="MinHeight" Value="28"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Grid>
+                        <Border x:Name="IdleBackground" CornerRadius="4" BorderThickness="2" BorderBrush="#67BBDDF2">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0.5,-0.887" EndPoint="0.5,1.887">
+                                    <GradientStop Color="#FF637495" Offset="0.308"/>
+                                    <GradientStop Color="#FF384D75" Offset="0.489"/>
+                                    <GradientStop Color="#FF223761" Offset="0.495"/>
+                                    <GradientStop Color="#FF284D7E" Offset="0.681"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+
+                        <Border x:Name="IdleGlow" CornerRadius="4" IsHitTestVisible="False">
+                            <Border.Background>
+                                <RadialGradientBrush RadiusX="0.67" RadiusY="1.43" Center="0.5,1.32" GradientOrigin="0.5,1.32">
+                                    <GradientStop Color="#FF4B9DCC" Offset="0.231"/>
+                                    <GradientStop Color="#013C4F73" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Border.Background>
+                        </Border>
+
+                        <Border x:Name="HoverBackground" Opacity="0" CornerRadius="4" BorderThickness="2" BorderBrush="#67BBDDF2">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0.5,-0.887" EndPoint="0.5,1.887">
+                                    <GradientStop Color="#FF7387AF" Offset="0.308"/>
+                                    <GradientStop Color="#FF405886" Offset="0.489"/>
+                                    <GradientStop Color="#FF284276" Offset="0.495"/>
+                                    <GradientStop Color="#FF295691" Offset="0.681"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+
+                        <Border x:Name="HoverBottomGlow" Opacity="0" CornerRadius="4" IsHitTestVisible="False">
+                            <Border.Background>
+                                <RadialGradientBrush RadiusX="0.56" RadiusY="1.0" Center="0.5,1.23" GradientOrigin="0.5,1.23">
+                                    <GradientStop Color="#FF4B9DCC" Offset="0.231"/>
+                                    <GradientStop Color="#013C4F73" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Border.Background>
+                        </Border>
+
+                        <Border x:Name="HoverTopGlow" Opacity="0" CornerRadius="4" IsHitTestVisible="False">
+                            <Border.Background>
+                                <RadialGradientBrush RadiusX="0.93" RadiusY="0.79" Center="0.5,-0.2" GradientOrigin="0.5,-0.2">
+                                    <GradientStop Color="#FF4B9DCC" Offset="0.231"/>
+                                    <GradientStop Color="#013C4F73" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Border.Background>
+                        </Border>
+
+                        <Border x:Name="PressedBackground" Opacity="0" CornerRadius="4" BorderThickness="2" BorderBrush="#67BBDDF2">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0.5,-0.887" EndPoint="0.5,1.887">
+                                    <GradientStop Color="#FF324F80" Offset="0.308"/>
+                                    <GradientStop Color="#FF142E74" Offset="0.489"/>
+                                    <GradientStop Color="#FF09246B" Offset="0.501"/>
+                                    <GradientStop Color="#FF0A348A" Offset="0.681"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+
+                        <Border x:Name="PressedGlow" Opacity="0" CornerRadius="4" IsHitTestVisible="False">
+                            <Border.Background>
+                                <RadialGradientBrush RadiusX="0.69" RadiusY="0.55" Center="0.5,1.12" GradientOrigin="0.5,1.12">
+                                    <GradientStop Color="#FF3A5AC6" Offset="0.213"/>
+                                    <GradientStop Color="#013C4F73" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Border.Background>
+                        </Border>
+
+                        <Border x:Name="PressedInnerShadow" Opacity="0" CornerRadius="4" IsHitTestVisible="False">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#80000000" Offset="0"/>
+                                    <GradientStop Color="#40000000" Offset="0.15"/>
+                                    <GradientStop Color="#00000000" Offset="0.4"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+
+                        <Border x:Name="PressedSideShadow" Opacity="0" CornerRadius="4" IsHitTestVisible="False">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+                                    <GradientStop Color="#50000000" Offset="0"/>
+                                    <GradientStop Color="#00000000" Offset="0.1"/>
+                                    <GradientStop Color="#00000000" Offset="0.9"/>
+                                    <GradientStop Color="#50000000" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+
+                        <ContentPresenter x:Name="ContentPresenter"
+                                          Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          RecognizesAccessKey="True">
+                            <ContentPresenter.Effect>
+                                <DropShadowEffect Color="#000000"
+                                                  BlurRadius="2"
+                                                  ShadowDepth="1"
+                                                  Opacity="0.5"/>
+                            </ContentPresenter.Effect>
+                        </ContentPresenter>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                                <Condition Property="Tag" Value="False"/>
+                            </MultiTrigger.Conditions>
+                            <MultiTrigger.EnterActions>
+                                <BeginStoryboard x:Name="HoverEnterStoryboard">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="IdleBackground"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0"
+                                                         Duration="0:0:0.15"/>
+                                        <DoubleAnimation Storyboard.TargetName="IdleGlow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0"
+                                                         Duration="0:0:0.15"/>
+                                        <DoubleAnimation Storyboard.TargetName="HoverBackground"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="1"
+                                                         Duration="0:0:0.15"/>
+                                        <DoubleAnimation Storyboard.TargetName="HoverBottomGlow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="1"
+                                                         Duration="0:0:0.15"/>
+                                        <DoubleAnimation Storyboard.TargetName="HoverTopGlow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="1"
+                                                         Duration="0:0:0.15"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </MultiTrigger.EnterActions>
+                            <MultiTrigger.ExitActions>
+                                <StopStoryboard BeginStoryboardName="HoverEnterStoryboard"/>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="IdleBackground"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="1"
+                                                         Duration="0:0:0.15"/>
+                                        <DoubleAnimation Storyboard.TargetName="IdleGlow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="1"
+                                                         Duration="0:0:0.15"/>
+                                        <DoubleAnimation Storyboard.TargetName="HoverBackground"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0"
+                                                         Duration="0:0:0.15"/>
+                                        <DoubleAnimation Storyboard.TargetName="HoverBottomGlow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0"
+                                                         Duration="0:0:0.15"/>
+                                        <DoubleAnimation Storyboard.TargetName="HoverTopGlow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0"
+                                                         Duration="0:0:0.15"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </MultiTrigger.ExitActions>
+                        </MultiTrigger>
+
+                        <Trigger Property="IsPressed" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard x:Name="PressedEnterStoryboard">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="IdleBackground"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0"
+                                                         Duration="0:0:0.08"/>
+                                        <DoubleAnimation Storyboard.TargetName="IdleGlow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0"
+                                                         Duration="0:0:0.08"/>
+                                        <DoubleAnimation Storyboard.TargetName="HoverBackground"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0"
+                                                         Duration="0:0:0.08"/>
+                                        <DoubleAnimation Storyboard.TargetName="HoverBottomGlow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0"
+                                                         Duration="0:0:0.08"/>
+                                        <DoubleAnimation Storyboard.TargetName="HoverTopGlow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0"
+                                                         Duration="0:0:0.08"/>
+                                        <DoubleAnimation Storyboard.TargetName="PressedBackground"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="1"
+                                                         Duration="0:0:0.08"/>
+                                        <DoubleAnimation Storyboard.TargetName="PressedGlow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="1"
+                                                         Duration="0:0:0.08"/>
+                                        <DoubleAnimation Storyboard.TargetName="PressedInnerShadow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="1"
+                                                         Duration="0:0:0.08"/>
+                                        <DoubleAnimation Storyboard.TargetName="PressedSideShadow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="1"
+                                                         Duration="0:0:0.08"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <StopStoryboard BeginStoryboardName="PressedEnterStoryboard"/>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="PressedBackground"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0"
+                                                         Duration="0:0:0.15"/>
+                                        <DoubleAnimation Storyboard.TargetName="PressedGlow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0"
+                                                         Duration="0:0:0.15"/>
+                                        <DoubleAnimation Storyboard.TargetName="PressedInnerShadow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0"
+                                                         Duration="0:0:0.15"/>
+                                        <DoubleAnimation Storyboard.TargetName="PressedSideShadow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0"
+                                                         Duration="0:0:0.15"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                                <Condition Property="IsPressed" Value="False"/>
+                                <Condition Property="Tag" Value="False"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="HoverBackground" Property="Opacity" Value="1"/>
+                            <Setter TargetName="HoverBottomGlow" Property="Opacity" Value="1"/>
+                            <Setter TargetName="HoverTopGlow" Property="Opacity" Value="1"/>
+                            <Setter TargetName="IdleBackground" Property="Opacity" Value="0"/>
+                            <Setter TargetName="IdleGlow" Property="Opacity" Value="0"/>
+                        </MultiTrigger>
+
+                        <Trigger Property="Tag" Value="True">
+                            <Setter TargetName="IdleBackground" Property="Opacity" Value="0"/>
+                            <Setter TargetName="IdleGlow" Property="Opacity" Value="0"/>
+                            <Setter TargetName="HoverBackground" Property="Opacity" Value="0"/>
+                            <Setter TargetName="HoverBottomGlow" Property="Opacity" Value="0"/>
+                            <Setter TargetName="HoverTopGlow" Property="Opacity" Value="0"/>
+                            <Setter TargetName="PressedBackground" Property="Opacity" Value="1"/>
+                            <Setter TargetName="PressedGlow" Property="Opacity" Value="1"/>
+                            <Setter TargetName="PressedInnerShadow" Property="Opacity" Value="1"/>
+                            <Setter TargetName="PressedSideShadow" Property="Opacity" Value="1"/>
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ChatAvatarBackgroundGlass -->
+    <DrawingBrush x:Key="ChatAvatarBackgroundGlassBrush" Stretch="Uniform">
+        <DrawingBrush.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.Children>
+                    <GeometryDrawing Geometry="F1 M 5.27979,0.160156L 44.5068,0.160156C 47.3345,0.160156 49.6267,2.45239 49.6267,5.28003L 49.6267,44.5068C 49.6267,47.3345 47.3345,49.627 44.5068,49.627L 5.27979,49.627C 2.45215,49.627 0.159912,47.3345 0.159912,44.5068L 0.159912,5.28003C 0.159912,2.45239 2.45215,0.160156 5.27979,0.160156 Z ">
+                        <GeometryDrawing.Pen>
+                            <Pen Thickness="0.319997" LineJoin="Round" Brush="#FF96FCFF"/>
+                        </GeometryDrawing.Pen>
+                        <GeometryDrawing.Brush>
+                            <LinearGradientBrush StartPoint="0.814659,0.888572" EndPoint="0.185341,0.111423">
+                                <LinearGradientBrush.GradientStops>
+                                    <GradientStop Color="#38FFFFFF" Offset="0"/>
+                                    <GradientStop Color="#00FFFFFF" Offset="0.473183"/>
+                                    <GradientStop Color="#91FFFFFF" Offset="0.478927"/>
+                                    <GradientStop Color="#00FFFFFF" Offset="1"/>
+                                </LinearGradientBrush.GradientStops>
+                            </LinearGradientBrush>
+                        </GeometryDrawing.Brush>
+                    </GeometryDrawing>
+                </DrawingGroup.Children>
+            </DrawingGroup>
+        </DrawingBrush.Drawing>
+    </DrawingBrush>
+
+    <!-- ChatBubbleObjectIdle -->
+    <DrawingBrush x:Key="ChatBubbleObjectIdleBrush" Stretch="Fill">
+        <DrawingBrush.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.Children>
+                    <GeometryDrawing Geometry="F1 M 9,1L 406.152,1C 410.57,1 414.152,4.58179 414.152,9L 414.152,143.667C 414.152,148.085 410.57,151.667 406.152,151.667L 9,151.667C 4.58179,151.667 1,148.085 1,143.667L 1,9C 1,4.58179 4.58179,1 9,1 Z ">
+                        <GeometryDrawing.Pen>
+                            <Pen Thickness="2" LineJoin="Round">
+                                <Pen.Brush>
+                                    <LinearGradientBrush StartPoint="0.0106324,0.127059" EndPoint="0.0106324,2.1148">
+                                        <LinearGradientBrush.GradientStops>
+                                            <GradientStop Color="#FF6A92AA" Offset="0"/>
+                                            <GradientStop Color="#FF2E6986" Offset="1"/>
+                                        </LinearGradientBrush.GradientStops>
+                                    </LinearGradientBrush>
+                                </Pen.Brush>
+                            </Pen>
+                        </GeometryDrawing.Pen>
+                        <GeometryDrawing.Brush>
+                            <RadialGradientBrush RadiusX="2.01413" RadiusY="1.0792" Center="0.00826346,0.122109" GradientOrigin="0.00826346,0.122109">
+                                <RadialGradientBrush.GradientStops>
+                                    <GradientStop Color="#12FFFFFF" Offset="0"/>
+                                    <GradientStop Color="#0BEEF5F8" Offset="0.250958"/>
+                                    <GradientStop Color="#01FFFFFF" Offset="0.992337"/>
+                                </RadialGradientBrush.GradientStops>
+                                <RadialGradientBrush.RelativeTransform>
+                                    <TransformGroup>
+                                        <RotateTransform CenterX="0.00826346" CenterY="0.122109" Angle="90"/>
+                                    </TransformGroup>
+                                </RadialGradientBrush.RelativeTransform>
+                            </RadialGradientBrush>
+                        </GeometryDrawing.Brush>
+                    </GeometryDrawing>
+                    <GeometryDrawing Geometry="F1 M 9,1L 406.152,1C 410.57,1 414.152,4.58179 414.152,9L 414.152,143.667C 414.152,148.085 410.57,151.667 406.152,151.667L 9,151.667C 4.58179,151.667 1,148.085 1,143.667L 1,9C 1,4.58179 4.58179,1 9,1 Z ">
+                        <GeometryDrawing.Pen>
+                            <Pen Thickness="2" LineJoin="Round">
+                                <Pen.Brush>
+                                    <LinearGradientBrush StartPoint="0.500001,0.0672213" EndPoint="0.500001,0.932779">
+                                        <LinearGradientBrush.GradientStops>
+                                            <GradientStop Color="#FF6A92AA" Offset="0"/>
+                                            <GradientStop Color="#FF2E6986" Offset="1"/>
+                                        </LinearGradientBrush.GradientStops>
+                                    </LinearGradientBrush>
+                                </Pen.Brush>
+                            </Pen>
+                        </GeometryDrawing.Pen>
+                        <GeometryDrawing.Brush>
+                            <LinearGradientBrush StartPoint="0.500001,0.0614764" EndPoint="0.500001,0.938524">
+                                <LinearGradientBrush.GradientStops>
+                                    <GradientStop Color="#3BFFFFFF" Offset="0"/>
+                                    <GradientStop Color="#00FFFFFF" Offset="0.178161"/>
+                                    <GradientStop Color="#00000000" Offset="0.208812"/>
+                                    <GradientStop Color="#09070E11" Offset="0.798851"/>
+                                    <GradientStop Color="#632582AA" Offset="1"/>
+                                </LinearGradientBrush.GradientStops>
+                            </LinearGradientBrush>
+                        </GeometryDrawing.Brush>
+                    </GeometryDrawing>
+                </DrawingGroup.Children>
+            </DrawingGroup>
+        </DrawingBrush.Drawing>
+    </DrawingBrush>
+
+    <!-- ChatBubbleObjectHover -->
+    <DrawingBrush x:Key="ChatBubbleObjectHoverBrush" Stretch="Fill">
+        <DrawingBrush.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.Children>
+                    <GeometryDrawing Geometry="F1 M 9,1L 406.152,1C 410.57,1 414.152,4.58179 414.152,9L 414.152,143.667C 414.152,148.085 410.57,151.667 406.152,151.667L 9,151.667C 4.58179,151.667 1,148.085 1,143.667L 1,9C 1,4.58179 4.58179,1 9,1 Z ">
+                        <GeometryDrawing.Pen>
+                            <Pen Thickness="2" LineJoin="Round">
+                                <Pen.Brush>
+                                    <LinearGradientBrush StartPoint="0.0106324,0.127059" EndPoint="0.0106324,2.1148">
+                                        <LinearGradientBrush.GradientStops>
+                                            <GradientStop Color="#FF6A92AA" Offset="0"/>
+                                            <GradientStop Color="#FF2E6986" Offset="1"/>
+                                        </LinearGradientBrush.GradientStops>
+                                    </LinearGradientBrush>
+                                </Pen.Brush>
+                            </Pen>
+                        </GeometryDrawing.Pen>
+                        <GeometryDrawing.Brush>
+                            <RadialGradientBrush RadiusX="2.01413" RadiusY="1.0792" Center="0.00826346,0.122109" GradientOrigin="0.00826346,0.122109">
+                                <RadialGradientBrush.GradientStops>
+                                    <GradientStop Color="#12FFFFFF" Offset="0"/>
+                                    <GradientStop Color="#0BEEF5F8" Offset="0.250958"/>
+                                    <GradientStop Color="#01FFFFFF" Offset="0.992337"/>
+                                </RadialGradientBrush.GradientStops>
+                                <RadialGradientBrush.RelativeTransform>
+                                    <TransformGroup>
+                                        <RotateTransform CenterX="0.00826346" CenterY="0.122109" Angle="90"/>
+                                    </TransformGroup>
+                                </RadialGradientBrush.RelativeTransform>
+                            </RadialGradientBrush>
+                        </GeometryDrawing.Brush>
+                    </GeometryDrawing>
+                    <GeometryDrawing Geometry="F1 M 9,1L 406.152,1C 410.57,1 414.152,4.58179 414.152,9L 414.152,143.667C 414.152,148.085 410.57,151.667 406.152,151.667L 9,151.667C 4.58179,151.667 1,148.085 1,143.667L 1,9C 1,4.58179 4.58179,1 9,1 Z ">
+                        <GeometryDrawing.Pen>
+                            <Pen Thickness="2" LineJoin="Round">
+                                <Pen.Brush>
+                                    <LinearGradientBrush StartPoint="0.500001,0.0672213" EndPoint="0.500001,0.932779">
+                                        <LinearGradientBrush.GradientStops>
+                                            <GradientStop Color="#FF6A92AA" Offset="0"/>
+                                            <GradientStop Color="#FF2E6986" Offset="1"/>
+                                        </LinearGradientBrush.GradientStops>
+                                    </LinearGradientBrush>
+                                </Pen.Brush>
+                            </Pen>
+                        </GeometryDrawing.Pen>
+                        <GeometryDrawing.Brush>
+                            <LinearGradientBrush StartPoint="0.500001,0.0614765" EndPoint="0.500001,0.938524">
+                                <LinearGradientBrush.GradientStops>
+                                    <GradientStop Color="#3BFFFFFF" Offset="0"/>
+                                    <GradientStop Color="#00FFFFFF" Offset="0.295019"/>
+                                    <GradientStop Color="#00000000" Offset="0.300766"/>
+                                    <GradientStop Color="#09070E11" Offset="0.703065"/>
+                                    <GradientStop Color="#632582AA" Offset="1"/>
+                                </LinearGradientBrush.GradientStops>
+                            </LinearGradientBrush>
+                        </GeometryDrawing.Brush>
+                    </GeometryDrawing>
+                </DrawingGroup.Children>
+            </DrawingGroup>
+        </DrawingBrush.Drawing>
+    </DrawingBrush>
+
+    <!-- ChatBubbleObjectActivated -->
+    <DrawingBrush x:Key="ChatBubbleObjectActivatedBrush" Stretch="Fill">
+        <DrawingBrush.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.Children>
+                    <GeometryDrawing Geometry="F1 M 9,1.00024L 406.151,1.00024C 410.57,1.00024 414.152,4.58179 414.152,9.00024L 414.152,143.667C 414.152,148.085 410.57,151.667 406.151,151.667L 9,151.667C 4.58154,151.667 1,148.085 1,143.667L 1,9.00024C 1,4.58179 4.58154,1.00024 9,1.00024 Z ">
+                        <GeometryDrawing.Pen>
+                            <Pen Thickness="2" LineJoin="Round">
+                                <Pen.Brush>
+                                    <LinearGradientBrush StartPoint="0.0106324,0.127058" EndPoint="0.0106324,2.1148">
+                                        <LinearGradientBrush.GradientStops>
+                                            <GradientStop Color="#FF6A92AA" Offset="0"/>
+                                            <GradientStop Color="#FF2E6986" Offset="1"/>
+                                        </LinearGradientBrush.GradientStops>
+                                    </LinearGradientBrush>
+                                </Pen.Brush>
+                            </Pen>
+                        </GeometryDrawing.Pen>
+                        <GeometryDrawing.Brush>
+                            <RadialGradientBrush RadiusX="2.01413" RadiusY="1.0792" Center="0.00826346,0.122107" GradientOrigin="0.00826346,0.122107">
+                                <RadialGradientBrush.GradientStops>
+                                    <GradientStop Color="#1AFFFFFF" Offset="0"/>
+                                    <GradientStop Color="#0BEEF5F8" Offset="0.890805"/>
+                                    <GradientStop Color="#0EFFFFFF" Offset="0.992337"/>
+                                </RadialGradientBrush.GradientStops>
+                                <RadialGradientBrush.RelativeTransform>
+                                    <TransformGroup>
+                                        <RotateTransform CenterX="0.00826346" CenterY="0.122107" Angle="90"/>
+                                    </TransformGroup>
+                                </RadialGradientBrush.RelativeTransform>
+                            </RadialGradientBrush>
+                        </GeometryDrawing.Brush>
+                    </GeometryDrawing>
+                    <GeometryDrawing Geometry="F1 M 9,1.00024L 406.151,1.00024C 410.57,1.00024 414.152,4.58179 414.152,9.00024L 414.152,143.667C 414.152,148.085 410.57,151.667 406.151,151.667L 9,151.667C 4.58154,151.667 1,148.085 1,143.667L 1,9.00024C 1,4.58179 4.58154,1.00024 9,1.00024 Z ">
+                        <GeometryDrawing.Pen>
+                            <Pen Thickness="2" LineJoin="Round">
+                                <Pen.Brush>
+                                    <LinearGradientBrush StartPoint="0.500001,0.0672214" EndPoint="0.500001,0.932779">
+                                        <LinearGradientBrush.GradientStops>
+                                            <GradientStop Color="#FF6A92AA" Offset="0"/>
+                                            <GradientStop Color="#FF2E6986" Offset="1"/>
+                                        </LinearGradientBrush.GradientStops>
+                                    </LinearGradientBrush>
+                                </Pen.Brush>
+                            </Pen>
+                        </GeometryDrawing.Pen>
+                        <GeometryDrawing.Brush>
+                            <LinearGradientBrush StartPoint="0.500001,0.0614765" EndPoint="0.500001,0.938523">
+                                <LinearGradientBrush.GradientStops>
+                                    <GradientStop Color="#5BFFFFFF" Offset="0"/>
+                                    <GradientStop Color="#00FFFFFF" Offset="0.178161"/>
+                                    <GradientStop Color="#00000000" Offset="0.208812"/>
+                                    <GradientStop Color="#09070E11" Offset="0.798851"/>
+                                    <GradientStop Color="#952582AA" Offset="1"/>
+                                </LinearGradientBrush.GradientStops>
+                            </LinearGradientBrush>
+                        </GeometryDrawing.Brush>
+                    </GeometryDrawing>
+                </DrawingGroup.Children>
+            </DrawingGroup>
+        </DrawingBrush.Drawing>
+    </DrawingBrush>
+
+    <!-- ChatBackground -->
+    <DrawingBrush x:Key="ChatBackgroundBrush" Stretch="Fill">
+        <DrawingBrush.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.Children>
+                    <GeometryDrawing Geometry="F1 M 1,0.999878L 400.999,0.999878L 400.999,223L 1,223L 1,0.999878 Z ">
+                        <GeometryDrawing.Brush>
+                            <RadialGradientBrush RadiusX="0.9594" RadiusY="1.23497" Center="0.500009,-0.0053194" GradientOrigin="0.500009,-0.0053194">
+                                <RadialGradientBrush.GradientStops>
+                                    <GradientStop Color="#BF306F83" Offset="0"/>
+                                    <GradientStop Color="#FF04071C" Offset="0.992337"/>
+                                </RadialGradientBrush.GradientStops>
+                                <RadialGradientBrush.RelativeTransform>
+                                    <TransformGroup/>
+                                </RadialGradientBrush.RelativeTransform>
+                            </RadialGradientBrush>
+                        </GeometryDrawing.Brush>
+                    </GeometryDrawing>
+                </DrawingGroup.Children>
+            </DrawingGroup>
+        </DrawingBrush.Drawing>
+    </DrawingBrush>
+
+</ResourceDictionary>
+
