@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -21,6 +22,7 @@ namespace Skyweaver.Services.LateralFileSystem
         private readonly ProjFsNative.PrjNotificationCb _notificationCallback;
         private readonly ProjFsNative.PrjCallbacks _callbacks;
         private readonly ProjFsNative.PrjNotificationMapping[] _notificationMappings;
+        private readonly IntPtr _notificationRootBuffer;
         private GCHandle _notificationMappingsHandle;
         private IntPtr _namespaceContext;
         private bool _disposed;
@@ -31,6 +33,7 @@ namespace Skyweaver.Services.LateralFileSystem
             WorkingRootDirectory = workingRootDirectory;
             SourceRootDirectory = sourceRootDirectory;
             _treeRepository = treeRepository;
+            LateralFileSystemDebugConsole.Write("Instance", $"Constructed virtualization instance for node='{Node.Name}' ({Node.Id}); virtualRootPath='{Node.VirtualRootPath}'; sourceRootDirectory='{SourceRootDirectory}'.");
 
             _startDirectoryEnumerationCallback = StartDirectoryEnumerationCallback;
             _endDirectoryEnumerationCallback = EndDirectoryEnumerationCallback;
@@ -49,11 +52,13 @@ namespace Skyweaver.Services.LateralFileSystem
                 NotificationCallback = Marshal.GetFunctionPointerForDelegate(_notificationCallback)
             };
 
+            _notificationRootBuffer = Marshal.StringToHGlobalUni(string.Empty);
+
             _notificationMappings =
             [
                 new ProjFsNative.PrjNotificationMapping
                 {
-                    NotificationRoot = string.Empty,
+                    NotificationRoot = _notificationRootBuffer,
                     NotificationBitMask = ProjFsNative.PrjNotification.NewFileCreated
                         | ProjFsNative.PrjNotification.FileOverwritten
                         | ProjFsNative.PrjNotification.PreDelete
@@ -92,10 +97,13 @@ namespace Skyweaver.Services.LateralFileSystem
             lock (_syncRoot)
             {
                 ThrowIfDisposed();
+                var stopwatch = Stopwatch.StartNew();
+                LateralFileSystemDebugConsole.Write("Instance", $"Start begin; node='{Node.Name}' ({Node.Id}); virtualRootPath='{Node.VirtualRootPath}'; sourceRootDirectory='{SourceRootDirectory}'.");
 
                 Directory.CreateDirectory(Node.VirtualRootPath);
                 var instanceId = Guid.Parse(Node.ProviderInstanceId);
                 var markResult = ProjFsNative.PrjMarkDirectoryAsPlaceholder(Node.VirtualRootPath, null, IntPtr.Zero, in instanceId);
+                LateralFileSystemDebugConsole.Write("Instance", $"PrjMarkDirectoryAsPlaceholder returned 0x{markResult:X8} for '{Node.VirtualRootPath}'.");
                 if (markResult < 0 && markResult != unchecked((int)0x800700b7))
                 {
                     Marshal.ThrowExceptionForHR(markResult);
@@ -112,6 +120,7 @@ namespace Skyweaver.Services.LateralFileSystem
 
                 var instanceContext = GCHandle.ToIntPtr(_selfHandle);
                 var hr = ProjFsNative.PrjStartVirtualizing(Node.VirtualRootPath, in _callbacks, instanceContext, in options, out _namespaceContext);
+                LateralFileSystemDebugConsole.Write("Instance", $"PrjStartVirtualizing returned 0x{hr:X8} for '{Node.VirtualRootPath}'.");
                 if (hr < 0)
                 {
                     Marshal.ThrowExceptionForHR(hr);
@@ -120,8 +129,10 @@ namespace Skyweaver.Services.LateralFileSystem
                 Node.IsActive = true;
                 Node.UpdatedAtUtc = DateTime.UtcNow;
                 PersistNode();
+                LateralFileSystemDebugConsole.Write("Instance", $"Node persisted as active; nodeId={Node.Id}.");
                 SyncAllPlaceholders();
                 _sourceWatcher.EnableRaisingEvents = true;
+                LateralFileSystemDebugConsole.Write("Instance", $"Start end; node='{Node.Name}' ({Node.Id}); elapsedMs={stopwatch.ElapsedMilliseconds}.");
             }
         }
 
@@ -134,6 +145,9 @@ namespace Skyweaver.Services.LateralFileSystem
                     return;
                 }
 
+                var stopwatch = Stopwatch.StartNew();
+                LateralFileSystemDebugConsole.Write("Instance", $"Stop begin; node='{Node.Name}' ({Node.Id}).");
+
                 _sourceWatcher.EnableRaisingEvents = false;
                 if (_namespaceContext != IntPtr.Zero)
                 {
@@ -144,6 +158,7 @@ namespace Skyweaver.Services.LateralFileSystem
                 Node.IsActive = false;
                 Node.UpdatedAtUtc = DateTime.UtcNow;
                 PersistNode();
+                LateralFileSystemDebugConsole.Write("Instance", $"Stop end; node='{Node.Name}' ({Node.Id}); elapsedMs={stopwatch.ElapsedMilliseconds}.");
             }
         }
 
@@ -152,21 +167,34 @@ namespace Skyweaver.Services.LateralFileSystem
             lock (_syncRoot)
             {
                 ThrowIfDisposed();
+                var stopwatch = Stopwatch.StartNew();
+                LateralFileSystemDebugConsole.Write("Instance", $"SyncAllPlaceholders begin; node='{Node.Name}' ({Node.Id}); virtualRootPath='{Node.VirtualRootPath}'.");
 
                 var sourceEntries = EnumerateEntries(string.Empty).ToDictionary(entry => entry.RelativePath, StringComparer.OrdinalIgnoreCase);
+                LateralFileSystemDebugConsole.Write("Instance", $"SyncAllPlaceholders sourceEntries count={sourceEntries.Count}.");
+                var ensuredCount = 0;
                 foreach (var entry in sourceEntries.Values.OrderBy(entry => entry.RelativePath.Count(static c => c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar)))
                 {
+                    ensuredCount++;
+                    if (ensuredCount <= 20 || ensuredCount % 100 == 0)
+                    {
+                        LateralFileSystemDebugConsole.Write("Instance", $"SyncAllPlaceholders ensuring placeholder {ensuredCount}: '{entry.RelativePath}' (directory={entry.IsDirectory}).");
+                    }
+
                     EnsurePlaceholder(entry);
                 }
 
+                LateralFileSystemDebugConsole.Write("Instance", $"SyncAllPlaceholders starting local recursive enumeration at '{Node.VirtualRootPath}'.");
                 var localPaths = Directory.Exists(Node.VirtualRootPath)
-                    ? Directory.EnumerateFileSystemEntries(Node.VirtualRootPath, "*", SearchOption.AllDirectories)
+                    ? LateralFileSystemSafeEnumeration.EnumerateFileSystemEntriesRecursively(Node.VirtualRootPath)
                         .Select(path => NormalizeRelativePath(Path.GetRelativePath(Node.VirtualRootPath, path)))
                         .Where(path => !string.IsNullOrWhiteSpace(path))
                         .OrderByDescending(path => path.Length)
                         .ToList()
                     : new List<string>();
+                LateralFileSystemDebugConsole.Write("Instance", $"SyncAllPlaceholders localPaths count={localPaths.Count}.");
 
+                var removedCount = 0;
                 foreach (var localPath in localPaths)
                 {
                     if (sourceEntries.ContainsKey(localPath))
@@ -180,7 +208,14 @@ namespace Skyweaver.Services.LateralFileSystem
                     }
 
                     RemoveLocalPath(localPath);
+                    removedCount++;
+                    if (removedCount <= 20 || removedCount % 100 == 0)
+                    {
+                        LateralFileSystemDebugConsole.Write("Instance", $"SyncAllPlaceholders removed local-only path {removedCount}: '{localPath}'.");
+                    }
                 }
+
+                LateralFileSystemDebugConsole.Write("Instance", $"SyncAllPlaceholders end; node='{Node.Name}' ({Node.Id}); sourceEntries={sourceEntries.Count}; localPaths={localPaths.Count}; removed={removedCount}; elapsedMs={stopwatch.ElapsedMilliseconds}.");
             }
         }
 
@@ -200,6 +235,11 @@ namespace Skyweaver.Services.LateralFileSystem
                     _notificationMappingsHandle.Free();
                 }
 
+                if (_notificationRootBuffer != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(_notificationRootBuffer);
+                }
+
                 if (_selfHandle.IsAllocated)
                 {
                     _selfHandle.Free();
@@ -213,9 +253,11 @@ namespace Skyweaver.Services.LateralFileSystem
         {
             try
             {
+                LateralFileSystemDebugConsole.Write("Callback", $"StartDirectoryEnumeration begin; nodeId={Node.Id}; enumerationId={enumerationId}; filePath='{callbackData.FilePathName}'; {DescribeCallbackOrigin(callbackData)}.");
                 var session = new LateralFileSystemEnumerationSession();
                 session.Entries.AddRange(EnumerateEntries(callbackData.FilePathName).OrderBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase));
                 _enumerationSessions[enumerationId] = session;
+                LateralFileSystemDebugConsole.Write("Callback", $"StartDirectoryEnumeration end; nodeId={Node.Id}; enumerationId={enumerationId}; entries={session.Entries.Count}; filePath='{callbackData.FilePathName}'; {DescribeCallbackOrigin(callbackData)}.");
                 return 0;
             }
             catch (DirectoryNotFoundException)
@@ -228,6 +270,7 @@ namespace Skyweaver.Services.LateralFileSystem
             }
             catch (Exception ex)
             {
+                LateralFileSystemDebugConsole.WriteException("Callback", ex, $"StartDirectoryEnumeration failed; nodeId={Node.Id}; enumerationId={enumerationId}; filePath='{callbackData.FilePathName}'; {DescribeCallbackOrigin(callbackData)}");
                 return Marshal.GetHRForException(ex);
             }
         }
@@ -235,6 +278,7 @@ namespace Skyweaver.Services.LateralFileSystem
         private int EndDirectoryEnumerationCallback(in ProjFsNative.PrjCallbackData callbackData, in Guid enumerationId)
         {
             _enumerationSessions.TryRemove(enumerationId, out _);
+            LateralFileSystemDebugConsole.Write("Callback", $"EndDirectoryEnumeration; nodeId={Node.Id}; enumerationId={enumerationId}; filePath='{callbackData.FilePathName}'; {DescribeCallbackOrigin(callbackData)}.");
             return 0;
         }
 
@@ -242,6 +286,7 @@ namespace Skyweaver.Services.LateralFileSystem
         {
             try
             {
+                LateralFileSystemDebugConsole.Write("Callback", $"GetDirectoryEnumeration begin; nodeId={Node.Id}; enumerationId={enumerationId}; filePath='{callbackData.FilePathName}'; searchExpression='{searchExpression}'; {DescribeCallbackOrigin(callbackData)}.");
                 if (!_enumerationSessions.TryGetValue(enumerationId, out var session))
                 {
                     return Marshal.GetHRForException(new InvalidOperationException("目录枚举会话不存在。"));
@@ -283,10 +328,12 @@ namespace Skyweaver.Services.LateralFileSystem
                     session.NextIndex++;
                 }
 
+                LateralFileSystemDebugConsole.Write("Callback", $"GetDirectoryEnumeration end; nodeId={Node.Id}; enumerationId={enumerationId}; entriesAdded={entriesAdded}; nextIndex={session.NextIndex}; filePath='{callbackData.FilePathName}'; {DescribeCallbackOrigin(callbackData)}.");
                 return 0;
             }
             catch (Exception ex)
             {
+                LateralFileSystemDebugConsole.WriteException("Callback", ex, $"GetDirectoryEnumeration failed; nodeId={Node.Id}; enumerationId={enumerationId}; filePath='{callbackData.FilePathName}'; {DescribeCallbackOrigin(callbackData)}");
                 return Marshal.GetHRForException(ex);
             }
         }
@@ -295,18 +342,22 @@ namespace Skyweaver.Services.LateralFileSystem
         {
             try
             {
+                LateralFileSystemDebugConsole.Write("Callback", $"GetPlaceholderInfo begin; nodeId={Node.Id}; filePath='{callbackData.FilePathName}'; {DescribeCallbackOrigin(callbackData)}.");
                 var entry = GetEntry(callbackData.FilePathName);
                 if (entry is null)
                 {
+                    LateralFileSystemDebugConsole.Write("Callback", $"GetPlaceholderInfo miss; nodeId={Node.Id}; filePath='{callbackData.FilePathName}'; {DescribeCallbackOrigin(callbackData)}.");
                     return ProjFsNative.ErrorFileNotFound;
                 }
 
                 var placeholderInfo = CreatePlaceholderInfo(entry);
                 var hr = ProjFsNative.PrjWritePlaceholderInfo(callbackData.NamespaceVirtualizationContext, callbackData.FilePathName, in placeholderInfo, (uint)Marshal.SizeOf<ProjFsNative.PrjPlaceholderInfo>());
+                LateralFileSystemDebugConsole.Write("Callback", $"GetPlaceholderInfo end; nodeId={Node.Id}; filePath='{callbackData.FilePathName}'; hr=0x{hr:X8}; isDirectory={entry.IsDirectory}; {DescribeCallbackOrigin(callbackData)}.");
                 return hr;
             }
             catch (Exception ex)
             {
+                LateralFileSystemDebugConsole.WriteException("Callback", ex, $"GetPlaceholderInfo failed; nodeId={Node.Id}; filePath='{callbackData.FilePathName}'; {DescribeCallbackOrigin(callbackData)}");
                 return Marshal.GetHRForException(ex);
             }
         }
@@ -315,9 +366,11 @@ namespace Skyweaver.Services.LateralFileSystem
         {
             try
             {
+                LateralFileSystemDebugConsole.Write("Callback", $"GetFileData begin; nodeId={Node.Id}; filePath='{callbackData.FilePathName}'; byteOffset={byteOffset}; length={length}; {DescribeCallbackOrigin(callbackData)}.");
                 var entry = GetEntry(callbackData.FilePathName);
                 if (entry is null || entry.IsDirectory)
                 {
+                    LateralFileSystemDebugConsole.Write("Callback", $"GetFileData miss; nodeId={Node.Id}; filePath='{callbackData.FilePathName}'; {DescribeCallbackOrigin(callbackData)}.");
                     return ProjFsNative.ErrorFileNotFound;
                 }
 
@@ -345,7 +398,9 @@ namespace Skyweaver.Services.LateralFileSystem
                     var managedBuffer = new byte[remaining];
                     var read = stream.Read(managedBuffer, 0, managedBuffer.Length);
                     Marshal.Copy(managedBuffer, 0, buffer, read);
-                    return ProjFsNative.PrjWriteFileData(callbackData.NamespaceVirtualizationContext, in callbackData.DataStreamId, buffer, byteOffset, (uint)read);
+                    var hr = ProjFsNative.PrjWriteFileData(callbackData.NamespaceVirtualizationContext, in callbackData.DataStreamId, buffer, byteOffset, (uint)read);
+                    LateralFileSystemDebugConsole.Write("Callback", $"GetFileData end; nodeId={Node.Id}; filePath='{callbackData.FilePathName}'; byteOffset={byteOffset}; requestedLength={length}; bytesWritten={read}; hr=0x{hr:X8}; sourcePath='{entry.FullPath}'; {DescribeCallbackOrigin(callbackData)}.");
+                    return hr;
                 }
                 finally
                 {
@@ -354,6 +409,7 @@ namespace Skyweaver.Services.LateralFileSystem
             }
             catch (Exception ex)
             {
+                LateralFileSystemDebugConsole.WriteException("Callback", ex, $"GetFileData failed; nodeId={Node.Id}; filePath='{callbackData.FilePathName}'; {DescribeCallbackOrigin(callbackData)}");
                 return Marshal.GetHRForException(ex);
             }
         }
@@ -364,6 +420,7 @@ namespace Skyweaver.Services.LateralFileSystem
             {
                 var relativePath = NormalizeRelativePath(callbackData.FilePathName);
                 var destinationRelativePath = NormalizeRelativePath(destinationFileName ?? string.Empty);
+                LateralFileSystemDebugConsole.Write("Callback", $"Notification; nodeId={Node.Id}; notification={notification}; isDirectory={isDirectory}; relativePath='{relativePath}'; destinationRelativePath='{destinationRelativePath}'; {DescribeCallbackOrigin(callbackData)}.");
 
                 switch (notification)
                 {
@@ -407,6 +464,7 @@ namespace Skyweaver.Services.LateralFileSystem
             }
             catch (Exception ex)
             {
+                LateralFileSystemDebugConsole.WriteException("Callback", ex, $"Notification failed; nodeId={Node.Id}; filePath='{callbackData.FilePathName}'; {DescribeCallbackOrigin(callbackData)}");
                 return Marshal.GetHRForException(ex);
             }
         }
@@ -499,6 +557,8 @@ namespace Skyweaver.Services.LateralFileSystem
                 return;
             }
 
+            LateralFileSystemDebugConsole.Write("Instance", $"EnsurePlaceholder; nodeId={Node.Id}; relativePath='{entry.RelativePath}'; isDirectory={entry.IsDirectory}; fileAttributes=0x{entry.FileAttributes:X8}.");
+
             var localPath = Path.Combine(Node.VirtualRootPath, entry.RelativePath);
             var localDirectory = Path.GetDirectoryName(localPath);
             if (!string.IsNullOrWhiteSpace(localDirectory))
@@ -521,6 +581,8 @@ namespace Skyweaver.Services.LateralFileSystem
                 return;
             }
 
+            LateralFileSystemDebugConsole.Write("Instance", $"RemoveSourceRemovedPath start; nodeId={Node.Id}; relativePath='{relativePath}'.");
+
             var localPath = Path.Combine(Node.VirtualRootPath, relativePath);
             if (IsEdited(relativePath))
             {
@@ -535,7 +597,7 @@ namespace Skyweaver.Services.LateralFileSystem
 
             if (Directory.Exists(localPath))
             {
-                var descendants = Directory.EnumerateFileSystemEntries(localPath, "*", SearchOption.AllDirectories)
+                var descendants = LateralFileSystemSafeEnumeration.EnumerateFileSystemEntriesRecursively(localPath)
                     .Select(path => NormalizeRelativePath(Path.GetRelativePath(Node.VirtualRootPath, path)))
                     .OrderByDescending(path => path.Length)
                     .ToList();
@@ -550,38 +612,63 @@ namespace Skyweaver.Services.LateralFileSystem
                     RemoveLocalPath(descendant);
                 }
 
-                if (!Directory.EnumerateFileSystemEntries(localPath).Any())
+                if (!LateralFileSystemSafeEnumeration.HasAnyEntries(localPath))
                 {
-                    Directory.Delete(localPath, recursive: false);
+                    try
+                    {
+                        Directory.Delete(localPath, recursive: false);
+                    }
+                    catch (UnauthorizedAccessException)
+                    {
+                    }
+                    catch (IOException)
+                    {
+                    }
                 }
             }
+
+            LateralFileSystemDebugConsole.Write("Instance", $"RemoveSourceRemovedPath end; nodeId={Node.Id}; relativePath='{relativePath}'.");
         }
 
         private void RemoveLocalPath(string relativePath)
         {
+            LateralFileSystemDebugConsole.Write("Instance", $"RemoveLocalPath start; nodeId={Node.Id}; relativePath='{relativePath}'.");
             var localPath = Path.Combine(Node.VirtualRootPath, relativePath);
             if (File.Exists(localPath))
             {
                 File.Delete(localPath);
+                LateralFileSystemDebugConsole.Write("Instance", $"RemoveLocalPath deleted file; nodeId={Node.Id}; fullPath='{localPath}'.");
                 return;
             }
 
-            if (Directory.Exists(localPath) && !Directory.EnumerateFileSystemEntries(localPath).Any())
+            if (Directory.Exists(localPath) && !LateralFileSystemSafeEnumeration.HasAnyEntries(localPath))
             {
-                Directory.Delete(localPath, recursive: false);
+                try
+                {
+                    Directory.Delete(localPath, recursive: false);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                }
+                catch (IOException)
+                {
+                }
             }
+
+            LateralFileSystemDebugConsole.Write("Instance", $"RemoveLocalPath end; nodeId={Node.Id}; relativePath='{relativePath}'.");
         }
 
         private IReadOnlyList<LateralFileSystemEntry> EnumerateEntries(string relativeDirectoryPath)
         {
             var sourceDirectoryPath = GetSourcePath(relativeDirectoryPath);
+            LateralFileSystemDebugConsole.Write("Instance", $"EnumerateEntries start; nodeId={Node.Id}; relativeDirectoryPath='{relativeDirectoryPath}'; sourceDirectoryPath='{sourceDirectoryPath}'.");
             if (!Directory.Exists(sourceDirectoryPath))
             {
                 throw new DirectoryNotFoundException(sourceDirectoryPath);
             }
 
             var entries = new List<LateralFileSystemEntry>();
-            foreach (var entryPath in Directory.EnumerateFileSystemEntries(sourceDirectoryPath))
+            foreach (var entryPath in LateralFileSystemSafeEnumeration.EnumerateImmediateFileSystemEntries(sourceDirectoryPath))
             {
                 var entry = GetEntryFromSourcePath(entryPath);
                 if (entry is not null)
@@ -590,6 +677,7 @@ namespace Skyweaver.Services.LateralFileSystem
                 }
             }
 
+            LateralFileSystemDebugConsole.Write("Instance", $"EnumerateEntries end; nodeId={Node.Id}; relativeDirectoryPath='{relativeDirectoryPath}'; count={entries.Count}.");
             return entries;
         }
 
@@ -618,39 +706,57 @@ namespace Skyweaver.Services.LateralFileSystem
 
         private LateralFileSystemEntry? GetEntryFromSourcePath(string sourcePath)
         {
-            if (Directory.Exists(sourcePath))
+            try
             {
-                var info = new DirectoryInfo(sourcePath);
-                return new LateralFileSystemEntry
+                if (Directory.Exists(sourcePath))
                 {
-                    RelativePath = NormalizeRelativePath(Path.GetRelativePath(SourceRootDirectory, sourcePath)),
-                    Name = info.Name,
-                    FullPath = info.FullName,
-                    IsDirectory = true,
-                    CreationTimeUtc = info.CreationTimeUtc,
-                    LastAccessTimeUtc = info.LastAccessTimeUtc,
-                    LastWriteTimeUtc = info.LastWriteTimeUtc,
-                    ChangeTimeUtc = info.LastWriteTimeUtc,
-                    FileAttributes = (uint)info.Attributes
-                };
-            }
+                    var info = new DirectoryInfo(sourcePath);
+                    return new LateralFileSystemEntry
+                    {
+                        RelativePath = NormalizeRelativePath(Path.GetRelativePath(SourceRootDirectory, sourcePath)),
+                        Name = info.Name,
+                        FullPath = info.FullName,
+                        IsDirectory = true,
+                        CreationTimeUtc = info.CreationTimeUtc,
+                        LastAccessTimeUtc = info.LastAccessTimeUtc,
+                        LastWriteTimeUtc = info.LastWriteTimeUtc,
+                        ChangeTimeUtc = info.LastWriteTimeUtc,
+                        FileAttributes = (uint)info.Attributes
+                    };
+                }
 
-            if (File.Exists(sourcePath))
-            {
-                var info = new FileInfo(sourcePath);
-                return new LateralFileSystemEntry
+                if (File.Exists(sourcePath))
                 {
-                    RelativePath = NormalizeRelativePath(Path.GetRelativePath(SourceRootDirectory, sourcePath)),
-                    Name = info.Name,
-                    FullPath = info.FullName,
-                    IsDirectory = false,
-                    FileSize = info.Length,
-                    CreationTimeUtc = info.CreationTimeUtc,
-                    LastAccessTimeUtc = info.LastAccessTimeUtc,
-                    LastWriteTimeUtc = info.LastWriteTimeUtc,
-                    ChangeTimeUtc = info.LastWriteTimeUtc,
-                    FileAttributes = (uint)info.Attributes
-                };
+                    var info = new FileInfo(sourcePath);
+                    return new LateralFileSystemEntry
+                    {
+                        RelativePath = NormalizeRelativePath(Path.GetRelativePath(SourceRootDirectory, sourcePath)),
+                        Name = info.Name,
+                        FullPath = info.FullName,
+                        IsDirectory = false,
+                        FileSize = info.Length,
+                        CreationTimeUtc = info.CreationTimeUtc,
+                        LastAccessTimeUtc = info.LastAccessTimeUtc,
+                        LastWriteTimeUtc = info.LastWriteTimeUtc,
+                        ChangeTimeUtc = info.LastWriteTimeUtc,
+                        FileAttributes = (uint)info.Attributes
+                    };
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+                LateralFileSystemDebugConsole.Write("Instance", $"GetEntryFromSourcePath skipped due to UnauthorizedAccessException; nodeId={Node.Id}; sourcePath='{sourcePath}'.");
+                return null;
+            }
+            catch (IOException)
+            {
+                LateralFileSystemDebugConsole.Write("Instance", $"GetEntryFromSourcePath skipped due to IOException; nodeId={Node.Id}; sourcePath='{sourcePath}'.");
+                return null;
+            }
+            catch (NotSupportedException)
+            {
+                LateralFileSystemDebugConsole.Write("Instance", $"GetEntryFromSourcePath skipped due to NotSupportedException; nodeId={Node.Id}; sourcePath='{sourcePath}'.");
+                return null;
             }
 
             return null;
@@ -857,6 +963,14 @@ namespace Skyweaver.Services.LateralFileSystem
                 ProviderId = providerId,
                 ContentId = contentId
             };
+        }
+
+        private static string DescribeCallbackOrigin(in ProjFsNative.PrjCallbackData callbackData)
+        {
+            var triggeringProcessImage = string.IsNullOrWhiteSpace(callbackData.TriggeringProcessImageFileName)
+                ? "<unknown>"
+                : callbackData.TriggeringProcessImageFileName;
+            return $"commandId={callbackData.CommandId}; triggeringProcessId={callbackData.TriggeringProcessId}; triggeringProcessImage='{triggeringProcessImage}'";
         }
 
         private static string NormalizeRelativePath(string relativePath)

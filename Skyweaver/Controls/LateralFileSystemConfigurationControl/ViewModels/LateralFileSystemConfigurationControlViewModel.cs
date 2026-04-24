@@ -11,8 +11,7 @@ namespace Skyweaver.Controls.LateralFileSystemConfigurationControl.ViewModels
 {
     public sealed class LateralFileSystemConfigurationControlViewModel : ObservableObject
     {
-        private readonly LateralFileSystemConfigurationRepository _configurationRepository;
-        private readonly LateralFileSystemService _lateralFileSystemService;
+        private readonly LateralFileSystemRuntime _runtime;
         private readonly LateralFileSystemConfiguration _configuration;
         private string _statusMessage = "配置已加载。";
         private bool _isLoading;
@@ -23,7 +22,11 @@ namespace Skyweaver.Controls.LateralFileSystemConfigurationControl.ViewModels
 
         public string Hint { get; } = "前端修改后会自动写入 XML。LateralFileSystemTree.xml 仅在建立首个虚拟文件夹时创建。";
 
-        public string ConfigurationFilePath => _configurationRepository.ConfigurationFilePath;
+        public string ConfigurationFilePath => _runtime.ConfigurationFilePath;
+
+        public bool IsVirtualizationBackendAvailable => _runtime.IsVirtualizationBackendAvailable;
+
+        public string BackendAvailabilityText => _runtime.VirtualizationBackendStatusMessage;
 
         public bool IsEnabled
         {
@@ -78,11 +81,8 @@ namespace Skyweaver.Controls.LateralFileSystemConfigurationControl.ViewModels
 
         public LateralFileSystemConfigurationControlViewModel()
         {
-            var pathProvider = new LateralFileSystemPathProvider();
-            _configurationRepository = new LateralFileSystemConfigurationRepository(pathProvider);
-            var treeRepository = new LateralFileSystemTreeRepository();
-            _lateralFileSystemService = new LateralFileSystemService(treeRepository, new LateralFileSystemProjectionHost(treeRepository));
-            _configuration = _configurationRepository.Load();
+            _runtime = LateralFileSystemRuntime.Instance;
+            _configuration = _runtime.GetConfiguration();
             _configuration.PropertyChanged += OnConfigurationPropertyChanged;
 
             BrowseWorkingRootDirectoryCommand = new RelayCommand(BrowseWorkingRootDirectory);
@@ -94,11 +94,7 @@ namespace Skyweaver.Controls.LateralFileSystemConfigurationControl.ViewModels
             OnPropertyChanged(nameof(HasWorkingRootDirectory));
             OnPropertyChanged(nameof(WorkingRootDirectoryHint));
             _isLoading = false;
-
-            if (_configuration.IsEnabled && !string.IsNullOrWhiteSpace(_configuration.WorkingRootDirectory))
-            {
-                _lateralFileSystemService.ActivateAll(_configuration.WorkingRootDirectory);
-            }
+            StatusMessage = BuildStatusMessage("配置已加载。");
         }
 
         private void BrowseWorkingRootDirectory()
@@ -157,19 +153,25 @@ namespace Skyweaver.Controls.LateralFileSystemConfigurationControl.ViewModels
 
             try
             {
-                _configurationRepository.Save(_configuration);
-
-                if (_configuration.IsEnabled && !string.IsNullOrWhiteSpace(_configuration.WorkingRootDirectory))
-                {
-                    _lateralFileSystemService.ActivateAll(_configuration.WorkingRootDirectory);
-                }
-
-                StatusMessage = successMessage;
+                _runtime.SaveConfiguration(_configuration);
+                OnPropertyChanged(nameof(IsVirtualizationBackendAvailable));
+                OnPropertyChanged(nameof(BackendAvailabilityText));
+                StatusMessage = BuildStatusMessage(successMessage);
             }
             catch (Exception ex)
             {
                 StatusMessage = $"保存失败：{ex.Message}";
             }
+        }
+
+        private string BuildStatusMessage(string successMessage)
+        {
+            if (!_runtime.IsVirtualizationBackendAvailable)
+            {
+                return _runtime.VirtualizationBackendStatusMessage;
+            }
+
+            return successMessage;
         }
     }
 }

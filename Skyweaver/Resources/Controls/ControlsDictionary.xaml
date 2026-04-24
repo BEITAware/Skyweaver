@@ -16,5 +16,6 @@
         <ResourceDictionary Source="FilmPreviewTabStyles.xaml"/>
         <ResourceDictionary Source="NewNodeGraphDialogStyles.xaml"/>
         <ResourceDictionary Source="ChatStyles.xaml"/>
+        <ResourceDictionary Source="SliderStyles.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

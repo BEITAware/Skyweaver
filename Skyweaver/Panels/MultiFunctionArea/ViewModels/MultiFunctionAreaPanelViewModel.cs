@@ -297,6 +297,7 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
 
         private static LateralFileSystemTreeControl CreateLateralFileSystemTreeView(int instanceNumber)
         {
+            Skyweaver.Services.LateralFileSystem.LateralFileSystemDebugConsole.Write("UI", $"CreateLateralFileSystemTreeView start; instanceNumber={instanceNumber}.");
             return new LateralFileSystemTreeControl
             {
                 DataContext = new LateralFileSystemTreeControlViewModel(instanceNumber)

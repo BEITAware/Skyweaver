@@ -10,6 +10,63 @@ namespace Skyweaver.Services.LateralFileSystem
         public const int ErrorPathNotFound = unchecked((int)0x80070003);
         public const int ErrorAccessDenied = unchecked((int)0x80070005);
 
+        public static bool TryGetAvailability(out string? unavailableReason)
+        {
+            IntPtr handle = IntPtr.Zero;
+
+            try
+            {
+                if (NativeLibrary.TryLoad("ProjectedFSLib.dll", typeof(ProjFsNative).Assembly, searchPath: null, out handle))
+                {
+                    unavailableReason = null;
+                    return true;
+                }
+
+                unavailableReason = BuildAvailabilityErrorMessage(exception: null);
+                return false;
+            }
+            catch (Exception ex) when (IsAvailabilityException(ex))
+            {
+                unavailableReason = BuildAvailabilityErrorMessage(ex);
+                return false;
+            }
+            finally
+            {
+                if (handle != IntPtr.Zero)
+                {
+                    NativeLibrary.Free(handle);
+                }
+            }
+        }
+
+        public static bool IsAvailabilityException(Exception exception)
+        {
+            ArgumentNullException.ThrowIfNull(exception);
+            return exception is DllNotFoundException or EntryPointNotFoundException or BadImageFormatException;
+        }
+
+        public static string BuildAvailabilityErrorMessage(Exception? exception)
+        {
+            return exception switch
+            {
+                BadImageFormatException => "侧向文件系统原生后端不可用：ProjectedFSLib.dll 或其依赖项的位数不匹配，无法加载。",
+                EntryPointNotFoundException => "侧向文件系统原生后端不可用：ProjectedFSLib.dll 已找到，但缺少所需的 ProjFS 导出函数。",
+                DllNotFoundException => "侧向文件系统原生后端不可用：无法加载 ProjectedFSLib.dll 或其依赖项。通常是系统未启用 Projected File System，或相关组件缺失。",
+                _ => "侧向文件系统原生后端不可用：无法加载 ProjectedFSLib.dll。通常是系统未启用 Projected File System，或相关组件缺失。"
+            };
+        }
+
+        [Flags]
+        public enum PrjFileState : uint
+        {
+            None = 0,
+            Placeholder = 0x00000001,
+            HydratedPlaceholder = 0x00000002,
+            DirtyPlaceholder = 0x00000004,
+            Full = 0x00000008,
+            Tombstone = 0x00000010
+        }
+
         [Flags]
         public enum PrjNotification : uint
         {
@@ -77,8 +134,7 @@ namespace Skyweaver.Services.LateralFileSystem
         public struct PrjNotificationMapping
         {
             public PrjNotification NotificationBitMask;
-            [MarshalAs(UnmanagedType.LPWStr)]
-            public string NotificationRoot;
+            public IntPtr NotificationRoot;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -195,6 +251,9 @@ namespace Skyweaver.Services.LateralFileSystem
 
         [DllImport("ProjectedFSLib.dll", CharSet = CharSet.Unicode, PreserveSig = true)]
         public static extern int PrjFillDirEntryBuffer(string fileName, in PrjFileBasicInfo fileBasicInfo, IntPtr dirEntryBufferHandle);
+
+        [DllImport("ProjectedFSLib.dll", CharSet = CharSet.Unicode, PreserveSig = true)]
+        public static extern int PrjGetOnDiskFileState(string destinationFileName, out PrjFileState fileState);
 
         [DllImport("ProjectedFSLib.dll", CharSet = CharSet.Unicode, PreserveSig = true)]
         public static extern int PrjWriteFileData(IntPtr namespaceVirtualizationContext, in Guid dataStreamId, IntPtr buffer, ulong byteOffset, uint length);

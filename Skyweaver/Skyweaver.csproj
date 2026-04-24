@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -55,6 +55,7 @@
   <ItemGroup>
     <Resource Include="Resources\*.png" />
     <Resource Include="Resources\*.ico" />
+    <Resource Include="Resources\*.jpg" />
   </ItemGroup>
 
   <ItemGroup>

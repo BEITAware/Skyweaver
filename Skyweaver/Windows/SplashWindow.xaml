@@ -14,7 +14,7 @@
         Background="Transparent"
         ResizeMode="NoResize">
     <Grid>
-        <Image x:Name="SplashImage" Source="/Resources/bootup2.png" Stretch="Uniform"/>
+        <Image x:Name="SplashImage" Source="/Resources/BootUpNew.jpg" Stretch="UniformToFill"/>
         <Image HorizontalAlignment="Left" Height="110" Margin="130,52,0,0" VerticalAlignment="Top" Width="110" Source="/Resources/SkyweaverAppLogo.png"/>
 
         <!-- 软件名称 -->
