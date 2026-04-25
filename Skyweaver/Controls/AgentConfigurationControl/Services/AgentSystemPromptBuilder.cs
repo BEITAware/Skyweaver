@@ -56,14 +56,15 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
         public string BuildCompleteSystemPrompt(
             AgentDefinition agent,
             bool supportsHostToolConfirmation,
-            IReadOnlyList<SkyweaverToolKitDefinition>? availableToolKits = null)
+            IReadOnlyList<SkyweaverToolKitDefinition>? availableToolKits = null,
+            IReadOnlyCollection<string>? activeToolKitKeys = null)
         {
             ArgumentNullException.ThrowIfNull(agent);
 
             var externalTools = _promptToolCatalogService.ResolveCallableTools(
                 agent,
                 supportsHostToolConfirmation,
-                activeToolKitKeys: null,
+                activeToolKitKeys: activeToolKitKeys,
                 restrictToToolNames: null,
                 availableToolKits: availableToolKits);
             var builder = new StringBuilder(4096);

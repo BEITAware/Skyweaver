@@ -263,6 +263,9 @@ namespace Skyweaver.Services.AgentLoop
 
             var availableToolKits = _toolKitService.Load();
             var toolKitMembershipMap = _toolKitService.BuildToolKitMembershipMap(availableToolKits);
+            var activeToolKitKeys = new HashSet<string>(
+                ExtractLoadedToolKitKeysFromHistory(request.History),
+                StringComparer.OrdinalIgnoreCase);
             var runtimeToolContext = request.ToolContext
                 .WithRuntimeAgent(
                     request.Agent,
@@ -271,7 +274,8 @@ namespace Skyweaver.Services.AgentLoop
             var systemPrompt = _systemPromptBuilder.BuildCompleteSystemPrompt(
                 request.Agent,
                 supportsHostToolConfirmation: request.ToolConfirmationCallback != null,
-                availableToolKits: availableToolKits);
+                availableToolKits: availableToolKits,
+                activeToolKitKeys: activeToolKitKeys);
             var debugRunContext = AgentLoopDebugRecorder.TryCreateRunContext(request);
             AgentLoopDebugRecorder.RecordRunStart(debugRunContext, request, systemPrompt);
 
@@ -280,7 +284,6 @@ namespace Skyweaver.Services.AgentLoop
                 .ToList();
             var turnHistory = new List<LanguageModelChatMessage>();
             var iterations = new List<AgentLoopIteration>();
-            var activeToolKitKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             string? lastModelId = null;
             AgentLoopFinalOutput? latestMessageOutput = null;
             var consecutiveRecoverableFailures = 0;
@@ -1612,6 +1615,105 @@ namespace Skyweaver.Services.AgentLoop
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .OrderBy(item => item, StringComparer.OrdinalIgnoreCase)
                 .ToArray();
+        }
+
+        private static IReadOnlyList<string> ExtractLoadedToolKitKeysFromHistory(
+            IReadOnlyList<LanguageModelChatMessage>? history)
+        {
+            if (history == null || history.Count == 0)
+            {
+                return Array.Empty<string>();
+            }
+
+            return history
+                .SelectMany(message => ExtractLoadedToolKitKeysFromToolsReturnXml(message.Content))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(item => item, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+        }
+
+        private static IReadOnlyList<string> ExtractLoadedToolKitKeysFromToolsReturnXml(string? xml)
+        {
+            if (string.IsNullOrWhiteSpace(xml))
+            {
+                return Array.Empty<string>();
+            }
+
+            XDocument document;
+            try
+            {
+                document = XDocument.Parse(xml, LoadOptions.PreserveWhitespace);
+            }
+            catch (XmlException)
+            {
+                return Array.Empty<string>();
+            }
+
+            var root = document.Root;
+            if (root == null || !string.Equals(root.Name.LocalName, "ToolsReturn", StringComparison.OrdinalIgnoreCase))
+            {
+                return Array.Empty<string>();
+            }
+
+            return root.Elements()
+                .Where(element => string.Equals(element.Name.LocalName, "ToolReturn", StringComparison.OrdinalIgnoreCase))
+                .Where(IsSuccessfulLoadToolKitsReturn)
+                .SelectMany(ExtractLoadedToolKitKeysFromToolReturnElement)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(item => item, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+        }
+
+        private static bool IsSuccessfulLoadToolKitsReturn(XElement toolReturn)
+        {
+            var toolName = toolReturn.Attributes()
+                .FirstOrDefault(attribute =>
+                    string.Equals(attribute.Name.LocalName, "ToolName", StringComparison.OrdinalIgnoreCase))
+                ?.Value
+                ?.Trim();
+
+            return string.Equals(toolName, LoadToolKitsTool.ToolName, StringComparison.OrdinalIgnoreCase) &&
+                   !toolReturn.Elements().Any(element =>
+                       string.Equals(element.Name.LocalName, "ErrorMessage", StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static IReadOnlyList<string> ExtractLoadedToolKitKeysFromToolReturnElement(XElement toolReturn)
+        {
+            const string keyPrefix = "loadedToolKitKeys=";
+
+            return toolReturn.Elements()
+                .Where(element => element.Name.LocalName.StartsWith("StringReturn", StringComparison.OrdinalIgnoreCase))
+                .Select(element => element.Value?.Trim() ?? string.Empty)
+                .Where(value => value.StartsWith(keyPrefix, StringComparison.OrdinalIgnoreCase))
+                .SelectMany(value => ParseStringArrayValue(value[keyPrefix.Length..]))
+                .Where(value => !string.IsNullOrWhiteSpace(value))
+                .Select(value => value.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(item => item, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+        }
+
+        private static IReadOnlyList<string> ParseStringArrayValue(string? rawValue)
+        {
+            if (string.IsNullOrWhiteSpace(rawValue))
+            {
+                return Array.Empty<string>();
+            }
+
+            var normalized = rawValue.Trim();
+            try
+            {
+                return JToken.Parse(normalized) is JArray array
+                    ? array.Values<string>()
+                        .Where(item => !string.IsNullOrWhiteSpace(item))
+                        .Select(item => item!.Trim())
+                        .ToArray()
+                    : Array.Empty<string>();
+            }
+            catch (Exception ex) when (ex is FormatException or Newtonsoft.Json.JsonReaderException)
+            {
+                return Array.Empty<string>();
+            }
         }
 
         private static IReadOnlyList<string> ExtractStringValues(
