@@ -496,94 +496,108 @@
                     </Grid>
                 </Grid>
 
-                <Border Grid.Row="2"
-                        Style="{StaticResource GlassCardBorderStyle}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="170"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock Grid.Row="0"
-                                   Grid.ColumnSpan="3"
-                                   Margin="0,0,0,10"
-                                   FontSize="14"
-                                   FontWeight="SemiBold"
-                                   Text="路径与状态"/>
-
-                        <TextBlock Grid.Row="1"
-                                   Grid.Column="0"
-                                   Margin="0,0,10,8"
-                                   FontWeight="SemiBold"
-                                   Text="工具目录"/>
-                        <TextBox Grid.Row="1"
-                                 Grid.Column="1"
-                                 Margin="0,0,10,8"
-                                 IsReadOnly="True"
-                                 Text="{Binding ToolDirectoryPath, Mode=OneWay}"/>
-                        <Button Grid.Row="1"
-                                Grid.Column="2"
-                                Margin="0,0,0,8"
-                                Command="{Binding OpenToolDirectoryCommand}"
-                                Content="打开"/>
-
-                        <TextBlock Grid.Row="2"
-                                   Grid.Column="0"
-                                   Margin="0,0,10,8"
-                                   FontWeight="SemiBold"
-                                   Text="图标目录"/>
-                        <TextBox Grid.Row="2"
-                                 Grid.Column="1"
-                                 Margin="0,0,10,8"
-                                 IsReadOnly="True"
-                                 Text="{Binding IconDirectoryPath, Mode=OneWay}"/>
-                        <Button Grid.Row="2"
-                                Grid.Column="2"
-                                Margin="0,0,0,8"
-                                Command="{Binding OpenIconDirectoryCommand}"
-                                Content="打开"/>
-
-                        <TextBlock Grid.Row="3"
-                                   Grid.Column="0"
-                                   Margin="0,0,10,8"
-                                   FontWeight="SemiBold"
-                                   Text="配置目录"/>
-                        <TextBox Grid.Row="3"
-                                 Grid.Column="1"
-                                 Margin="0,0,10,8"
-                                 IsReadOnly="True"
-                                 Text="{Binding ConfigurationDirectoryPath, Mode=OneWay}"/>
-                        <Button Grid.Row="3"
-                                Grid.Column="2"
-                                Margin="0,0,0,8"
-                                Command="{Binding OpenConfigurationDirectoryCommand}"
-                                Content="打开"/>
-
-                        <TextBlock Grid.Row="4"
-                                   Grid.Column="0"
-                                   Margin="0,0,10,0"
-                                   FontWeight="SemiBold"
-                                   Text="状态"/>
-                        <StackPanel Grid.Row="4"
-                                    Grid.Column="1"
-                                    Grid.ColumnSpan="2">
-                            <TextBox IsReadOnly="True"
-                                     Text="{Binding ConfigurationFilePath, Mode=OneWay}"/>
-                            <TextBlock Margin="0,8,0,0"
-                                       Foreground="#FFD3F6FF"
-                                       Text="{Binding StatusMessage}"
-                                       TextWrapping="Wrap"/>
+                <GroupBox Grid.Row="2"
+                          Header="工具集配置">
+                    <DockPanel Margin="10">
+                        <StackPanel DockPanel.Dock="Top"
+                                    Orientation="Horizontal"
+                                    Margin="0,0,0,10">
+                            <Button Width="120"
+                                    Command="{Binding AddToolKitCommand}"
+                                    Content="新增工具集"/>
+                            <Button Width="120"
+                                    Margin="8,0,0,0"
+                                    Command="{Binding RemoveToolKitCommand}"
+                                    Content="删除所选工具集"/>
                         </StackPanel>
-                    </Grid>
-                </Border>
+
+                        <TextBlock DockPanel.Dock="Top"
+                                   Margin="0,0,0,10"
+                                   Text="{Binding ToolKitSummaryText}"
+                                   TextWrapping="Wrap"/>
+
+                        <TextBlock DockPanel.Dock="Top"
+                                   Margin="0,0,0,10"
+                                   Foreground="#FFD3F6FF"
+                                   Text="{Binding StatusMessage}"
+                                   TextWrapping="Wrap"/>
+
+                        <ListView ItemsSource="{Binding ToolKits}"
+                                  SelectedItem="{Binding SelectedToolKit}"
+                                  Style="{StaticResource ConfigurationListViewStyle}"
+                                  ItemContainerStyle="{StaticResource ConfigurationListViewItemStyle}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource GlassCardBorderStyle}">
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal"
+                                                        Margin="0,0,0,8">
+                                                <TextBlock Width="72"
+                                                           VerticalAlignment="Center"
+                                                           Text="工具集名称"
+                                                           FontWeight="SemiBold"/>
+                                                <TextBox MinWidth="240"
+                                                         Text="{Binding Name, UpdateSourceTrigger=LostFocus}"/>
+                                                <Button Width="120"
+                                                        Margin="10,0,0,0"
+                                                        Command="{Binding DataContext.AddToolToToolKitCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        Content="添加工具"/>
+                                            </StackPanel>
+
+                                            <TextBlock Margin="0,0,0,8"
+                                                       Text="{Binding ManagementHint}"
+                                                       TextWrapping="Wrap"/>
+
+                                            <ListView ItemsSource="{Binding Tools}"
+                                                      Style="{StaticResource ConfigurationListViewStyle}"
+                                                      ItemContainerStyle="{StaticResource ConfigurationListViewItemStyle}">
+                                                <ListView.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Style="{StaticResource GlassCardBorderStyle}">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <ComboBox Grid.Column="0"
+                                                                          ItemsSource="{Binding DataContext.ToolKitEligibleTools, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                          DisplayMemberPath="Name"
+                                                                          SelectedValuePath="Name"
+                                                                          SelectedValue="{Binding ToolName, UpdateSourceTrigger=PropertyChanged}"/>
+                                                                <Button Grid.Column="1"
+                                                                        Width="60"
+                                                                        Margin="8,0,0,0"
+                                                                        Command="{Binding DataContext.MoveToolInToolKitUpCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                        CommandParameter="{Binding}"
+                                                                        Content="上移"/>
+                                                                <Button Grid.Column="2"
+                                                                        Width="60"
+                                                                        Margin="8,0,0,0"
+                                                                        Command="{Binding DataContext.MoveToolInToolKitDownCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                        CommandParameter="{Binding}"
+                                                                        Content="下移"/>
+                                                                <Button Grid.Column="3"
+                                                                        Width="60"
+                                                                        Margin="8,0,0,0"
+                                                                        Command="{Binding DataContext.RemoveToolFromToolKitCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                        CommandParameter="{Binding}"
+                                                                        Content="删除"/>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ListView.ItemTemplate>
+                                            </ListView>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </DockPanel>
+                </GroupBox>
             </Grid>
         </ScrollViewer>
     </Grid>

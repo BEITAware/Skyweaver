@@ -1,4 +1,5 @@
 using System.Xml.Linq;
+using Skyweaver.Controls.AgentConfigurationControl.Models;
 
 namespace Skyweaver.Services.SkyweaverTools
 {
@@ -19,6 +20,57 @@ namespace Skyweaver.Services.SkyweaverTools
 
         public SkyweaverToolConfigurationState? CurrentToolConfiguration { get; init; }
 
+        public AgentDefinition? CurrentAgent { get; init; }
+
+        public bool SupportsHostToolConfirmation { get; init; }
+
+        public IReadOnlyList<SkyweaverToolKitDefinition> AvailableToolKits { get; init; } =
+            Array.Empty<SkyweaverToolKitDefinition>();
+
+        public SkyweaverToolContext WithRuntimeAgent(
+            AgentDefinition? agent,
+            bool supportsHostToolConfirmation)
+        {
+            return new SkyweaverToolContext
+            {
+                ApplicationName = ApplicationName,
+                SessionTitle = SessionTitle,
+                WorkspacePath = WorkspacePath,
+                Timestamp = Timestamp,
+                Properties = CloneProperties(Properties),
+                CurrentToolName = CurrentToolName,
+                CurrentToolConfiguration = CurrentToolConfiguration == null
+                    ? null
+                    : new SkyweaverToolConfigurationState(
+                        CurrentToolConfiguration.ToolName,
+                        CurrentToolConfiguration.GetPayload()),
+                CurrentAgent = agent,
+                SupportsHostToolConfirmation = supportsHostToolConfirmation,
+                AvailableToolKits = CloneToolKits(AvailableToolKits)
+            };
+        }
+
+        public SkyweaverToolContext WithAvailableToolKits(IReadOnlyList<SkyweaverToolKitDefinition>? availableToolKits)
+        {
+            return new SkyweaverToolContext
+            {
+                ApplicationName = ApplicationName,
+                SessionTitle = SessionTitle,
+                WorkspacePath = WorkspacePath,
+                Timestamp = Timestamp,
+                Properties = CloneProperties(Properties),
+                CurrentToolName = CurrentToolName,
+                CurrentToolConfiguration = CurrentToolConfiguration == null
+                    ? null
+                    : new SkyweaverToolConfigurationState(
+                        CurrentToolConfiguration.ToolName,
+                        CurrentToolConfiguration.GetPayload()),
+                CurrentAgent = CurrentAgent,
+                SupportsHostToolConfirmation = SupportsHostToolConfirmation,
+                AvailableToolKits = CloneToolKits(availableToolKits)
+            };
+        }
+
         public SkyweaverToolContext WithCurrentToolConfiguration(string toolName, XElement? configuration)
         {
             var normalizedToolName = (toolName ?? string.Empty).Trim();
@@ -35,7 +87,10 @@ namespace Skyweaver.Services.SkyweaverTools
                 Timestamp = Timestamp,
                 Properties = CloneProperties(Properties),
                 CurrentToolName = normalizedToolName,
-                CurrentToolConfiguration = new SkyweaverToolConfigurationState(normalizedToolName, configuration)
+                CurrentToolConfiguration = new SkyweaverToolConfigurationState(normalizedToolName, configuration),
+                CurrentAgent = CurrentAgent,
+                SupportsHostToolConfirmation = SupportsHostToolConfirmation,
+                AvailableToolKits = CloneToolKits(AvailableToolKits)
             };
         }
 
@@ -44,6 +99,19 @@ namespace Skyweaver.Services.SkyweaverTools
             return properties.Count == 0
                 ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 : new Dictionary<string, string>(properties, StringComparer.OrdinalIgnoreCase);
+        }
+
+        private static IReadOnlyList<SkyweaverToolKitDefinition> CloneToolKits(
+            IReadOnlyList<SkyweaverToolKitDefinition>? toolKits)
+        {
+            if (toolKits == null || toolKits.Count == 0)
+            {
+                return Array.Empty<SkyweaverToolKitDefinition>();
+            }
+
+            return toolKits
+                .Select(toolKit => toolKit.DeepClone())
+                .ToArray();
         }
     }
 }

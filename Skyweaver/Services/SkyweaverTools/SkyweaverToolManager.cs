@@ -1210,6 +1210,8 @@ namespace Skyweaver.Services.SkyweaverTools
 
         public bool RequiresAgentPermission => Definition.RequiresAgentPermission;
 
+        public bool CanBelongToToolKit => Definition.CanBelongToToolKit;
+
         public bool HasCustomConfiguration => Tool is ISkyweaverToolConfigurationProvider;
 
         public bool HasCustomInvocationPresentation => Tool is ISkyweaverToolInvocationPresentationProvider;

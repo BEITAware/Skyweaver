@@ -11,7 +11,8 @@ namespace Skyweaver.Services.SkyweaverTools
             string description,
             string? iconName = null,
             IReadOnlyList<SkyweaverToolParameterDefinition>? parameters = null,
-            bool isSystemTool = false)
+            bool isSystemTool = false,
+            bool canBelongToToolKit = true)
         {
             var normalizedName = (name ?? string.Empty).Trim();
             if (normalizedName.Length == 0)
@@ -39,6 +40,7 @@ namespace Skyweaver.Services.SkyweaverTools
             IconName = string.IsNullOrWhiteSpace(iconName) ? null : iconName.Trim();
             Parameters = normalizedParameters;
             IsSystemTool = isSystemTool;
+            CanBelongToToolKit = !isSystemTool && canBelongToToolKit;
         }
 
         public string Name { get; }
@@ -50,6 +52,8 @@ namespace Skyweaver.Services.SkyweaverTools
         public IReadOnlyList<SkyweaverToolParameterDefinition> Parameters { get; }
 
         public bool IsSystemTool { get; }
+
+        public bool CanBelongToToolKit { get; }
 
         public bool CanUserDisable => !IsSystemTool;
 

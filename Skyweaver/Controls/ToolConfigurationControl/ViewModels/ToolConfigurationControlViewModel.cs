@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
@@ -110,6 +111,7 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
                     : registration.Definition.IconName!;
                 IconPath = registration.IconPath;
                 ImplementationTypeName = registration.ImplementationType.FullName ?? registration.ImplementationType.Name;
+                CanBelongToToolKit = registration.CanBelongToToolKit;
                 _isEnabled = registration.IsEnabled;
                 Parameters = new ObservableCollection<ToolParameterItemViewModel>(
                     registration.Definition.Parameters.Select(parameter => new ToolParameterItemViewModel(parameter)));
@@ -141,6 +143,8 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
             public string IconPath { get; }
 
             public string ImplementationTypeName { get; }
+
+            public bool CanBelongToToolKit { get; }
 
             public ObservableCollection<ToolParameterItemViewModel> Parameters { get; }
 
@@ -270,8 +274,10 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
         }
 
         private readonly SkyweaverToolManager _toolManager = new();
+        private readonly SkyweaverToolKitConfigurationRepository _toolKitRepository = new();
         private bool _isLoading;
         private ToolItemViewModel? _selectedTool;
+        private SkyweaverToolKitDefinition? _selectedToolKit;
         private string _statusMessage = string.Empty;
 
         public ToolConfigurationControlViewModel()
@@ -279,20 +285,29 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
             ReloadToolsCommand = new RelayCommand(LoadTools);
             EnableAllToolsCommand = new RelayCommand(() => SetAllToolsEnabled(true), () => Tools.Count > 0);
             DisableAllToolsCommand = new RelayCommand(() => SetAllToolsEnabled(false), () => Tools.Count > 0);
-            OpenToolDirectoryCommand = new RelayCommand(() => _toolManager.OpenDirectory(ToolDirectoryPath));
-            OpenIconDirectoryCommand = new RelayCommand(() => _toolManager.OpenDirectory(IconDirectoryPath));
-            OpenConfigurationDirectoryCommand = new RelayCommand(() => _toolManager.OpenDirectory(ConfigurationDirectoryPath));
+            AddToolKitCommand = new RelayCommand(AddToolKit);
+            RemoveToolKitCommand = new RelayCommand(RemoveSelectedToolKit, () => SelectedToolKit != null);
+            AddToolToToolKitCommand = new RelayCommand<SkyweaverToolKitDefinition>(AddToolToToolKit, toolKit => toolKit != null && ToolKitEligibleTools.Count > 0);
+            RemoveToolFromToolKitCommand = new RelayCommand<SkyweaverToolKitEntry>(RemoveToolFromToolKit, entry => entry != null);
+            MoveToolInToolKitUpCommand = new RelayCommand<SkyweaverToolKitEntry>(MoveToolInToolKitUp, CanMoveToolInToolKitUp);
+            MoveToolInToolKitDownCommand = new RelayCommand<SkyweaverToolKitEntry>(MoveToolInToolKitDown, CanMoveToolInToolKitDown);
 
+            Tools.CollectionChanged += OnToolsCollectionChanged;
+            ToolKits.CollectionChanged += OnToolKitsCollectionChanged;
+
+            LoadToolKits();
             LoadTools();
         }
 
         public string Title { get; } = "工具配置";
 
-        public string Description { get; } = "扫描 ISkyweaverTool 实现，展示运行时工具定义，并允许工具在宿主中挂载自己的配置面板。";
+        public string Description { get; } = "扫描 ISkyweaverTool 实现，展示运行时工具定义，并允许工具在宿主中挂载自己的配置面板与 ToolKit 编排。";
 
-        public string DiscoveryHint { get; } = "宿主统一保存启用状态与工具自定义配置；工具则可以按自己的方式提供 MVVM、动态定义和执行期配置读取。";
+        public string DiscoveryHint { get; } = "宿主统一保存启用状态、工具自定义配置与 ToolKit 结构；工具则可以按自己的方式提供 MVVM、动态定义、提示词描述和执行期配置读取。";
 
         public ObservableCollection<ToolItemViewModel> Tools { get; } = new();
+
+        public ObservableCollection<SkyweaverToolKitDefinition> ToolKits { get; } = new();
 
         public ToolItemViewModel? SelectedTool
         {
@@ -300,17 +315,40 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
             set => SetProperty(ref _selectedTool, value);
         }
 
-        public string ToolDirectoryPath => _toolManager.ToolDirectoryPath;
+        public SkyweaverToolKitDefinition? SelectedToolKit
+        {
+            get => _selectedToolKit;
+            set
+            {
+                if (SetProperty(ref _selectedToolKit, value))
+                {
+                    CommandManager.InvalidateRequerySuggested();
+                }
+            }
+        }
 
-        public string IconDirectoryPath => _toolManager.IconDirectoryPath;
-
-        public string ConfigurationDirectoryPath => _toolManager.ConfigurationDirectoryPath;
-
-        public string ConfigurationFilePath => _toolManager.ConfigurationFilePath;
+        public IReadOnlyList<ToolItemViewModel> ToolKitEligibleTools => Tools
+            .Where(tool => tool.CanBelongToToolKit)
+            .OrderBy(tool => tool.Name, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
 
         public string SummaryText => Tools.Count == 0
             ? "未发现工具。"
             : $"共发现 {Tools.Count} 个工具，已启用 {Tools.Count(tool => tool.IsEnabled)} 个，其中 {Tools.Count(tool => tool.HasCustomConfiguration)} 个带自定义配置。";
+
+        public string ToolKitSummaryText
+        {
+            get
+            {
+                if (ToolKits.Count == 0)
+                {
+                    return "当前尚未配置任何 ToolKit。加入 ToolKit 的工具不会在代理循环开始时默认提供给 LLM。";
+                }
+
+                var groupedToolCount = ToolKits.Sum(toolKit => toolKit.Tools.Count(tool => !string.IsNullOrWhiteSpace(tool.ToolName)));
+                return $"当前已配置 {ToolKits.Count} 个 ToolKit，累计包含 {groupedToolCount} 条工具引用。";
+            }
+        }
 
         public string StatusMessage
         {
@@ -326,11 +364,17 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
 
         public ICommand DisableAllToolsCommand { get; }
 
-        public ICommand OpenToolDirectoryCommand { get; }
+        public ICommand AddToolKitCommand { get; }
 
-        public ICommand OpenIconDirectoryCommand { get; }
+        public ICommand RemoveToolKitCommand { get; }
 
-        public ICommand OpenConfigurationDirectoryCommand { get; }
+        public ICommand AddToolToToolKitCommand { get; }
+
+        public ICommand RemoveToolFromToolKitCommand { get; }
+
+        public ICommand MoveToolInToolKitUpCommand { get; }
+
+        public ICommand MoveToolInToolKitDownCommand { get; }
 
         private void LoadTools()
         {
@@ -372,6 +416,40 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
             }
         }
 
+        private void LoadToolKits()
+        {
+            _isLoading = true;
+            var selectedToolKitKey = SelectedToolKit?.Key;
+
+            try
+            {
+                DisposeToolKits();
+                ToolKits.Clear();
+
+                foreach (var toolKit in _toolKitRepository.Load())
+                {
+                    AttachToolKit(toolKit);
+                    ToolKits.Add(toolKit);
+                }
+
+                SelectedToolKit = ToolKits.FirstOrDefault(toolKit =>
+                        string.Equals(toolKit.Key, selectedToolKitKey, StringComparison.OrdinalIgnoreCase))
+                    ?? ToolKits.FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                DisposeToolKits();
+                ToolKits.Clear();
+                SelectedToolKit = null;
+                StatusMessage = $"ToolKit 加载失败：{ex.Message}";
+            }
+            finally
+            {
+                _isLoading = false;
+                RefreshState();
+            }
+        }
+
         private void OnToolItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (_isLoading || sender is not ToolItemViewModel item)
@@ -384,7 +462,7 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
                 return;
             }
 
-            PersistConfiguration($"工具“{item.Name}”已{(item.IsEnabled ? "启用" : "禁用")}。");
+            PersistTools($"工具“{item.Name}”已{(item.IsEnabled ? "启用" : "禁用")}。");
         }
 
         private void OnToolItemCustomConfigurationChanged(object? sender, EventArgs e)
@@ -394,7 +472,7 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
                 return;
             }
 
-            PersistConfiguration($"工具“{item.Name}”的自定义配置已保存。");
+            PersistTools($"工具“{item.Name}”的自定义配置已保存。");
         }
 
         private void SetAllToolsEnabled(bool isEnabled)
@@ -418,10 +496,129 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
                 _isLoading = false;
             }
 
-            PersistConfiguration(isEnabled ? "已启用全部工具。" : "已禁用全部工具。");
+            PersistTools(isEnabled ? "已启用全部工具。" : "已禁用全部工具。");
         }
 
-        private void PersistConfiguration(string successMessage)
+        private void AddToolKit()
+        {
+            var toolKit = new SkyweaverToolKitDefinition
+            {
+                Name = $"ToolKit {ToolKits.Count + 1}"
+            };
+
+            AttachToolKit(toolKit);
+            ToolKits.Add(toolKit);
+            SelectedToolKit = toolKit;
+            PersistToolKits("ToolKit 已新增并保存。");
+        }
+
+        private void RemoveSelectedToolKit()
+        {
+            if (SelectedToolKit == null)
+            {
+                return;
+            }
+
+            DetachToolKit(SelectedToolKit);
+            ToolKits.Remove(SelectedToolKit);
+            SelectedToolKit = ToolKits.FirstOrDefault();
+            PersistToolKits("ToolKit 已删除并保存。");
+        }
+
+        private void AddToolToToolKit(SkyweaverToolKitDefinition? toolKit)
+        {
+            if (toolKit == null || ToolKitEligibleTools.Count == 0)
+            {
+                return;
+            }
+
+            var entry = new SkyweaverToolKitEntry
+            {
+                ToolName = ToolKitEligibleTools[0].Name
+            };
+
+            AttachToolKitEntry(entry);
+            toolKit.Tools.Add(entry);
+            PersistToolKits("ToolKit 中的工具顺序已保存。");
+        }
+
+        private void RemoveToolFromToolKit(SkyweaverToolKitEntry? entry)
+        {
+            if (entry == null)
+            {
+                return;
+            }
+
+            var toolKit = FindParentToolKit(entry);
+            if (toolKit == null)
+            {
+                return;
+            }
+
+            DetachToolKitEntry(entry);
+            toolKit.Tools.Remove(entry);
+            PersistToolKits("ToolKit 中的工具顺序已保存。");
+        }
+
+        private bool CanMoveToolInToolKitUp(SkyweaverToolKitEntry? entry)
+        {
+            var toolKit = entry == null ? null : FindParentToolKit(entry);
+            return toolKit != null && toolKit.Tools.IndexOf(entry!) > 0;
+        }
+
+        private void MoveToolInToolKitUp(SkyweaverToolKitEntry? entry)
+        {
+            if (entry == null)
+            {
+                return;
+            }
+
+            var toolKit = FindParentToolKit(entry);
+            if (toolKit == null)
+            {
+                return;
+            }
+
+            var index = toolKit.Tools.IndexOf(entry);
+            if (index <= 0)
+            {
+                return;
+            }
+
+            toolKit.Tools.Move(index, index - 1);
+            PersistToolKits("ToolKit 中的工具顺序已保存。");
+        }
+
+        private bool CanMoveToolInToolKitDown(SkyweaverToolKitEntry? entry)
+        {
+            var toolKit = entry == null ? null : FindParentToolKit(entry);
+            return toolKit != null && toolKit.Tools.IndexOf(entry!) < toolKit.Tools.Count - 1;
+        }
+
+        private void MoveToolInToolKitDown(SkyweaverToolKitEntry? entry)
+        {
+            if (entry == null)
+            {
+                return;
+            }
+
+            var toolKit = FindParentToolKit(entry);
+            if (toolKit == null)
+            {
+                return;
+            }
+
+            var index = toolKit.Tools.IndexOf(entry);
+            if (index < 0 || index >= toolKit.Tools.Count - 1)
+            {
+                return;
+            }
+
+            toolKit.Tools.Move(index, index + 1);
+            PersistToolKits("ToolKit 中的工具顺序已保存。");
+        }
+
+        private void PersistTools(string successMessage)
         {
             try
             {
@@ -438,6 +635,129 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
             }
         }
 
+        private void PersistToolKits(string successMessage)
+        {
+            if (_isLoading)
+            {
+                return;
+            }
+
+            try
+            {
+                _toolKitRepository.Save(ToolKits);
+                StatusMessage = successMessage;
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"保存 ToolKit 配置失败：{ex.Message}";
+            }
+            finally
+            {
+                RefreshState();
+            }
+        }
+
+        private void AttachToolKit(SkyweaverToolKitDefinition toolKit)
+        {
+            toolKit.PropertyChanged -= OnToolKitPropertyChanged;
+            toolKit.PropertyChanged += OnToolKitPropertyChanged;
+            toolKit.Tools.CollectionChanged -= OnToolKitEntriesCollectionChanged;
+            toolKit.Tools.CollectionChanged += OnToolKitEntriesCollectionChanged;
+
+            foreach (var entry in toolKit.Tools)
+            {
+                AttachToolKitEntry(entry);
+            }
+        }
+
+        private void DetachToolKit(SkyweaverToolKitDefinition toolKit)
+        {
+            toolKit.PropertyChanged -= OnToolKitPropertyChanged;
+            toolKit.Tools.CollectionChanged -= OnToolKitEntriesCollectionChanged;
+
+            foreach (var entry in toolKit.Tools)
+            {
+                DetachToolKitEntry(entry);
+            }
+        }
+
+        private void AttachToolKitEntry(SkyweaverToolKitEntry entry)
+        {
+            entry.PropertyChanged -= OnToolKitEntryPropertyChanged;
+            entry.PropertyChanged += OnToolKitEntryPropertyChanged;
+        }
+
+        private void DetachToolKitEntry(SkyweaverToolKitEntry entry)
+        {
+            entry.PropertyChanged -= OnToolKitEntryPropertyChanged;
+        }
+
+        private void OnToolKitPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            PersistToolKits("ToolKit 配置已保存。");
+        }
+
+        private void OnToolKitEntriesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+            {
+                foreach (SkyweaverToolKitEntry entry in e.NewItems)
+                {
+                    AttachToolKitEntry(entry);
+                }
+            }
+
+            if (e.OldItems != null)
+            {
+                foreach (SkyweaverToolKitEntry entry in e.OldItems)
+                {
+                    DetachToolKitEntry(entry);
+                }
+            }
+
+            PersistToolKits("ToolKit 配置已保存。");
+            CommandManager.InvalidateRequerySuggested();
+        }
+
+        private void OnToolKitEntryPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            PersistToolKits("ToolKit 配置已保存。");
+        }
+
+        private SkyweaverToolKitDefinition? FindParentToolKit(SkyweaverToolKitEntry entry)
+        {
+            return ToolKits.FirstOrDefault(toolKit => toolKit.Tools.Contains(entry));
+        }
+
+        private void OnToolsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(ToolKitEligibleTools));
+            RefreshState();
+        }
+
+        private void OnToolKitsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+            {
+                foreach (SkyweaverToolKitDefinition toolKit in e.NewItems)
+                {
+                    AttachToolKit(toolKit);
+                }
+            }
+
+            if (e.OldItems != null)
+            {
+                foreach (SkyweaverToolKitDefinition toolKit in e.OldItems)
+                {
+                    DetachToolKit(toolKit);
+                }
+            }
+
+            OnPropertyChanged(nameof(ToolKits));
+            OnPropertyChanged(nameof(ToolKitSummaryText));
+            CommandManager.InvalidateRequerySuggested();
+        }
+
         private void DisposeToolItems()
         {
             foreach (var existingItem in Tools)
@@ -448,10 +768,20 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
             }
         }
 
+        private void DisposeToolKits()
+        {
+            foreach (var toolKit in ToolKits)
+            {
+                DetachToolKit(toolKit);
+            }
+        }
+
         private void RefreshState()
         {
             OnPropertyChanged(nameof(HasTools));
             OnPropertyChanged(nameof(SummaryText));
+            OnPropertyChanged(nameof(ToolKitSummaryText));
+            OnPropertyChanged(nameof(ToolKitEligibleTools));
             CommandManager.InvalidateRequerySuggested();
         }
     }

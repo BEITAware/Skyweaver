@@ -7,28 +7,22 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
 {
     public sealed class AgentSystemPromptBuilder
     {
-        private sealed record PromptToolDefinition(
-            string Name,
-            string Description,
-            IReadOnlyList<SkyweaverToolParameterDefinition> Parameters,
-            bool RequiresHostConfirmation);
-
         private readonly AgentConfigurationRepository _configurationRepository;
-        private readonly SkyweaverToolManager _toolManager;
+        private readonly SkyweaverPromptToolCatalogService _promptToolCatalogService;
 
         public AgentSystemPromptBuilder()
             : this(
                 new AgentConfigurationRepository(new AgentConfigurationPathProvider()),
-                new SkyweaverToolManager())
+                new SkyweaverPromptToolCatalogService())
         {
         }
 
         public AgentSystemPromptBuilder(
             AgentConfigurationRepository configurationRepository,
-            SkyweaverToolManager toolManager)
+            SkyweaverPromptToolCatalogService promptToolCatalogService)
         {
             _configurationRepository = configurationRepository ?? throw new ArgumentNullException(nameof(configurationRepository));
-            _toolManager = toolManager ?? throw new ArgumentNullException(nameof(toolManager));
+            _promptToolCatalogService = promptToolCatalogService ?? throw new ArgumentNullException(nameof(promptToolCatalogService));
         }
 
         public string BuildCompleteSystemPrompt(string agentName)
@@ -53,14 +47,25 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
 
         public string BuildCompleteSystemPrompt(AgentDefinition agent)
         {
-            return BuildCompleteSystemPrompt(agent, supportsHostToolConfirmation: false);
+            return BuildCompleteSystemPrompt(
+                agent,
+                supportsHostToolConfirmation: false,
+                availableToolKits: null);
         }
 
-        public string BuildCompleteSystemPrompt(AgentDefinition agent, bool supportsHostToolConfirmation)
+        public string BuildCompleteSystemPrompt(
+            AgentDefinition agent,
+            bool supportsHostToolConfirmation,
+            IReadOnlyList<SkyweaverToolKitDefinition>? availableToolKits = null)
         {
             ArgumentNullException.ThrowIfNull(agent);
 
-            var externalTools = ResolveCallableTools(agent, supportsHostToolConfirmation);
+            var externalTools = _promptToolCatalogService.ResolveCallableTools(
+                agent,
+                supportsHostToolConfirmation,
+                activeToolKitKeys: null,
+                restrictToToolNames: null,
+                availableToolKits: availableToolKits);
             var builder = new StringBuilder(4096);
 
             AppendIdentitySection(builder, agent);
@@ -73,41 +78,6 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
 
             return builder.ToString().Trim();
         }
-
-        private List<PromptToolDefinition> ResolveCallableTools(
-            AgentDefinition agent,
-            bool supportsHostToolConfirmation)
-        {
-            var tools = new List<PromptToolDefinition>();
-
-            foreach (var registration in _toolManager.GetRegisteredTools(resolveIcons: false)
-                         .Where(item => item.RequiresAgentPermission)
-                         .OrderBy(item => item.Definition.Name, StringComparer.OrdinalIgnoreCase))
-            {
-                var decision = AgentToolPermissionEvaluator.Resolve(agent, registration);
-                switch (decision)
-                {
-                    case AgentToolEffectiveDecision.Allowed:
-                        tools.Add(new PromptToolDefinition(
-                            registration.Definition.Name,
-                            registration.Definition.Description,
-                            registration.Definition.Parameters,
-                            RequiresHostConfirmation: false));
-                        break;
-
-                    case AgentToolEffectiveDecision.RequiresUserConfirmation when supportsHostToolConfirmation:
-                        tools.Add(new PromptToolDefinition(
-                            registration.Definition.Name,
-                            registration.Definition.Description,
-                            registration.Definition.Parameters,
-                            RequiresHostConfirmation: true));
-                        break;
-                }
-            }
-
-            return tools;
-        }
-
         private static void AppendIdentitySection(StringBuilder builder, AgentDefinition agent)
         {
             builder.AppendLine("角色");
@@ -180,7 +150,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
 
         private static void AppendExternalToolSection(
             StringBuilder builder,
-            IReadOnlyList<PromptToolDefinition> tools,
+            IReadOnlyList<SkyweaverPromptToolDefinition> tools,
             bool supportsHostToolConfirmation)
         {
             builder.AppendLine("可调用外部工具");
@@ -194,33 +164,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
                 return;
             }
 
-            foreach (var tool in tools)
-            {
-                var toolDescription = NormalizeInline(tool.Description);
-                builder.AppendLine($"- {tool.Name}：{(toolDescription.Length == 0 ? "未提供说明。" : toolDescription)}");
-                builder.AppendLine(tool.RequiresHostConfirmation
-                    ? "  确认：执行前需要 Host 批准。"
-                    : "  确认：无需额外 Host 批准。");
-
-                if (tool.Parameters.Count == 0)
-                {
-                    builder.AppendLine("  参数：无。");
-                    continue;
-                }
-
-                builder.AppendLine("  参数：");
-                foreach (var parameter in tool.Parameters)
-                {
-                    var requirementText = parameter.IsRequired ? "必填" : "可选";
-                    var defaultText = string.IsNullOrWhiteSpace(parameter.DefaultValue)
-                        ? string.Empty
-                        : $" 默认值={parameter.DefaultValue}。";
-                    var parameterDescription = NormalizeInline(parameter.Description);
-                    builder.AppendLine(
-                        $"    - {parameter.Name}（{LocalizeParameterType(parameter.ParameterType)}，{requirementText}）：{(parameterDescription.Length == 0 ? "未提供说明。" : parameterDescription)}{defaultText}");
-                }
-            }
-
+            SkyweaverToolPromptSupport.AppendToolListing(builder, tools);
             builder.AppendLine();
         }
 
@@ -387,19 +331,6 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
             }
 
             builder.AppendLine($"{indent}</{elementName}>");
-        }
-
-        private static string LocalizeParameterType(SkyweaverToolParameterType parameterType)
-        {
-            return parameterType switch
-            {
-                SkyweaverToolParameterType.String => "文本",
-                SkyweaverToolParameterType.Boolean => "布尔",
-                SkyweaverToolParameterType.Integer => "整数",
-                SkyweaverToolParameterType.Number => "数值",
-                SkyweaverToolParameterType.Json => "JSON",
-                _ => parameterType.ToString()
-            };
         }
 
         private static string NormalizeInline(string? text)

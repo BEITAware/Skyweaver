@@ -1,6 +1,7 @@
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
+using Newtonsoft.Json.Linq;
 using Skyweaver.Controls.AgentConfigurationControl.Models;
 using Skyweaver.Controls.AgentConfigurationControl.Services;
 using Skyweaver.Controls.ChatSessionControl.Services;
@@ -58,7 +59,8 @@ namespace Skyweaver.Services.AgentLoop
             AgentAssistantResponse AssistantResponse,
             IReadOnlyList<AgentToolBackfill> ToolBackfills,
             AgentLoopFinalOutput? FinalOutput,
-            AgentLoopFinalOutput? LatestMessageOutput);
+            AgentLoopFinalOutput? LatestMessageOutput,
+            IReadOnlyList<string> NewlyLoadedToolKitKeys);
 
         private sealed class CreateMessageStreamingTracker
         {
@@ -206,6 +208,7 @@ namespace Skyweaver.Services.AgentLoop
         private readonly ILanguageModelChatService _chatService;
         private readonly SkyweaverToolManager _toolManager;
         private readonly AgentLoopContextManager _contextManager;
+        private readonly SkyweaverToolKitService _toolKitService;
 
         public AgentLoopService()
             : this(
@@ -213,7 +216,8 @@ namespace Skyweaver.Services.AgentLoop
                 new AgentLanguageModelResolver(),
                 new LanguageModelChatService(),
                 new SkyweaverToolManager(),
-                new AgentLoopContextManager())
+                new AgentLoopContextManager(),
+                new SkyweaverToolKitService())
         {
         }
 
@@ -222,13 +226,15 @@ namespace Skyweaver.Services.AgentLoop
             IAgentLanguageModelResolver languageModelResolver,
             ILanguageModelChatService chatService,
             SkyweaverToolManager toolManager,
-            AgentLoopContextManager contextManager)
+            AgentLoopContextManager contextManager,
+            SkyweaverToolKitService? toolKitService = null)
         {
             _systemPromptBuilder = systemPromptBuilder ?? throw new ArgumentNullException(nameof(systemPromptBuilder));
             _languageModelResolver = languageModelResolver ?? throw new ArgumentNullException(nameof(languageModelResolver));
             _chatService = chatService ?? throw new ArgumentNullException(nameof(chatService));
             _toolManager = toolManager ?? throw new ArgumentNullException(nameof(toolManager));
             _contextManager = contextManager ?? throw new ArgumentNullException(nameof(contextManager));
+            _toolKitService = toolKitService ?? new SkyweaverToolKitService();
         }
 
         public Task<AgentLoopResult> RunAsync(
@@ -255,9 +261,17 @@ namespace Skyweaver.Services.AgentLoop
             ArgumentNullException.ThrowIfNull(request);
             ValidateRequest(request);
 
+            var availableToolKits = _toolKitService.Load();
+            var toolKitMembershipMap = _toolKitService.BuildToolKitMembershipMap(availableToolKits);
+            var runtimeToolContext = request.ToolContext
+                .WithRuntimeAgent(
+                    request.Agent,
+                    request.ToolConfirmationCallback != null)
+                .WithAvailableToolKits(availableToolKits);
             var systemPrompt = _systemPromptBuilder.BuildCompleteSystemPrompt(
                 request.Agent,
-                supportsHostToolConfirmation: request.ToolConfirmationCallback != null);
+                supportsHostToolConfirmation: request.ToolConfirmationCallback != null,
+                availableToolKits: availableToolKits);
             var debugRunContext = AgentLoopDebugRecorder.TryCreateRunContext(request);
             AgentLoopDebugRecorder.RecordRunStart(debugRunContext, request, systemPrompt);
 
@@ -266,6 +280,7 @@ namespace Skyweaver.Services.AgentLoop
                 .ToList();
             var turnHistory = new List<LanguageModelChatMessage>();
             var iterations = new List<AgentLoopIteration>();
+            var activeToolKitKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             string? lastModelId = null;
             AgentLoopFinalOutput? latestMessageOutput = null;
             var consecutiveRecoverableFailures = 0;
@@ -326,6 +341,9 @@ namespace Skyweaver.Services.AgentLoop
                     response = await InvokeModelStreamingAsync(
                         request,
                         preparedSnapshot,
+                        runtimeToolContext,
+                        toolKitMembershipMap,
+                        activeToolKitKeys,
                         debugRunContext,
                         iterationNumber,
                         latestMessageOutput,
@@ -419,6 +437,11 @@ namespace Skyweaver.Services.AgentLoop
                     latestMessageOutput = response.LatestMessageOutput;
                 }
 
+                foreach (var toolKitKey in response.NewlyLoadedToolKitKeys)
+                {
+                    activeToolKitKeys.Add(toolKitKey);
+                }
+
                 AppendCurrentTurnHistory(
                     response.AssistantResponse,
                     response.ToolBackfills,
@@ -480,6 +503,9 @@ namespace Skyweaver.Services.AgentLoop
         private async Task<StreamedResponseResult> InvokeModelStreamingAsync(
             AgentLoopRequest request,
             AgentLoopPreparedRequestDebugSnapshot preparedSnapshot,
+            SkyweaverToolContext runtimeToolContext,
+            IReadOnlyDictionary<string, IReadOnlyList<string>> toolKitMembershipMap,
+            IReadOnlyCollection<string> activeToolKitKeys,
             AgentLoopDebugRunContext? debugRunContext,
             int iterationNumber,
             AgentLoopFinalOutput? latestMessageOutput,
@@ -648,6 +674,9 @@ namespace Skyweaver.Services.AgentLoop
                     var executionResult = await ExecuteAssistantToolTreeAsync(
                         request,
                         assistantResponse.GetToolCalls(),
+                        runtimeToolContext,
+                        toolKitMembershipMap,
+                        activeToolKitKeys,
                         iterationNumber,
                         modelId,
                         latestMessageOutput,
@@ -673,7 +702,8 @@ namespace Skyweaver.Services.AgentLoop
                         assistantResponse,
                         executionResult.ToolBackfills,
                         executionResult.FinalOutput,
-                        executionResult.LatestMessageOutput);
+                        executionResult.LatestMessageOutput,
+                        executionResult.NewlyLoadedToolKitKeys);
                 }
                 catch (OperationCanceledException)
                 {
@@ -769,10 +799,13 @@ namespace Skyweaver.Services.AgentLoop
             return builder.ToString(builder.Length - length, length);
         }
 
-        private async Task<(IReadOnlyList<AgentToolBackfill> ToolBackfills, AgentLoopFinalOutput? FinalOutput, AgentLoopFinalOutput? LatestMessageOutput)>
+        private async Task<(IReadOnlyList<AgentToolBackfill> ToolBackfills, AgentLoopFinalOutput? FinalOutput, AgentLoopFinalOutput? LatestMessageOutput, IReadOnlyList<string> NewlyLoadedToolKitKeys)>
             ExecuteAssistantToolTreeAsync(
                 AgentLoopRequest request,
                 IReadOnlyList<SkyweaverToolInvocation> invocations,
+                SkyweaverToolContext runtimeToolContext,
+                IReadOnlyDictionary<string, IReadOnlyList<string>> toolKitMembershipMap,
+                IReadOnlyCollection<string> activeToolKitKeys,
                 int iterationNumber,
                 string? modelId,
                 AgentLoopFinalOutput? latestMessageOutput,
@@ -781,6 +814,7 @@ namespace Skyweaver.Services.AgentLoop
         {
             var toolBackfills = new List<AgentToolBackfill>();
             var finishInvocations = new List<(int ToolCallIndex, SkyweaverToolInvocation Invocation)>();
+            var newlyLoadedToolKitKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var currentLatestMessageOutput = latestMessageOutput;
             const int partIndex = 0;
 
@@ -814,9 +848,21 @@ namespace Skyweaver.Services.AgentLoop
                     var toolReturns = await ExecuteAuthorizedInvocationsAsync(
                         request,
                         [invocation],
+                        runtimeToolContext,
+                        toolKitMembershipMap,
+                        activeToolKitKeys,
                         iterationNumber,
                         partIndex,
                         cancellationToken).ConfigureAwait(false);
+
+                    if (IsLoadToolKits(invocation.ToolName))
+                    {
+                        foreach (var toolKitKey in ExtractLoadedToolKitKeys(toolReturns))
+                        {
+                            newlyLoadedToolKitKeys.Add(toolKitKey);
+                        }
+                    }
+
                     backfill = CreateBackfill(partIndex, toolCallIndex, toolReturns);
                 }
 
@@ -858,7 +904,7 @@ namespace Skyweaver.Services.AgentLoop
 
             if (finishInvocations.Count == 0)
             {
-                return (toolBackfills, null, currentLatestMessageOutput);
+                return (toolBackfills, null, currentLatestMessageOutput, newlyLoadedToolKitKeys.ToArray());
             }
 
             if (finishInvocations.Count > 1)
@@ -889,7 +935,7 @@ namespace Skyweaver.Services.AgentLoop
                         cancellationToken).ConfigureAwait(false);
                 }
 
-                return (toolBackfills, null, currentLatestMessageOutput);
+                return (toolBackfills, null, currentLatestMessageOutput, newlyLoadedToolKitKeys.ToArray());
             }
 
             var finishInvocationCandidate = finishInvocations[0];
@@ -918,7 +964,7 @@ namespace Skyweaver.Services.AgentLoop
                     },
                     cancellationToken).ConfigureAwait(false);
 
-                return (toolBackfills, null, currentLatestMessageOutput);
+                return (toolBackfills, null, currentLatestMessageOutput, newlyLoadedToolKitKeys.ToArray());
             }
 
             if (currentLatestMessageOutput == null)
@@ -946,7 +992,7 @@ namespace Skyweaver.Services.AgentLoop
                     },
                     cancellationToken).ConfigureAwait(false);
 
-                return (toolBackfills, null, currentLatestMessageOutput);
+                return (toolBackfills, null, currentLatestMessageOutput, newlyLoadedToolKitKeys.ToArray());
             }
 
             var successBackfill = CreateBackfill(
@@ -985,7 +1031,7 @@ namespace Skyweaver.Services.AgentLoop
                 },
                 cancellationToken).ConfigureAwait(false);
 
-            return (toolBackfills, currentLatestMessageOutput, currentLatestMessageOutput);
+            return (toolBackfills, currentLatestMessageOutput, currentLatestMessageOutput, newlyLoadedToolKitKeys.ToArray());
         }
 
         private static async Task PublishStreamingToolCallUpdatesAsync(
@@ -1209,9 +1255,17 @@ namespace Skyweaver.Services.AgentLoop
             return string.Equals(toolName, FinishTaskTool.ToolName, StringComparison.OrdinalIgnoreCase);
         }
 
+        private static bool IsLoadToolKits(string toolName)
+        {
+            return string.Equals(toolName, LoadToolKitsTool.ToolName, StringComparison.OrdinalIgnoreCase);
+        }
+
         private async Task<IReadOnlyList<SkyweaverToolReturnPayload>> ExecuteAuthorizedInvocationsAsync(
             AgentLoopRequest request,
             IReadOnlyList<SkyweaverToolInvocation> invocations,
+            SkyweaverToolContext runtimeToolContext,
+            IReadOnlyDictionary<string, IReadOnlyList<string>> toolKitMembershipMap,
+            IReadOnlyCollection<string> activeToolKitKeys,
             int iterationNumber,
             int partIndex,
             CancellationToken cancellationToken)
@@ -1225,6 +1279,9 @@ namespace Skyweaver.Services.AgentLoop
                 var authorization = await AuthorizeToolInvocationAsync(
                     request,
                     invocation,
+                    runtimeToolContext,
+                    toolKitMembershipMap,
+                    activeToolKitKeys,
                     iterationNumber,
                     partIndex,
                     cancellationToken).ConfigureAwait(false);
@@ -1242,7 +1299,7 @@ namespace Skyweaver.Services.AgentLoop
                     var result = await _toolManager.ExecuteAsync(
                         invocation.ToolName,
                         invocation.RawArguments,
-                        request.ToolContext,
+                        runtimeToolContext,
                         request.Agent,
                         authorization.HasHostConfirmation,
                         cancellationToken).ConfigureAwait(false);
@@ -1266,6 +1323,9 @@ namespace Skyweaver.Services.AgentLoop
         private async Task<ToolExecutionAuthorization> AuthorizeToolInvocationAsync(
             AgentLoopRequest request,
             SkyweaverToolInvocation invocation,
+            SkyweaverToolContext runtimeToolContext,
+            IReadOnlyDictionary<string, IReadOnlyList<string>> toolKitMembershipMap,
+            IReadOnlyCollection<string> activeToolKitKeys,
             int iterationNumber,
             int partIndex,
             CancellationToken cancellationToken)
@@ -1287,6 +1347,27 @@ namespace Skyweaver.Services.AgentLoop
                     false,
                     false,
                     $"Tool '{invocation.ToolName}' is currently disabled.");
+            }
+
+            if (registration.Definition.CanBelongToToolKit &&
+                toolKitMembershipMap.TryGetValue(registration.Definition.Name, out var membershipKeys) &&
+                membershipKeys.Count > 0 &&
+                !membershipKeys.Any(activeToolKitKeys.Contains))
+            {
+                var toolKitNames = runtimeToolContext.AvailableToolKits
+                    .Where(toolKit => membershipKeys.Contains(toolKit.Key, StringComparer.OrdinalIgnoreCase))
+                    .Select(toolKit => string.IsNullOrWhiteSpace(toolKit.Name) ? toolKit.DisplayNameOrFallback : toolKit.Name)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
+                var toolKitHint = toolKitNames.Length == 0
+                    ? $"Load the containing toolkit first with {LoadToolKitsTool.ToolName}."
+                    : $"Load one of the containing toolkits first with {LoadToolKitsTool.ToolName}: {string.Join(", ", toolKitNames)}.";
+
+                return new ToolExecutionAuthorization(
+                    false,
+                    false,
+                    $"Tool '{invocation.ToolName}' is gated behind a toolkit and is not currently loaded. {toolKitHint}");
             }
 
             var permissionDecision = AgentToolPermissionEvaluator.Resolve(request.Agent, registration);
@@ -1512,6 +1593,47 @@ namespace Skyweaver.Services.AgentLoop
                 ToolCallIndex = toolCallIndex,
                 ToolReturns = toolReturns,
                 ToolsReturnXml = _toolManager.BuildToolsReturnXml(toolReturns)
+            };
+        }
+
+        private static IReadOnlyList<string> ExtractLoadedToolKitKeys(
+            IReadOnlyList<SkyweaverToolReturnPayload> toolReturns)
+        {
+            if (toolReturns.Count == 0)
+            {
+                return Array.Empty<string>();
+            }
+
+            return toolReturns
+                .Where(toolReturn =>
+                    toolReturn.IsSuccess &&
+                    string.Equals(toolReturn.ToolName, LoadToolKitsTool.ToolName, StringComparison.OrdinalIgnoreCase))
+                .SelectMany(toolReturn => ExtractStringValues(toolReturn.Result.Data, "loadedToolKitKeys"))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(item => item, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+        }
+
+        private static IReadOnlyList<string> ExtractStringValues(
+            IReadOnlyDictionary<string, object?> data,
+            string key)
+        {
+            if (!data.TryGetValue(key, out var value) || value == null)
+            {
+                return Array.Empty<string>();
+            }
+
+            return value switch
+            {
+                JArray array => array.Values<string>()
+                    .Where(item => !string.IsNullOrWhiteSpace(item))
+                    .Select(item => item!.Trim())
+                    .ToArray(),
+                IEnumerable<string> strings => strings
+                    .Where(item => !string.IsNullOrWhiteSpace(item))
+                    .Select(item => item.Trim())
+                    .ToArray(),
+                _ => Array.Empty<string>()
             };
         }
 
