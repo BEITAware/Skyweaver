@@ -8,7 +8,9 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
         private readonly ChatMessageModel _message;
         private readonly ToolInvocationPresentationService _toolInvocationPresentationService;
         private readonly Dictionary<ToolCallInstanceKey, ChatMessagePartModel> _toolParts = new();
+        private readonly Dictionary<ToolCallInstanceKey, ChatMessagePartModel> _toolOutputParts = new();
         private ChatMessagePartModel? _activeReplyPayloadPart;
+        private ChatMessagePartModel? _activeReasoningPart;
         private ChatMessagePartModel? _streamingTextPart;
 
         public ChatSessionMessageBuilder(
@@ -31,19 +33,34 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
             return part;
         }
 
+        public ChatMessagePartModel AppendReasoningDelta(string? textDelta)
+        {
+            if (string.IsNullOrEmpty(textDelta))
+            {
+                return _activeReasoningPart ?? EnsureReasoningPart();
+            }
+
+            var part = EnsureReasoningPart();
+            part.Content += textDelta;
+            return part;
+        }
+
         public ChatMessagePartModel AddToolCall(
             ToolCallInstanceKey toolCallKey,
             SkyweaverToolInvocation invocation,
-            bool isStreaming = false)
+            bool isStreaming = false,
+            string? toolCallId = null,
+            string? callerAgentId = null)
         {
             ArgumentNullException.ThrowIfNull(invocation);
 
             CompleteTextStreaming();
 
             var part = EnsureToolCallPart(toolCallKey, invocation.ToolName);
+            ApplyToolMetadata(part, toolCallId, callerAgentId);
             part.PartType = ChatMessagePartType.ToolCall;
             part.Title = invocation.ToolName;
-            part.BadgeText = "Tool Call";
+            part.BadgeText = "工具调用";
             part.IsStreaming = isStreaming;
             part.Content = invocation.InvocationXml;
             return part;
@@ -51,16 +68,19 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
 
         public ChatMessagePartModel AddOrUpdateToolCall(
             ToolCallInstanceKey toolCallKey,
-            SkyweaverStreamingToolCallSnapshot snapshot)
+            SkyweaverStreamingToolCallSnapshot snapshot,
+            string? toolCallId = null,
+            string? callerAgentId = null)
         {
             ArgumentNullException.ThrowIfNull(snapshot);
 
             CompleteTextStreaming();
 
             var part = EnsureToolCallPart(toolCallKey, snapshot.ToolName);
+            ApplyToolMetadata(part, toolCallId, callerAgentId);
             part.PartType = ChatMessagePartType.ToolCall;
             part.Title = snapshot.ToolName;
-            part.BadgeText = "Tool Call";
+            part.BadgeText = "工具调用";
             part.IsStreaming = true;
             part.Content = snapshot.ToolXmlFragment ?? string.Empty;
             part.ToolPresentationState?.ApplySnapshot(snapshot);
@@ -76,29 +96,53 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
             return part;
         }
 
-        public ChatMessagePartModel CompleteToolCall(ToolCallInstanceKey toolCallKey, string toolOutputXml)
+        public ChatMessagePartModel CompleteToolCall(
+            ToolCallInstanceKey toolCallKey,
+            string toolOutputXml,
+            string? toolCallId = null,
+            string? callerAgentId = null)
         {
             if (!_toolParts.TryGetValue(toolCallKey, out var part))
             {
-                part = ChatMessagePartModel.CreateToolOutput(
+                var fallbackOutputPart = ChatMessagePartModel.CreateToolOutput(
                     toolOutputXml,
                     $"Tool #{toolCallKey.ToolCallIndex}");
-                _toolParts[toolCallKey] = part;
-                _message.Parts.Add(part);
-                return part;
+                ApplyToolMetadata(fallbackOutputPart, toolCallId, callerAgentId);
+                _toolOutputParts[toolCallKey] = fallbackOutputPart;
+                _message.Parts.Add(fallbackOutputPart);
+                return fallbackOutputPart;
             }
 
-            part.PartType = ChatMessagePartType.ToolOutput;
-            part.BadgeText = "Tool Output";
+            ApplyToolMetadata(part, toolCallId, callerAgentId);
+            part.PartType = ChatMessagePartType.ToolCall;
+            part.BadgeText = "工具调用";
             part.IsStreaming = false;
-            part.Content = toolOutputXml ?? string.Empty;
-            return part;
+            if (part.ToolPresentationState != null)
+            {
+                part.ToolPresentationState.IsInvocationClosed = true;
+            }
+
+            var existingIndex = _message.Parts.IndexOf(part);
+            var outputPart = EnsureToolOutputPart(
+                toolCallKey,
+                string.IsNullOrWhiteSpace(part.Title)
+                    ? $"Tool #{toolCallKey.ToolCallIndex}"
+                    : part.Title,
+                existingIndex < 0 ? null : existingIndex + 1);
+            ApplyToolMetadata(outputPart, toolCallId, callerAgentId);
+            outputPart.PartType = ChatMessagePartType.ToolOutput;
+            outputPart.BadgeText = "工具输出";
+            outputPart.IsStreaming = false;
+            outputPart.Content = toolOutputXml ?? string.Empty;
+            return outputPart;
         }
 
         public ChatMessagePartModel AddMalformedToolCall(
             ToolCallInstanceKey toolCallKey,
             string content,
-            string? errorMessage)
+            string? errorMessage,
+            string? toolCallId = null,
+            string? callerAgentId = null)
         {
             CompleteTextStreaming();
 
@@ -108,15 +152,21 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
 
             if (_toolParts.TryGetValue(toolCallKey, out var part))
             {
+                ApplyToolMetadata(part, toolCallId, callerAgentId);
                 part.PartType = ChatMessagePartType.ToolOutput;
-                part.Title = "Tool Parse Error";
-                part.BadgeText = "Tool Output";
+                part.Title = "工具解析错误";
+                part.BadgeText = "工具输出";
                 part.IsStreaming = false;
+                part.IsUserVisible = true;
                 part.Content = normalizedContent;
                 return part;
             }
 
-            part = ChatMessagePartModel.CreateToolOutput(normalizedContent, "Tool Parse Error");
+            part = ChatMessagePartModel.CreateToolOutput(
+                normalizedContent,
+                "工具解析错误",
+                isUserVisible: true);
+            ApplyToolMetadata(part, toolCallId, callerAgentId);
             _toolParts[toolCallKey] = part;
             _message.Parts.Add(part);
             return part;
@@ -126,7 +176,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
         {
             CompleteTextStreaming();
 
-            var part = ChatMessagePartModel.CreateStructuredXml(xmlText, title ?? "Structured XML");
+            var part = ChatMessagePartModel.CreateStructuredXml(xmlText, title ?? "结构化 XML");
             _message.Parts.Add(part);
             return part;
         }
@@ -146,7 +196,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
             return AppendReplyPayloadDelta(
                 ChatMessagePartType.StructuredXml,
                 xmlText ?? string.Empty,
-                title ?? "Reply XML",
+                title ?? "回复 XML",
                 language: null,
                 badgeText: "XML");
         }
@@ -166,7 +216,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
             return CommitReplyPayload(
                 ChatMessagePartType.StructuredXml,
                 xmlText ?? string.Empty,
-                title ?? "Reply XML",
+                title ?? "回复 XML",
                 language: null,
                 badgeText: "XML");
         }
@@ -191,6 +241,17 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
 
             _activeReplyPayloadPart.IsStreaming = false;
             _activeReplyPayloadPart = null;
+        }
+
+        public void CompleteReasoningStreaming()
+        {
+            if (_activeReasoningPart == null)
+            {
+                return;
+            }
+
+            _activeReasoningPart.IsStreaming = false;
+            _activeReasoningPart = null;
         }
 
         public void ApplyStreamingPart(AssistantStreamingPart part)
@@ -225,14 +286,31 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
 
         public void FinalizeOpenToolCalls(string? message)
         {
-            foreach (var toolPart in _toolParts.Values
-                         .Distinct()
-                         .Where(part => part.PartType == ChatMessagePartType.ToolCall))
+            foreach (var item in _toolParts
+                         .Where(item => item.Value.PartType == ChatMessagePartType.ToolCall)
+                         .ToArray())
             {
-                toolPart.PartType = ChatMessagePartType.ToolOutput;
-                toolPart.BadgeText = "Tool Output";
+                var toolCallKey = item.Key;
+                var toolPart = item.Value;
+                var existingIndex = _message.Parts.IndexOf(toolPart);
+                toolPart.PartType = ChatMessagePartType.ToolCall;
+                toolPart.BadgeText = "工具调用";
                 toolPart.IsStreaming = false;
-                toolPart.Content = message ?? string.Empty;
+                if (toolPart.ToolPresentationState != null)
+                {
+                    toolPart.ToolPresentationState.IsInvocationClosed = true;
+                }
+
+                var outputPart = EnsureToolOutputPart(
+                    toolCallKey,
+                    string.IsNullOrWhiteSpace(toolPart.Title)
+                        ? $"Tool #{toolCallKey.ToolCallIndex}"
+                        : toolPart.Title,
+                    existingIndex < 0 ? null : existingIndex + 1);
+                outputPart.PartType = ChatMessagePartType.ToolOutput;
+                outputPart.BadgeText = "工具输出";
+                outputPart.IsStreaming = false;
+                outputPart.Content = message ?? string.Empty;
             }
         }
 
@@ -249,6 +327,19 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
             return _streamingTextPart;
         }
 
+        private ChatMessagePartModel EnsureReasoningPart()
+        {
+            if (_activeReasoningPart != null)
+            {
+                _activeReasoningPart.IsStreaming = true;
+                return _activeReasoningPart;
+            }
+
+            _activeReasoningPart = ChatMessagePartModel.CreateReasoning(string.Empty, isStreaming: true);
+            _message.Parts.Add(_activeReasoningPart);
+            return _activeReasoningPart;
+        }
+
         private ChatMessagePartModel EnsureToolCallPart(ToolCallInstanceKey toolCallKey, string? toolName)
         {
             if (_toolParts.TryGetValue(toolCallKey, out var existingPart))
@@ -262,6 +353,31 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
 
             _toolParts[toolCallKey] = part;
             _message.Parts.Add(part);
+            return part;
+        }
+
+        private ChatMessagePartModel EnsureToolOutputPart(
+            ToolCallInstanceKey toolCallKey,
+            string? title,
+            int? insertIndex = null)
+        {
+            if (_toolOutputParts.TryGetValue(toolCallKey, out var existingPart))
+            {
+                existingPart.Title = title;
+                return existingPart;
+            }
+
+            var part = ChatMessagePartModel.CreateToolOutput(string.Empty, title);
+            _toolOutputParts[toolCallKey] = part;
+            if (insertIndex is int index && index >= 0 && index <= _message.Parts.Count)
+            {
+                _message.Parts.Insert(index, part);
+            }
+            else
+            {
+                _message.Parts.Add(part);
+            }
+
             return part;
         }
 
@@ -286,6 +402,22 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
                 toolCallKey.ToolCallIndex,
                 toolName);
             part.AttachToolPresentation(handle.State, handle.View);
+        }
+
+        private static void ApplyToolMetadata(
+            ChatMessagePartModel part,
+            string? toolCallId,
+            string? callerAgentId)
+        {
+            if (!string.IsNullOrWhiteSpace(toolCallId))
+            {
+                part.ToolCallId = toolCallId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(callerAgentId))
+            {
+                part.CallerAgentId = callerAgentId;
+            }
         }
 
         private ChatMessagePartModel AppendReplyPayloadDelta(

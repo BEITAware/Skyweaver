@@ -1,24 +1,38 @@
 ﻿using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
 using Skyweaver.Controls.WorkflowEditorControl.Models;
-using Skyweaver.Models.ChatSession;
-
 namespace Skyweaver.Services.ChatSession
 {
     public sealed class ChatSessionConversationHistoryRecorder
     {
         private const string AssistantDisplayName = "Skyweaver Assistant";
 
-        private readonly ChatSessionModel _session;
+        private readonly IList<LanguageModelChatMessage> _conversationHistory;
         private readonly object _syncRoot = new();
 
-        public ChatSessionConversationHistoryRecorder(ChatSessionModel session, string currentUserText)
+        public ChatSessionConversationHistoryRecorder(
+            IList<LanguageModelChatMessage> conversationHistory,
+            string currentUserText,
+            IReadOnlyList<LanguageModelChatContentBlock>? currentUserContentBlocks = null)
         {
-            _session = session ?? throw new ArgumentNullException(nameof(session));
+            _conversationHistory = conversationHistory ?? throw new ArgumentNullException(nameof(conversationHistory));
 
             var normalizedUserText = NormalizeContent(currentUserText);
+            var userBlocks = new List<LanguageModelChatContentBlock>();
             if (normalizedUserText.Length > 0)
             {
-                AppendMessage(new LanguageModelChatMessage(LanguageModelChatRole.User, normalizedUserText));
+                userBlocks.Add(LanguageModelChatContentBlock.CreateText(normalizedUserText));
+            }
+
+            if (currentUserContentBlocks != null)
+            {
+                userBlocks.AddRange(currentUserContentBlocks
+                    .Where(block => block != null)
+                    .Select(block => block.Clone()));
+            }
+
+            if (userBlocks.Count > 0)
+            {
+                AppendMessage(new LanguageModelChatMessage(LanguageModelChatRole.User, userBlocks));
             }
         }
 
@@ -80,7 +94,7 @@ namespace Skyweaver.Services.ChatSession
 
         private void AppendMessage(LanguageModelChatMessage message)
         {
-            _session.ConversationHistory.Add(message);
+            _conversationHistory.Add(message);
         }
 
         private static string NormalizeContent(string? content)

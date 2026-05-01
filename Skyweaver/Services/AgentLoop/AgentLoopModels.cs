@@ -28,11 +28,12 @@ namespace Skyweaver.Services.AgentLoop
 
         public string Input { get; init; } = string.Empty;
 
+        public IReadOnlyList<LanguageModelChatContentBlock> InputContentBlocks { get; init; } =
+            Array.Empty<LanguageModelChatContentBlock>();
+
         public IReadOnlyList<LanguageModelChatMessage> History { get; init; } = Array.Empty<LanguageModelChatMessage>();
 
         public SkyweaverToolContext ToolContext { get; init; } = new();
-
-        public int MaxIterations { get; init; } = 12;
 
         public Func<AgentToolConfirmationRequest, CancellationToken, Task<AgentToolConfirmationResult>>? ToolConfirmationCallback { get; init; }
     }
@@ -262,16 +263,17 @@ namespace Skyweaver.Services.AgentLoop
     {
         IterationStarted = 0,
         TextDelta = 1,
-        AssistantToolTreeReceived = 2,
-        ToolCallStarted = 3,
-        ToolCallUpdated = 4,
-        MalformedToolCall = 5,
-        ToolOutputReceived = 6,
-        MessageCreated = 7,
-        RepairMessageGenerated = 8,
-        ContextCompressionApplied = 9,
-        FinalOutputProduced = 10,
-        IterationCompleted = 11
+        ReasoningDelta = 2,
+        AssistantToolTreeReceived = 3,
+        ToolCallStarted = 4,
+        ToolCallUpdated = 5,
+        MalformedToolCall = 6,
+        ToolOutputReceived = 7,
+        MessageCreated = 8,
+        RepairMessageGenerated = 9,
+        ContextCompressionApplied = 10,
+        FinalOutputProduced = 11,
+        IterationCompleted = 12
     }
 
     public sealed class AgentLoopRuntimeEvent
@@ -283,6 +285,8 @@ namespace Skyweaver.Services.AgentLoop
         public string? ModelId { get; init; }
 
         public string? TextDelta { get; init; }
+
+        public string? ReasoningDelta { get; init; }
 
         public AgentLoopOutputKind? TextDeltaOutputKind { get; init; }
 

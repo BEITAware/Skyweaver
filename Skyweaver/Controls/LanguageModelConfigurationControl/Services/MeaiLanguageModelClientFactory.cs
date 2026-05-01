@@ -1,5 +1,6 @@
 using System.ClientModel;
 using System.Collections;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Extensions.AI;
@@ -36,6 +37,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             return new LanguageModelChatResponse
             {
                 Text = SanitizeModelText(response.Text),
+                ReasoningText = ExtractReasoningText(response.Messages.SelectMany(message => message.Contents)),
                 ModelId = response.ModelId
             };
         }
@@ -97,12 +99,15 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
 
             var rawText = update.Text;
             var sanitizedText = SanitizeModelText(rawText);
+            var rawReasoningText = ExtractReasoningText(update.Contents);
+            var sanitizedReasoningText = SanitizeModelText(rawReasoningText);
             var rawRepresentation = update.RawRepresentation;
             var continuationToken = GetContinuationToken(update);
 
             return new LanguageModelStreamingChatUpdate
             {
                 TextDelta = sanitizedText,
+                ReasoningTextDelta = sanitizedReasoningText,
                 ModelId = NormalizeMetadataText(update.ModelId),
                 RawText = rawText,
                 WasTextSanitized = !string.Equals(rawText ?? string.Empty, sanitizedText, StringComparison.Ordinal),
@@ -127,6 +132,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
 
             return
                 !string.IsNullOrEmpty(update.TextDelta) ||
+                !string.IsNullOrEmpty(update.ReasoningTextDelta) ||
                 !string.IsNullOrEmpty(update.RawText) ||
                 update.WasTextSanitized ||
                 !string.IsNullOrWhiteSpace(update.ModelId) ||
@@ -166,7 +172,12 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             return new LanguageModelStreamingContentDebugItem
             {
                 ContentType = content.GetType().FullName ?? content.GetType().Name,
-                Text = content is TextContent textContent ? textContent.Text : null,
+                Text = content switch
+                {
+                    TextContent textContent => textContent.Text,
+                    TextReasoningContent reasoningContent => reasoningContent.Text,
+                    _ => null
+                },
                 Summary = DescribeContent(content),
                 RawRepresentationType = rawRepresentation?.GetType().FullName,
                 RawRepresentationSummary = DescribeDebugValue(rawRepresentation),
@@ -264,6 +275,11 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             if (content is TextContent textContent)
             {
                 return TruncateText(textContent.Text, 512);
+            }
+
+            if (content is TextReasoningContent reasoningContent)
+            {
+                return TruncateText(reasoningContent.Text, 512);
             }
 
             var rawRepresentationSummary = DescribeDebugValue(content.RawRepresentation);
@@ -413,7 +429,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 options.Seed = settings.Seed;
             }
 
-            if (settings.UseReasoningEffort)
+            if (settings.UseReasoningEffort || settings.UseReasoningOutput)
             {
                 var reasoningOptions = CreateReasoningOptions(settings);
                 if (reasoningOptions != null)
@@ -429,10 +445,138 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
         {
             ArgumentNullException.ThrowIfNull(message);
 
-            return new ChatMessage(ToSdkRole(message.Role), message.Content)
+            var sdkContents = BuildSdkContents(message);
+            var sdkMessage = sdkContents.Count == 0 || sdkContents.All(content => content is TextContent)
+                ? new ChatMessage(ToSdkRole(message.Role), message.Content)
+                : new ChatMessage(ToSdkRole(message.Role), sdkContents)
             {
                 AuthorName = message.AuthorName
             };
+
+            return sdkMessage;
+        }
+
+        private static IList<AIContent> BuildSdkContents(LanguageModelChatMessage message)
+        {
+            if (message.ContentBlocks.Count == 0)
+            {
+                return Array.Empty<AIContent>();
+            }
+
+            var contents = new List<AIContent>();
+            foreach (var block in message.ContentBlocks)
+            {
+                switch (block.Kind)
+                {
+                    case LanguageModelChatContentBlockKind.Text:
+                    case LanguageModelChatContentBlockKind.HostPreservedContent:
+                        if (!string.IsNullOrWhiteSpace(block.Content))
+                        {
+                            contents.Add(new TextContent(block.Content));
+                        }
+
+                        break;
+
+                    case LanguageModelChatContentBlockKind.Image:
+                    case LanguageModelChatContentBlockKind.Audio:
+                        if (TryCreateDataContent(block, out var dataContent) && dataContent != null)
+                        {
+                            contents.Add(dataContent);
+                        }
+                        else if (TryCreateUriContent(block, out var uriContent) && uriContent != null)
+                        {
+                            contents.Add(uriContent);
+                        }
+                        else if (!string.IsNullOrWhiteSpace(block.Content))
+                        {
+                            contents.Add(new TextContent(block.Content));
+                        }
+
+                        break;
+                }
+            }
+
+            return contents;
+        }
+
+        private static bool TryCreateDataContent(
+            LanguageModelChatContentBlock block,
+            out DataContent? dataContent)
+        {
+            dataContent = null;
+            var mediaType = NormalizeMediaType(block.MediaType, block.ResourcePath ?? block.Content, block.Kind);
+
+            if (block.Data is { Length: > 0 } bytes)
+            {
+                dataContent = new DataContent(bytes, mediaType);
+                return true;
+            }
+
+            var path = block.ResourcePath ?? block.Content;
+            if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            {
+                return false;
+            }
+
+            dataContent = new DataContent(File.ReadAllBytes(path), mediaType);
+            return true;
+        }
+
+        private static bool TryCreateUriContent(
+            LanguageModelChatContentBlock block,
+            out UriContent? uriContent)
+        {
+            uriContent = null;
+            var rawUri = block.ResourcePath ?? block.Content;
+            if (string.IsNullOrWhiteSpace(rawUri) ||
+                !Uri.TryCreate(rawUri.Trim(), UriKind.Absolute, out var uri) ||
+                uri.IsFile)
+            {
+                return false;
+            }
+
+            uriContent = new UriContent(
+                uri,
+                NormalizeMediaType(block.MediaType, rawUri, block.Kind));
+            return true;
+        }
+
+        private static string NormalizeMediaType(
+            string? mediaType,
+            string? pathOrUri,
+            LanguageModelChatContentBlockKind kind)
+        {
+            if (!string.IsNullOrWhiteSpace(mediaType))
+            {
+                return mediaType.Trim();
+            }
+
+            var extension = Path.GetExtension(pathOrUri ?? string.Empty).ToLowerInvariant();
+            return extension switch
+            {
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".gif" => "image/gif",
+                ".webp" => "image/webp",
+                ".bmp" => "image/bmp",
+                ".wav" => "audio/wav",
+                ".mp3" => "audio/mpeg",
+                ".m4a" => "audio/mp4",
+                ".ogg" => "audio/ogg",
+                _ => kind == LanguageModelChatContentBlockKind.Audio ? "audio/wav" : "image/png"
+            };
+        }
+
+        private static string ExtractReasoningText(IEnumerable<AIContent>? contents)
+        {
+            if (contents == null)
+            {
+                return string.Empty;
+            }
+
+            return string.Concat(
+                contents
+                    .OfType<TextReasoningContent>()
+                    .Select(content => content.Text ?? string.Empty));
         }
 
         private static ChatRole ToSdkRole(LanguageModelChatRole role)
@@ -490,15 +634,27 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
         private static ReasoningOptions? CreateReasoningOptions(MeaiLanguageModelSettings settings)
         {
             var effort = ParseReasoningEffort(settings.ReasoningEffort);
-            if (effort == null)
+            var output = settings.UseReasoningOutput
+                ? ParseReasoningOutput(settings.ReasoningOutput)
+                : null;
+
+            if (effort == null && output == null)
             {
                 return null;
             }
 
-            return new ReasoningOptions
+            var options = new ReasoningOptions();
+            if (effort != null)
             {
-                Effort = effort
-            };
+                options.Effort = effort;
+            }
+
+            if (output != null)
+            {
+                options.Output = output;
+            }
+
+            return options;
         }
 
         private static ReasoningEffort? ParseReasoningEffort(string? value)
@@ -510,6 +666,17 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 "HIGH" => ReasoningEffort.High,
                 "EXTRAHIGH" => ReasoningEffort.High,
                 "EXTRA_HIGH" => ReasoningEffort.High,
+                _ => null
+            };
+        }
+
+        private static ReasoningOutput? ParseReasoningOutput(string? value)
+        {
+            return (value ?? string.Empty).Trim().ToUpperInvariant() switch
+            {
+                "SUMMARY" => ReasoningOutput.Summary,
+                "FULL" => ReasoningOutput.Full,
+                "NONE" => ReasoningOutput.None,
                 _ => null
             };
         }

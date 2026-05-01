@@ -6,16 +6,20 @@ namespace Skyweaver.Windows
 {
     public partial class LateralFileSystemFolderDialog : Window
     {
+        private readonly bool _requiresSourcePath;
+
         public LateralFileSystemFolderDialog(
             string title,
             string promptText,
             string confirmButtonText,
             string? inheritedFromName = null,
             string initialName = "",
-            string initialSourcePath = "")
+            string initialSourcePath = "",
+            bool requiresSourcePath = true)
         {
             InitializeComponent();
 
+            _requiresSourcePath = requiresSourcePath;
             Title = title;
             PromptTextBlock.Text = promptText;
             ConfirmButton.Content = confirmButtonText;
@@ -26,6 +30,13 @@ namespace Skyweaver.Windows
             {
                 ParentHintTextBlock.Text = $"继承来源：{inheritedFromName}";
                 ParentHintTextBlock.Visibility = Visibility.Visible;
+            }
+
+            if (!_requiresSourcePath)
+            {
+                SourcePathLabel.Visibility = Visibility.Collapsed;
+                SourcePathPanel.Visibility = Visibility.Collapsed;
+                Height = 220;
             }
 
             Loaded += (_, _) =>
@@ -61,6 +72,12 @@ namespace Skyweaver.Windows
             if (string.IsNullOrWhiteSpace(FolderDisplayName))
             {
                 System.Windows.MessageBox.Show(this, "请输入侧向文件夹的显示名称。", Title, MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!_requiresSourcePath)
+            {
+                DialogResult = true;
                 return;
             }
 

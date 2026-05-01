@@ -1,4 +1,5 @@
 using System.Xml.Linq;
+using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
 
 namespace Skyweaver.Controls.WorkflowEditorControl.Models
 {
@@ -10,15 +11,21 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Models
 
     public sealed class SessionFlowPayload
     {
-        private SessionFlowPayload(SessionFlowPayloadKind kind, string content)
+        private SessionFlowPayload(
+            SessionFlowPayloadKind kind,
+            string content,
+            IEnumerable<LanguageModelChatContentBlock>? contentBlocks = null)
         {
             Kind = kind;
             Content = content ?? string.Empty;
+            ContentBlocks = NormalizeContentBlocks(contentBlocks);
         }
 
         public SessionFlowPayloadKind Kind { get; }
 
         public string Content { get; }
+
+        public IReadOnlyList<LanguageModelChatContentBlock> ContentBlocks { get; }
 
         public bool IsNaturalLanguage => Kind == SessionFlowPayloadKind.NaturalLanguage;
 
@@ -27,6 +34,16 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Models
         public static SessionFlowPayload FromNaturalLanguage(string text)
         {
             return new SessionFlowPayload(SessionFlowPayloadKind.NaturalLanguage, text ?? string.Empty);
+        }
+
+        public static SessionFlowPayload FromNaturalLanguage(
+            string text,
+            IEnumerable<LanguageModelChatContentBlock>? contentBlocks)
+        {
+            return new SessionFlowPayload(
+                SessionFlowPayloadKind.NaturalLanguage,
+                text ?? string.Empty,
+                contentBlocks);
         }
 
         public static SessionFlowPayload FromStructuredXml(string xmlText)
@@ -60,6 +77,20 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Models
             payload = new SessionFlowPayload(SessionFlowPayloadKind.NaturalLanguage, content ?? string.Empty);
             errorMessage = string.Empty;
             return true;
+        }
+
+        private static IReadOnlyList<LanguageModelChatContentBlock> NormalizeContentBlocks(
+            IEnumerable<LanguageModelChatContentBlock>? contentBlocks)
+        {
+            if (contentBlocks == null)
+            {
+                return Array.Empty<LanguageModelChatContentBlock>();
+            }
+
+            return contentBlocks
+                .Where(block => block != null)
+                .Select(block => block.Clone())
+                .ToArray();
         }
 
         private static bool TryNormalizeXml(

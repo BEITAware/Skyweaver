@@ -3,7 +3,6 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Models
     public sealed class MeaiLanguageModelSettings : LanguageModelInterfaceSettings
     {
         private static readonly string[] s_supportedReasoningEfforts = ["Low", "Medium", "High"];
-
         private string _modelId = string.Empty;
         private string _apiKey = string.Empty;
         private string _baseUrl = string.Empty;
@@ -21,6 +20,8 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Models
         private long _seed;
         private bool _useReasoningEffort;
         private string _reasoningEffort = "Medium";
+        private bool _useReasoningOutput = true;
+        private string _reasoningOutput = "Full";
 
         public override string InterfaceType => "MEAI";
 
@@ -146,6 +147,18 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Models
             set => SetProperty(ref _reasoningEffort, NormalizeReasoningEffort(value));
         }
 
+        public bool UseReasoningOutput
+        {
+            get => _useReasoningOutput;
+            set => SetProperty(ref _useReasoningOutput, true);
+        }
+
+        public string ReasoningOutput
+        {
+            get => _reasoningOutput;
+            set => SetProperty(ref _reasoningOutput, "Full");
+        }
+
         public override bool IsFullyConfigured =>
             !string.IsNullOrWhiteSpace(ModelId) &&
             !string.IsNullOrWhiteSpace(ApiKey) &&
@@ -171,5 +184,6 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Models
                 _ => "Medium"
             };
         }
+
     }
 }

@@ -120,7 +120,6 @@ namespace Skyweaver.Services.AgentLoop
                     GeneratedAtLocal = DateTimeOffset.Now,
                     Agent = BuildAgentRecord(request.Agent),
                     ToolContext = BuildToolContextRecord(request.ToolContext),
-                    MaxIterations = request.MaxIterations,
                     SupportsHostToolConfirmation = request.ToolConfirmationCallback != null,
                     InitialInput = request.Input ?? string.Empty,
                     SystemPrompt = systemPrompt ?? string.Empty,

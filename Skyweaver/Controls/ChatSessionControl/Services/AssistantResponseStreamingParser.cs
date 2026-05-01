@@ -142,7 +142,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
                         {
                             if (isFinal)
                             {
-                                completedParts.Add(CreateMalformedPart(_buffer.ToString(), "A <Tool> element is missing its closing </Tool> tag."));
+                                completedParts.Add(CreateMalformedPart(_buffer.ToString(), "<Tool> 元素缺少闭合的 </Tool> 标签。"));
                                 _buffer.Clear();
                             }
 
@@ -197,7 +197,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
                 {
                     if (isFinal && _buffer.Length > 0)
                     {
-                        completedParts.Add(CreateMalformedPart(_buffer.ToString(), "Tool invocation XML is incomplete."));
+                        completedParts.Add(CreateMalformedPart(_buffer.ToString(), "工具调用 XML 不完整。"));
                         _buffer.Clear();
                         _insideToolsBlock = false;
                     }
@@ -216,7 +216,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
                 {
                     if (isFinal)
                     {
-                        completedParts.Add(CreateMalformedPart(_buffer.ToString(), "A <Tool> element is missing its closing </Tool> tag."));
+                        completedParts.Add(CreateMalformedPart(_buffer.ToString(), "<Tool> 元素缺少闭合的 </Tool> 标签。"));
                         _buffer.Clear();
                         _insideToolsBlock = false;
                     }

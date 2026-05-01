@@ -1,5 +1,6 @@
 using System.Xml.Linq;
 using Skyweaver.Controls.AgentConfigurationControl.Models;
+using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
 using Skyweaver.Controls.WorkflowEditorControl.Models;
 using Skyweaver.Services.AgentLoop;
 
@@ -55,7 +56,9 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
                     return false;
                 }
 
-                payload = SessionFlowPortPayload.FromNaturalLanguage(nodePayload.Content);
+                payload = SessionFlowPortPayload.FromNaturalLanguage(
+                    nodePayload.Content,
+                    nodePayload.ContentBlocks);
                 return true;
             }
 
@@ -105,13 +108,30 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
             out string input,
             out string errorMessage)
         {
+            return TryBuildAgentInput(
+                agent,
+                inboundPayloads,
+                out input,
+                out _,
+                out errorMessage);
+        }
+
+        public bool TryBuildAgentInput(
+            AgentDefinition agent,
+            IEnumerable<(SessionFlowPortModel Port, SessionFlowPortPayload Payload)> inboundPayloads,
+            out string input,
+            out IReadOnlyList<LanguageModelChatContentBlock> inputContentBlocks,
+            out string errorMessage)
+        {
             ArgumentNullException.ThrowIfNull(agent);
 
             var bindings = NormalizeBindings(inboundPayloads);
+            inputContentBlocks = Array.Empty<LanguageModelChatContentBlock>();
 
             if (!agent.IsStructuredXmlIO)
             {
                 var textSegments = new List<string>();
+                var contentBlocks = new List<LanguageModelChatContentBlock>();
                 foreach (var binding in bindings)
                 {
                     if (!binding.Payload.IsNaturalLanguage)
@@ -126,9 +146,12 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
                     {
                         textSegments.Add(normalizedText);
                     }
+
+                    contentBlocks.AddRange(binding.Payload.ContentBlocks.Select(block => block.Clone()));
                 }
 
                 input = string.Join(Environment.NewLine + Environment.NewLine, textSegments);
+                inputContentBlocks = contentBlocks;
                 errorMessage = string.Empty;
                 return true;
             }
@@ -144,6 +167,10 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
             }
 
             input = payload!.Content;
+            inputContentBlocks = bindings
+                .SelectMany(binding => binding.Payload.ContentBlocks)
+                .Select(block => block.Clone())
+                .ToArray();
             return true;
         }
 

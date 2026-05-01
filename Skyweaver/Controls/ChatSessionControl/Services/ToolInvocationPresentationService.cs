@@ -1,5 +1,6 @@
-using System.Windows;
 using System.Linq;
+using System.Windows;
+using Skyweaver.Controls.ChatSessionControl.Models;
 using Skyweaver.Controls.ChatSessionControl.Views;
 using Skyweaver.Services.SkyweaverTools;
 
@@ -10,6 +11,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
         private const string DefaultToolIconPath = "pack://application:,,,/Resources/Script.png";
 
         private readonly Dictionary<string, SkyweaverToolRegistration> _registrations;
+        private readonly SkyweaverToolInvocationStreamingParser _streamingParser;
 
         public ToolInvocationPresentationService()
             : this(new SkyweaverToolManager())
@@ -20,14 +22,17 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
         {
             ArgumentNullException.ThrowIfNull(toolManager);
 
-            _registrations = toolManager.GetRegisteredTools()
+            var registrations = toolManager.GetRegisteredTools().ToArray();
+            _registrations = registrations
                 .ToDictionary(registration => registration.Definition.Name, StringComparer.OrdinalIgnoreCase);
+            _streamingParser = new SkyweaverToolInvocationStreamingParser(
+                registrations.Select(registration => registration.Definition));
         }
 
         public ToolInvocationPresentationHandle CreatePresentation(int toolCallIndex, string? toolName)
         {
             var normalizedToolName = string.IsNullOrWhiteSpace(toolName)
-                ? $"Tool #{toolCallIndex}"
+                ? $"工具 #{toolCallIndex}"
                 : toolName.Trim();
 
             if (_registrations.TryGetValue(normalizedToolName, out var registration))
@@ -58,8 +63,133 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
                 fallbackState,
                 ToolInvocationCardFactory.CreateDefault(
                     fallbackState,
-                    "该工具未提供专用参数呈现控件。",
+                    "此工具不提供自定义调用卡。",
                     DefaultToolIconPath));
+        }
+
+        public bool TryAttachPresentation(
+            ChatMessagePartModel part,
+            int? preferredToolCallIndex = null)
+        {
+            ArgumentNullException.ThrowIfNull(part);
+
+            if (part.PartType != ChatMessagePartType.ToolCall)
+            {
+                return false;
+            }
+
+            if (part.ToolPresentationState != null && part.ToolPresentationView != null)
+            {
+                return true;
+            }
+
+            var snapshot = TryParseSnapshot(part.Content);
+            var toolName = ResolveToolName(part, snapshot);
+            var toolCallIndex = ResolveToolCallIndex(preferredToolCallIndex, snapshot, part.ToolCallId);
+            var handle = CreatePresentation(toolCallIndex, toolName);
+            part.AttachToolPresentation(handle.State, handle.View);
+
+            if (snapshot != null)
+            {
+                handle.State.ApplySnapshot(snapshot, ResolveParameterDefinitions(snapshot.ToolName));
+            }
+            else
+            {
+                handle.State.RawToolXml = NormalizeXml(part.Content);
+                handle.State.IsInvocationClosed = !part.IsStreaming;
+            }
+
+            return true;
+        }
+
+        private SkyweaverStreamingToolCallSnapshot? TryParseSnapshot(string? content)
+        {
+            var normalizedContent = NormalizeXml(content);
+            if (normalizedContent.Length == 0)
+            {
+                return null;
+            }
+
+            return _streamingParser.Parse(normalizedContent).FirstOrDefault();
+        }
+
+        private IReadOnlyList<SkyweaverToolParameterDefinition>? ResolveParameterDefinitions(string? toolName)
+        {
+            if (string.IsNullOrWhiteSpace(toolName))
+            {
+                return null;
+            }
+
+            return _registrations.TryGetValue(toolName.Trim(), out var registration)
+                ? registration.Definition.Parameters
+                : null;
+        }
+
+        private static string? ResolveToolName(
+            ChatMessagePartModel part,
+            SkyweaverStreamingToolCallSnapshot? snapshot)
+        {
+            if (!string.IsNullOrWhiteSpace(snapshot?.ToolName))
+            {
+                return snapshot.ToolName.Trim();
+            }
+
+            return string.IsNullOrWhiteSpace(part.Title)
+                ? null
+                : part.Title.Trim();
+        }
+
+        private static int ResolveToolCallIndex(
+            int? preferredToolCallIndex,
+            SkyweaverStreamingToolCallSnapshot? snapshot,
+            string? toolCallId)
+        {
+            if (preferredToolCallIndex is > 0)
+            {
+                return preferredToolCallIndex.Value;
+            }
+
+            if (snapshot?.ToolCallIndex is > 0)
+            {
+                return snapshot.ToolCallIndex;
+            }
+
+            return TryParseToolCallIndex(toolCallId, out var parsedToolCallIndex)
+                ? parsedToolCallIndex
+                : 1;
+        }
+
+        private static bool TryParseToolCallIndex(string? toolCallId, out int toolCallIndex)
+        {
+            toolCallIndex = 0;
+            if (string.IsNullOrWhiteSpace(toolCallId))
+            {
+                return false;
+            }
+
+            var normalizedToolCallId = toolCallId.Trim();
+            var digitStartIndex = normalizedToolCallId.Length;
+            while (digitStartIndex > 0 && char.IsDigit(normalizedToolCallId[digitStartIndex - 1]))
+            {
+                digitStartIndex--;
+            }
+
+            if (digitStartIndex >= normalizedToolCallId.Length ||
+                !int.TryParse(normalizedToolCallId[digitStartIndex..], out toolCallIndex) ||
+                toolCallIndex <= 0)
+            {
+                toolCallIndex = 0;
+                return false;
+            }
+
+            return true;
+        }
+
+        private static string NormalizeXml(string? content)
+        {
+            return string.IsNullOrWhiteSpace(content)
+                ? string.Empty
+                : content.Trim();
         }
     }
 

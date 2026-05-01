@@ -179,11 +179,12 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
             builder.AppendLine("- **你当前必须使用 XML Tool Calling。每一次 assistant 响应都必须且只能输出一个完整的 <Tools> XML 文档。**");
             builder.AppendLine("- **不要在 XML 树之外输出任何自然语言、解释、前后缀、Markdown 代码块或其他包裹内容。**");
             builder.AppendLine("- **不要输出多个 XML 根节点，也不要输出 <tool_call>、<function_call> 之类的伪包装标签。**");
-            builder.AppendLine("- **根节点必须是 <Tools>，并且其中至少包含一个 <Tool> 子节点。**");
+            builder.AppendLine("- **根节点必须是 <Tools>，并且其中至少包含一个 <Tool> 子节点。允许包含多个 <Tool> 子节点，工具调用会逐个实施。**");
             builder.AppendLine("- **一旦决定调用工具，就直接输出最终的 <Tools> XML 树，不要先写分析、说明或中间文本。**");
-            builder.AppendLine("- Tool 调用会按顺序执行。");
+            builder.AppendLine("- Tool 调用会按顺序执行。不支持动态数据绑定。你可以进行典型的 查看-编辑 工作流，即在多个代理轮次内操作不同的工具。");
             builder.AppendLine("- **如果你的响应不是单一且有效的 <Tools> XML 树，或者其中没有任何 Tool 调用，Host 会立即中止当前循环。**");
             builder.AppendLine("- 调用工具时，请把 <Tools> 视为唯一合法的顶层输出容器。");
+            builder.AppendLine($"- **非常重要：如果要在工具调用过程中给用户发送消息或补充说明，请务必使用 {CreateMessageTool.ToolName} ，而非在 <Tools> XML树外添加任何自然语言文本。**");
             builder.AppendLine("- 标准形态：");
             builder.AppendLine("  <Tools>");
             builder.AppendLine("    <Tool ToolName=\"ToolName\">");

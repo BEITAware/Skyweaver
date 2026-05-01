@@ -13,7 +13,11 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
         private string? _title;
         private string? _language;
         private string? _badgeText;
+        private string? _toolCallId;
+        private string? _callerAgentId;
+        private string? _resourcePath;
         private bool _isStreaming;
+        private bool _isUserVisible;
         private SkyweaverToolInvocationPresentationState? _toolPresentationState;
         private FrameworkElement? _toolPresentationView;
 
@@ -53,6 +57,12 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
             set => SetProperty(ref _isStreaming, value);
         }
 
+        public bool IsUserVisible
+        {
+            get => _isUserVisible;
+            set => SetProperty(ref _isUserVisible, value);
+        }
+
         public string? Title
         {
             get => _title;
@@ -63,6 +73,24 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
         {
             get => _language;
             set => SetProperty(ref _language, value);
+        }
+
+        public string? ToolCallId
+        {
+            get => _toolCallId;
+            set => SetProperty(ref _toolCallId, NormalizeMetadataValue(value));
+        }
+
+        public string? CallerAgentId
+        {
+            get => _callerAgentId;
+            set => SetProperty(ref _callerAgentId, NormalizeMetadataValue(value));
+        }
+
+        public string? ResourcePath
+        {
+            get => _resourcePath;
+            set => SetProperty(ref _resourcePath, NormalizeMetadataValue(value));
         }
 
         public ObservableCollection<ChatStructuredXmlNodeModel> StructuredXmlNodes { get; } = new();
@@ -87,7 +115,11 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
             string? title = null,
             string? language = null,
             string? badgeText = null,
-            bool isStreaming = false)
+            bool isStreaming = false,
+            string? toolCallId = null,
+            string? callerAgentId = null,
+            string? resourcePath = null,
+            bool isUserVisible = true)
         {
             _partType = partType;
             _content = content;
@@ -95,6 +127,10 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
             _language = language;
             _badgeText = badgeText;
             _isStreaming = isStreaming;
+            _isUserVisible = isUserVisible;
+            _toolCallId = NormalizeMetadataValue(toolCallId);
+            _callerAgentId = NormalizeMetadataValue(callerAgentId);
+            _resourcePath = NormalizeMetadataValue(resourcePath);
             StructuredXmlNodes.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasStructuredXmlNodes));
             RebuildStructuredXmlNodes();
         }
@@ -126,17 +162,47 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
 
         public static ChatMessagePartModel CreateToolCall(string content, string? title = null, bool isStreaming = false)
         {
-            return new ChatMessagePartModel(ChatMessagePartType.ToolCall, content, title, badgeText: "Tool Call", isStreaming: isStreaming);
+            return new ChatMessagePartModel(ChatMessagePartType.ToolCall, content, title, badgeText: "工具调用", isStreaming: isStreaming);
         }
 
-        public static ChatMessagePartModel CreateToolOutput(string content, string? title = null, bool isStreaming = false)
+        public static ChatMessagePartModel CreateToolOutput(
+            string content,
+            string? title = null,
+            bool isStreaming = false,
+            bool isUserVisible = false)
         {
-            return new ChatMessagePartModel(ChatMessagePartType.ToolOutput, content, title, badgeText: "Tool Output", isStreaming: isStreaming);
+            return new ChatMessagePartModel(
+                ChatMessagePartType.ToolOutput,
+                content,
+                title,
+                badgeText: "工具输出",
+                isStreaming: isStreaming,
+                isUserVisible: isUserVisible);
         }
 
         public static ChatMessagePartModel CreateStructuredXml(string xmlText, string? title = null)
         {
             return new ChatMessagePartModel(ChatMessagePartType.StructuredXml, xmlText, title, badgeText: "XML");
+        }
+
+        public static ChatMessagePartModel CreateImage(string path, string? title = null)
+        {
+            return new ChatMessagePartModel(ChatMessagePartType.Image, path, title, badgeText: "图片", resourcePath: path);
+        }
+
+        public static ChatMessagePartModel CreateAudio(string path, string? title = null)
+        {
+            return new ChatMessagePartModel(ChatMessagePartType.Audio, path, title, badgeText: "音频", resourcePath: path);
+        }
+
+        public static ChatMessagePartModel CreateReasoning(string content, string? title = null, bool isStreaming = false)
+        {
+            return new ChatMessagePartModel(
+                ChatMessagePartType.Reasoning,
+                content,
+                title ?? "推理过程",
+                badgeText: "推理过程",
+                isStreaming: isStreaming);
         }
 
         public void AttachToolPresentation(
@@ -197,6 +263,11 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
             }
 
             return node;
+        }
+
+        private static string? NormalizeMetadataValue(string? value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
         }
     }
 }

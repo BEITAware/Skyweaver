@@ -8,7 +8,7 @@ namespace Skyweaver.Tools
 
         private static readonly SkyweaverToolDefinition s_definition = new(
             ToolName,
-            "Create the assistant reply payload for the current turn. Put the reply content directly inside <Tool ToolName=\"CreateMessage\">...</Tool>. This tool does not end the loop. Call FinishTask after the latest successful CreateMessage when the turn is ready to close.",
+            "Create the assistant reply payload for the current turn. Put the reply content directly inside <Tool ToolName=\"CreateMessage\">...</Tool>. This tool does not terminate the agent loop. To end the entire loop, you must call FinishTask after a successful CreateMessage. If FinishTask is not called, the system will automatically initiate the next turn.",
             "GuideBot",
             parameters: [],
             isSystemTool: true);

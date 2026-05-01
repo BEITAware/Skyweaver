@@ -444,7 +444,9 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
                     UseSeed = meai.UseSeed,
                     Seed = meai.Seed,
                     UseReasoningEffort = meai.UseReasoningEffort,
-                    ReasoningEffort = meai.ReasoningEffort
+                    ReasoningEffort = meai.ReasoningEffort,
+                    UseReasoningOutput = meai.UseReasoningOutput,
+                    ReasoningOutput = meai.ReasoningOutput
                 },
                 _ => LanguageModelDefinition.CreateInterfaceSettings(source.InterfaceType)
             };

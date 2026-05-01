@@ -241,7 +241,9 @@ namespace Skyweaver.Services.ChatSession
             var isPayloadAlreadyPresented = false;
             if (naturalLanguageBinding != null)
             {
-                payload = SessionFlowPayload.FromNaturalLanguage(naturalLanguageBinding.Payload.Content);
+                payload = SessionFlowPayload.FromNaturalLanguage(
+                    naturalLanguageBinding.Payload.Content,
+                    naturalLanguageBinding.Payload.ContentBlocks);
                 isPayloadAlreadyPresented = naturalLanguageBinding.IsAlreadyPresented;
             }
             else if (xmlBinding != null)
@@ -297,6 +299,7 @@ namespace Skyweaver.Services.ChatSession
                     agent,
                     deliveredBindings.Select(binding => (binding.Port, binding.Payload)),
                     out var agentInput,
+                    out var agentInputContentBlocks,
                     out var errorMessage))
             {
                 throw CreateExecutionError(compiledNode, errorMessage);
@@ -306,17 +309,28 @@ namespace Skyweaver.Services.ChatSession
                 request,
                 compiledNode,
                 agent,
-                agentInput);
+                agentInput,
+                agentInputContentBlocks);
 
+            var reservedToolCallIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var toolCallIdsByKey = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             var agentResult = await _agentExecutor.ExecuteAsync(
                 new SessionFlowAgentExecutionRequest
                 {
                     Agent = agent.DeepClone(),
                     Input = agentInput,
-                    History = request.ConversationHistory,
+                    InputContentBlocks = agentInputContentBlocks,
+                    History = request.ConversationHistory.ToArray(),
                     ToolContext = BuildToolContext(request),
                     ToolConfirmationCallback = request.ToolConfirmationCallback,
-                    EventSink = (update, ct) => PublishAgentLoopUpdateAsync(request, compiledNode, update, onEventAsync, ct)
+                    EventSink = (update, ct) => PublishAgentLoopUpdateAsync(
+                        request,
+                        compiledNode,
+                        update,
+                        toolCallIdsByKey,
+                        reservedToolCallIds,
+                        onEventAsync,
+                        ct)
                 },
                 cancellationToken).ConfigureAwait(false);
 
@@ -628,25 +642,94 @@ namespace Skyweaver.Services.ChatSession
             SessionFlowExecutionRequest request,
             SessionFlowCompiledNode compiledNode,
             AgentDefinition agent,
-            string agentInput)
+            string agentInput,
+            IReadOnlyList<LanguageModelChatContentBlock>? agentInputContentBlocks)
         {
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(compiledNode);
             ArgumentNullException.ThrowIfNull(agent);
 
             var normalizedInput = NormalizeConversationHistoryContent(agentInput);
-            if (normalizedInput.Length == 0)
+            var contentBlocks = new List<LanguageModelChatContentBlock>();
+            if (normalizedInput.Length > 0)
+            {
+                contentBlocks.Add(LanguageModelChatContentBlock.CreateText(normalizedInput));
+            }
+
+            if (agentInputContentBlocks != null)
+            {
+                contentBlocks.AddRange(agentInputContentBlocks
+                    .Where(block => block != null)
+                    .Select(block => block.Clone()));
+            }
+
+            if (contentBlocks.Count == 0)
             {
                 return;
             }
 
-            request.Session.ConversationHistory.Add(new LanguageModelChatMessage(
+            if (request.ConversationHistory.Count > 0 &&
+                IsSameUserPayload(request.ConversationHistory[^1], contentBlocks))
+            {
+                return;
+            }
+
+            request.ConversationHistory.Add(new LanguageModelChatMessage(
                 LanguageModelChatRole.User,
-                normalizedInput)
+                contentBlocks)
             {
                 AuthorName = NormalizeConversationHistoryAuthor(compiledNode.Node.Title)
                     ?? NormalizeConversationHistoryAuthor(agent.DisplayNameOrFallback)
             });
+        }
+
+        private static bool IsSameUserPayload(
+            LanguageModelChatMessage candidate,
+            IReadOnlyList<LanguageModelChatContentBlock> contentBlocks)
+        {
+            return candidate.Role == LanguageModelChatRole.User &&
+                   AreContentBlocksEquivalent(candidate.ContentBlocks, contentBlocks);
+        }
+
+        private static bool AreContentBlocksEquivalent(
+            IReadOnlyList<LanguageModelChatContentBlock> left,
+            IReadOnlyList<LanguageModelChatContentBlock> right)
+        {
+            if (left.Count != right.Count)
+            {
+                return false;
+            }
+
+            for (var index = 0; index < left.Count; index++)
+            {
+                if (!AreContentBlocksEquivalent(left[index], right[index]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool AreContentBlocksEquivalent(
+            LanguageModelChatContentBlock left,
+            LanguageModelChatContentBlock right)
+        {
+            return left.Kind == right.Kind &&
+                   string.Equals(NormalizeConversationHistoryContent(left.Content), NormalizeConversationHistoryContent(right.Content), StringComparison.Ordinal) &&
+                   string.Equals(NormalizeConversationHistoryContent(left.ResourcePath), NormalizeConversationHistoryContent(right.ResourcePath), StringComparison.Ordinal) &&
+                   string.Equals(NormalizeConversationHistoryContent(left.MediaType), NormalizeConversationHistoryContent(right.MediaType), StringComparison.OrdinalIgnoreCase) &&
+                   AreByteArraysEquivalent(left.Data, right.Data);
+        }
+
+        private static bool AreByteArraysEquivalent(byte[]? left, byte[]? right)
+        {
+            if (left == null || left.Length == 0)
+            {
+                return right == null || right.Length == 0;
+            }
+
+            return right != null && left.SequenceEqual(right);
         }
 
         private static string NormalizeConversationHistoryContent(string? content)
@@ -686,9 +769,13 @@ namespace Skyweaver.Services.ChatSession
             SessionFlowExecutionRequest request,
             SessionFlowCompiledNode compiledNode,
             AgentLoopRuntimeEvent update,
+            IDictionary<string, string> toolCallIdsByKey,
+            ISet<string> reservedToolCallIds,
             Func<ChatSessionRuntimeEvent, CancellationToken, ValueTask>? onEventAsync,
             CancellationToken cancellationToken)
         {
+            var toolCallId = ResolveToolCallId(request, update, toolCallIdsByKey, reservedToolCallIds);
+
             ChatSessionRuntimeEvent? runtimeEvent = update.Kind switch
             {
                 AgentLoopRuntimeEventKind.IterationStarted => CreateRuntimeEvent(
@@ -713,6 +800,13 @@ namespace Skyweaver.Services.ChatSession
                     modelId: update.ModelId,
                     textDelta: update.TextDelta,
                     textDeltaOutputKind: update.TextDeltaOutputKind),
+                AgentLoopRuntimeEventKind.ReasoningDelta => CreateRuntimeEvent(
+                    request,
+                    ChatSessionRuntimeEventKind.ReasoningDelta,
+                    compiledNode,
+                    iterationNumber: update.IterationNumber,
+                    modelId: update.ModelId,
+                    reasoningDelta: update.ReasoningDelta),
                 AgentLoopRuntimeEventKind.AssistantToolTreeReceived => CreateRuntimeEvent(
                     request,
                     ChatSessionRuntimeEventKind.AssistantToolTreeReceived,
@@ -728,6 +822,7 @@ namespace Skyweaver.Services.ChatSession
                     modelId: update.ModelId,
                     partIndex: update.PartIndex,
                     toolCallIndex: update.ToolCallIndex,
+                    toolCallId: toolCallId,
                     toolCallSnapshot: update.ToolCallSnapshot,
                     toolXml: update.ToolXml),
                 AgentLoopRuntimeEventKind.ToolCallUpdated => CreateRuntimeEvent(
@@ -738,6 +833,7 @@ namespace Skyweaver.Services.ChatSession
                     modelId: update.ModelId,
                     partIndex: update.PartIndex,
                     toolCallIndex: update.ToolCallIndex,
+                    toolCallId: toolCallId,
                     toolCallSnapshot: update.ToolCallSnapshot,
                     toolInvocation: update.ToolInvocation,
                     toolXml: update.ToolXml),
@@ -750,6 +846,7 @@ namespace Skyweaver.Services.ChatSession
                     modelId: update.ModelId,
                     partIndex: update.PartIndex,
                     toolCallIndex: update.ToolCallIndex,
+                    toolCallId: toolCallId,
                     toolXml: update.ToolXml),
                 AgentLoopRuntimeEventKind.ToolOutputReceived => CreateRuntimeEvent(
                     request,
@@ -759,6 +856,7 @@ namespace Skyweaver.Services.ChatSession
                     modelId: update.ModelId,
                     partIndex: update.PartIndex,
                     toolCallIndex: update.ToolCallIndex,
+                    toolCallId: toolCallId,
                     toolInvocation: update.ToolInvocation,
                     toolOutputXml: update.ToolOutputXml,
                     toolReturns: update.ToolReturns),
@@ -807,6 +905,28 @@ namespace Skyweaver.Services.ChatSession
             }
         }
 
+        private static string? ResolveToolCallId(
+            SessionFlowExecutionRequest request,
+            AgentLoopRuntimeEvent update,
+            IDictionary<string, string> toolCallIdsByKey,
+            ISet<string> reservedToolCallIds)
+        {
+            if (update.ToolCallIndex is not int toolCallIndex)
+            {
+                return null;
+            }
+
+            var key = $"{update.IterationNumber}:{update.PartIndex ?? 0}:{toolCallIndex}";
+            if (toolCallIdsByKey.TryGetValue(key, out var existingId))
+            {
+                return existingId;
+            }
+
+            var toolCallId = ChatSessionToolCallIdGenerator.Create(request.Session, reservedToolCallIds);
+            toolCallIdsByKey[key] = toolCallId;
+            return toolCallId;
+        }
+
         private static ChatSessionRuntimeEvent CreateRuntimeEvent(
             SessionFlowExecutionRequest request,
             ChatSessionRuntimeEventKind kind,
@@ -817,9 +937,11 @@ namespace Skyweaver.Services.ChatSession
             int? iterationNumber = null,
             string? modelId = null,
             string? textDelta = null,
+            string? reasoningDelta = null,
             AgentLoopOutputKind? textDeltaOutputKind = null,
             int? partIndex = null,
             int? toolCallIndex = null,
+            string? toolCallId = null,
             SkyweaverToolInvocation? toolInvocation = null,
             SkyweaverStreamingToolCallSnapshot? toolCallSnapshot = null,
             string? toolXml = null,
@@ -836,6 +958,7 @@ namespace Skyweaver.Services.ChatSession
                 FlowName = request.Graph.Document.Name,
                 NodeId = compiledNode?.Node.Id,
                 NodeTitle = compiledNode?.Node.Title,
+                AgentId = compiledNode?.Node.AgentId,
                 NodeKind = compiledNode?.Node.Kind,
                 IsHiddenAgent = compiledNode?.Node.IsHiddenAgent == true,
                 IsSkipped = isSkipped,
@@ -845,9 +968,11 @@ namespace Skyweaver.Services.ChatSession
                 Payload = payload,
                 IsPayloadFromFinishTask = isPayloadFromFinishTask,
                 TextDelta = textDelta,
+                ReasoningDelta = reasoningDelta,
                 TextDeltaOutputKind = textDeltaOutputKind,
                 PartIndex = partIndex,
                 ToolCallIndex = toolCallIndex,
+                ToolCallId = toolCallId,
                 ToolInvocation = toolInvocation,
                 ToolCallSnapshot = toolCallSnapshot,
                 ToolXml = toolXml,

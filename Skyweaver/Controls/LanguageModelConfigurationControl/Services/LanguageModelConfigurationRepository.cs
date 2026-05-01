@@ -130,7 +130,9 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 UseSeed = ParseBool((string?)ValueSource("UseSeed")),
                 Seed = ParseLong((string?)ValueSource("Seed"), 0L),
                 UseReasoningEffort = ParseBool((string?)ValueSource("UseReasoningEffort")),
-                ReasoningEffort = ((string?)ValueSource("ReasoningEffort") ?? "Medium").Trim()
+                ReasoningEffort = ((string?)ValueSource("ReasoningEffort") ?? "Medium").Trim(),
+                UseReasoningOutput = ParseBool((string?)ValueSource("UseReasoningOutput")),
+                ReasoningOutput = ((string?)ValueSource("ReasoningOutput") ?? "Full").Trim()
             };
         }
 
@@ -156,7 +158,9 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                     new XElement("UseSeed", meai.UseSeed),
                     new XElement("Seed", meai.Seed),
                     new XElement("UseReasoningEffort", meai.UseReasoningEffort),
-                    new XElement("ReasoningEffort", meai.ReasoningEffort)),
+                    new XElement("ReasoningEffort", meai.ReasoningEffort),
+                    new XElement("UseReasoningOutput", meai.UseReasoningOutput),
+                    new XElement("ReasoningOutput", meai.ReasoningOutput)),
                 _ => throw new InvalidDataException($"不支持的接口类型配置：{settings.InterfaceType}")
             };
         }

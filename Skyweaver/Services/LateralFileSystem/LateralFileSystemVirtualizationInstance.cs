@@ -130,7 +130,6 @@ namespace Skyweaver.Services.LateralFileSystem
                 Node.UpdatedAtUtc = DateTime.UtcNow;
                 PersistNode();
                 LateralFileSystemDebugConsole.Write("Instance", $"Node persisted as active; nodeId={Node.Id}.");
-                SyncAllPlaceholders();
                 _sourceWatcher.EnableRaisingEvents = true;
                 LateralFileSystemDebugConsole.Write("Instance", $"Start end; node='{Node.Name}' ({Node.Id}); elapsedMs={stopwatch.ElapsedMilliseconds}.");
             }
@@ -184,9 +183,9 @@ namespace Skyweaver.Services.LateralFileSystem
                     EnsurePlaceholder(entry);
                 }
 
-                LateralFileSystemDebugConsole.Write("Instance", $"SyncAllPlaceholders starting local recursive enumeration at '{Node.VirtualRootPath}'.");
+                LateralFileSystemDebugConsole.Write("Instance", $"SyncAllPlaceholders starting local root enumeration at '{Node.VirtualRootPath}'.");
                 var localPaths = Directory.Exists(Node.VirtualRootPath)
-                    ? LateralFileSystemSafeEnumeration.EnumerateFileSystemEntriesRecursively(Node.VirtualRootPath)
+                    ? LateralFileSystemSafeEnumeration.EnumerateImmediateFileSystemEntries(Node.VirtualRootPath)
                         .Select(path => NormalizeRelativePath(Path.GetRelativePath(Node.VirtualRootPath, path)))
                         .Where(path => !string.IsNullOrWhiteSpace(path))
                         .OrderByDescending(path => path.Length)
@@ -708,7 +707,8 @@ namespace Skyweaver.Services.LateralFileSystem
         {
             try
             {
-                if (Directory.Exists(sourcePath))
+                var attributes = File.GetAttributes(sourcePath);
+                if (attributes.HasFlag(FileAttributes.Directory))
                 {
                     var info = new DirectoryInfo(sourcePath);
                     return new LateralFileSystemEntry
@@ -721,11 +721,11 @@ namespace Skyweaver.Services.LateralFileSystem
                         LastAccessTimeUtc = info.LastAccessTimeUtc,
                         LastWriteTimeUtc = info.LastWriteTimeUtc,
                         ChangeTimeUtc = info.LastWriteTimeUtc,
-                        FileAttributes = (uint)info.Attributes
+                        FileAttributes = (uint)attributes
                     };
                 }
 
-                if (File.Exists(sourcePath))
+                if (!attributes.HasFlag(FileAttributes.Directory))
                 {
                     var info = new FileInfo(sourcePath);
                     return new LateralFileSystemEntry
@@ -739,7 +739,7 @@ namespace Skyweaver.Services.LateralFileSystem
                         LastAccessTimeUtc = info.LastAccessTimeUtc,
                         LastWriteTimeUtc = info.LastWriteTimeUtc,
                         ChangeTimeUtc = info.LastWriteTimeUtc,
-                        FileAttributes = (uint)info.Attributes
+                        FileAttributes = (uint)attributes
                     };
                 }
             }

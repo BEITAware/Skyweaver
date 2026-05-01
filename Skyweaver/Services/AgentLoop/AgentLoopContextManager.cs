@@ -41,6 +41,7 @@ namespace Skyweaver.Services.AgentLoop
                 agent,
                 systemPrompt,
                 upstreamInput,
+                upstreamContentBlocks: null,
                 persistentHistory,
                 turnHistory,
                 debugRunContext: null,
@@ -52,6 +53,7 @@ namespace Skyweaver.Services.AgentLoop
             AgentDefinition agent,
             string systemPrompt,
             string upstreamInput,
+            IReadOnlyList<LanguageModelChatContentBlock>? upstreamContentBlocks,
             IReadOnlyList<LanguageModelChatMessage> persistentHistory,
             IReadOnlyList<LanguageModelChatMessage> turnHistory,
             AgentLoopDebugRunContext? debugRunContext = null,
@@ -60,7 +62,10 @@ namespace Skyweaver.Services.AgentLoop
         {
             ArgumentNullException.ThrowIfNull(agent);
 
-            var immutableHistory = NormalizeHistory(persistentHistory);
+            var immutableHistory = TrimTrailingCurrentInputEchoes(
+                NormalizeHistory(persistentHistory),
+                upstreamInput,
+                upstreamContentBlocks);
             var currentTurnHistory = NormalizeHistory(turnHistory);
 
             var contextWindowTokens = _languageModelResolver.GetMinimumContextWindowTokens(agent);
@@ -68,6 +73,7 @@ namespace Skyweaver.Services.AgentLoop
                 systemPrompt,
                 immutableHistory,
                 upstreamInput,
+                upstreamContentBlocks,
                 currentTurnHistory);
             var estimatedBefore = _tokenEstimator.Estimate(preparedMessages);
 
@@ -87,7 +93,7 @@ namespace Skyweaver.Services.AgentLoop
                     $"Agent '{agent.DisplayNameOrFallback}' exceeds the context window with its system prompt, current user input, and current-turn loop history. Earlier-turn history is already empty, so there is nothing left to compress.");
             }
 
-            var fixedMessages = ComposeFixedMessages(systemPrompt, upstreamInput, currentTurnHistory);
+            var fixedMessages = ComposeFixedMessages(systemPrompt, upstreamInput, upstreamContentBlocks, currentTurnHistory);
             var fixedTokenCount = _tokenEstimator.Estimate(fixedMessages);
             if (fixedTokenCount >= contextWindowTokens)
             {
@@ -123,6 +129,7 @@ namespace Skyweaver.Services.AgentLoop
                 systemPrompt,
                 compressedPersistentHistory,
                 upstreamInput,
+                upstreamContentBlocks,
                 currentTurnHistory);
             var estimatedAfter = _tokenEstimator.Estimate(preparedMessages);
             if (estimatedAfter > contextWindowTokens)
@@ -220,6 +227,7 @@ namespace Skyweaver.Services.AgentLoop
             string systemPrompt,
             IReadOnlyList<LanguageModelChatMessage> persistentHistory,
             string upstreamInput,
+            IReadOnlyList<LanguageModelChatContentBlock>? upstreamContentBlocks,
             IReadOnlyList<LanguageModelChatMessage> turnHistory)
         {
             var messages = new List<LanguageModelChatMessage>(persistentHistory.Count + turnHistory.Count + 2)
@@ -228,7 +236,7 @@ namespace Skyweaver.Services.AgentLoop
             };
 
             messages.AddRange(persistentHistory.Select(message => message.Clone()));
-            messages.Add(new LanguageModelChatMessage(LanguageModelChatRole.User, upstreamInput ?? string.Empty));
+            messages.Add(CreateInputMessage(upstreamInput, upstreamContentBlocks));
             messages.AddRange(turnHistory.Select(message => message.Clone()));
             return messages;
         }
@@ -249,6 +257,96 @@ namespace Skyweaver.Services.AgentLoop
             }
 
             return normalizedHistory;
+        }
+
+        private static List<LanguageModelChatMessage> TrimTrailingCurrentInputEchoes(
+            List<LanguageModelChatMessage> history,
+            string? upstreamInput,
+            IReadOnlyList<LanguageModelChatContentBlock>? upstreamContentBlocks)
+        {
+            ArgumentNullException.ThrowIfNull(history);
+
+            if (history.Count == 0)
+            {
+                return history;
+            }
+
+            var currentInputMessage = CreateInputMessage(upstreamInput, upstreamContentBlocks);
+            if (currentInputMessage.ContentBlocks.Count == 0)
+            {
+                return history;
+            }
+
+            var endExclusive = history.Count;
+            while (endExclusive > 0 &&
+                   IsCurrentInputEcho(history[endExclusive - 1], currentInputMessage))
+            {
+                endExclusive--;
+            }
+
+            if (endExclusive == history.Count)
+            {
+                return history;
+            }
+
+            history.RemoveRange(endExclusive, history.Count - endExclusive);
+            return history;
+        }
+
+        private static bool IsCurrentInputEcho(
+            LanguageModelChatMessage candidate,
+            LanguageModelChatMessage currentInputMessage)
+        {
+            return candidate.Role == LanguageModelChatRole.User &&
+                   AreContentBlocksEquivalent(candidate.ContentBlocks, currentInputMessage.ContentBlocks);
+        }
+
+        private static bool AreContentBlocksEquivalent(
+            IReadOnlyList<LanguageModelChatContentBlock> left,
+            IReadOnlyList<LanguageModelChatContentBlock> right)
+        {
+            if (left.Count != right.Count)
+            {
+                return false;
+            }
+
+            for (var index = 0; index < left.Count; index++)
+            {
+                if (!AreContentBlocksEquivalent(left[index], right[index]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool AreContentBlocksEquivalent(
+            LanguageModelChatContentBlock left,
+            LanguageModelChatContentBlock right)
+        {
+            return left.Kind == right.Kind &&
+                   string.Equals(NormalizeComparableContent(left.Content), NormalizeComparableContent(right.Content), StringComparison.Ordinal) &&
+                   string.Equals(NormalizeComparableContent(left.ResourcePath), NormalizeComparableContent(right.ResourcePath), StringComparison.Ordinal) &&
+                   string.Equals(NormalizeComparableContent(left.MediaType), NormalizeComparableContent(right.MediaType), StringComparison.OrdinalIgnoreCase) &&
+                   AreByteArraysEquivalent(left.Data, right.Data);
+        }
+
+        private static bool AreByteArraysEquivalent(byte[]? left, byte[]? right)
+        {
+            if (left == null || left.Length == 0)
+            {
+                return right == null || right.Length == 0;
+            }
+
+            return right != null && left.SequenceEqual(right);
+        }
+
+        private static string NormalizeComparableContent(string? content)
+        {
+            return string.IsNullOrWhiteSpace(content)
+                ? string.Empty
+                : content.Trim();
         }
 
         private static LanguageModelChatMessage? NormalizeHistoryMessage(
@@ -273,7 +371,9 @@ namespace Skyweaver.Services.AgentLoop
                 ? LanguageModelChatRole.User
                 : message.Role;
 
-            return new LanguageModelChatMessage(normalizedRole, message.Content)
+            return new LanguageModelChatMessage(
+                normalizedRole,
+                message.ContentBlocks.Select(block => block.Clone()).ToArray())
             {
                 AuthorName = message.AuthorName
             };
@@ -282,16 +382,37 @@ namespace Skyweaver.Services.AgentLoop
         private static IReadOnlyList<LanguageModelChatMessage> ComposeFixedMessages(
             string systemPrompt,
             string upstreamInput,
+            IReadOnlyList<LanguageModelChatContentBlock>? upstreamContentBlocks,
             IReadOnlyList<LanguageModelChatMessage> turnHistory)
         {
             var messages = new List<LanguageModelChatMessage>(turnHistory.Count + 2)
             {
                 new(LanguageModelChatRole.System, systemPrompt ?? string.Empty),
-                new(LanguageModelChatRole.User, upstreamInput ?? string.Empty)
+                CreateInputMessage(upstreamInput, upstreamContentBlocks)
             };
 
             messages.AddRange(turnHistory.Select(message => message.Clone()));
             return messages;
+        }
+
+        private static LanguageModelChatMessage CreateInputMessage(
+            string? upstreamInput,
+            IReadOnlyList<LanguageModelChatContentBlock>? upstreamContentBlocks)
+        {
+            var contentBlocks = new List<LanguageModelChatContentBlock>();
+            if (!string.IsNullOrWhiteSpace(upstreamInput))
+            {
+                contentBlocks.Add(LanguageModelChatContentBlock.CreateText(upstreamInput));
+            }
+
+            if (upstreamContentBlocks != null)
+            {
+                contentBlocks.AddRange(upstreamContentBlocks
+                    .Where(block => block != null)
+                    .Select(block => block.Clone()));
+            }
+
+            return new LanguageModelChatMessage(LanguageModelChatRole.User, contentBlocks);
         }
 
         private static IReadOnlyList<LanguageModelChatMessage> BuildCompressionMessages(

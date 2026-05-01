@@ -15,6 +15,41 @@
         <Style TargetType="ScrollBar" BasedOn="{StaticResource AeroScrollBarV2Style}"/>
         <Style TargetType="ScrollViewer" BasedOn="{StaticResource AeroScrollViewerV2Style}"/>
 
+        <DrawingBrush x:Key="ChatSoftGlassSliceBrush" Stretch="Uniform">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <DrawingGroup.Children>
+                        <GeometryDrawing Geometry="F1 M 0.160156,0.159668L 1386.16,0.159668L 1386.16,223.646L 0.160156,223.646L 0.160156,0.159668 Z ">
+                            <GeometryDrawing.Pen>
+                                <Pen Thickness="0.32" LineJoin="Round" Brush="#FF000000"/>
+                            </GeometryDrawing.Pen>
+                            <GeometryDrawing.Brush>
+                                <LinearGradientBrush StartPoint="0.10059,1.65236" EndPoint="2.53982,1.65236">
+                                    <LinearGradientBrush.RelativeTransform>
+                                        <TransformGroup>
+                                            <SkewTransform CenterX="0.10059" CenterY="1.65236" AngleX="-59.7491" AngleY="0"/>
+                                            <RotateTransform CenterX="0.10059" CenterY="1.65236" Angle="-70.8836"/>
+                                        </TransformGroup>
+                                    </LinearGradientBrush.RelativeTransform>
+                                    <LinearGradientBrush.GradientStops>
+                                        <GradientStop Color="#3BFFFFFF" Offset="0"/>
+                                        <GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>
+                                        <GradientStop Color="#07FFFFFF" Offset="0.109195"/>
+                                        <GradientStop Color="#04FFFFFF" Offset="0.298851"/>
+                                        <GradientStop Color="#3AFFFFFF" Offset="0.327586"/>
+                                        <GradientStop Color="#1AFFFFFF" Offset="0.465517"/>
+                                        <GradientStop Color="#14FFFFFF" Offset="0.591954"/>
+                                        <GradientStop Color="#05FFFFFF" Offset="0.758621"/>
+                                        <GradientStop Color="#44FFFFFF" Offset="1"/>
+                                    </LinearGradientBrush.GradientStops>
+                                </LinearGradientBrush>
+                            </GeometryDrawing.Brush>
+                        </GeometryDrawing>
+                    </DrawingGroup.Children>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+
         <RadialGradientBrush x:Key="ChatHeaderButtonIdleBrush"
                              RadiusX="2.152"
                              RadiusY="1.684"
@@ -315,6 +350,29 @@
             </Setter>
         </Style>
 
+        <Style x:Key="ChatComposerImageRemoveButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="18"/>
+            <Setter Property="Height" Value="18"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#99000000"/>
+            <Setter Property="BorderBrush" Value="#66FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="ChatMessageListItemStyle" TargetType="ListBoxItem">
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Margin" Value="0"/>
@@ -536,6 +594,48 @@
             </Border>
         </DataTemplate>
 
+        <DataTemplate x:Key="ImageMessagePartTemplate" DataType="{x:Type models:ChatMessagePartModel}">
+            <Grid Width="156" Height="156" HorizontalAlignment="Left">
+                <Border Background="{StaticResource ChatSoftGlassSliceBrush}"
+                        BorderBrush="#5596FCFF"
+                        BorderThickness="1"/>
+                <Image Source="{Binding ResourcePath}"
+                       Width="140"
+                       Height="140"
+                       Stretch="Uniform"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ReasoningMessagePartTemplate" DataType="{x:Type models:ChatMessagePartModel}">
+            <Expander IsExpanded="False"
+                      Background="#1414232C"
+                      BorderBrush="#4476D7EE"
+                      BorderThickness="1"
+                      Padding="0">
+                <Expander.Header>
+                    <DockPanel LastChildFill="False">
+                        <TextBlock Text="{Binding Title}"
+                                   Foreground="#FFD5F5FF"
+                                   FontWeight="SemiBold"
+                                   FontSize="12"/>
+                        <TextBlock DockPanel.Dock="Right"
+                                   Margin="10,0,0,0"
+                                   Text="{Binding BadgeText}"
+                                   Foreground="#99FFFFFF"
+                                   FontSize="11"/>
+                    </DockPanel>
+                </Expander.Header>
+                <TextBlock Text="{Binding Content}"
+                           Margin="10,8,10,10"
+                           Foreground="#DDEDFBFF"
+                           FontFamily="Consolas"
+                           FontSize="12"
+                           TextWrapping="Wrap"/>
+            </Expander>
+        </DataTemplate>
+
         <local:ChatMessagePartTemplateSelector x:Key="ChatMessagePartTemplateSelector"
                                                TextTemplate="{StaticResource TextMessagePartTemplate}"
                                                CodeTemplate="{StaticResource CodeMessagePartTemplate}"
@@ -543,7 +643,9 @@
                                                PlaceholderTemplate="{StaticResource PlaceholderMessagePartTemplate}"
                                                ToolCallTemplate="{StaticResource ToolCallMessagePartTemplate}"
                                                ToolOutputTemplate="{StaticResource ToolOutputMessagePartTemplate}"
-                                               StructuredXmlTemplate="{StaticResource StructuredXmlMessagePartTemplate}"/>
+                                               StructuredXmlTemplate="{StaticResource StructuredXmlMessagePartTemplate}"
+                                               ImageTemplate="{StaticResource ImageMessagePartTemplate}"
+                                               ReasoningTemplate="{StaticResource ReasoningMessagePartTemplate}"/>
 
         <DataTemplate x:Key="BubbleMessageContentTemplate" DataType="{x:Type models:ChatMessageModel}">
             <StackPanel>
@@ -570,6 +672,7 @@
                     <ItemsControl.ItemContainerStyle>
                         <Style TargetType="ContentPresenter">
                             <Setter Property="Margin" Value="0,0,0,8"/>
+                            <Setter Property="Visibility" Value="{Binding IsUserVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                         </Style>
                     </ItemsControl.ItemContainerStyle>
                 </ItemsControl>
@@ -641,6 +744,70 @@
                                            UserTemplate="{StaticResource UserMessageTemplate}"
                                            AssistantTemplate="{StaticResource AssistantMessageTemplate}"
                                            SystemTemplate="{StaticResource SystemMessageTemplate}"/>
+
+        <!-- 工具栏样式 -->
+        <LinearGradientBrush x:Key="MediaBarGlassBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#40FFFFFF" Offset="0"/>
+            <GradientStop Color="#10FFFFFF" Offset="0.45"/>
+            <GradientStop Color="#00FFFFFF" Offset="0.45"/>
+            <GradientStop Color="#05FFFFFF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <RadialGradientBrush x:Key="ToolButtonHoverBackgroundBrush" RadiusX="1.64234" RadiusY="2.22972" Center="0.5,1.47445" GradientOrigin="0.5,1.47445">
+            <RadialGradientBrush.GradientStops>
+                <GradientStop Color="#CB4C87AF" Offset="0.295559"/>
+                <GradientStop Color="#CD162D41" Offset="0.607963"/>
+                <GradientStop Color="#CD3A576E" Offset="0.638591"/>
+                <GradientStop Color="#CD6E869C" Offset="0.911179"/>
+            </RadialGradientBrush.GradientStops>
+            <RadialGradientBrush.RelativeTransform>
+                <RotateTransform CenterX="0.5" CenterY="1.47445" Angle="90"/>
+            </RadialGradientBrush.RelativeTransform>
+        </RadialGradientBrush>
+        <SolidColorBrush x:Key="ToolButtonHoverBorderBrush" Color="#67BBDDF2"/>
+
+        <RadialGradientBrush x:Key="ToolButtonPressedBackgroundBrush" RadiusX="1.64234" RadiusY="2.22972" Center="0.5,1.47445" GradientOrigin="0.5,1.47445">
+            <RadialGradientBrush.GradientStops>
+                <GradientStop Color="#CC2C577F" Offset="0.295559"/>
+                <GradientStop Color="#CC061D31" Offset="0.607963"/>
+                <GradientStop Color="#CC1A374E" Offset="0.638591"/>
+                <GradientStop Color="#CC4E667C" Offset="0.911179"/>
+            </RadialGradientBrush.GradientStops>
+            <RadialGradientBrush.RelativeTransform>
+                <RotateTransform CenterX="0.5" CenterY="1.47445" Angle="90"/>
+            </RadialGradientBrush.RelativeTransform>
+        </RadialGradientBrush>
+        <SolidColorBrush x:Key="ToolButtonPressedBorderBrush" Color="#99001020"/>
+
+        <Style x:Key="MediaToolbarButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="Margin" Value="0,0,5,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Background="{TemplateBinding Background}">
+                            <Border x:Name="HoverBorder" Opacity="0" CornerRadius="4" BorderThickness="2" Background="{StaticResource ToolButtonHoverBackgroundBrush}" BorderBrush="{StaticResource ToolButtonHoverBorderBrush}"/>
+                            <Border x:Name="PressedBorder" Opacity="0" CornerRadius="4" BorderThickness="2" Background="{StaticResource ToolButtonPressedBackgroundBrush}" BorderBrush="{StaticResource ToolButtonPressedBorderBrush}"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="HoverBorder" Property="Opacity" Value="1"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="PressedBorder" Property="Opacity" Value="1"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
     <Border Style="{DynamicResource WorkAreaStyle}">
@@ -752,12 +919,81 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <TextBlock Text="{Binding ComposerHintText}"
                                    Foreground="#99FFFFFF"
                                    FontSize="11"
                                    Margin="0,0,0,8"/>
-                        <Grid Grid.Row="1">
+                        <ItemsControl Grid.Row="1"
+                                      ItemsSource="{Binding PendingComposerImages}"
+                                      Margin="0,0,0,8"
+                                      Visibility="{Binding HasPendingComposerImages, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type models:ChatComposerAttachmentModel}">
+                                    <Grid Width="76" Height="76" Margin="0,0,8,0">
+                                        <Border Background="{StaticResource ChatSoftGlassSliceBrush}"
+                                                BorderBrush="#5596FCFF"
+                                                BorderThickness="1"/>
+                                        <Image Source="{Binding ResourcePath}"
+                                               Width="64"
+                                               Height="64"
+                                               Stretch="Uniform"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                        <Button HorizontalAlignment="Right"
+                                                VerticalAlignment="Top"
+                                                Style="{StaticResource ChatComposerImageRemoveButtonStyle}"
+                                                Content="X"
+                                                Command="{Binding DataContext.RemoveComposerImageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <!-- 顶部工具栏 -->
+                        <Border Grid.Row="2" Background="{StaticResource MediaBarGlassBrush}" BorderBrush="#80FFFFFF" BorderThickness="1" Margin="0,0,0,8" CornerRadius="3" Padding="10,5">
+                            <StackPanel Orientation="Horizontal">
+                                <Button Command="{Binding AddImageCommand}" Style="{StaticResource MediaToolbarButtonStyle}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/image.png" Width="20" Height="20" Margin="0,0,5,0"/>
+                                        <TextBlock Text="添加图片" VerticalAlignment="Center" FontSize="12"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Command="{Binding AddClipboardCommand}" Style="{StaticResource MediaToolbarButtonStyle}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/imagealt.png" Width="20" Height="20" Margin="0,0,5,0"/>
+                                        <TextBlock Text="添加剪贴板" VerticalAlignment="Center" FontSize="12"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <Rectangle Width="1" Height="20" Fill="#33FFFFFF" Margin="5,0"/>
+
+                                <Button Style="{StaticResource MediaToolbarButtonStyle}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/RawImage.png" Width="20" Height="20" Margin="0,0,5,0"/>
+                                        <TextBlock Text="语音" VerticalAlignment="Center" FontSize="12"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <Rectangle Width="1" Height="20" Fill="#33FFFFFF" Margin="5,0"/>
+
+                                <Button Style="{StaticResource MediaToolbarButtonStyle}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/imgpp.png" Width="20" Height="20" Margin="0,0,5,0"/>
+                                        <TextBlock Text="添加文件" VerticalAlignment="Center" FontSize="12"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+
+                        <Grid Grid.Row="3">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="128"/>
@@ -766,8 +1002,7 @@
                             <TextBox x:Name="ComposerTextBox"
                                      Style="{StaticResource ChatComposerTextBoxStyle}"
                                      Text="{Binding DraftMessageText, UpdateSourceTrigger=PropertyChanged}"
-                                     MinHeight="82"
-                                     MaxHeight="180"
+                                     Height="82"
                                      Padding="10"
                                      AcceptsReturn="True"
                                      TextWrapping="Wrap"
@@ -777,7 +1012,8 @@
                                      Foreground="White"
                                      BorderBrush="#5596FCFF"
                                      BorderThickness="1"
-                                     PreviewKeyDown="ComposerTextBox_PreviewKeyDown"/>
+                                      DataObject.Pasting="ComposerTextBox_Pasting"
+                                      PreviewKeyDown="ComposerTextBox_PreviewKeyDown"/>
 
                             <Button Grid.Column="1"
                                     Margin="10,0,0,0"

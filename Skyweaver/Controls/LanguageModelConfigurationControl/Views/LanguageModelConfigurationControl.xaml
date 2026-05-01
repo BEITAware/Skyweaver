@@ -79,6 +79,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <Grid Grid.Row="0"
@@ -262,6 +263,7 @@
                               ItemsSource="{Binding SupportedReasoningEfforts}"
                               SelectedItem="{Binding ReasoningEffort, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
+
             </Grid>
         </DataTemplate>
     </UserControl.Resources>

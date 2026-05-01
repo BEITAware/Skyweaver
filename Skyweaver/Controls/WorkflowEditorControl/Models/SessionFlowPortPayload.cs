@@ -1,4 +1,5 @@
 using System.Xml.Linq;
+using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
 
 namespace Skyweaver.Controls.WorkflowEditorControl.Models
 {
@@ -13,11 +14,13 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Models
         private SessionFlowPortPayload(
             SessionFlowPortPayloadKind kind,
             string content,
-            string? xmlElementName = null)
+            string? xmlElementName = null,
+            IEnumerable<LanguageModelChatContentBlock>? contentBlocks = null)
         {
             Kind = kind;
             Content = content ?? string.Empty;
             XmlElementName = xmlElementName;
+            ContentBlocks = NormalizeContentBlocks(contentBlocks);
         }
 
         public SessionFlowPortPayloadKind Kind { get; }
@@ -26,6 +29,8 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Models
 
         public string? XmlElementName { get; }
 
+        public IReadOnlyList<LanguageModelChatContentBlock> ContentBlocks { get; }
+
         public bool IsNaturalLanguage => Kind == SessionFlowPortPayloadKind.NaturalLanguage;
 
         public bool IsXmlElement => Kind == SessionFlowPortPayloadKind.XmlElement;
@@ -33,6 +38,16 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Models
         public static SessionFlowPortPayload FromNaturalLanguage(string text)
         {
             return new SessionFlowPortPayload(SessionFlowPortPayloadKind.NaturalLanguage, text ?? string.Empty);
+        }
+
+        public static SessionFlowPortPayload FromNaturalLanguage(
+            string text,
+            IEnumerable<LanguageModelChatContentBlock>? contentBlocks)
+        {
+            return new SessionFlowPortPayload(
+                SessionFlowPortPayloadKind.NaturalLanguage,
+                text ?? string.Empty,
+                contentBlocks: contentBlocks);
         }
 
         public static SessionFlowPortPayload FromXmlElement(XElement element)
@@ -44,6 +59,20 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Models
                 SessionFlowPortPayloadKind.XmlElement,
                 clone.ToString(SaveOptions.DisableFormatting),
                 clone.Name.LocalName);
+        }
+
+        private static IReadOnlyList<LanguageModelChatContentBlock> NormalizeContentBlocks(
+            IEnumerable<LanguageModelChatContentBlock>? contentBlocks)
+        {
+            if (contentBlocks == null)
+            {
+                return Array.Empty<LanguageModelChatContentBlock>();
+            }
+
+            return contentBlocks
+                .Where(block => block != null)
+                .Select(block => block.Clone())
+                .ToArray();
         }
 
         public static SessionFlowPortPayload FromXmlText(string xmlText)

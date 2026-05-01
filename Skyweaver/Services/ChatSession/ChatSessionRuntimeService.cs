@@ -79,7 +79,11 @@ namespace Skyweaver.Services.ChatSession
             ArgumentNullException.ThrowIfNull(request.Session);
 
             var trimmedUserText = request.UserText?.Trim() ?? string.Empty;
-            if (trimmedUserText.Length == 0)
+            var userContentBlocks = request.UserContentBlocks
+                .Where(block => block != null)
+                .Select(block => block.Clone())
+                .ToArray();
+            if (trimmedUserText.Length == 0 && userContentBlocks.Length == 0)
             {
                 throw new InvalidOperationException("用户输入不能为空。");
             }
@@ -121,16 +125,15 @@ namespace Skyweaver.Services.ChatSession
 
                 var conversationHistory = ChatSessionTurnHistoryBuilder.BuildForNextTurn(
                     request.Session,
-                    trimmedUserText);
-                request.Session.ConversationHistory.Clear();
-                foreach (var historyMessage in conversationHistory)
-                {
-                    request.Session.ConversationHistory.Add(historyMessage.Clone());
-                }
+                    trimmedUserText,
+                    userContentBlocks)
+                    .Select(message => message.Clone())
+                    .ToList();
 
                 conversationHistoryRecorder = new ChatSessionConversationHistoryRecorder(
-                    request.Session,
-                    trimmedUserText);
+                    conversationHistory,
+                    trimmedUserText,
+                    userContentBlocks);
 
                 var compilationResult = _flowBindingService.CompileBinding(request.Session.FlowBinding);
                 if (!compilationResult.IsSuccess || compilationResult.Graph == null)
@@ -198,8 +201,9 @@ namespace Skyweaver.Services.ChatSession
                     {
                         Session = request.Session,
                         Graph = graph,
-                        InitialPayload = SessionFlowPayload.FromNaturalLanguage(trimmedUserText),
-                        ConversationHistory = request.Session.ConversationHistory,
+                        InitialPayload = SessionFlowPayload.FromNaturalLanguage(trimmedUserText, userContentBlocks),
+                        InitialUserContentBlocks = userContentBlocks,
+                        ConversationHistory = conversationHistory,
                         AgentsById = agentsById,
                         ToolConfirmationCallback = request.ToolConfirmationCallback
                     },

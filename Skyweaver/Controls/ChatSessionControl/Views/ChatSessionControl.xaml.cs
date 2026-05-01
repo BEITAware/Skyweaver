@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Skyweaver.Controls.ChatSessionControl.ViewModels;
 
@@ -135,6 +136,40 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             }
 
             e.Handled = true;
+        }
+
+        private void ComposerTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (!ReferenceEquals(sender, ComposerTextBox) ||
+                !ComposerTextBox.IsKeyboardFocusWithin)
+            {
+                return;
+            }
+
+            var image = TryGetPastedImage(e);
+            if (image == null)
+            {
+                return;
+            }
+
+            if (DataContext is ChatSessionControlViewModel viewModel &&
+                viewModel.AddPastedImage(image))
+            {
+                e.CancelCommand();
+                e.Handled = true;
+            }
+        }
+
+        private static BitmapSource? TryGetPastedImage(DataObjectPastingEventArgs e)
+        {
+            if (Clipboard.ContainsImage())
+            {
+                return Clipboard.GetImage();
+            }
+
+            return e.SourceDataObject.GetDataPresent(DataFormats.Bitmap, autoConvert: true)
+                ? e.SourceDataObject.GetData(DataFormats.Bitmap, autoConvert: true) as BitmapSource
+                : null;
         }
 
         public double RibbonTime

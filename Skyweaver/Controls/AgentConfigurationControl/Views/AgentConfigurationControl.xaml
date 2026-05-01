@@ -16,6 +16,7 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="8"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
         </Style>
 
         <Style x:Key="ConfigurationListViewItemStyle"
@@ -382,7 +383,8 @@
                                               ItemContainerStyle="{StaticResource ConfigurationListViewItemStyle}">
                                         <ListView.ItemTemplate>
                                             <DataTemplate DataType="{x:Type models:AgentToolPermissionDefinition}">
-                                                <Border Style="{StaticResource GlassCardBorderStyle}">
+                                                <Border MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                        Style="{StaticResource GlassCardBorderStyle}">
                                                     <Grid>
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>
@@ -409,6 +411,7 @@
                                                             <TextBlock Margin="0,6,0,0"
                                                                        Foreground="#D9FFFFFF"
                                                                        TextWrapping="Wrap"
+                                                                       MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Grid}}"
                                                                        Text="{Binding ToolDescription}"/>
                                                             <TextBlock Margin="0,8,0,0"
                                                                        Foreground="#FFD3F6FF"

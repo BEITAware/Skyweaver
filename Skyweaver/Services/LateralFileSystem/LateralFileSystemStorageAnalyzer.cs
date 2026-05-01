@@ -23,20 +23,27 @@ namespace Skyweaver.Services.LateralFileSystem
             var fullFileCount = 0;
             var placeholderFileCount = 0;
             var totalFileCount = 0;
+            var totalDirectoryCount = 1;
             var usedFallbackEstimation = false;
 
-            foreach (var filePath in LateralFileSystemSafeEnumeration.EnumerateFilesRecursively(virtualRootPath))
+            foreach (var entryPath in LateralFileSystemSafeEnumeration.EnumerateFileSystemEntriesRecursively(virtualRootPath))
             {
+                if (LateralFileSystemSafeEnumeration.IsDirectory(entryPath))
+                {
+                    totalDirectoryCount++;
+                    continue;
+                }
+
                 try
                 {
                     totalFileCount++;
                     if (totalFileCount <= 20 || totalFileCount % 100 == 0)
                     {
-                        LateralFileSystemDebugConsole.Write("Analyzer", $"Analyze file {totalFileCount}: '{filePath}'.");
+                        LateralFileSystemDebugConsole.Write("Analyzer", $"Analyze file {totalFileCount}: '{entryPath}'.");
                     }
 
-                    var fileInfo = new FileInfo(filePath);
-                    var stateInfo = GetOnDiskState(filePath, isDirectory: false);
+                    var fileInfo = new FileInfo(entryPath);
+                    var stateInfo = GetOnDiskState(entryPath, isDirectory: false);
 
                     if (stateInfo.UsedFallbackEstimation)
                     {
@@ -66,19 +73,17 @@ namespace Skyweaver.Services.LateralFileSystem
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    LateralFileSystemDebugConsole.Write("Analyzer", $"Analyze skipped file due to UnauthorizedAccessException: '{filePath}'.");
+                    LateralFileSystemDebugConsole.Write("Analyzer", $"Analyze skipped file due to UnauthorizedAccessException: '{entryPath}'.");
                 }
                 catch (IOException)
                 {
-                    LateralFileSystemDebugConsole.Write("Analyzer", $"Analyze skipped file due to IOException: '{filePath}'.");
+                    LateralFileSystemDebugConsole.Write("Analyzer", $"Analyze skipped file due to IOException: '{entryPath}'.");
                 }
                 catch (NotSupportedException)
                 {
-                    LateralFileSystemDebugConsole.Write("Analyzer", $"Analyze skipped file due to NotSupportedException: '{filePath}'.");
+                    LateralFileSystemDebugConsole.Write("Analyzer", $"Analyze skipped file due to NotSupportedException: '{entryPath}'.");
                 }
             }
-
-            var totalDirectoryCount = 1 + LateralFileSystemSafeEnumeration.EnumerateDirectoriesRecursively(virtualRootPath).Count();
 
             var summary = new LateralFileSystemNodeStorageSummary
             {
@@ -118,18 +123,19 @@ namespace Skyweaver.Services.LateralFileSystem
 
             var entries = new List<LateralFileSystemFileEntryModel>();
 
-            foreach (var directoryPath in LateralFileSystemSafeEnumeration.EnumerateImmediateDirectories(targetDirectoryPath).OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase))
-            {
-                var entry = TryCreateEntryModel(virtualRootPath, directoryPath, isDirectory: true);
-                if (entry is not null)
+            var childEntryPaths = LateralFileSystemSafeEnumeration.EnumerateImmediateFileSystemEntries(targetDirectoryPath)
+                .Select(path => new
                 {
-                    entries.Add(entry);
-                }
-            }
+                    FullPath = path,
+                    IsDirectory = LateralFileSystemSafeEnumeration.IsDirectory(path)
+                })
+                .OrderBy(entry => entry.IsDirectory ? 0 : 1)
+                .ThenBy(entry => Path.GetFileName(entry.FullPath), StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
-            foreach (var filePath in LateralFileSystemSafeEnumeration.EnumerateImmediateFiles(targetDirectoryPath).OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase))
+            foreach (var childEntryPath in childEntryPaths)
             {
-                var entry = TryCreateEntryModel(virtualRootPath, filePath, isDirectory: false);
+                var entry = TryCreateEntryModel(virtualRootPath, childEntryPath.FullPath, childEntryPath.IsDirectory);
                 if (entry is not null)
                 {
                     entries.Add(entry);

@@ -1,15 +1,15 @@
-namespace Skyweaver.Controls.ChatSessionControl.Models
+namespace Skyweaver.Models.ChatSession
 {
-    public enum ChatMessagePartType
+    public enum ChatSessionContentBlockKind
     {
         Text = 0,
         Code = 1,
         Status = 2,
         Placeholder = 3,
-        Tool = 4,
+        StructuredXml = 4,
         ToolCall = 5,
         ToolOutput = 6,
-        StructuredXml = 7,
+        ToolReference = 7,
         Image = 8,
         Audio = 9,
         HostPreservedContent = 10,

@@ -20,6 +20,10 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
 
         public DataTemplate? StructuredXmlTemplate { get; set; }
 
+        public DataTemplate? ImageTemplate { get; set; }
+
+        public DataTemplate? ReasoningTemplate { get; set; }
+
         public override DataTemplate? SelectTemplate(object item, DependencyObject container)
         {
             if (item is not ChatMessagePartModel part)
@@ -36,6 +40,10 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                 ChatMessagePartType.ToolCall => ToolCallTemplate ?? StatusTemplate,
                 ChatMessagePartType.ToolOutput => ToolOutputTemplate ?? StatusTemplate,
                 ChatMessagePartType.StructuredXml => StructuredXmlTemplate ?? TextTemplate,
+                ChatMessagePartType.Image => ImageTemplate ?? StatusTemplate ?? TextTemplate,
+                ChatMessagePartType.Audio => StatusTemplate ?? TextTemplate,
+                ChatMessagePartType.HostPreservedContent => StructuredXmlTemplate ?? TextTemplate,
+                ChatMessagePartType.Reasoning => ReasoningTemplate ?? StatusTemplate ?? TextTemplate,
                 ChatMessagePartType.Tool => ToolOutputTemplate ?? StatusTemplate,
                 _ => TextTemplate
             };

@@ -335,10 +335,10 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
             var parentNode = SelectedNode;
             var dialog = new LateralFileSystemFolderDialog(
                 title: "继承侧向文件夹",
-                promptText: "创建一个继承当前节点关系的侧向文件夹，并指定被投影的源文件夹。",
+                promptText: "创建一个继承当前节点的侧向文件夹，内容默认投影父节点。",
                 confirmButtonText: "继承",
                 inheritedFromName: parentNode.Name,
-                initialSourcePath: parentNode.ProjectionSourcePath ?? string.Empty);
+                requiresSourcePath: false);
             dialog.Owner = Application.Current?.MainWindow;
 
             if (dialog.ShowDialog() != true)
@@ -348,7 +348,7 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
 
             try
             {
-                var createdNode = _runtime.CreateInheritance(dialog.FolderDisplayName, parentNode.Id, dialog.SourceFolderPath);
+                var createdNode = _runtime.CreateInheritance(dialog.FolderDisplayName, parentNode.Id, string.Empty);
                 SaveInitialNodePosition(createdNode, parentNode);
                 RefreshFromBackend(preserveSelection: false, preferredSelectedNodeId: createdNode.Id);
                 StatusMessage = $"已创建继承自“{parentNode.Name}”的侧向文件夹“{createdNode.Name}”。";
@@ -500,7 +500,12 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
                 if (syncSelectedNode)
                 {
                     LateralFileSystemDebugConsole.Write("TreeVM", $"RefreshSelectedNodeInspectorAsync syncing node '{selectedNodeId}'.");
-                    _runtime.SyncNode(selectedNodeId);
+                    await Task.Run(() => _runtime.SyncNode(selectedNodeId)).ConfigureAwait(true);
+                    if (refreshVersion != _selectedNodeRefreshVersion
+                        || !string.Equals(SelectedNode?.Id, selectedNodeId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return;
+                    }
                 }
 
                 if (refreshStorageSummary)

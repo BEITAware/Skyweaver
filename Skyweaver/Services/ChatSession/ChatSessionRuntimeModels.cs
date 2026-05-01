@@ -28,7 +28,8 @@ namespace Skyweaver.Services.ChatSession
         StructuredOutputProduced = 15,
         ExecutionCompleted = 16,
         ExecutionFailed = 17,
-        ExecutionCancelled = 18
+        ExecutionCancelled = 18,
+        ReasoningDelta = 19
     }
 
     public sealed class ChatSessionRuntimeRequest
@@ -36,6 +37,9 @@ namespace Skyweaver.Services.ChatSession
         public ChatSessionModel Session { get; init; } = null!;
 
         public string UserText { get; init; } = string.Empty;
+
+        public IReadOnlyList<LanguageModelChatContentBlock> UserContentBlocks { get; init; } =
+            Array.Empty<LanguageModelChatContentBlock>();
 
         public Func<AgentToolConfirmationRequest, CancellationToken, Task<AgentToolConfirmationResult>>? ToolConfirmationCallback { get; init; }
     }
@@ -67,6 +71,8 @@ namespace Skyweaver.Services.ChatSession
 
         public string? NodeTitle { get; init; }
 
+        public string? AgentId { get; init; }
+
         public SessionFlowNodeKind? NodeKind { get; init; }
 
         public bool IsHiddenAgent { get; init; }
@@ -81,11 +87,15 @@ namespace Skyweaver.Services.ChatSession
 
         public string? TextDelta { get; init; }
 
+        public string? ReasoningDelta { get; init; }
+
         public AgentLoopOutputKind? TextDeltaOutputKind { get; init; }
 
         public int? PartIndex { get; init; }
 
         public int? ToolCallIndex { get; init; }
+
+        public string? ToolCallId { get; init; }
 
         public SkyweaverToolInvocation? ToolInvocation { get; init; }
 
@@ -116,8 +126,11 @@ namespace Skyweaver.Services.ChatSession
 
         public SessionFlowPayload InitialPayload { get; init; } = null!;
 
-        public IReadOnlyList<LanguageModelChatMessage> ConversationHistory { get; init; } =
-            Array.Empty<LanguageModelChatMessage>();
+        public IReadOnlyList<LanguageModelChatContentBlock> InitialUserContentBlocks { get; init; } =
+            Array.Empty<LanguageModelChatContentBlock>();
+
+        public IList<LanguageModelChatMessage> ConversationHistory { get; init; } =
+            new List<LanguageModelChatMessage>();
 
         public IReadOnlyDictionary<string, AgentDefinition> AgentsById { get; init; } =
             new Dictionary<string, AgentDefinition>(StringComparer.OrdinalIgnoreCase);
@@ -140,12 +153,13 @@ namespace Skyweaver.Services.ChatSession
 
         public string Input { get; init; } = string.Empty;
 
+        public IReadOnlyList<LanguageModelChatContentBlock> InputContentBlocks { get; init; } =
+            Array.Empty<LanguageModelChatContentBlock>();
+
         public IReadOnlyList<LanguageModelChatMessage> History { get; init; } =
             Array.Empty<LanguageModelChatMessage>();
 
         public SkyweaverToolContext ToolContext { get; init; } = new();
-
-        public int MaxIterations { get; init; } = 12;
 
         public Func<AgentLoopRuntimeEvent, CancellationToken, ValueTask>? EventSink { get; init; }
 

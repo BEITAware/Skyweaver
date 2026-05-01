@@ -21,8 +21,12 @@ namespace Skyweaver.Models.ChatSession
 
         public ChatSessionFlowBinding FlowBinding { get; } = new();
 
+        public List<ChatSessionMessageRecordModel> Records { get; } = new();
+
         public List<ChatMessageModel> Messages { get; } = new();
 
+        // Legacy/transient projection kept for older code paths. New persistence derives
+        // LLM history from Records instead of saving this list directly.
         public List<LanguageModelChatMessage> ConversationHistory { get; } = new();
 
         public string SessionFolderPath { get; set; } = string.Empty;

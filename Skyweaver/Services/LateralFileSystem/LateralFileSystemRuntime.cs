@@ -14,6 +14,7 @@ namespace Skyweaver.Services.LateralFileSystem
         private LateralFileSystemConfiguration _configuration;
         private LateralFileSystemService _service;
         private bool _isVirtualizationBackendAvailable;
+        private int _activationRequestId;
         private string _virtualizationBackendStatusMessage = "侧向文件系统原生后端可用。";
         private bool _disposed;
 
@@ -28,7 +29,7 @@ namespace Skyweaver.Services.LateralFileSystem
             LateralFileSystemDebugConsole.Write("Runtime", $"Loaded configuration: IsEnabled={_configuration.IsEnabled}; WorkingRootDirectory='{_configuration.WorkingRootDirectory}'.");
             _service = CreateService();
             RefreshVirtualizationBackendAvailabilityLocked();
-            TryActivateAllLocked();
+            QueueActivateAllLocked();
             LateralFileSystemDebugConsole.Write("Runtime", "LateralFileSystemRuntime constructor end.");
         }
 
@@ -100,12 +101,17 @@ namespace Skyweaver.Services.LateralFileSystem
 
         public LateralFileSystemNodeModel CreateProjection(string virtualFolderName, string projectionSourcePath)
         {
+            return CreateProjection(virtualFolderName, projectionSourcePath, owner: "User");
+        }
+
+        public LateralFileSystemNodeModel CreateProjection(string virtualFolderName, string projectionSourcePath, string owner)
+        {
             LateralFileSystemNodeModel node;
             lock (_syncRoot)
             {
                 ThrowIfDisposed();
                 var workingRootDirectory = EnsureWorkingRootIsReadyForActivation();
-                node = _service.CreateProjection(workingRootDirectory, virtualFolderName, owner: "User", projectionSourcePath);
+                node = _service.CreateProjection(workingRootDirectory, virtualFolderName, owner, projectionSourcePath);
             }
 
             TreeChanged?.Invoke(this, EventArgs.Empty);
@@ -114,12 +120,17 @@ namespace Skyweaver.Services.LateralFileSystem
 
         public LateralFileSystemNodeModel CreateInheritance(string virtualFolderName, string parentNodeId, string projectionSourcePath)
         {
+            return CreateInheritance(virtualFolderName, parentNodeId, projectionSourcePath, owner: "User");
+        }
+
+        public LateralFileSystemNodeModel CreateInheritance(string virtualFolderName, string parentNodeId, string projectionSourcePath, string owner)
+        {
             LateralFileSystemNodeModel node;
             lock (_syncRoot)
             {
                 ThrowIfDisposed();
                 var workingRootDirectory = EnsureWorkingRootIsReadyForActivation();
-                node = _service.CreateInheritance(workingRootDirectory, virtualFolderName, owner: "User", parentNodeId, projectionSourcePath);
+                node = _service.CreateInheritance(workingRootDirectory, virtualFolderName, owner, parentNodeId, projectionSourcePath);
             }
 
             TreeChanged?.Invoke(this, EventArgs.Empty);
@@ -160,10 +171,8 @@ namespace Skyweaver.Services.LateralFileSystem
                 {
                     ResetServiceLocked();
                 }
-                else
-                {
-                    TryActivateAllLocked();
-                }
+
+                QueueActivateAllLocked();
             }
 
             ConfigurationChanged?.Invoke(this, EventArgs.Empty);
@@ -240,6 +249,7 @@ namespace Skyweaver.Services.LateralFileSystem
 
                 _service.SourceChanged -= OnSourceChanged;
                 _service.Dispose();
+                _activationRequestId++;
                 _disposed = true;
             }
         }
@@ -256,37 +266,92 @@ namespace Skyweaver.Services.LateralFileSystem
             _service.SourceChanged -= OnSourceChanged;
             _service.Dispose();
             _service = CreateService();
-            TryActivateAllLocked();
         }
 
-        private void TryActivateAllLocked()
+        private void QueueActivateAllLocked()
         {
-            LateralFileSystemDebugConsole.Write("Runtime", $"TryActivateAllLocked start; IsEnabled={_configuration.IsEnabled}; WorkingRootDirectory='{_configuration.WorkingRootDirectory}'.");
+            var requestId = ++_activationRequestId;
+            _ = Task.Run(() => ActivateAllForRequest(requestId));
+        }
+
+        private void ActivateAllForRequest(int requestId)
+        {
+            var didRun = false;
+
+            try
+            {
+                LateralFileSystemService service;
+                string workingRootDirectory;
+
+                lock (_syncRoot)
+                {
+                    if (!TryPrepareActivationLocked(requestId, out service, out workingRootDirectory))
+                    {
+                        return;
+                    }
+                }
+
+                try
+                {
+                    service.ActivateAll(workingRootDirectory);
+                    LateralFileSystemDebugConsole.Write("Runtime", "Background activation finished activating all nodes.");
+                }
+                catch (Exception ex) when (ProjFsNative.IsAvailabilityException(ex))
+                {
+                    lock (_syncRoot)
+                    {
+                        if (!_disposed && requestId == _activationRequestId)
+                        {
+                            _isVirtualizationBackendAvailable = false;
+                            _virtualizationBackendStatusMessage = ProjFsNative.BuildAvailabilityErrorMessage(ex);
+                        }
+                    }
+
+                    LateralFileSystemDebugConsole.WriteException("Runtime", ex, "Background activation failed due to virtualization backend availability");
+                }
+
+                didRun = true;
+            }
+            catch (Exception ex)
+            {
+                LateralFileSystemDebugConsole.WriteException("Runtime", ex, $"Background activation failed; requestId={requestId}");
+            }
+
+            if (didRun)
+            {
+                ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+                TreeChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        private bool TryPrepareActivationLocked(int requestId, out LateralFileSystemService service, out string workingRootDirectory)
+        {
+            service = _service;
+            workingRootDirectory = _configuration.WorkingRootDirectory;
+
+            if (_disposed || requestId != _activationRequestId)
+            {
+                return false;
+            }
+
+            LateralFileSystemDebugConsole.Write("Runtime", $"TryPrepareActivationLocked start; IsEnabled={_configuration.IsEnabled}; WorkingRootDirectory='{_configuration.WorkingRootDirectory}'.");
             RefreshVirtualizationBackendAvailabilityLocked();
 
             if (!_configuration.IsEnabled || string.IsNullOrWhiteSpace(_configuration.WorkingRootDirectory))
             {
-                LateralFileSystemDebugConsole.Write("Runtime", "TryActivateAllLocked skipped because backend is disabled or working root is empty.");
-                return;
+                LateralFileSystemDebugConsole.Write("Runtime", "TryPrepareActivationLocked skipped because backend is disabled or working root is empty.");
+                return false;
             }
 
             if (!_isVirtualizationBackendAvailable)
             {
-                LateralFileSystemDebugConsole.Write("Runtime", $"TryActivateAllLocked skipped because backend is unavailable: {_virtualizationBackendStatusMessage}");
-                return;
+                LateralFileSystemDebugConsole.Write("Runtime", $"TryPrepareActivationLocked skipped because backend is unavailable: {_virtualizationBackendStatusMessage}");
+                return false;
             }
 
-            try
-            {
-                _service.ActivateAll(_configuration.WorkingRootDirectory);
-                LateralFileSystemDebugConsole.Write("Runtime", "TryActivateAllLocked finished activating all nodes.");
-            }
-            catch (Exception ex) when (ProjFsNative.IsAvailabilityException(ex))
-            {
-                _isVirtualizationBackendAvailable = false;
-                _virtualizationBackendStatusMessage = ProjFsNative.BuildAvailabilityErrorMessage(ex);
-                LateralFileSystemDebugConsole.WriteException("Runtime", ex, "TryActivateAllLocked failed due to virtualization backend availability");
-            }
+            service = _service;
+            workingRootDirectory = _configuration.WorkingRootDirectory;
+            return true;
         }
 
         private void RefreshVirtualizationBackendAvailabilityLocked()

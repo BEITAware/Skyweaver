@@ -11,6 +11,7 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
         private bool _isExpanded;
         private bool _isSelected;
         private bool _hasLoaded;
+        private bool _isLoading;
 
         public LateralFileSystemFileTreeNodeViewModel(
             LateralFileSystemFileEntryModel entry,
@@ -72,17 +73,44 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
 
         private void LoadChildren()
         {
-            if (!IsDirectory || _hasLoaded)
+            if (!IsDirectory || _hasLoaded || _isLoading)
             {
                 return;
             }
 
-            _hasLoaded = true;
-            Children.Clear();
+            _ = LoadChildrenAsync();
+        }
 
-            foreach (var entry in _childLoader(_relativePath))
+        private async Task LoadChildrenAsync()
+        {
+            if (!IsDirectory || _hasLoaded || _isLoading)
             {
-                Children.Add(new LateralFileSystemFileTreeNodeViewModel(entry, _childLoader));
+                return;
+            }
+
+            _isLoading = true;
+
+            try
+            {
+                var entries = await Task.Run(() => _childLoader(_relativePath)).ConfigureAwait(true);
+                Children.Clear();
+
+                foreach (var entry in entries)
+                {
+                    Children.Add(new LateralFileSystemFileTreeNodeViewModel(entry, _childLoader));
+                }
+
+                _hasLoaded = true;
+            }
+            catch (Exception ex)
+            {
+                Children.Clear();
+                Children.Add(new LateralFileSystemFileTreeNodeViewModel($"加载失败: {ex.Message}"));
+                _hasLoaded = true;
+            }
+            finally
+            {
+                _isLoading = false;
             }
         }
 

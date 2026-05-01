@@ -27,9 +27,9 @@ namespace Skyweaver.Services.ChatSession
             {
                 Agent = request.Agent,
                 Input = request.Input,
+                InputContentBlocks = request.InputContentBlocks,
                 History = request.History,
                 ToolContext = request.ToolContext,
-                MaxIterations = request.MaxIterations,
                 ToolConfirmationCallback = request.ToolConfirmationCallback
             };
 

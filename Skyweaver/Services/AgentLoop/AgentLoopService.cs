@@ -1,4 +1,6 @@
 using System.Text;
+using System.Net;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 using Newtonsoft.Json.Linq;
@@ -17,6 +19,38 @@ namespace Skyweaver.Services.AgentLoop
         private const int MaxConsecutiveRecoverableFailures = 3;
         private const string RequestRepairToolName = "_request";
         private const int StreamingTraceRawContentTailLength = 256;
+        private const int MaxAssistantToolTreeRepairCandidates = 128;
+        private const int MaxRepairToolCallSummaries = 12;
+        private static readonly Regex s_markdownCodeFencePattern = new(
+            @"^\s*```(?:xml)?\s*(?<content>[\s\S]*?)\s*```\s*$",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex s_terminalClosingTagMissingEndPattern = new(
+            @"(?<tag></[A-Za-z_][\w:.-]*\s*)$",
+            RegexOptions.Compiled);
+        private static readonly Regex s_invalidClosingTagSelfSlashPattern = new(
+            @"</(?<name>[A-Za-z_][\w:.-]*)\s*/>",
+            RegexOptions.Compiled);
+        private static readonly Regex s_closingTagWhitespacePattern = new(
+            @"</(?<name>[A-Za-z_][\w:.-]*)\s+>",
+            RegexOptions.Compiled);
+        private static readonly Regex s_knownToolTagNamePattern = new(
+            @"<(?<slash>/?)\s*(?<name>tools|tool)(?=[\s>/])",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex s_bareAmpersandPattern = new(
+            @"&(?!#\d+;|#x[0-9a-fA-F]+;|\w+;)",
+            RegexOptions.Compiled);
+        private static readonly Regex s_missingAttributeEqualsPattern = new(
+            @"\b(?<name>ToolName|Name|Value|ParameterName|Key)\s+(?<quote>[""'])",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex s_colonAttributePattern = new(
+            @"\b(?<name>ToolName|Name|Value|ParameterName|Key)\s*:\s*(?<value>(""[^""]*""|'[^']*'|[^\s/>]+))",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex s_unquotedAttributeValuePattern = new(
+            @"\b(?<name>ToolName|Name|Value|ParameterName|Key)\s*=\s*(?<value>[^\s""'<>/`]+)",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex s_parameterContentPattern = new(
+            @"(?<open><Parameter\b[^>]*>)(?<content>.*?)(?<close></Parameter\s*>)",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
         private sealed class InvalidAssistantResponseException : InvalidOperationException
         {
@@ -288,7 +322,7 @@ namespace Skyweaver.Services.AgentLoop
             AgentLoopFinalOutput? latestMessageOutput = null;
             var consecutiveRecoverableFailures = 0;
 
-            for (var iterationNumber = 1; iterationNumber <= request.MaxIterations; iterationNumber++)
+            for (var iterationNumber = 1; ; iterationNumber++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -296,6 +330,7 @@ namespace Skyweaver.Services.AgentLoop
                     request.Agent,
                     systemPrompt,
                     request.Input,
+                    request.InputContentBlocks,
                     persistentHistory,
                     turnHistory,
                     debugRunContext,
@@ -366,7 +401,12 @@ namespace Skyweaver.Services.AgentLoop
                     }
 
                     consecutiveRecoverableFailures++;
-                    var repairMessage = BuildRepairMessage(ex.Message, consecutiveRecoverableFailures);
+                    var repairMessage = BuildRepairMessage(
+                        ex.Message,
+                        consecutiveRecoverableFailures,
+                        ex.ToolBackfills,
+                        turnHistory,
+                        latestMessageOutput);
                     AppendFailedIterationHistory(ex, repairMessage, turnHistory);
 
                     await PublishAsync(
@@ -494,13 +534,6 @@ namespace Skyweaver.Services.AgentLoop
                 }
             }
 
-            return new AgentLoopResult
-            {
-                IsCompleted = false,
-                FailureReason = $"The agent loop reached the iteration limit ({request.MaxIterations}) before FinishTask closed the turn.",
-                LastModelId = lastModelId,
-                Iterations = iterations.ToArray()
-            };
         }
 
         private async Task<StreamedResponseResult> InvokeModelStreamingAsync(
@@ -581,6 +614,20 @@ namespace Skyweaver.Services.AgentLoop
                         if (!string.IsNullOrWhiteSpace(update.ModelId))
                         {
                             modelId = update.ModelId;
+                        }
+
+                        if (!string.IsNullOrEmpty(update.ReasoningTextDelta))
+                        {
+                            await PublishAsync(
+                                onEventAsync,
+                                new AgentLoopRuntimeEvent
+                                {
+                                    Kind = AgentLoopRuntimeEventKind.ReasoningDelta,
+                                    IterationNumber = iterationNumber,
+                                    ModelId = modelId,
+                                    ReasoningDelta = update.ReasoningTextDelta
+                                },
+                                cancellationToken).ConfigureAwait(false);
                         }
 
                         var rawContentLengthBeforeAppend = rawContentBuilder.Length;
@@ -1137,11 +1184,6 @@ namespace Skyweaver.Services.AgentLoop
         {
             ArgumentNullException.ThrowIfNull(request.Agent);
 
-            if (request.MaxIterations <= 0)
-            {
-                throw new InvalidOperationException("MaxIterations must be greater than zero.");
-            }
-
             if (request.Agent.IsStructuredXmlIO &&
                 !TryParseXmlWithRoot(
                     request.Input,
@@ -1171,10 +1213,54 @@ namespace Skyweaver.Services.AgentLoop
                 return false;
             }
 
+            if (TryParseAssistantToolTreeExact(
+                    trimmed,
+                    out normalizedToolsXml,
+                    out assistantResponse,
+                    out errorMessage))
+            {
+                return true;
+            }
+
+            var originalErrorMessage = errorMessage;
+            if (TryRepairAssistantToolTree(trimmed, out var repairedToolsXml) &&
+                TryParseAssistantToolTreeExact(
+                    repairedToolsXml,
+                    out normalizedToolsXml,
+                    out assistantResponse,
+                    out _))
+            {
+                return true;
+            }
+
+            if (TryWrapBareMessageAsCreateMessageToolTree(trimmed, out var wrappedMessageToolsXml) &&
+                TryParseAssistantToolTreeExact(
+                    wrappedMessageToolsXml,
+                    out normalizedToolsXml,
+                    out assistantResponse,
+                    out _))
+            {
+                return true;
+            }
+
+            errorMessage = originalErrorMessage;
+            return false;
+        }
+
+        private static bool TryParseAssistantToolTreeExact(
+            string rawContent,
+            out string normalizedToolsXml,
+            out AgentAssistantResponse assistantResponse,
+            out string errorMessage)
+        {
+            normalizedToolsXml = string.Empty;
+            assistantResponse = new AgentAssistantResponse(string.Empty, Array.Empty<AgentAssistantResponsePart>());
+            errorMessage = string.Empty;
+
             XDocument document;
             try
             {
-                document = XDocument.Parse(trimmed, LoadOptions.PreserveWhitespace);
+                document = XDocument.Parse(rawContent, LoadOptions.PreserveWhitespace);
             }
             catch (Exception ex) when (ex is XmlException or InvalidOperationException)
             {
@@ -1246,6 +1332,641 @@ namespace Skyweaver.Services.AgentLoop
                     invocations,
                     toolCallIndex: 1)]);
             return true;
+        }
+
+        private static bool TryRepairAssistantToolTree(string rawContent, out string repairedToolsXml)
+        {
+            repairedToolsXml = string.Empty;
+
+            var original = rawContent?.Trim() ?? string.Empty;
+            if (original.Length == 0)
+            {
+                return false;
+            }
+
+            var queue = new Queue<string>();
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+
+            void Enqueue(string? candidate)
+            {
+                if (seen.Count >= MaxAssistantToolTreeRepairCandidates ||
+                    string.IsNullOrWhiteSpace(candidate))
+                {
+                    return;
+                }
+
+                var trimmedCandidate = candidate.Trim();
+                if (trimmedCandidate.Length > 0 && seen.Add(trimmedCandidate))
+                {
+                    queue.Enqueue(trimmedCandidate);
+                }
+            }
+
+            Enqueue(original);
+            while (queue.Count > 0)
+            {
+                var candidate = queue.Dequeue();
+                if (!string.Equals(candidate, original, StringComparison.Ordinal) &&
+                    TryParseAssistantToolTreeExact(
+                        candidate,
+                        out var normalizedCandidate,
+                        out _,
+                        out _))
+                {
+                    repairedToolsXml = normalizedCandidate;
+                    return true;
+                }
+
+                foreach (var transformedCandidate in EnumerateAssistantToolTreeRepairTransforms(candidate))
+                {
+                    Enqueue(transformedCandidate);
+                }
+            }
+
+            return false;
+        }
+
+        private static IEnumerable<string?> EnumerateAssistantToolTreeRepairTransforms(string text)
+        {
+            yield return StripMarkdownCodeFence(text);
+            yield return MaybeDecodeHtmlEncodedXml(text);
+            yield return NormalizeCommonXmlSyntax(text);
+            yield return FixTerminalMissingTagEnd(text);
+            yield return NormalizeInvalidClosingTagSyntax(text);
+            yield return NormalizeKnownToolTagCasing(text);
+            yield return NormalizeCommonToolAttributeTypos(text);
+            yield return EscapeBareAmpersands(text);
+            yield return ProtectParameterTextContent(text);
+            yield return ExtractSingleToolsFragment(text);
+            yield return WrapStandaloneToolElements(text);
+            yield return AppendMissingToolsClosingTag(text);
+            yield return PrependMissingToolsOpeningTag(text);
+            yield return ReplaceTerminalMistypedToolsClosingTag(text);
+        }
+
+        private static bool TryWrapBareMessageAsCreateMessageToolTree(string rawContent, out string toolsXml)
+        {
+            toolsXml = string.Empty;
+
+            var normalized = rawContent?.Trim() ?? string.Empty;
+            if (normalized.Length == 0 ||
+                StartsWithElement(normalized, "Tools") ||
+                StartsWithElement(normalized, "Tool"))
+            {
+                return false;
+            }
+
+            toolsXml = CreateMessageToolTreeXml(normalized);
+            return toolsXml.Length > 0;
+        }
+
+        private static string CreateAssistantHistoryContent(string content)
+        {
+            var normalized = content?.Trim() ?? string.Empty;
+            if (normalized.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            if (StartsWithElement(normalized, "Tools"))
+            {
+                return normalized;
+            }
+
+            if (StartsWithElement(normalized, "Tool"))
+            {
+                return $"<Tools>{normalized}</Tools>";
+            }
+
+            return CreateMessageToolTreeXml(normalized);
+        }
+
+        private static string CreateMessageToolTreeXml(string content)
+        {
+            var normalized = content?.Trim() ?? string.Empty;
+            if (normalized.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            var document = new XDocument(
+                new XElement(
+                    "Tools",
+                    new XElement(
+                        "Tool",
+                        new XAttribute("ToolName", CreateMessageTool.ToolName),
+                        normalized)));
+            return document.ToString(SaveOptions.DisableFormatting);
+        }
+
+        private static string StripMarkdownCodeFence(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return string.Empty;
+            }
+
+            var match = s_markdownCodeFencePattern.Match(text);
+            return match.Success
+                ? match.Groups["content"].Value
+                : text;
+        }
+
+        private static string MaybeDecodeHtmlEncodedXml(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return string.Empty;
+            }
+
+            if (text.Contains('<'))
+            {
+                return text;
+            }
+
+            if (!text.Contains("&lt;", StringComparison.OrdinalIgnoreCase) &&
+                !text.Contains("&#60;", StringComparison.OrdinalIgnoreCase) &&
+                !text.Contains("&#x3c;", StringComparison.OrdinalIgnoreCase))
+            {
+                return text;
+            }
+
+            var decoded = WebUtility.HtmlDecode(text);
+            return decoded.Contains('<') ? decoded : text;
+        }
+
+        private static string NormalizeCommonXmlSyntax(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return string.Empty;
+            }
+
+            var builder = new StringBuilder(text.Length);
+            foreach (var character in text)
+            {
+                switch (character)
+                {
+                    case '\uFEFF':
+                    case '\u200B':
+                    case '\u200C':
+                    case '\u200D':
+                    case '\u2060':
+                        continue;
+                    case '\u00A0':
+                    case '\u3000':
+                        builder.Append(' ');
+                        break;
+                    case '\uFF1C':
+                        builder.Append('<');
+                        break;
+                    case '\uFF1E':
+                        builder.Append('>');
+                        break;
+                    case '\uFF1D':
+                        builder.Append('=');
+                        break;
+                    case '\uFF0F':
+                        builder.Append('/');
+                        break;
+                    case '\u201C':
+                    case '\u201D':
+                    case '\u2033':
+                    case '\u00AB':
+                    case '\u00BB':
+                    case '\u300C':
+                    case '\u300D':
+                    case '\u300E':
+                    case '\u300F':
+                    case '\uFF02':
+                        builder.Append('"');
+                        break;
+                    case '\u2018':
+                    case '\u2019':
+                    case '\u2032':
+                    case '\uFF07':
+                        builder.Append('\'');
+                        break;
+                    default:
+                        if (char.IsControl(character) && character is not '\r' and not '\n' and not '\t')
+                        {
+                            continue;
+                        }
+
+                        builder.Append(character);
+                        break;
+                }
+            }
+
+            return builder.ToString();
+        }
+
+        private static string FixTerminalMissingTagEnd(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return string.Empty;
+            }
+
+            var trimmed = text.TrimEnd();
+            return trimmed.EndsWith(">", StringComparison.Ordinal)
+                ? text
+                : s_terminalClosingTagMissingEndPattern.Replace(trimmed, "${tag}>");
+        }
+
+        private static string NormalizeInvalidClosingTagSyntax(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return string.Empty;
+            }
+
+            var normalized = s_invalidClosingTagSelfSlashPattern.Replace(text, "</${name}>");
+            return s_closingTagWhitespacePattern.Replace(normalized, "</${name}>");
+        }
+
+        private static string NormalizeKnownToolTagCasing(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return string.Empty;
+            }
+
+            return s_knownToolTagNamePattern.Replace(
+                text,
+                match =>
+                {
+                    var slash = match.Groups["slash"].Value;
+                    var canonicalName = string.Equals(
+                        match.Groups["name"].Value,
+                        "Tools",
+                        StringComparison.OrdinalIgnoreCase)
+                            ? "Tools"
+                            : "Tool";
+                    return $"<{slash}{canonicalName}";
+                });
+        }
+
+        private static string NormalizeCommonToolAttributeTypos(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return string.Empty;
+            }
+
+            var normalized = s_missingAttributeEqualsPattern.Replace(text, "${name}=${quote}");
+            normalized = s_colonAttributePattern.Replace(normalized, "${name}=${value}");
+            normalized = s_unquotedAttributeValuePattern.Replace(
+                normalized,
+                match => $"{match.Groups["name"].Value}=\"{match.Groups["value"].Value}\"");
+            return normalized;
+        }
+
+        private static string EscapeBareAmpersands(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return string.Empty;
+            }
+
+            return s_bareAmpersandPattern.Replace(text, "&amp;");
+        }
+
+        private static string ProtectParameterTextContent(string? xml)
+        {
+            if (string.IsNullOrWhiteSpace(xml))
+            {
+                return string.Empty;
+            }
+
+            return s_parameterContentPattern.Replace(
+                xml,
+                match =>
+                {
+                    var content = match.Groups["content"].Value;
+                    if (string.IsNullOrWhiteSpace(content) || LooksLikeXmlFragment(content))
+                    {
+                        return match.Value;
+                    }
+
+                    return $"{match.Groups["open"].Value}{EscapeXmlTextContent(content)}{match.Groups["close"].Value}";
+                });
+        }
+
+        private static string EscapeXmlTextContent(string text)
+        {
+            return EscapeBareAmpersands(text)
+                .Replace("<", "&lt;", StringComparison.Ordinal)
+                .Replace(">", "&gt;", StringComparison.Ordinal);
+        }
+
+        private static bool LooksLikeXmlFragment(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text) || !text.Contains('<'))
+            {
+                return false;
+            }
+
+            try
+            {
+                _ = XDocument.Parse($"<Root>{EscapeBareAmpersands(text)}</Root>", LoadOptions.PreserveWhitespace);
+                return true;
+            }
+            catch (Exception ex) when (ex is XmlException or InvalidOperationException)
+            {
+                return false;
+            }
+        }
+
+        private static string? ExtractSingleToolsFragment(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return null;
+            }
+
+            var trimmed = text.Trim();
+            var toolsStartIndexes = EnumerateElementStartIndexes(trimmed, "Tools").Take(2).ToArray();
+            if (toolsStartIndexes.Length != 1)
+            {
+                return null;
+            }
+
+            var toolsStartIndex = toolsStartIndexes[0];
+            var toolsEndIndex = IndexOfClosingElementEnd(trimmed, "Tools", toolsStartIndex);
+            return toolsEndIndex > toolsStartIndex
+                ? trimmed[toolsStartIndex..toolsEndIndex]
+                : trimmed[toolsStartIndex..];
+        }
+
+        private static string? WrapStandaloneToolElements(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return null;
+            }
+
+            var trimmed = text.Trim();
+            if (StartsWithElement(trimmed, "Tools"))
+            {
+                return null;
+            }
+
+            return TryCollectOnlyStandaloneToolElements(trimmed, out var toolElements)
+                ? $"<Tools>{toolElements}</Tools>"
+                : null;
+        }
+
+        private static string? AppendMissingToolsClosingTag(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return null;
+            }
+
+            var trimmed = text.Trim();
+            return StartsWithElement(trimmed, "Tools") &&
+                   IndexOfClosingElementEnd(trimmed, "Tools") < 0
+                ? $"{trimmed}</Tools>"
+                : null;
+        }
+
+        private static string? PrependMissingToolsOpeningTag(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return null;
+            }
+
+            var trimmed = text.Trim();
+            if (IndexOfElementStart(trimmed, "Tools") >= 0)
+            {
+                return null;
+            }
+
+            var toolsCloseStartIndex = LastIndexOfClosingTagStart(trimmed, "Tools");
+            if (toolsCloseStartIndex < 0 ||
+                FindTagEnd(trimmed, toolsCloseStartIndex) != trimmed.Length)
+            {
+                return null;
+            }
+
+            var beforeClosingRoot = trimmed[..toolsCloseStartIndex].Trim();
+            return TryCollectOnlyStandaloneToolElements(beforeClosingRoot, out var toolElements)
+                ? $"<Tools>{toolElements}</Tools>"
+                : null;
+        }
+
+        private static string? ReplaceTerminalMistypedToolsClosingTag(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return null;
+            }
+
+            var trimmed = text.Trim();
+            if (!StartsWithElement(trimmed, "Tools") ||
+                IndexOfClosingElementEnd(trimmed, "Tools") >= 0)
+            {
+                return null;
+            }
+
+            var terminalToolCloseStartIndex = LastIndexOfClosingTagStart(trimmed, "Tool");
+            if (terminalToolCloseStartIndex < 0 ||
+                FindTagEnd(trimmed, terminalToolCloseStartIndex) != trimmed.Length)
+            {
+                return null;
+            }
+
+            return $"{trimmed[..terminalToolCloseStartIndex]}</Tools>";
+        }
+
+        private static bool TryCollectOnlyStandaloneToolElements(string text, out string toolElements)
+        {
+            toolElements = string.Empty;
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return false;
+            }
+
+            var builder = new StringBuilder();
+            var index = 0;
+            var foundAny = false;
+
+            while (index < text.Length)
+            {
+                index = SkipWhitespace(text, index);
+                if (index >= text.Length)
+                {
+                    break;
+                }
+
+                if (IndexOfElementStart(text, "Tool", index) != index)
+                {
+                    toolElements = string.Empty;
+                    return false;
+                }
+
+                var toolEndIndex = IndexOfElementEnd(text, "Tool", index);
+                if (toolEndIndex < 0)
+                {
+                    toolElements = string.Empty;
+                    return false;
+                }
+
+                builder.Append(text[index..toolEndIndex]);
+                index = toolEndIndex;
+                foundAny = true;
+            }
+
+            toolElements = builder.ToString();
+            return foundAny;
+        }
+
+        private static IEnumerable<int> EnumerateElementStartIndexes(string text, string elementName)
+        {
+            var searchIndex = 0;
+            while (searchIndex < text.Length)
+            {
+                var elementStartIndex = IndexOfElementStart(text, elementName, searchIndex);
+                if (elementStartIndex < 0)
+                {
+                    yield break;
+                }
+
+                yield return elementStartIndex;
+                searchIndex = elementStartIndex + 1;
+            }
+        }
+
+        private static bool StartsWithElement(string text, string elementName)
+        {
+            return IndexOfElementStart(text, elementName) == 0;
+        }
+
+        private static int IndexOfElementStart(string text, string elementName, int startIndex = 0)
+        {
+            var needle = $"<{elementName}";
+            var searchIndex = Math.Max(0, startIndex);
+
+            while (searchIndex < text.Length)
+            {
+                var matchIndex = text.IndexOf(needle, searchIndex, StringComparison.OrdinalIgnoreCase);
+                if (matchIndex < 0)
+                {
+                    return -1;
+                }
+
+                var nameEndIndex = matchIndex + needle.Length;
+                if (nameEndIndex >= text.Length || IsXmlNameBoundary(text[nameEndIndex]))
+                {
+                    return matchIndex;
+                }
+
+                searchIndex = matchIndex + 1;
+            }
+
+            return -1;
+        }
+
+        private static int IndexOfClosingTagStart(string text, string elementName, int startIndex = 0)
+        {
+            var needle = $"</{elementName}";
+            var searchIndex = Math.Max(0, startIndex);
+
+            while (searchIndex < text.Length)
+            {
+                var matchIndex = text.IndexOf(needle, searchIndex, StringComparison.OrdinalIgnoreCase);
+                if (matchIndex < 0)
+                {
+                    return -1;
+                }
+
+                var nameEndIndex = matchIndex + needle.Length;
+                if (nameEndIndex >= text.Length || IsXmlNameBoundary(text[nameEndIndex]))
+                {
+                    return matchIndex;
+                }
+
+                searchIndex = matchIndex + 1;
+            }
+
+            return -1;
+        }
+
+        private static int LastIndexOfClosingTagStart(string text, string elementName)
+        {
+            var lastMatchIndex = -1;
+            var searchIndex = 0;
+
+            while (searchIndex < text.Length)
+            {
+                var matchIndex = IndexOfClosingTagStart(text, elementName, searchIndex);
+                if (matchIndex < 0)
+                {
+                    return lastMatchIndex;
+                }
+
+                lastMatchIndex = matchIndex;
+                searchIndex = matchIndex + 1;
+            }
+
+            return lastMatchIndex;
+        }
+
+        private static int IndexOfElementEnd(string text, string elementName, int startIndex)
+        {
+            if (IndexOfElementStart(text, elementName, startIndex) != startIndex)
+            {
+                return -1;
+            }
+
+            var openingTagEndIndex = FindTagEnd(text, startIndex);
+            if (openingTagEndIndex < 0)
+            {
+                return -1;
+            }
+
+            var openingTag = text[startIndex..openingTagEndIndex];
+            if (openingTag.TrimEnd().EndsWith("/>", StringComparison.Ordinal))
+            {
+                return openingTagEndIndex;
+            }
+
+            return IndexOfClosingElementEnd(text, elementName, openingTagEndIndex);
+        }
+
+        private static int IndexOfClosingElementEnd(string text, string elementName, int startIndex = 0)
+        {
+            var closingTagStartIndex = IndexOfClosingTagStart(text, elementName, startIndex);
+            return closingTagStartIndex < 0
+                ? -1
+                : FindTagEnd(text, closingTagStartIndex);
+        }
+
+        private static int FindTagEnd(string text, int tagStartIndex)
+        {
+            return tagStartIndex < 0
+                ? -1
+                : text.IndexOf('>', tagStartIndex) is var tagEndIndex && tagEndIndex >= 0
+                    ? tagEndIndex + 1
+                    : -1;
+        }
+
+        private static int SkipWhitespace(string text, int startIndex)
+        {
+            var index = Math.Max(0, startIndex);
+            while (index < text.Length && char.IsWhiteSpace(text[index]))
+            {
+                index++;
+            }
+
+            return index;
+        }
+
+        private static bool IsXmlNameBoundary(char character)
+        {
+            return char.IsWhiteSpace(character) || character is '>' or '/' or '?';
         }
 
         private static bool IsCreateMessage(string toolName)
@@ -1739,16 +2460,204 @@ namespace Skyweaver.Services.AgentLoop
             };
         }
 
-        private string BuildRepairMessage(string errorMessage, int consecutiveFailures)
+        private static string BuildRepairMessage(
+            string errorMessage,
+            int consecutiveFailures,
+            IReadOnlyList<AgentToolBackfill>? rejectedResponseBackfills,
+            IReadOnlyList<LanguageModelChatMessage>? turnHistory,
+            AgentLoopFinalOutput? latestMessageOutput)
         {
             var normalizedError = string.IsNullOrWhiteSpace(errorMessage)
                 ? "The previous assistant response could not be accepted."
                 : errorMessage.Trim();
+            var executionStateHint = BuildRepairExecutionStateHint(
+                rejectedResponseBackfills,
+                turnHistory,
+                latestMessageOutput);
 
             return
                 $"The previous assistant response was rejected and the turn is still open. Reason: {normalizedError} " +
-                $"Ignore any partial text from that rejected response. This is consecutive failed iteration {consecutiveFailures} of {MaxConsecutiveRecoverableFailures}. " +
+                $"Ignore any partial text from that rejected response. {executionStateHint} " +
+                $"This is consecutive failed iteration {consecutiveFailures} of {MaxConsecutiveRecoverableFailures}. " +
                 $"Reply again with exactly one complete <Tools> XML tree. Put user-visible text only inside {CreateMessageTool.ToolName}, and call {FinishTaskTool.ToolName} only after a successful {CreateMessageTool.ToolName}.";
+        }
+
+        private static string BuildRepairExecutionStateHint(
+            IReadOnlyList<AgentToolBackfill>? rejectedResponseBackfills,
+            IReadOnlyList<LanguageModelChatMessage>? turnHistory,
+            AgentLoopFinalOutput? latestMessageOutput)
+        {
+            var hints = new List<string>();
+            var acceptedFromRejectedResponse = BuildBackfillToolCallSummaries(
+                rejectedResponseBackfills,
+                requireAllSuccessful: true);
+            if (acceptedFromRejectedResponse.Count > 0)
+            {
+                hints.Add(
+                    $"Tool calls already accepted from the rejected response: {string.Join(", ", acceptedFromRejectedResponse)}. Do not call these again unless you intentionally need a new side effect or need to replace the current reply.");
+            }
+
+            var failedFromRejectedResponse = BuildBackfillToolCallSummaries(
+                rejectedResponseBackfills,
+                requireAllSuccessful: false);
+            if (failedFromRejectedResponse.Count > 0)
+            {
+                hints.Add(
+                    $"Tool calls that returned errors from the rejected response: {string.Join(", ", failedFromRejectedResponse)}. Retry only the failed or missing work if it is still needed.");
+            }
+
+            var successfulHistoryCalls = BuildSuccessfulHistoryToolReturnSummaries(turnHistory);
+            if (successfulHistoryCalls.Count > 0)
+            {
+                hints.Add(
+                    $"Successful tool calls already recorded in this turn history: {string.Join(", ", successfulHistoryCalls)}. Use those ToolReturn messages as authoritative context; do not replay them just because the previous response was rejected.");
+            }
+
+            if (latestMessageOutput != null)
+            {
+                hints.Add(
+                    $"A current reply candidate already exists from the latest successful {CreateMessageTool.ToolName}. Do not repeat {CreateMessageTool.ToolName} just to restate the same message; call {FinishTaskTool.ToolName} if the task is ready to close, or call {CreateMessageTool.ToolName} only if you need to update the reply.");
+            }
+
+            if (hints.Count == 0)
+            {
+                hints.Add("No tool calls from the rejected response were accepted. Any streamed text from that rejected response is not a successful tool call.");
+            }
+
+            return string.Join(" ", hints);
+        }
+
+        private static IReadOnlyList<string> BuildBackfillToolCallSummaries(
+            IReadOnlyList<AgentToolBackfill>? toolBackfills,
+            bool requireAllSuccessful)
+        {
+            if (toolBackfills == null || toolBackfills.Count == 0)
+            {
+                return Array.Empty<string>();
+            }
+
+            var summaries = toolBackfills
+                .Where(backfill => backfill.ToolReturns.Count > 0)
+                .Where(backfill => requireAllSuccessful
+                    ? backfill.ToolReturns.All(toolReturn => toolReturn.IsSuccess)
+                    : backfill.ToolReturns.Any(toolReturn => !toolReturn.IsSuccess))
+                .Select(BuildBackfillToolCallSummary)
+                .Where(summary => !string.IsNullOrWhiteSpace(summary))
+                .ToArray();
+
+            return LimitRepairToolCallSummaries(summaries);
+        }
+
+        private static string BuildBackfillToolCallSummary(AgentToolBackfill backfill)
+        {
+            var toolNames = backfill.ToolReturns
+                .Select(toolReturn => toolReturn.ToolName?.Trim() ?? string.Empty)
+                .Where(toolName => toolName.Length > 0)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            if (toolNames.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            return backfill.ToolCallIndex > 0
+                ? $"#{backfill.ToolCallIndex} {string.Join("+", toolNames)}"
+                : string.Join("+", toolNames);
+        }
+
+        private static IReadOnlyList<string> BuildSuccessfulHistoryToolReturnSummaries(
+            IReadOnlyList<LanguageModelChatMessage>? turnHistory)
+        {
+            if (turnHistory == null || turnHistory.Count == 0)
+            {
+                return Array.Empty<string>();
+            }
+
+            var countsByToolName = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            foreach (var message in turnHistory)
+            {
+                if (message.Role != LanguageModelChatRole.User)
+                {
+                    continue;
+                }
+
+                foreach (var toolName in ExtractSuccessfulToolReturnNames(message.Content))
+                {
+                    countsByToolName.TryGetValue(toolName, out var currentCount);
+                    countsByToolName[toolName] = currentCount + 1;
+                }
+            }
+
+            if (countsByToolName.Count == 0)
+            {
+                return Array.Empty<string>();
+            }
+
+            var summaries = countsByToolName
+                .OrderBy(item => item.Key, StringComparer.OrdinalIgnoreCase)
+                .Select(item => item.Value > 1 ? $"{item.Key} x{item.Value}" : item.Key)
+                .ToArray();
+
+            return LimitRepairToolCallSummaries(summaries);
+        }
+
+        private static IEnumerable<string> ExtractSuccessfulToolReturnNames(string? xml)
+        {
+            if (string.IsNullOrWhiteSpace(xml))
+            {
+                yield break;
+            }
+
+            XDocument document;
+            try
+            {
+                document = XDocument.Parse(xml, LoadOptions.PreserveWhitespace);
+            }
+            catch (Exception ex) when (ex is XmlException or InvalidOperationException)
+            {
+                yield break;
+            }
+
+            var root = document.Root;
+            if (root == null || !string.Equals(root.Name.LocalName, "ToolsReturn", StringComparison.OrdinalIgnoreCase))
+            {
+                yield break;
+            }
+
+            foreach (var toolReturn in root.Elements().Where(element =>
+                         string.Equals(element.Name.LocalName, "ToolReturn", StringComparison.OrdinalIgnoreCase)))
+            {
+                if (toolReturn.Elements().Any(element =>
+                        string.Equals(element.Name.LocalName, "ErrorMessage", StringComparison.OrdinalIgnoreCase)))
+                {
+                    continue;
+                }
+
+                var toolName = toolReturn.Attributes()
+                    .FirstOrDefault(attribute =>
+                        string.Equals(attribute.Name.LocalName, "ToolName", StringComparison.OrdinalIgnoreCase))
+                    ?.Value
+                    ?.Trim();
+
+                if (!string.IsNullOrWhiteSpace(toolName))
+                {
+                    yield return toolName;
+                }
+            }
+        }
+
+        private static IReadOnlyList<string> LimitRepairToolCallSummaries(IReadOnlyList<string> summaries)
+        {
+            if (summaries.Count <= MaxRepairToolCallSummaries)
+            {
+                return summaries;
+            }
+
+            return summaries
+                .Take(MaxRepairToolCallSummaries)
+                .Append($"and {summaries.Count - MaxRepairToolCallSummaries} more")
+                .ToArray();
         }
 
         private void AppendFailedIterationHistory(
@@ -1765,9 +2674,10 @@ namespace Skyweaver.Services.AgentLoop
             }
             else if (!string.IsNullOrWhiteSpace(failure.AssistantResponse.RawContent))
             {
+                var assistantHistoryContent = CreateAssistantHistoryContent(failure.AssistantResponse.RawContent);
                 turnHistory.Add(new LanguageModelChatMessage(
                     LanguageModelChatRole.Assistant,
-                    failure.AssistantResponse.RawContent));
+                    assistantHistoryContent));
             }
 
             turnHistory.Add(new LanguageModelChatMessage(
@@ -1806,9 +2716,10 @@ namespace Skyweaver.Services.AgentLoop
                 var part = assistantResponse.Parts[partIndex];
                 if (!part.HasParseError && !string.IsNullOrWhiteSpace(part.Content))
                 {
+                    var assistantHistoryContent = CreateAssistantHistoryContent(part.Content);
                     turnHistory.Add(new LanguageModelChatMessage(
                         LanguageModelChatRole.Assistant,
-                        part.Content));
+                        assistantHistoryContent));
                 }
 
                 while (backfillCursor < orderedBackfills.Length &&

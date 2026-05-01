@@ -6,9 +6,21 @@ using Skyweaver.Services.SkyweaverTools;
 
 namespace Skyweaver.Tools
 {
-    public sealed class ReadTextFileTool : ISkyweaverTool, ISkyweaverToolInvocationPresentationProvider
+    public sealed class ReadTextFileTool :
+        ISkyweaverTool,
+        ISkyweaverToolInvocationPresentationProvider,
+        ISkyweaverToolPromptDescriptionProvider
     {
         public const string ToolName = "ReadTextFile";
+
+        private sealed record ReadTargetPath(
+            string ResolvedPath,
+            string? WorkspaceRelativePath,
+            string? LateralNodeName,
+            string? LateralNodeId,
+            string? LateralNodeVirtualRootPath,
+            string? LateralRelativePath,
+            bool UsedLateralShortcut);
 
         private sealed record EncodingDecision(
             Encoding EffectiveEncoding,
@@ -34,23 +46,30 @@ namespace Skyweaver.Tools
 
         private static readonly SkyweaverToolDefinition s_definition = new(
             ToolName,
-            "读取文本文件并返回完整内容。Encoding 为可选参数；默认以 UTF-8 为首选，但当文件可被明确探测为非 UTF-8 编码时，会自动改用探测到的编码，并在结果中说明。",
+            "Reads a whole text file and returns the full content. FilePath may be a normal absolute or relative path, or a LateralFS\\NodeName\\relative\\file.ext shortcut. Encoding is optional; utf-8 is preferred by default, and the tool automatically switches to a clearly detected non-UTF-8 encoding when safe detection succeeds.",
             "Script",
             [
                 new SkyweaverToolParameterDefinition(
                     "FilePath",
-                    "要读取的文本文件路径。相对路径会相对于当前工作区解析。",
+                    "Path of the text file to read. Relative paths resolve against the current workspace. You may also use LateralFS\\NodeName\\relative\\file.ext; the host resolves that shortcut to the node virtual folder and blocks path traversal outside the node.",
                     SkyweaverToolParameterType.String,
                     isRequired: true),
                 new SkyweaverToolParameterDefinition(
                     "Encoding",
-                    "读取文件时使用的文本编码名称；省略时默认以 UTF-8 为首选，并在可明确探测到非 UTF-8 编码时自动切换到探测结果。",
+                    "Text encoding name to use while reading. Default is utf-8. When utf-8 is requested, the tool safely auto-detects UTF BOMs plus strong UTF-16 or UTF-32 zero-byte patterns.",
                     SkyweaverToolParameterType.String,
                     isRequired: false,
                     defaultValue: "utf-8")
             ]);
 
         public SkyweaverToolDefinition Definition => s_definition;
+
+        public string GetPromptDescription(SkyweaverToolPromptDescriptionContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            return "Reads a whole text file and returns the full content. FilePath may be a normal absolute or relative path, or a LateralFS\\NodeName\\relative\\file.ext shortcut; the shortcut resolves to that node's virtual folder and rejects '..' traversal outside the node. Encoding is optional and defaults to utf-8 with safe auto-detection of non-UTF-8 UTF BOMs and strong UTF-16 or UTF-32 zero-byte patterns.";
+        }
 
         public FrameworkElement? CreateInvocationPresentation(SkyweaverToolInvocationPresentationContext context)
         {
@@ -59,8 +78,8 @@ namespace Skyweaver.Tools
             return ToolInvocationCardFactory.Create(
                 context,
                 [
-                    new ToolInvocationCardFieldDefinition("文件路径", "FilePath", "等待文件路径..."),
-                    new ToolInvocationCardFieldDefinition("编码", "Encoding", "默认按 UTF-8 处理")
+                    new ToolInvocationCardFieldDefinition("File path", "FilePath", "Waiting for file path..."),
+                    new ToolInvocationCardFieldDefinition("Encoding", "Encoding", "Default utf-8 with safe auto-detection")
                 ]);
         }
 
@@ -72,20 +91,18 @@ namespace Skyweaver.Tools
             cancellationToken.ThrowIfCancellationRequested();
 
             var requestedPath = arguments.GetString("FilePath") ?? string.Empty;
-            string? resolvedPath = null;
+            ReadTargetPath? targetPath = null;
 
             try
             {
-                resolvedPath = ToolFileSystemHelper.ResolvePath(requestedPath, context.WorkspacePath);
-                var relativePath = ToolFileSystemHelper.TryGetWorkspaceRelativePath(context.WorkspacePath, resolvedPath);
+                targetPath = ResolveReadTargetPath(requestedPath, context.WorkspacePath);
 
-                if (Directory.Exists(resolvedPath))
+                if (Directory.Exists(targetPath.ResolvedPath))
                 {
                     return SkyweaverToolResult.Failure(
-                        $"Path points to a directory, not a text file: {resolvedPath}",
+                        $"Path points to a directory, not a text file: {targetPath.ResolvedPath}",
                         BuildData(
-                            resolvedPath,
-                            relativePath,
+                            targetPath,
                             requestedEncodingName: null,
                             requestedEncodingWasDefault: true,
                             effectiveEncodingName: null,
@@ -98,13 +115,12 @@ namespace Skyweaver.Tools
                             byteCount: null));
                 }
 
-                if (!File.Exists(resolvedPath))
+                if (!File.Exists(targetPath.ResolvedPath))
                 {
                     return SkyweaverToolResult.Failure(
-                        $"Text file not found: {resolvedPath}",
+                        $"Text file not found: {targetPath.ResolvedPath}",
                         BuildData(
-                            resolvedPath,
-                            relativePath,
+                            targetPath,
                             requestedEncodingName: null,
                             requestedEncodingWasDefault: true,
                             effectiveEncodingName: null,
@@ -117,22 +133,20 @@ namespace Skyweaver.Tools
                             byteCount: null));
                 }
 
-                var fileBytes = await File.ReadAllBytesAsync(resolvedPath, cancellationToken).ConfigureAwait(false);
+                var fileBytes = await File.ReadAllBytesAsync(targetPath.ResolvedPath, cancellationToken).ConfigureAwait(false);
                 var encodingDecision = ResolveEncodingDecision(fileBytes, arguments.GetString("Encoding"));
                 var content = DecodeContent(fileBytes, encodingDecision.EffectiveEncoding);
                 var lineCount = ToolFileSystemHelper.CountLines(content);
 
                 return SkyweaverToolResult.Success(
                     BuildContent(
-                        resolvedPath,
-                        relativePath,
+                        targetPath,
                         encodingDecision,
                         content,
                         lineCount,
                         fileBytes.LongLength),
                     BuildData(
-                        resolvedPath,
-                        relativePath,
+                        targetPath,
                         encodingDecision.RequestedEncodingName,
                         encodingDecision.RequestedEncodingWasDefault,
                         encodingDecision.EffectiveEncodingName,
@@ -153,8 +167,7 @@ namespace Skyweaver.Tools
                 return SkyweaverToolResult.Failure(
                     $"Failed to read text file: {ex.Message}",
                     BuildData(
-                        resolvedPath,
-                        ToolFileSystemHelper.TryGetWorkspaceRelativePath(context.WorkspacePath, resolvedPath ?? string.Empty),
+                        targetPath,
                         requestedEncodingName: null,
                         requestedEncodingWasDefault: true,
                         effectiveEncodingName: null,
@@ -169,19 +182,25 @@ namespace Skyweaver.Tools
         }
 
         private static string BuildContent(
-            string resolvedPath,
-            string? relativePath,
+            ReadTargetPath targetPath,
             EncodingDecision encodingDecision,
             string content,
             int lineCount,
             long byteCount)
         {
             var builder = new StringBuilder(Math.Max(content.Length + 512, 768));
-            builder.AppendLine($"Path: {resolvedPath}");
+            builder.AppendLine($"Path: {targetPath.ResolvedPath}");
 
-            if (!string.IsNullOrWhiteSpace(relativePath))
+            if (!string.IsNullOrWhiteSpace(targetPath.WorkspaceRelativePath))
             {
-                builder.AppendLine($"WorkspaceRelativePath: {relativePath}");
+                builder.AppendLine($"WorkspaceRelativePath: {targetPath.WorkspaceRelativePath}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(targetPath.LateralNodeName))
+            {
+                builder.AppendLine($"LateralFSNode: {targetPath.LateralNodeName}");
+                builder.AppendLine($"LateralFSRelativePath: {targetPath.LateralRelativePath}");
+                builder.AppendLine($"UsedLateralFSShortcut: {targetPath.UsedLateralShortcut}");
             }
 
             builder.AppendLine($"RequestedEncoding: {encodingDecision.RequestedEncodingDisplayName}");
@@ -214,8 +233,7 @@ namespace Skyweaver.Tools
         }
 
         private static IReadOnlyDictionary<string, object?> BuildData(
-            string? resolvedPath,
-            string? relativePath,
+            ReadTargetPath? targetPath,
             string? requestedEncodingName,
             bool requestedEncodingWasDefault,
             string? effectiveEncodingName,
@@ -229,8 +247,13 @@ namespace Skyweaver.Tools
         {
             return new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase)
             {
-                ["resolvedPath"] = resolvedPath,
-                ["workspaceRelativePath"] = relativePath,
+                ["resolvedPath"] = targetPath?.ResolvedPath,
+                ["workspaceRelativePath"] = targetPath?.WorkspaceRelativePath,
+                ["lateralNodeName"] = targetPath?.LateralNodeName,
+                ["lateralNodeId"] = targetPath?.LateralNodeId,
+                ["lateralNodeVirtualRootPath"] = targetPath?.LateralNodeVirtualRootPath,
+                ["lateralRelativePath"] = targetPath?.LateralRelativePath,
+                ["usedLateralShortcut"] = targetPath?.UsedLateralShortcut,
                 ["requestedEncoding"] = requestedEncodingName,
                 ["requestedEncodingWasDefault"] = requestedEncodingWasDefault,
                 ["encoding"] = effectiveEncodingName,
@@ -243,6 +266,35 @@ namespace Skyweaver.Tools
                 ["lineCount"] = lineCount,
                 ["byteCount"] = byteCount
             };
+        }
+
+        private static ReadTargetPath ResolveReadTargetPath(string requestedPath, string? workspacePath)
+        {
+            ToolFileSystemHelper.LateralFileSystemPathResolution? lateralResolution = null;
+            string resolvedPath;
+
+            if (ToolFileSystemHelper.TryResolveLateralFileSystemShortcut(requestedPath, out var shortcutResolution))
+            {
+                lateralResolution = shortcutResolution;
+                resolvedPath = shortcutResolution.ResolvedPath;
+            }
+            else
+            {
+                resolvedPath = ToolFileSystemHelper.ResolvePath(requestedPath, workspacePath);
+                if (ToolFileSystemHelper.TryGetContainingLateralFileSystemNode(resolvedPath, out var containingResolution))
+                {
+                    lateralResolution = containingResolution;
+                }
+            }
+
+            return new ReadTargetPath(
+                resolvedPath,
+                ToolFileSystemHelper.TryGetWorkspaceRelativePath(workspacePath, resolvedPath),
+                lateralResolution?.NodeName,
+                lateralResolution?.NodeId,
+                lateralResolution?.NodeVirtualRootPath,
+                lateralResolution?.RelativePath,
+                lateralResolution?.UsedShortcut ?? false);
         }
 
         private static EncodingDecision ResolveEncodingDecision(byte[] fileBytes, string? requestedEncodingName)
