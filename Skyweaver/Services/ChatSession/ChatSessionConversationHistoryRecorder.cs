@@ -44,18 +44,22 @@ namespace Skyweaver.Services.ChatSession
             {
                 switch (runtimeEvent.Kind)
                 {
-                    case ChatSessionRuntimeEventKind.AssistantToolTreeReceived:
-                        AppendAssistantToolTree(runtimeEvent);
+                    case ChatSessionRuntimeEventKind.AssistantToolCallsReceived:
+                        AppendAssistantToolCalls(runtimeEvent);
                         break;
 
                     case ChatSessionRuntimeEventKind.ToolOutputReceived:
                         AppendToolOutput(runtimeEvent);
                         break;
+
+                    case ChatSessionRuntimeEventKind.AgentFinalOutputProduced:
+                        AppendFinalOutput(runtimeEvent);
+                        break;
                 }
             }
         }
 
-        private void AppendAssistantToolTree(ChatSessionRuntimeEvent runtimeEvent)
+        private void AppendAssistantToolCalls(ChatSessionRuntimeEvent runtimeEvent)
         {
             if (runtimeEvent.NodeKind != SessionFlowNodeKind.Agent)
             {
@@ -89,6 +93,25 @@ namespace Skyweaver.Services.ChatSession
             AppendMessage(new LanguageModelChatMessage(LanguageModelChatRole.User, toolOutputXml)
             {
                 AuthorName = NormalizeAuthor(authorName)
+            });
+        }
+
+        private void AppendFinalOutput(ChatSessionRuntimeEvent runtimeEvent)
+        {
+            if (runtimeEvent.NodeKind != SessionFlowNodeKind.Agent || runtimeEvent.Payload == null)
+            {
+                return;
+            }
+
+            var content = NormalizeContent(runtimeEvent.Payload.Content);
+            if (content.Length == 0)
+            {
+                return;
+            }
+
+            AppendMessage(new LanguageModelChatMessage(LanguageModelChatRole.Assistant, content)
+            {
+                AuthorName = NormalizeAuthor(runtimeEvent.NodeTitle) ?? AssistantDisplayName
             });
         }
 

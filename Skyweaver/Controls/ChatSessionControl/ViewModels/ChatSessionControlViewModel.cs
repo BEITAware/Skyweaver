@@ -230,7 +230,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                     image.MediaType))
                 .ToArray();
 
-            var userMessage = CreateMessage(
+            var userMessage = CreateChatMessage(
                 ChatMessageRole.User,
                 userParts.ToArray());
             Messages.Add(userMessage);
@@ -431,7 +431,8 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                     break;
 
                 case ChatSessionRuntimeEventKind.TextDelta:
-                    if (!runtimeEvent.IsHiddenAgent)
+                    if (!runtimeEvent.IsHiddenAgent &&
+                        !string.IsNullOrEmpty(runtimeEvent.TextDelta))
                     {
                         var builder = GetOrCreateAgentMessageBuilder(runtimeEvent);
                         switch (runtimeEvent.TextDeltaOutputKind)
@@ -451,7 +452,8 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                     break;
 
                 case ChatSessionRuntimeEventKind.ReasoningDelta:
-                    if (!runtimeEvent.IsHiddenAgent)
+                    if (!runtimeEvent.IsHiddenAgent &&
+                        !string.IsNullOrEmpty(runtimeEvent.ReasoningDelta))
                     {
                         GetOrCreateAgentMessageBuilder(runtimeEvent)
                             .AppendReasoningDelta(runtimeEvent.ReasoningDelta);
@@ -459,12 +461,12 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
                     break;
 
-                case ChatSessionRuntimeEventKind.AssistantToolTreeReceived:
+                case ChatSessionRuntimeEventKind.AssistantToolCallsReceived:
                     break;
 
                 case ChatSessionRuntimeEventKind.ToolCallStarted:
                     if (!runtimeEvent.IsHiddenAgent &&
-                        !ChatSessionFinishTaskVisibility.IsInternalToolRuntimeEvent(runtimeEvent) &&
+                        !ChatSessionInternalToolVisibility.IsInternalToolRuntimeEvent(runtimeEvent) &&
                         runtimeEvent.ToolCallSnapshot != null &&
                         runtimeEvent.ToolCallIndex is int toolCallIndex)
                     {
@@ -481,7 +483,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
                 case ChatSessionRuntimeEventKind.ToolCallUpdated:
                     if (!runtimeEvent.IsHiddenAgent &&
-                        !ChatSessionFinishTaskVisibility.IsInternalToolRuntimeEvent(runtimeEvent) &&
+                        !ChatSessionInternalToolVisibility.IsInternalToolRuntimeEvent(runtimeEvent) &&
                         runtimeEvent.ToolCallSnapshot != null &&
                         runtimeEvent.ToolCallIndex is int updatedToolCallIndex)
                     {
@@ -498,7 +500,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
                 case ChatSessionRuntimeEventKind.MalformedToolCall:
                     if (!runtimeEvent.IsHiddenAgent &&
-                        !ChatSessionFinishTaskVisibility.IsInternalToolRuntimeEvent(runtimeEvent) &&
+                        !ChatSessionInternalToolVisibility.IsInternalToolRuntimeEvent(runtimeEvent) &&
                         runtimeEvent.ToolCallIndex is int malformedToolCallIndex)
                     {
                         var malformedToolCallKey = CreateToolCallKey(runtimeEvent, malformedToolCallIndex);
@@ -515,7 +517,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
                 case ChatSessionRuntimeEventKind.ToolOutputReceived:
                     if (!runtimeEvent.IsHiddenAgent &&
-                        !ChatSessionFinishTaskVisibility.IsInternalToolRuntimeEvent(runtimeEvent) &&
+                        !ChatSessionInternalToolVisibility.IsInternalToolRuntimeEvent(runtimeEvent) &&
                         runtimeEvent.ToolCallIndex is int completedToolCallIndex)
                     {
                         var completedToolCallKey = CreateToolCallKey(runtimeEvent, completedToolCallIndex);
@@ -529,16 +531,8 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
                     break;
 
-                case ChatSessionRuntimeEventKind.AssistantMessageCreated:
-                    ApplyAssistantMessageCreated(runtimeEvent);
-                    break;
-
                 case ChatSessionRuntimeEventKind.ContextCompressionApplied:
                     AddSystemStatusMessage(BuildCompressionMessage(runtimeEvent), "上下文压缩");
-                    break;
-
-                case ChatSessionRuntimeEventKind.RepairMessageGenerated:
-                    AddSystemStatusMessage(runtimeEvent.Message ?? "代理需要另一个 FinishTask 调用来完成。", "修复提示");
                     break;
 
                 case ChatSessionRuntimeEventKind.AgentFinalOutputProduced:
@@ -580,6 +574,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             var builder = GetOrCreateAgentMessageBuilder(runtimeEvent);
             builder.CompleteReasoningStreaming();
             builder.CompleteTextStreaming();
+            builder.CompleteReplyStreaming();
         }
 
         private void ApplyAgentFinalOutput(ChatSessionRuntimeEvent runtimeEvent)
@@ -592,23 +587,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             var builder = GetOrCreateAgentMessageBuilder(runtimeEvent);
             builder.CompleteReasoningStreaming();
             builder.CompleteTextStreaming();
-            if (runtimeEvent.IsPayloadFromFinishTask)
-            {
-                ApplyAssistantPayload(builder, runtimeEvent.Payload);
-            }
-        }
-
-        private void ApplyAssistantMessageCreated(ChatSessionRuntimeEvent runtimeEvent)
-        {
-            if (runtimeEvent.IsHiddenAgent || runtimeEvent.Payload == null)
-            {
-                return;
-            }
-
-            var builder = GetOrCreateAgentMessageBuilder(runtimeEvent);
-            builder.CompleteReasoningStreaming();
-            builder.CompleteTextStreaming();
-            ApplyAssistantPayload(builder, runtimeEvent.Payload);
+            builder.CompleteReplyStreaming();
         }
 
         private static ToolCallInstanceKey CreateToolCallKey(ChatSessionRuntimeEvent runtimeEvent, int toolCallIndex)
@@ -661,22 +640,6 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             _activeAgentMessageBuilders.Clear();
         }
 
-        private static void ApplyAssistantPayload(
-            ChatSessionMessageBuilder builder,
-            SessionFlowPayload payload)
-        {
-            ArgumentNullException.ThrowIfNull(builder);
-            ArgumentNullException.ThrowIfNull(payload);
-
-            if (payload.IsStructuredXml)
-            {
-                builder.SetReplyStructuredXml(payload.Content);
-                return;
-            }
-
-            builder.SetReplyText(payload.Content);
-        }
-
         private Task<AgentToolConfirmationResult> ConfirmToolInvocationAsync(
             AgentToolConfirmationRequest request,
             CancellationToken cancellationToken)
@@ -724,10 +687,10 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             }
 
             var message = payload.IsStructuredXml
-                ? CreateMessage(
+                ? CreateChatMessage(
                     ChatMessageRole.Assistant,
                     ChatMessagePartModel.CreateStructuredXml(payload.Content, "结构化 XML"))
-                : CreateMessage(
+                : CreateChatMessage(
                     ChatMessageRole.Assistant,
                     ChatMessagePartModel.CreateText(payload.Content));
 
@@ -737,7 +700,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
         private void AddSystemStatusMessage(string content, string title)
         {
-            var message = CreateMessage(
+            var message = CreateChatMessage(
                 ChatMessageRole.System,
                 ChatMessagePartModel.CreateStatus(content, title));
             Messages.Add(message);
@@ -939,10 +902,11 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         private static bool TryCloneMessage(ChatMessageModel source, out ChatMessageModel? clone)
         {
             var clonedParts = source.Parts
-                .Where(part => !ChatSessionFinishTaskVisibility.IsFinishTaskPart(part))
+                .Where(part => !ChatSessionInternalToolVisibility.IsInternalToolPart(part))
+                .Where(part => !IsEmptyPresentationPart(part))
                 .Select(part => new ChatMessagePartModel(
                     part.PartType,
-                    part.Content,
+                    NormalizePresentationPartContent(part),
                     part.Title,
                     part.Language,
                     part.BadgeText,
@@ -968,6 +932,28 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             return true;
         }
 
+        private static bool IsEmptyPresentationPart(ChatMessagePartModel part)
+        {
+            return (part.PartType is ChatMessagePartType.Text
+                or ChatMessagePartType.Code
+                or ChatMessagePartType.Status
+                or ChatMessagePartType.Placeholder
+                or ChatMessagePartType.StructuredXml
+                or ChatMessagePartType.Reasoning)
+                && string.IsNullOrWhiteSpace(part.Content)
+                && string.IsNullOrWhiteSpace(part.Title)
+                && string.IsNullOrWhiteSpace(part.ResourcePath);
+        }
+
+        private static string NormalizePresentationPartContent(ChatMessagePartModel part)
+        {
+            return part.PartType is ChatMessagePartType.Text
+                or ChatMessagePartType.StructuredXml
+                or ChatMessagePartType.Reasoning
+                ? (part.Content ?? string.Empty).TrimEnd()
+                : part.Content;
+        }
+
         private void HydrateToolCallPresentations(ChatMessageModel message)
         {
             ArgumentNullException.ThrowIfNull(message);
@@ -985,7 +971,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             }
         }
 
-        private ChatMessageModel CreateMessage(ChatMessageRole role, params ChatMessagePartModel[] parts)
+        private ChatMessageModel CreateChatMessage(ChatMessageRole role, params ChatMessagePartModel[] parts)
         {
             return new ChatMessageModel(role, GetDisplayName(role), GetAvatarPath(role), DateTime.Now, parts);
         }

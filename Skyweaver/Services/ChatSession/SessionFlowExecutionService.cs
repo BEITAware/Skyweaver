@@ -337,7 +337,7 @@ namespace Skyweaver.Services.ChatSession
             if (!agentResult.IsCompleted || agentResult.FinalOutput == null)
             {
                 var failureReason = string.IsNullOrWhiteSpace(agentResult.FailureReason)
-                    ? $"代理节点“{node.Title}”没有完成有效的 FinishTask 调用。"
+                    ? $"代理节点“{node.Title}”没有产生有效输出。"
                     : agentResult.FailureReason!;
                 throw CreateExecutionError(compiledNode, failureReason);
             }
@@ -359,7 +359,8 @@ namespace Skyweaver.Services.ChatSession
             return new NodeExecutionOutcome
             {
                 NodePayload = payload,
-                IsNodePayloadAlreadyPresented = !node.IsHiddenAgent
+                IsNodePayloadAlreadyPresented = !node.IsHiddenAgent &&
+                                                agentResult.FinalOutput.Source == AgentLoopFinalOutputSource.AssistantText
             };
         }
 
@@ -807,9 +808,9 @@ namespace Skyweaver.Services.ChatSession
                     iterationNumber: update.IterationNumber,
                     modelId: update.ModelId,
                     reasoningDelta: update.ReasoningDelta),
-                AgentLoopRuntimeEventKind.AssistantToolTreeReceived => CreateRuntimeEvent(
+                AgentLoopRuntimeEventKind.AssistantToolCallsReceived => CreateRuntimeEvent(
                     request,
-                    ChatSessionRuntimeEventKind.AssistantToolTreeReceived,
+                    ChatSessionRuntimeEventKind.AssistantToolCallsReceived,
                     compiledNode,
                     iterationNumber: update.IterationNumber,
                     modelId: update.ModelId,
@@ -860,23 +861,6 @@ namespace Skyweaver.Services.ChatSession
                     toolInvocation: update.ToolInvocation,
                     toolOutputXml: update.ToolOutputXml,
                     toolReturns: update.ToolReturns),
-                AgentLoopRuntimeEventKind.MessageCreated when update.MessageOutput != null => CreateRuntimeEvent(
-                    request,
-                    ChatSessionRuntimeEventKind.AssistantMessageCreated,
-                    compiledNode,
-                    message: update.MessageOutput.IsStructuredXml
-                        ? "浠ｇ悊鑺傜偣鍒涘缓浜嗕竴鏉″€欓€夊洖澶嶆秷鎭€?"
-                        : "浠ｇ悊鑺傜偣鍒涘缓浜嗕竴鏉¤嚜鐒惰瑷€鍥炲銆?",
-                    iterationNumber: update.IterationNumber,
-                    modelId: update.ModelId,
-                    payload: _payloadRouter.CreateNodePayloadFromAgentOutput(update.MessageOutput)),
-                AgentLoopRuntimeEventKind.RepairMessageGenerated => CreateRuntimeEvent(
-                    request,
-                    ChatSessionRuntimeEventKind.RepairMessageGenerated,
-                    compiledNode,
-                    message: update.RepairMessage,
-                    iterationNumber: update.IterationNumber,
-                    modelId: update.ModelId),
                 AgentLoopRuntimeEventKind.ContextCompressionApplied => CreateRuntimeEvent(
                     request,
                     ChatSessionRuntimeEventKind.ContextCompressionApplied,
@@ -895,7 +879,7 @@ namespace Skyweaver.Services.ChatSession
                     iterationNumber: update.IterationNumber,
                     modelId: update.ModelId,
                     payload: _payloadRouter.CreateNodePayloadFromAgentOutput(update.FinalOutput),
-                    isPayloadFromFinishTask: update.FinalOutput.IsFromFinishTaskPayload),
+                    isPayloadFromPassdown: update.FinalOutput.IsFromPassdownPayload),
                 _ => null
             };
 
@@ -948,7 +932,7 @@ namespace Skyweaver.Services.ChatSession
             string? toolOutputXml = null,
             IReadOnlyList<SkyweaverToolReturnPayload>? toolReturns = null,
             AgentLoopContextCompressionInfo? contextCompression = null,
-            bool isPayloadFromFinishTask = false)
+            bool isPayloadFromPassdown = false)
         {
             return new ChatSessionRuntimeEvent
             {
@@ -966,7 +950,7 @@ namespace Skyweaver.Services.ChatSession
                 ModelId = modelId,
                 Message = message,
                 Payload = payload,
-                IsPayloadFromFinishTask = isPayloadFromFinishTask,
+                IsPayloadFromPassdown = isPayloadFromPassdown,
                 TextDelta = textDelta,
                 ReasoningDelta = reasoningDelta,
                 TextDeltaOutputKind = textDeltaOutputKind,

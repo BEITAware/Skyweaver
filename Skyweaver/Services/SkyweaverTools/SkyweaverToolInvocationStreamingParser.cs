@@ -29,6 +29,7 @@ namespace Skyweaver.Services.SkyweaverTools
 
             var snapshots = new List<SkyweaverStreamingToolCallSnapshot>();
             var searchIndex = 0;
+            var partIndex = 0;
             var toolCallIndex = 0;
 
             while (searchIndex < rawContent.Length)
@@ -39,6 +40,11 @@ namespace Skyweaver.Services.SkyweaverTools
                     break;
                 }
 
+                if (toolStartIndex > searchIndex)
+                {
+                    partIndex++;
+                }
+
                 var toolOpenTagEndIndex = FindTagEnd(rawContent, toolStartIndex);
                 if (toolOpenTagEndIndex < 0)
                 {
@@ -46,61 +52,79 @@ namespace Skyweaver.Services.SkyweaverTools
                 }
 
                 var toolOpenTag = rawContent[toolStartIndex..toolOpenTagEndIndex];
+                toolCallIndex++;
+                var currentPartIndex = partIndex;
                 var toolName = GetAttributeValue(toolOpenTag, "ToolName") ?? GetAttributeValue(toolOpenTag, "Name");
-                if (string.IsNullOrWhiteSpace(toolName))
+                var normalizedToolName = (toolName ?? string.Empty).Trim();
+                if (!string.IsNullOrWhiteSpace(normalizedToolName))
                 {
-                    searchIndex = toolOpenTagEndIndex;
+                    _toolDefinitions.TryGetValue(normalizedToolName, out var toolDefinition);
+
+                    IReadOnlyList<SkyweaverStreamingToolParameterSnapshot> parameters;
+                    int toolEndIndex;
+                    bool isInvocationClosed;
+
+                    if (IsSelfClosingTag(toolOpenTag))
+                    {
+                        parameters = Array.Empty<SkyweaverStreamingToolParameterSnapshot>();
+                        toolEndIndex = toolOpenTagEndIndex;
+                        isInvocationClosed = true;
+                    }
+                    else if (toolDefinition?.Parameters.Count > 0)
+                    {
+                        parameters = ParseParameterizedToolBody(
+                            rawContent,
+                            toolDefinition.Parameters,
+                            toolOpenTagEndIndex,
+                            out toolEndIndex,
+                            out isInvocationClosed);
+                    }
+                    else
+                    {
+                        parameters = Array.Empty<SkyweaverStreamingToolParameterSnapshot>();
+                        isInvocationClosed = TryFindToolClose(rawContent, toolOpenTagEndIndex, out toolEndIndex);
+                        if (!isInvocationClosed)
+                        {
+                            toolEndIndex = rawContent.Length;
+                        }
+                    }
+
+                    snapshots.Add(new SkyweaverStreamingToolCallSnapshot
+                    {
+                        PartIndex = currentPartIndex,
+                        ToolCallIndex = toolCallIndex,
+                        ToolName = normalizedToolName,
+                        ToolXmlFragment = rawContent[toolStartIndex..Math.Min(toolEndIndex, rawContent.Length)],
+                        IsInvocationClosed = isInvocationClosed,
+                        Parameters = parameters
+                    });
+
+                    partIndex++;
+                    if (!isInvocationClosed)
+                    {
+                        break;
+                    }
+
+                    searchIndex = Math.Max(toolEndIndex, toolOpenTagEndIndex);
                     continue;
                 }
 
-                toolCallIndex++;
-                var normalizedToolName = toolName.Trim();
-                _toolDefinitions.TryGetValue(normalizedToolName, out var toolDefinition);
-
-                IReadOnlyList<SkyweaverStreamingToolParameterSnapshot> parameters;
-                int toolEndIndex;
-                bool isInvocationClosed;
-
-                if (IsSelfClosingTag(toolOpenTag))
+                var fallbackToolEndIndex = toolOpenTagEndIndex;
+                var isFallbackInvocationClosed = true;
+                if (!IsSelfClosingTag(toolOpenTag) &&
+                    !TryFindToolClose(rawContent, toolOpenTagEndIndex, out fallbackToolEndIndex))
                 {
-                    parameters = Array.Empty<SkyweaverStreamingToolParameterSnapshot>();
-                    toolEndIndex = toolOpenTagEndIndex;
-                    isInvocationClosed = true;
-                }
-                else if (toolDefinition?.Parameters.Count > 0)
-                {
-                    parameters = ParseParameterizedToolBody(
-                        rawContent,
-                        toolDefinition.Parameters,
-                        toolOpenTagEndIndex,
-                        out toolEndIndex,
-                        out isInvocationClosed);
-                }
-                else
-                {
-                    parameters = Array.Empty<SkyweaverStreamingToolParameterSnapshot>();
-                    isInvocationClosed = TryFindToolClose(rawContent, toolOpenTagEndIndex, out toolEndIndex);
-                    if (!isInvocationClosed)
-                    {
-                        toolEndIndex = rawContent.Length;
-                    }
+                    fallbackToolEndIndex = rawContent.Length;
+                    isFallbackInvocationClosed = false;
                 }
 
-                snapshots.Add(new SkyweaverStreamingToolCallSnapshot
-                {
-                    ToolCallIndex = toolCallIndex,
-                    ToolName = normalizedToolName,
-                    ToolXmlFragment = rawContent[toolStartIndex..Math.Min(toolEndIndex, rawContent.Length)],
-                    IsInvocationClosed = isInvocationClosed,
-                    Parameters = parameters
-                });
-
-                if (!isInvocationClosed)
+                partIndex++;
+                if (!isFallbackInvocationClosed)
                 {
                     break;
                 }
 
-                searchIndex = Math.Max(toolEndIndex, toolOpenTagEndIndex);
+                searchIndex = Math.Max(fallbackToolEndIndex, toolOpenTagEndIndex);
             }
 
             return snapshots;

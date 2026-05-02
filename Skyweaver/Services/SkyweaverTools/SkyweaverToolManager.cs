@@ -1,10 +1,8 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Net;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Xml;
 using System.Xml.Linq;
@@ -18,24 +16,6 @@ namespace Skyweaver.Services.SkyweaverTools
         private const string DefaultIconPath = "pack://application:,,,/Resources/Script.png";
         private const string ToolNamespacePrefix = "Skyweaver.Tools";
         private static readonly string[] s_supportedIconExtensions = [".png", ".ico", ".jpg", ".jpeg", ".bmp"];
-        private static readonly Regex s_markdownCodeFencePattern = new(
-            @"^\s*```(?:xml)?\s*(?<content>[\s\S]*?)\s*```\s*$",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex s_bareAmpersandPattern = new(
-            @"&(?!#\d+;|#x[0-9a-fA-F]+;|\w+;)",
-            RegexOptions.Compiled);
-        private static readonly Regex s_missingAttributeEqualsPattern = new(
-            @"\b(?<name>ToolName|Name|Value|ParameterName|Key)\s+(?<quote>[""'])",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex s_colonAttributePattern = new(
-            @"\b(?<name>ToolName|Name|Value|ParameterName|Key)\s*:\s*(?<value>(""[^""]*""|'[^']*'|[^\s/>]+))",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex s_unquotedAttributeValuePattern = new(
-            @"\b(?<name>ToolName|Name|Value|ParameterName|Key)\s*=\s*(?<value>[^\s""'<>/`]+)",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex s_parameterContentPattern = new(
-            @"(?<open><Parameter\b[^>]*>)(?<content>.*?)(?<close></Parameter\s*>)",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
         private readonly SkyweaverToolConfigurationRepository _configurationRepository = new();
 
         public string ConfigurationDirectoryPath => _configurationRepository.ConfigurationDirectoryPath;
@@ -162,11 +142,9 @@ namespace Skyweaver.Services.SkyweaverTools
         }
 
         // Input XML:
-        // <Tools>
-        //   <Tool ToolName="tool_name">
-        //     <param_a>value</param_a>
-        //   </Tool>
-        // </Tools>
+        // <Tool ToolName="tool_name">
+        //   <param_a>value</param_a>
+        // </Tool>
         //
         // Output XML:
         // <ToolsReturn>
@@ -174,36 +152,21 @@ namespace Skyweaver.Services.SkyweaverTools
         //     <StringReturn1>...</StringReturn1>
         //   </ToolReturn>
         // </ToolsReturn>
-        public IReadOnlyList<SkyweaverToolInvocation> ParseToolsInvocationXml(string toolsInvocationXml)
+        public IReadOnlyList<SkyweaverToolInvocation> ParseToolInvocationXml(string toolInvocationXml)
         {
-            if (string.IsNullOrWhiteSpace(toolsInvocationXml))
+            if (string.IsNullOrWhiteSpace(toolInvocationXml))
             {
                 throw new InvalidOperationException("No tool invocation XML was provided.");
             }
 
-            string lastErrorMessage = "No parseable tool invocation XML was found.";
-            Exception? lastException = null;
-            foreach (var candidate in BuildInvocationXmlCandidates(toolsInvocationXml))
+            var invocationDocument = XDocument.Parse(toolInvocationXml, LoadOptions.PreserveWhitespace);
+            var root = invocationDocument.Root;
+            if (root == null || !IsElementNamed(root, "Tool"))
             {
-                if (TryParseInvocationCandidate(candidate, out var invocations, out var errorMessage, out var exception))
-                {
-                    return invocations;
-                }
-
-                lastErrorMessage = errorMessage;
-                lastException = exception;
+                throw new InvalidOperationException("Tool invocation XML must use a single <Tool> root element.");
             }
 
-            throw new InvalidOperationException($"Tool invocation XML could not be parsed: {lastErrorMessage}", lastException);
-        }
-
-        public string BuildToolsInvocationXml(IEnumerable<SkyweaverToolInvocation> invocations)
-        {
-            ArgumentNullException.ThrowIfNull(invocations);
-
-            var toolElements = invocations.Select(invocation => invocation.ToXElement()).ToArray();
-            var document = new XDocument(new XElement("Tools", toolElements));
-            return document.ToString();
+            return ParseInvocationDocument(invocationDocument);
         }
 
         public async Task<IReadOnlyList<SkyweaverToolReturnPayload>> ExecuteInvocationsAsync(
@@ -300,7 +263,7 @@ namespace Skyweaver.Services.SkyweaverTools
             IReadOnlyList<SkyweaverToolInvocation> invocations;
             try
             {
-                invocations = ParseToolsInvocationXml(toolsInvocationXml);
+                invocations = ParseToolInvocationXml(toolsInvocationXml);
             }
             catch (Exception ex) when (ex is InvalidOperationException or XmlException)
             {
@@ -387,36 +350,6 @@ namespace Skyweaver.Services.SkyweaverTools
             return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
         }
 
-        private static bool TryParseInvocationCandidate(
-            string candidateXml,
-            out IReadOnlyList<SkyweaverToolInvocation> invocations,
-            out string errorMessage,
-            out Exception? exception)
-        {
-            invocations = Array.Empty<SkyweaverToolInvocation>();
-            errorMessage = string.Empty;
-            exception = null;
-
-            if (string.IsNullOrWhiteSpace(candidateXml))
-            {
-                errorMessage = "No candidate XML remained after normalization.";
-                return false;
-            }
-
-            try
-            {
-                var invocationDocument = XDocument.Parse(candidateXml, LoadOptions.PreserveWhitespace);
-                invocations = ParseInvocationDocument(invocationDocument);
-                return true;
-            }
-            catch (Exception ex) when (ex is XmlException or InvalidOperationException)
-            {
-                errorMessage = ex.Message;
-                exception = ex;
-                return false;
-            }
-        }
-
         private static IReadOnlyList<SkyweaverToolInvocation> ParseInvocationDocument(XDocument invocationDocument)
         {
             var root = invocationDocument.Root;
@@ -425,422 +358,25 @@ namespace Skyweaver.Services.SkyweaverTools
                 throw new InvalidOperationException("Tool invocation XML is missing a root element.");
             }
 
-            XElement[] toolElements;
-            if (IsElementNamed(root, "Tools"))
+            if (!IsElementNamed(root, "Tool"))
             {
-                toolElements = root.Elements()
-                    .Where(element => IsElementNamed(element, "Tool"))
-                    .ToArray();
-
-                if (toolElements.Length == 0)
-                {
-                    throw new InvalidOperationException("No <Tool> element was found under <Tools>.");
-                }
-            }
-            else if (IsElementNamed(root, "Tool"))
-            {
-                toolElements = [root];
-            }
-            else
-            {
-                throw new InvalidOperationException("Tool invocation XML must use <Tools> as its root element, or contain a single <Tool> root element.");
+                throw new InvalidOperationException("Tool invocation XML must use a single <Tool> root element.");
             }
 
-            var invocations = new List<SkyweaverToolInvocation>(toolElements.Length);
-            foreach (var toolElement in toolElements)
+            var toolName = GetAttributeValue(root, "ToolName")
+                ?? GetAttributeValue(root, "Name");
+            if (string.IsNullOrWhiteSpace(toolName))
             {
-                var toolName = GetAttributeValue(toolElement, "ToolName")
-                    ?? GetAttributeValue(toolElement, "Name");
-                if (string.IsNullOrWhiteSpace(toolName))
-                {
-                    throw new InvalidOperationException("<Tool> element is missing ToolName.");
-                }
+                throw new InvalidOperationException("<Tool> element is missing ToolName.");
+            }
 
-                invocations.Add(new SkyweaverToolInvocation(
+            return
+            [
+                new SkyweaverToolInvocation(
                     toolName,
-                    ParseRawArguments(toolElement),
-                    toolElement));
-            }
-
-            return invocations;
-        }
-
-        private static IReadOnlyList<string> BuildInvocationXmlCandidates(string toolsInvocationXml)
-        {
-            var candidates = new List<string>();
-            var seen = new HashSet<string>(StringComparer.Ordinal);
-
-            void AddCandidate(string? candidate)
-            {
-                if (string.IsNullOrWhiteSpace(candidate))
-                {
-                    return;
-                }
-
-                var trimmedCandidate = candidate.Trim();
-                if (trimmedCandidate.Length > 0 && seen.Add(trimmedCandidate))
-                {
-                    candidates.Add(trimmedCandidate);
-                }
-            }
-
-            AddCandidate(toolsInvocationXml);
-
-            var stripped = StripMarkdownCodeFence(toolsInvocationXml);
-            AddCandidate(stripped);
-            AddCandidate(BuildNormalizedInvocationCandidate(stripped));
-
-            var decoded = MaybeDecodeHtmlEncodedXml(stripped);
-            if (!string.Equals(decoded, stripped, StringComparison.Ordinal))
-            {
-                AddCandidate(decoded);
-                AddCandidate(BuildNormalizedInvocationCandidate(decoded));
-            }
-
-            return candidates;
-        }
-
-        private static string BuildNormalizedInvocationCandidate(string toolsInvocationXml)
-        {
-            var normalized = StripMarkdownCodeFence(toolsInvocationXml);
-            normalized = NormalizeCommonXmlSyntax(normalized);
-            normalized = ExtractLikelyToolInvocationFragment(normalized);
-            normalized = NormalizeCommonToolAttributeTypos(normalized);
-            normalized = EscapeBareAmpersands(normalized);
-            normalized = ProtectParameterTextContent(normalized);
-            normalized = EnsureToolsRoot(normalized);
-            return normalized.Trim();
-        }
-
-        private static string StripMarkdownCodeFence(string? text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                return string.Empty;
-            }
-
-            var match = s_markdownCodeFencePattern.Match(text);
-            return match.Success
-                ? match.Groups["content"].Value
-                : text;
-        }
-
-        private static string MaybeDecodeHtmlEncodedXml(string? text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                return string.Empty;
-            }
-
-            if (text.Contains('<'))
-            {
-                return text;
-            }
-
-            if (!text.Contains("&lt;", StringComparison.OrdinalIgnoreCase) &&
-                !text.Contains("&#60;", StringComparison.OrdinalIgnoreCase) &&
-                !text.Contains("&#x3c;", StringComparison.OrdinalIgnoreCase))
-            {
-                return text;
-            }
-
-            var decoded = WebUtility.HtmlDecode(text);
-            return decoded.Contains('<') ? decoded : text;
-        }
-
-        private static string NormalizeCommonXmlSyntax(string? text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                return string.Empty;
-            }
-
-            var builder = new StringBuilder(text.Length);
-            foreach (var character in text)
-            {
-                switch (character)
-                {
-                    case '\uFEFF':
-                    case '\u200B':
-                    case '\u200C':
-                    case '\u200D':
-                    case '\u2060':
-                        continue;
-                    case '\u00A0':
-                    case '\u3000':
-                        builder.Append(' ');
-                        break;
-                    case '\uFF1C':
-                        builder.Append('<');
-                        break;
-                    case '\uFF1E':
-                        builder.Append('>');
-                        break;
-                    case '\uFF1D':
-                        builder.Append('=');
-                        break;
-                    case '\uFF0F':
-                        builder.Append('/');
-                        break;
-                    case '\u201C':
-                    case '\u201D':
-                    case '\u2033':
-                    case '\u00AB':
-                    case '\u00BB':
-                    case '\u300C':
-                    case '\u300D':
-                    case '\u300E':
-                    case '\u300F':
-                    case '\uFF02':
-                        builder.Append('"');
-                        break;
-                    case '\u2018':
-                    case '\u2019':
-                    case '\u2032':
-                    case '\uFF07':
-                        builder.Append('\'');
-                        break;
-                    default:
-                        if (char.IsControl(character) && character is not '\r' and not '\n' and not '\t')
-                        {
-                            continue;
-                        }
-
-                        builder.Append(character);
-                        break;
-                }
-            }
-
-            return builder.ToString();
-        }
-
-        private static string ExtractLikelyToolInvocationFragment(string? text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                return string.Empty;
-            }
-
-            var trimmed = text.Trim();
-            var toolsStartIndex = IndexOfElementStart(trimmed, "Tools");
-            if (toolsStartIndex >= 0)
-            {
-                var toolsEndIndex = IndexOfClosingElementEnd(trimmed, "Tools", toolsStartIndex);
-                return toolsEndIndex > toolsStartIndex
-                    ? trimmed[toolsStartIndex..toolsEndIndex]
-                    : trimmed[toolsStartIndex..];
-            }
-
-            var toolElements = CollectStandaloneToolElements(trimmed);
-            return string.IsNullOrWhiteSpace(toolElements) ? trimmed : toolElements;
-        }
-
-        private static string NormalizeCommonToolAttributeTypos(string? text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                return string.Empty;
-            }
-
-            var normalized = s_missingAttributeEqualsPattern.Replace(text, "${name}=${quote}");
-            normalized = s_colonAttributePattern.Replace(normalized, "${name}=${value}");
-            normalized = s_unquotedAttributeValuePattern.Replace(
-                normalized,
-                match => $"{match.Groups["name"].Value}=\"{match.Groups["value"].Value}\"");
-            return normalized;
-        }
-
-        private static string EscapeBareAmpersands(string? text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                return string.Empty;
-            }
-
-            return s_bareAmpersandPattern.Replace(text, "&amp;");
-        }
-
-        private static string ProtectParameterTextContent(string? xml)
-        {
-            if (string.IsNullOrWhiteSpace(xml))
-            {
-                return string.Empty;
-            }
-
-            return s_parameterContentPattern.Replace(
-                xml,
-                match =>
-                {
-                    var content = match.Groups["content"].Value;
-                    if (string.IsNullOrWhiteSpace(content) || LooksLikeXmlFragment(content))
-                    {
-                        return match.Value;
-                    }
-
-                    return $"{match.Groups["open"].Value}{EscapeXmlTextContent(content)}{match.Groups["close"].Value}";
-                });
-        }
-
-        private static string EscapeXmlTextContent(string text)
-        {
-            return EscapeBareAmpersands(text)
-                .Replace("<", "&lt;", StringComparison.Ordinal)
-                .Replace(">", "&gt;", StringComparison.Ordinal);
-        }
-
-        private static bool LooksLikeXmlFragment(string? text)
-        {
-            if (string.IsNullOrWhiteSpace(text) || !text.Contains('<'))
-            {
-                return false;
-            }
-
-            try
-            {
-                _ = XDocument.Parse($"<Root>{EscapeBareAmpersands(text)}</Root>", LoadOptions.PreserveWhitespace);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        private static string EnsureToolsRoot(string? text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                return string.Empty;
-            }
-
-            var trimmed = text.Trim();
-            if (StartsWithElement(trimmed, "Tools"))
-            {
-                return trimmed;
-            }
-
-            if (StartsWithElement(trimmed, "Tool"))
-            {
-                return $"<Tools>{trimmed}</Tools>";
-            }
-
-            var toolElements = CollectStandaloneToolElements(trimmed);
-            return string.IsNullOrWhiteSpace(toolElements)
-                ? trimmed
-                : $"<Tools>{toolElements}</Tools>";
-        }
-
-        private static string CollectStandaloneToolElements(string text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                return string.Empty;
-            }
-
-            var builder = new StringBuilder();
-            var currentIndex = 0;
-            var foundAny = false;
-
-            while (true)
-            {
-                var toolStartIndex = IndexOfElementStart(text, "Tool", currentIndex);
-                if (toolStartIndex < 0)
-                {
-                    break;
-                }
-
-                var toolEndIndex = IndexOfClosingElementEnd(text, "Tool", toolStartIndex);
-                if (toolEndIndex < 0)
-                {
-                    break;
-                }
-
-                if (foundAny && !IsWhitespaceOnly(text, currentIndex, toolStartIndex))
-                {
-                    break;
-                }
-
-                builder.Append(text[toolStartIndex..toolEndIndex]);
-                currentIndex = toolEndIndex;
-                foundAny = true;
-            }
-
-            return builder.ToString();
-        }
-
-        private static bool StartsWithElement(string text, string elementName)
-        {
-            return IndexOfElementStart(text, elementName) == 0;
-        }
-
-        private static int IndexOfElementStart(string text, string elementName, int startIndex = 0)
-        {
-            var needle = $"<{elementName}";
-            var searchIndex = Math.Max(0, startIndex);
-
-            while (searchIndex < text.Length)
-            {
-                var matchIndex = text.IndexOf(needle, searchIndex, StringComparison.OrdinalIgnoreCase);
-                if (matchIndex < 0)
-                {
-                    return -1;
-                }
-
-                var nameEndIndex = matchIndex + needle.Length;
-                if (nameEndIndex >= text.Length || IsXmlNameBoundary(text[nameEndIndex]))
-                {
-                    return matchIndex;
-                }
-
-                searchIndex = matchIndex + 1;
-            }
-
-            return -1;
-        }
-
-        private static int IndexOfClosingElementEnd(string text, string elementName, int startIndex = 0)
-        {
-            var needle = $"</{elementName}";
-            var searchIndex = Math.Max(0, startIndex);
-
-            while (searchIndex < text.Length)
-            {
-                var matchIndex = text.IndexOf(needle, searchIndex, StringComparison.OrdinalIgnoreCase);
-                if (matchIndex < 0)
-                {
-                    return -1;
-                }
-
-                var nameEndIndex = matchIndex + needle.Length;
-                if (nameEndIndex < text.Length && !IsXmlNameBoundary(text[nameEndIndex]))
-                {
-                    searchIndex = matchIndex + 1;
-                    continue;
-                }
-
-                var tagEndIndex = text.IndexOf('>', nameEndIndex);
-                return tagEndIndex < 0 ? -1 : tagEndIndex + 1;
-            }
-
-            return -1;
-        }
-
-        private static bool IsWhitespaceOnly(string text, int startIndex, int endIndex)
-        {
-            for (var index = startIndex; index < endIndex; index++)
-            {
-                if (!char.IsWhiteSpace(text[index]))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private static bool IsXmlNameBoundary(char character)
-        {
-            return char.IsWhiteSpace(character) || character is '>' or '/' or '?';
+                    ParseRawArguments(root),
+                    root)
+            ];
         }
 
         private static bool IsElementNamed(XElement element, string name)

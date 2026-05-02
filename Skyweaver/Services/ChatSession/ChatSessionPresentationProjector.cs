@@ -81,7 +81,8 @@ namespace Skyweaver.Services.ChatSession
         {
             if (block.Kind is ChatSessionContentBlockKind.ToolOutput or ChatSessionContentBlockKind.ToolReference)
             {
-                return string.Equals(block.Title, "Tool Parse Error", StringComparison.Ordinal);
+                return string.Equals(block.Title, "Tool Parse Error", StringComparison.Ordinal) ||
+                       string.Equals(block.Title, "工具解析错误", StringComparison.Ordinal);
             }
 
             return true;

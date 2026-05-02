@@ -19,7 +19,7 @@ namespace Skyweaver.Services.AgentLoop
     public enum AgentLoopFinalOutputSource
     {
         AssistantText = 0,
-        FinishTaskPayload = 1
+        PassdownPayload = 1
     }
 
     public sealed class AgentLoopRequest
@@ -190,7 +190,7 @@ namespace Skyweaver.Services.AgentLoop
 
         public bool IsStructuredXml => Kind == AgentLoopOutputKind.StructuredXml;
 
-        public bool IsFromFinishTaskPayload => Source == AgentLoopFinalOutputSource.FinishTaskPayload;
+        public bool IsFromPassdownPayload => Source == AgentLoopFinalOutputSource.PassdownPayload;
 
         public string? NaturalLanguageText => Kind == AgentLoopOutputKind.NaturalLanguage ? Content : null;
 
@@ -222,8 +222,6 @@ namespace Skyweaver.Services.AgentLoop
             new(string.Empty, Array.Empty<AgentAssistantResponsePart>());
 
         public IReadOnlyList<AgentToolBackfill> ToolBackfills { get; init; } = Array.Empty<AgentToolBackfill>();
-
-        public string? RepairMessage { get; init; }
 
         public AgentLoopFinalOutput? FinalOutput { get; init; }
 
@@ -264,16 +262,14 @@ namespace Skyweaver.Services.AgentLoop
         IterationStarted = 0,
         TextDelta = 1,
         ReasoningDelta = 2,
-        AssistantToolTreeReceived = 3,
+        AssistantToolCallsReceived = 3,
         ToolCallStarted = 4,
         ToolCallUpdated = 5,
         MalformedToolCall = 6,
         ToolOutputReceived = 7,
-        MessageCreated = 8,
-        RepairMessageGenerated = 9,
-        ContextCompressionApplied = 10,
-        FinalOutputProduced = 11,
-        IterationCompleted = 12
+        ContextCompressionApplied = 8,
+        FinalOutputProduced = 9,
+        IterationCompleted = 10
     }
 
     public sealed class AgentLoopRuntimeEvent
@@ -305,10 +301,6 @@ namespace Skyweaver.Services.AgentLoop
         public string? ToolOutputXml { get; init; }
 
         public IReadOnlyList<SkyweaverToolReturnPayload> ToolReturns { get; init; } = Array.Empty<SkyweaverToolReturnPayload>();
-
-        public AgentLoopFinalOutput? MessageOutput { get; init; }
-
-        public string? RepairMessage { get; init; }
 
         public AgentLoopFinalOutput? FinalOutput { get; init; }
 

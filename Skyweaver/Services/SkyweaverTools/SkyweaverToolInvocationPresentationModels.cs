@@ -16,6 +16,8 @@ namespace Skyweaver.Services.SkyweaverTools
 
     public sealed class SkyweaverStreamingToolCallSnapshot
     {
+        public int PartIndex { get; init; }
+
         public int ToolCallIndex { get; init; }
 
         public string ToolName { get; init; } = string.Empty;

@@ -266,7 +266,6 @@ namespace Skyweaver.Services.AgentLoop
             string? modelId,
             AgentAssistantResponse assistantResponse,
             IReadOnlyList<AgentToolBackfill> toolBackfills,
-            string? repairMessage,
             AgentLoopFinalOutput? finalOutput)
         {
 #if DEBUG
@@ -290,7 +289,6 @@ namespace Skyweaver.Services.AgentLoop
                     ModelId = NormalizeText(modelId),
                     AssistantResponse = BuildAssistantResponseRecord(assistantResponse),
                     ToolBackfills = BuildToolBackfillRecords(toolBackfills),
-                    RepairMessage = NormalizeText(repairMessage),
                     FinalOutput = BuildFinalOutputRecord(finalOutput)
                 });
 #endif
@@ -558,7 +556,7 @@ namespace Skyweaver.Services.AgentLoop
                 Kind = finalOutput.Kind.ToString(),
                 Source = finalOutput.Source.ToString(),
                 finalOutput.IsStructuredXml,
-                finalOutput.IsFromFinishTaskPayload
+                finalOutput.IsFromPassdownPayload
             };
         }
 
@@ -720,7 +718,7 @@ namespace Skyweaver.Services.AgentLoop
                 }
 
                 builder.AppendLine();
-                builder.Append(message.Content ?? string.Empty);
+                builder.Append(NormalizeText(message.Content));
                 index++;
             }
 

@@ -2,7 +2,6 @@ using System.Text;
 using Skyweaver.Controls.AgentConfigurationControl.Models;
 using Skyweaver.Controls.AgentConfigurationControl.Services;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
-using Skyweaver.Services.SkyweaverTools;
 
 namespace Skyweaver.Services.AgentLoop
 {
@@ -358,15 +357,9 @@ namespace Skyweaver.Services.AgentLoop
             var message = history[index];
             ArgumentNullException.ThrowIfNull(message);
 
-            if (message.Role == LanguageModelChatRole.Assistant &&
-                SkyweaverToolSyntaxInspector.ContainsInvalidPseudoToolMarkup(message.Content))
-            {
-                return null;
-            }
-
-            // Skyweaver's XML tool protocol carries tool returns as plain XML text instead of
-            // MEAI-native FunctionResultContent. Normalize any legacy Tool messages to User
-            // so the raw XML transcript is preserved by downstream chat backends.
+            // Skyweaver carries tool returns as plain XML text instead of MEAI-native
+            // FunctionResultContent. Normalize Tool messages to User so the raw XML
+            // transcript is preserved by downstream chat backends.
             var normalizedRole = message.Role == LanguageModelChatRole.Tool
                 ? LanguageModelChatRole.User
                 : message.Role;
@@ -429,10 +422,10 @@ Your job is not to continue the task. Your job is to summarize earlier turns tha
 Preserve:
 1. Confirmed facts, constraints, and decisions that still matter.
 2. Important tool calls, tool results, and failures.
-3. The latest successful CreateMessage payloads that matter for continuity.
+3. Passdown payloads, tool calls, tool results, and failures.
 4. Open questions, unfinished branches, and relevant intermediate conclusions.
 5. Any assistant commitments or prior outputs that the next turn must remain consistent with.
-6. Whether a turn was explicitly closed with FinishTask.
+6. Whether a turn ended with direct assistant text or with a Passdown payload.
 
 Do not write XML. Do not continue the conversation. Return only the compressed summary body.
 Accuracy matters more than brevity, but try to stay within the requested budget.
@@ -478,10 +471,17 @@ Return only the compressed summary text.
                 }
 
                 builder.AppendLine("]");
-                builder.AppendLine(message.Content ?? string.Empty);
+                builder.AppendLine(NormalizeTranscriptContent(message.Content));
             }
 
             return builder.ToString().Trim();
+        }
+
+        private static string NormalizeTranscriptContent(string? content)
+        {
+            return string.IsNullOrWhiteSpace(content)
+                ? string.Empty
+                : content.Trim();
         }
 
         private static string BuildCompressedHistoryEnvelope(string summaryText)

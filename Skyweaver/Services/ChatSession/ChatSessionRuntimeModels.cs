@@ -16,20 +16,18 @@ namespace Skyweaver.Services.ChatSession
         AgentIterationStarted = 3,
         AgentIterationCompleted = 4,
         TextDelta = 5,
-        AssistantToolTreeReceived = 6,
+        AssistantToolCallsReceived = 6,
         ToolCallStarted = 7,
         ToolCallUpdated = 8,
         MalformedToolCall = 9,
         ToolOutputReceived = 10,
-        AssistantMessageCreated = 11,
-        RepairMessageGenerated = 12,
-        ContextCompressionApplied = 13,
-        AgentFinalOutputProduced = 14,
-        StructuredOutputProduced = 15,
-        ExecutionCompleted = 16,
-        ExecutionFailed = 17,
-        ExecutionCancelled = 18,
-        ReasoningDelta = 19
+        ContextCompressionApplied = 11,
+        AgentFinalOutputProduced = 12,
+        StructuredOutputProduced = 13,
+        ExecutionCompleted = 14,
+        ExecutionFailed = 15,
+        ExecutionCancelled = 16,
+        ReasoningDelta = 17
     }
 
     public sealed class ChatSessionRuntimeRequest
@@ -111,7 +109,7 @@ namespace Skyweaver.Services.ChatSession
 
         public SessionFlowPayload? Payload { get; init; }
 
-        public bool IsPayloadFromFinishTask { get; init; }
+        public bool IsPayloadFromPassdown { get; init; }
 
         public bool IsPayloadAlreadyPresented { get; init; }
 

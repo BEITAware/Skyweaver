@@ -3,7 +3,6 @@ using Skyweaver.Controls.ChatSessionControl.Models;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
 using Skyweaver.Models.ChatSession;
 using Skyweaver.Services.SkyweaverTools;
-using Skyweaver.Tools;
 
 namespace Skyweaver.Services.ChatSession
 {
@@ -128,11 +127,9 @@ namespace Skyweaver.Services.ChatSession
                 return;
             }
 
-            var suppressAssistantText = message.Role == ChatMessageRole.Assistant &&
-                                        MessageContainsToolActivity(message);
             foreach (var part in message.Parts)
             {
-                if (!TryProjectPart(message, part, suppressAssistantText, out var projectedMessage) ||
+                if (!TryProjectPart(message, part, out var projectedMessage) ||
                     projectedMessage == null)
                 {
                     continue;
@@ -156,11 +153,9 @@ namespace Skyweaver.Services.ChatSession
                 return;
             }
 
-            var suppressAssistantText = record.Role == ChatMessageRole.Assistant &&
-                                        RecordContainsToolActivity(record);
             foreach (var block in record.Blocks)
             {
-                if (!TryProjectBlock(session, record, block, suppressAssistantText, out var projectedMessage) ||
+                if (!TryProjectBlock(session, record, block, out var projectedMessage) ||
                     projectedMessage == null)
                 {
                     continue;
@@ -173,19 +168,12 @@ namespace Skyweaver.Services.ChatSession
         private static bool TryProjectPart(
             ChatMessageModel sourceMessage,
             ChatMessagePartModel part,
-            bool suppressAssistantText,
             out LanguageModelChatMessage? projectedMessage)
         {
             ArgumentNullException.ThrowIfNull(sourceMessage);
 
             projectedMessage = null;
             if (part == null || !ShouldIncludePartInNextTurnHistory(part))
-            {
-                return false;
-            }
-
-            if (suppressAssistantText &&
-                part.PartType is ChatMessagePartType.Text or ChatMessagePartType.Code or ChatMessagePartType.StructuredXml)
             {
                 return false;
             }
@@ -207,19 +195,6 @@ namespace Skyweaver.Services.ChatSession
                 return false;
             }
 
-            if (sourceMessage.Role == ChatMessageRole.Assistant &&
-                SkyweaverToolSyntaxInspector.ContainsInvalidPseudoToolMarkup(content))
-            {
-                return false;
-            }
-
-            if (role == LanguageModelChatRole.Assistant &&
-                !suppressAssistantText &&
-                part.PartType is ChatMessagePartType.Text or ChatMessagePartType.Code or ChatMessagePartType.StructuredXml)
-            {
-                content = WrapInAgentToolsXml(content);
-            }
-
             projectedMessage = new LanguageModelChatMessage(role, content)
             {
                 AuthorName = ResolveAuthorName(sourceMessage, part, role)
@@ -231,17 +206,10 @@ namespace Skyweaver.Services.ChatSession
             ChatSessionModel session,
             ChatSessionMessageRecordModel sourceMessage,
             ChatSessionContentBlockModel block,
-            bool suppressAssistantText,
             out LanguageModelChatMessage? projectedMessage)
         {
             projectedMessage = null;
             if (!ShouldIncludeBlockInNextTurnHistory(block))
-            {
-                return false;
-            }
-
-            if (suppressAssistantText &&
-                block.Kind is ChatSessionContentBlockKind.Text or ChatSessionContentBlockKind.Code or ChatSessionContentBlockKind.StructuredXml)
             {
                 return false;
             }
@@ -261,19 +229,6 @@ namespace Skyweaver.Services.ChatSession
             if (content.Length == 0)
             {
                 return false;
-            }
-
-            if (sourceMessage.Role == ChatMessageRole.Assistant &&
-                SkyweaverToolSyntaxInspector.ContainsInvalidPseudoToolMarkup(content))
-            {
-                return false;
-            }
-
-            if (role == LanguageModelChatRole.Assistant &&
-                !suppressAssistantText &&
-                block.Kind is ChatSessionContentBlockKind.Text or ChatSessionContentBlockKind.Code or ChatSessionContentBlockKind.StructuredXml)
-            {
-                content = WrapInAgentToolsXml(content);
             }
 
             projectedMessage = new LanguageModelChatMessage(role, content)
@@ -375,32 +330,11 @@ namespace Skyweaver.Services.ChatSession
             return message.Role is ChatMessageRole.User or ChatMessageRole.Assistant;
         }
 
-        private static bool MessageContainsToolActivity(ChatMessageModel message)
-        {
-            ArgumentNullException.ThrowIfNull(message);
-
-            return message.Parts.Any(part =>
-                !ChatSessionFinishTaskVisibility.IsInternalToolPart(part) &&
-                part.PartType is
-                    ChatMessagePartType.ToolCall or
-                    ChatMessagePartType.ToolOutput or
-                    ChatMessagePartType.Tool);
-        }
-
-        private static bool RecordContainsToolActivity(ChatSessionMessageRecordModel record)
-        {
-            return record.Blocks.Any(block =>
-                block.Kind is
-                    ChatSessionContentBlockKind.ToolCall or
-                    ChatSessionContentBlockKind.ToolOutput or
-                    ChatSessionContentBlockKind.ToolReference);
-        }
-
         private static bool ShouldIncludePartInNextTurnHistory(ChatMessagePartModel part)
         {
             ArgumentNullException.ThrowIfNull(part);
 
-            if (ChatSessionFinishTaskVisibility.IsInternalToolPart(part))
+            if (ChatSessionInternalToolVisibility.IsInternalToolPart(part))
             {
                 return false;
             }
@@ -419,6 +353,14 @@ namespace Skyweaver.Services.ChatSession
         private static bool ShouldIncludeBlockInNextTurnHistory(ChatSessionContentBlockModel block)
         {
             ArgumentNullException.ThrowIfNull(block);
+
+            if (block.Kind is ChatSessionContentBlockKind.ToolCall or ChatSessionContentBlockKind.ToolOutput or ChatSessionContentBlockKind.ToolReference &&
+                (ChatSessionInternalToolVisibility.IsInternalToolName(block.Title) ||
+                 ChatSessionInternalToolVisibility.IsInternalToolXml(block.Content) ||
+                 ChatSessionInternalToolVisibility.IsInternalToolToolsReturnXml(block.Content)))
+            {
+                return false;
+            }
 
             return block.Kind is ChatSessionContentBlockKind.Text
                 or ChatSessionContentBlockKind.Code
@@ -452,7 +394,7 @@ namespace Skyweaver.Services.ChatSession
                     Environment.NewLine + Environment.NewLine,
                     message.Parts
                         .Where(IsTextLikeUserPart)
-                        .Where(part => !ChatSessionFinishTaskVisibility.IsInternalToolPart(part))
+                        .Where(part => !ChatSessionInternalToolVisibility.IsInternalToolPart(part))
                         .Select(BuildMessageContent)
                         .Where(content => content.Length > 0))
                 .Trim();
@@ -644,13 +586,7 @@ namespace Skyweaver.Services.ChatSession
             IReadOnlyList<LanguageModelChatMessage> storedHistory,
             int index)
         {
-            var message = storedHistory[index];
-            if (message.Role == LanguageModelChatRole.Assistant &&
-                SkyweaverToolSyntaxInspector.ContainsInvalidPseudoToolMarkup(message.Content))
-            {
-                return false;
-            }
-
+            _ = storedHistory[index];
             return true;
         }
 
@@ -701,7 +637,7 @@ namespace Skyweaver.Services.ChatSession
             return part.PartType switch
             {
                 ChatMessagePartType.StructuredXml => content,
-                ChatMessagePartType.ToolCall => EnsureToolsWrapper(content),
+                ChatMessagePartType.ToolCall => content,
                 ChatMessagePartType.ToolOutput or ChatMessagePartType.Tool => content,
                 ChatMessagePartType.Code => BuildCodeBlock(part, content),
                 _ => PrefixTitle(part.Title, content)
@@ -732,7 +668,7 @@ namespace Skyweaver.Services.ChatSession
             return block.Kind switch
             {
                 ChatSessionContentBlockKind.StructuredXml => content,
-                ChatSessionContentBlockKind.ToolCall => EnsureToolsWrapper(content),
+                ChatSessionContentBlockKind.ToolCall => content,
                 ChatSessionContentBlockKind.ToolOutput or ChatSessionContentBlockKind.ToolReference => content,
                 ChatSessionContentBlockKind.Code => BuildCodeBlock(block, content),
                 ChatSessionContentBlockKind.Image or ChatSessionContentBlockKind.Audio or ChatSessionContentBlockKind.HostPreservedContent => content,
@@ -781,44 +717,6 @@ namespace Skyweaver.Services.ChatSession
             return string.IsNullOrWhiteSpace(content)
                 ? string.Empty
                 : content.Trim();
-        }
-
-        private static string EnsureToolsWrapper(string content)
-        {
-            var normalized = NormalizeContent(content);
-            if (normalized.Length == 0)
-            {
-                return string.Empty;
-            }
-
-            if (normalized.StartsWith("<Tools", StringComparison.OrdinalIgnoreCase))
-            {
-                return normalized;
-            }
-
-            return normalized.StartsWith("<Tool", StringComparison.OrdinalIgnoreCase)
-                ? $"<Tools>{normalized}</Tools>"
-                : normalized;
-        }
-
-        private static string WrapInAgentToolsXml(string content)
-        {
-            var normalized = NormalizeContent(content);
-            if (normalized.Length == 0)
-            {
-                return string.Empty;
-            }
-
-            if (normalized.StartsWith("<Tools", StringComparison.OrdinalIgnoreCase))
-            {
-                return normalized;
-            }
-
-            var toolsElement = new XElement("Tools",
-                new XElement("Tool",
-                    new XAttribute("ToolName", CreateMessageTool.ToolName),
-                    normalized));
-            return toolsElement.ToString(SaveOptions.DisableFormatting);
         }
 
         private static string BuildPreservedResourceXml(string elementName, string? path)

@@ -21,11 +21,11 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
             _toolInvocationPresentationService = toolInvocationPresentationService ?? new ToolInvocationPresentationService();
         }
 
-        public ChatMessagePartModel AppendTextDelta(string? textDelta)
+        public ChatMessagePartModel? AppendTextDelta(string? textDelta)
         {
             if (string.IsNullOrEmpty(textDelta))
             {
-                return _streamingTextPart ?? EnsureStreamingTextPart();
+                return _streamingTextPart;
             }
 
             var part = EnsureStreamingTextPart();
@@ -33,11 +33,11 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
             return part;
         }
 
-        public ChatMessagePartModel AppendReasoningDelta(string? textDelta)
+        public ChatMessagePartModel? AppendReasoningDelta(string? textDelta)
         {
             if (string.IsNullOrEmpty(textDelta))
             {
-                return _activeReasoningPart ?? EnsureReasoningPart();
+                return _activeReasoningPart;
             }
 
             var part = EnsureReasoningPart();
@@ -54,7 +54,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
         {
             ArgumentNullException.ThrowIfNull(invocation);
 
-            CompleteTextStreaming();
+            CompleteAssistantTextStreaming();
 
             var part = EnsureToolCallPart(toolCallKey, invocation.ToolName);
             ApplyToolMetadata(part, toolCallId, callerAgentId);
@@ -74,7 +74,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
         {
             ArgumentNullException.ThrowIfNull(snapshot);
 
-            CompleteTextStreaming();
+            CompleteAssistantTextStreaming();
 
             var part = EnsureToolCallPart(toolCallKey, snapshot.ToolName);
             ApplyToolMetadata(part, toolCallId, callerAgentId);
@@ -89,7 +89,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
 
         public ChatMessagePartModel AddTextPart(string? text, string? title = null)
         {
-            CompleteTextStreaming();
+            CompleteAssistantTextStreaming();
 
             var part = ChatMessagePartModel.CreateText(text ?? string.Empty, title);
             _message.Parts.Add(part);
@@ -144,7 +144,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
             string? toolCallId = null,
             string? callerAgentId = null)
         {
-            CompleteTextStreaming();
+            CompleteAssistantTextStreaming();
 
             var normalizedContent = string.IsNullOrWhiteSpace(errorMessage)
                 ? content
@@ -174,14 +174,14 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
 
         public ChatMessagePartModel AddStructuredXml(string xmlText, string? title = null)
         {
-            CompleteTextStreaming();
+            CompleteAssistantTextStreaming();
 
             var part = ChatMessagePartModel.CreateStructuredXml(xmlText, title ?? "结构化 XML");
             _message.Parts.Add(part);
             return part;
         }
 
-        public ChatMessagePartModel AppendReplyTextDelta(string? text, string? title = null)
+        public ChatMessagePartModel? AppendReplyTextDelta(string? text, string? title = null)
         {
             return AppendReplyPayloadDelta(
                 ChatMessagePartType.Text,
@@ -191,7 +191,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
                 badgeText: null);
         }
 
-        public ChatMessagePartModel AppendReplyStructuredXmlDelta(string? xmlText, string? title = null)
+        public ChatMessagePartModel? AppendReplyStructuredXmlDelta(string? xmlText, string? title = null)
         {
             return AppendReplyPayloadDelta(
                 ChatMessagePartType.StructuredXml,
@@ -228,6 +228,8 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
                 return;
             }
 
+            TrimTrailingPresentationWhitespace(_streamingTextPart);
+            RemovePartIfEmpty(_streamingTextPart);
             _streamingTextPart.IsStreaming = false;
             _streamingTextPart = null;
         }
@@ -239,8 +241,16 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
                 return;
             }
 
+            TrimTrailingPresentationWhitespace(_activeReplyPayloadPart);
+            RemovePartIfEmpty(_activeReplyPayloadPart);
             _activeReplyPayloadPart.IsStreaming = false;
             _activeReplyPayloadPart = null;
+        }
+
+        private void CompleteAssistantTextStreaming()
+        {
+            CompleteTextStreaming();
+            CompleteReplyStreaming();
         }
 
         public void CompleteReasoningStreaming()
@@ -250,38 +260,10 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
                 return;
             }
 
+            TrimTrailingPresentationWhitespace(_activeReasoningPart);
+            RemovePartIfEmpty(_activeReasoningPart);
             _activeReasoningPart.IsStreaming = false;
             _activeReasoningPart = null;
-        }
-
-        public void ApplyStreamingPart(AssistantStreamingPart part)
-        {
-            ArgumentNullException.ThrowIfNull(part);
-
-            switch (part.Kind)
-            {
-                case AssistantStreamingPartKind.Text:
-                    AppendTextDelta(part.Content);
-                    break;
-                case AssistantStreamingPartKind.ToolCall when part.ToolInvocation != null:
-                    AddToolCall(
-                        ToolCallInstanceKey.Create(
-                            iterationNumber: null,
-                            partIndex: null,
-                            toolCallIndex: part.ToolCallIndex),
-                        part.ToolInvocation,
-                        isStreaming: true);
-                    break;
-                case AssistantStreamingPartKind.MalformedToolCall:
-                    AddMalformedToolCall(
-                        ToolCallInstanceKey.Create(
-                            iterationNumber: null,
-                            partIndex: null,
-                            toolCallIndex: part.ToolCallIndex),
-                        part.Content,
-                        part.ErrorMessage);
-                    break;
-            }
         }
 
         public void FinalizeOpenToolCalls(string? message)
@@ -420,7 +402,39 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
             }
         }
 
-        private ChatMessagePartModel AppendReplyPayloadDelta(
+        private void RemovePartIfEmpty(ChatMessagePartModel part)
+        {
+            if (!IsEmptyPresentationPart(part))
+            {
+                return;
+            }
+
+            _message.Parts.Remove(part);
+        }
+
+        private static void TrimTrailingPresentationWhitespace(ChatMessagePartModel part)
+        {
+            if (part.PartType is not (ChatMessagePartType.Text
+                or ChatMessagePartType.StructuredXml
+                or ChatMessagePartType.Reasoning))
+            {
+                return;
+            }
+
+            part.Content = part.Content.TrimEnd();
+        }
+
+        private static bool IsEmptyPresentationPart(ChatMessagePartModel part)
+        {
+            return (part.PartType is ChatMessagePartType.Text
+                or ChatMessagePartType.StructuredXml
+                or ChatMessagePartType.Reasoning)
+                && string.IsNullOrWhiteSpace(part.Content)
+                && string.IsNullOrWhiteSpace(part.Title)
+                && string.IsNullOrWhiteSpace(part.ResourcePath);
+        }
+
+        private ChatMessagePartModel? AppendReplyPayloadDelta(
             ChatMessagePartType partType,
             string content,
             string? title,
@@ -428,6 +442,14 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
             string? badgeText)
         {
             CompleteTextStreaming();
+
+            if (string.IsNullOrEmpty(content) &&
+                (_activeReplyPayloadPart == null ||
+                 !_activeReplyPayloadPart.IsStreaming ||
+                 _activeReplyPayloadPart.PartType != partType))
+            {
+                return null;
+            }
 
             if (_activeReplyPayloadPart == null ||
                 !_activeReplyPayloadPart.IsStreaming ||
