@@ -18,6 +18,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
         private string? _resourcePath;
         private bool _isStreaming;
         private bool _isUserVisible;
+        private bool _isCollapsible;
         private SkyweaverToolInvocationPresentationState? _toolPresentationState;
         private FrameworkElement? _toolPresentationView;
 
@@ -40,7 +41,10 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
             {
                 if (SetProperty(ref _content, value))
                 {
-                    RebuildStructuredXmlNodes();
+                    if (!IsStreaming)
+                    {
+                        RebuildStructuredXmlNodes();
+                    }
                 }
             }
         }
@@ -54,13 +58,25 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
         public bool IsStreaming
         {
             get => _isStreaming;
-            set => SetProperty(ref _isStreaming, value);
+            set
+            {
+                if (SetProperty(ref _isStreaming, value) && !value)
+                {
+                    RebuildStructuredXmlNodes();
+                }
+            }
         }
 
         public bool IsUserVisible
         {
             get => _isUserVisible;
             set => SetProperty(ref _isUserVisible, value);
+        }
+
+        public bool IsCollapsible
+        {
+            get => _isCollapsible;
+            set => SetProperty(ref _isCollapsible, value);
         }
 
         public string? Title
@@ -119,7 +135,8 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
             string? toolCallId = null,
             string? callerAgentId = null,
             string? resourcePath = null,
-            bool isUserVisible = true)
+            bool isUserVisible = true,
+            bool isCollapsible = true)
         {
             _partType = partType;
             _content = content;
@@ -128,11 +145,15 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
             _badgeText = badgeText;
             _isStreaming = isStreaming;
             _isUserVisible = isUserVisible;
+            _isCollapsible = isCollapsible;
             _toolCallId = NormalizeMetadataValue(toolCallId);
             _callerAgentId = NormalizeMetadataValue(callerAgentId);
             _resourcePath = NormalizeMetadataValue(resourcePath);
             StructuredXmlNodes.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasStructuredXmlNodes));
-            RebuildStructuredXmlNodes();
+            if (!_isStreaming)
+            {
+                RebuildStructuredXmlNodes();
+            }
         }
 
         public static ChatMessagePartModel CreateText(string content, string? title = null)
@@ -195,14 +216,19 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
             return new ChatMessagePartModel(ChatMessagePartType.Audio, path, title, badgeText: "音频", resourcePath: path);
         }
 
-        public static ChatMessagePartModel CreateReasoning(string content, string? title = null, bool isStreaming = false)
+        public static ChatMessagePartModel CreateReasoning(
+            string content,
+            string? title = null,
+            bool isStreaming = false,
+            bool isCollapsible = true)
         {
             return new ChatMessagePartModel(
                 ChatMessagePartType.Reasoning,
                 content,
                 title ?? "推理过程",
                 badgeText: "推理过程",
-                isStreaming: isStreaming);
+                isStreaming: isStreaming,
+                isCollapsible: isCollapsible);
         }
 
         public void AttachToolPresentation(
@@ -211,6 +237,12 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
         {
             ToolPresentationState = state ?? throw new ArgumentNullException(nameof(state));
             ToolPresentationView = view ?? throw new ArgumentNullException(nameof(view));
+        }
+
+        public void DetachToolPresentation()
+        {
+            ToolPresentationState = null;
+            ToolPresentationView = null;
         }
 
         private void RebuildStructuredXmlNodes()

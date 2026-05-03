@@ -3,125 +3,398 @@ using Skyweaver.Models.ChatSession;
 
 namespace Skyweaver.Services.ChatSession
 {
-    public static class ChatSessionPresentationProjector
+    public sealed class ChatSessionPresentationProjector
     {
-        public static ChatSessionMessageRecordModel ToRecord(ChatMessageModel message)
+        private const string UserAvatarPath = "pack://application:,,,/Resources/image.png";
+        private const string AssistantAvatarPath = "pack://application:,,,/Resources/GuideBot.png";
+        private const string SystemAvatarPath = "pack://application:,,,/Resources/QuestionBot.png";
+
+        public IReadOnlyList<ChatMessageModel> Project(
+            ChatSessionTranscript transcript,
+            bool includeDebugEntries = false)
         {
-            ArgumentNullException.ThrowIfNull(message);
+            ArgumentNullException.ThrowIfNull(transcript);
 
-            var record = new ChatSessionMessageRecordModel
-            {
-                Id = message.Id.ToString("N"),
-                Role = message.Role,
-                DisplayName = message.DisplayName,
-                AvatarPath = message.AvatarPath,
-                TimestampUtc = message.Timestamp.ToUniversalTime()
-            };
+            var messages = new List<ChatMessageModel>();
+            var assistantGroups = new Dictionary<string, ChatMessageModel>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var part in message.Parts)
+            foreach (var entry in transcript.Entries)
             {
-                record.Blocks.Add(ToRecordBlock(part));
+                if (!ShouldProjectEntry(transcript, entry, includeDebugEntries))
+                {
+                    continue;
+                }
+
+                if (ShouldGroupAsAssistantBubble(entry))
+                {
+                    var groupKey = BuildAssistantGroupKey(entry);
+                    if (!assistantGroups.TryGetValue(groupKey, out var groupedMessage))
+                    {
+                        groupedMessage = CreatePresentationMessage(entry, groupKey);
+                        assistantGroups[groupKey] = groupedMessage;
+                        messages.Add(groupedMessage);
+                    }
+
+                    AddEntryParts(groupedMessage, entry);
+                    continue;
+                }
+
+                var message = CreatePresentationMessage(entry, entry.EntryId);
+                AddEntryParts(message, entry);
+                if (message.Parts.Count > 0)
+                {
+                    messages.Add(message);
+                }
             }
 
-            return record;
+            return messages.Where(message => message.Parts.Count > 0).ToArray();
         }
 
-        public static ChatMessageModel ToPresentationMessage(ChatSessionMessageRecordModel record)
+        private static ChatMessageModel CreatePresentationMessage(
+            ChatSessionTranscriptEntry entry,
+            string sourceEntryId)
         {
-            ArgumentNullException.ThrowIfNull(record);
-
+            var role = ToPresentationRole(entry.Role);
             return new ChatMessageModel(
-                record.Role,
-                record.DisplayName,
-                record.AvatarPath,
-                record.TimestampUtc.ToLocalTime(),
-                record.Blocks.Select(ToPresentationPart));
+                role,
+                ResolveDisplayName(entry, role),
+                GetAvatarPath(role),
+                entry.TimestampUtc.ToLocalTime(),
+                sourceEntryId: sourceEntryId);
         }
 
-        public static ChatSessionContentBlockModel ToRecordBlock(ChatMessagePartModel part)
+        private static void AddEntryParts(
+            ChatMessageModel message,
+            ChatSessionTranscriptEntry entry)
         {
-            ArgumentNullException.ThrowIfNull(part);
-
-            return new ChatSessionContentBlockModel
+            if (!message.SourceEntryIds.Contains(entry.EntryId, StringComparer.OrdinalIgnoreCase))
             {
-                Kind = ToBlockKind(part.PartType),
-                Content = part.Content,
-                Title = part.Title,
-                Language = part.Language,
-                BadgeText = part.BadgeText,
-                IsStreaming = part.IsStreaming,
-                ToolCallId = part.ToolCallId,
-                CallerAgentId = part.CallerAgentId,
-                ResourcePath = part.PartType is ChatMessagePartType.Image or ChatMessagePartType.Audio
-                    ? part.ResourcePath ?? part.Content
-                    : part.ResourcePath
+                message.SourceEntryIds.Add(entry.EntryId);
+            }
+
+            foreach (var block in entry.Blocks)
+            {
+                if (!ShouldProjectBlock(block))
+                {
+                    continue;
+                }
+
+                var part = ToPresentationPart(entry, block);
+                PrepareForAdjacentToolCall(message, part);
+                message.Parts.Add(part);
+            }
+        }
+
+        private static void PrepareForAdjacentToolCall(
+            ChatMessageModel message,
+            ChatMessagePartModel nextPart)
+        {
+            if (nextPart.PartType != ChatMessagePartType.ToolCall ||
+                message.Parts.Count == 0)
+            {
+                return;
+            }
+
+            var previousPart = message.Parts[^1];
+            if (!CanTrimTrailingPresentationWhitespace(previousPart))
+            {
+                return;
+            }
+
+            previousPart.Content = previousPart.Content.TrimEnd();
+            if (IsEmptyPresentationPart(previousPart))
+            {
+                message.Parts.RemoveAt(message.Parts.Count - 1);
+            }
+        }
+
+        private static bool CanTrimTrailingPresentationWhitespace(ChatMessagePartModel part)
+        {
+            return part.PartType is ChatMessagePartType.Text
+                or ChatMessagePartType.StructuredXml
+                or ChatMessagePartType.Reasoning;
+        }
+
+        private static bool IsEmptyPresentationPart(ChatMessagePartModel part)
+        {
+            return CanTrimTrailingPresentationWhitespace(part) &&
+                string.IsNullOrWhiteSpace(part.Content) &&
+                string.IsNullOrWhiteSpace(part.Title) &&
+                string.IsNullOrWhiteSpace(part.ResourcePath);
+        }
+
+        private static bool ShouldProjectBlock(ChatSessionTranscriptBlock block)
+        {
+            if (block.Kind is ChatSessionTranscriptBlockKind.Image
+                or ChatSessionTranscriptBlockKind.Audio
+                or ChatSessionTranscriptBlockKind.File
+                or ChatSessionTranscriptBlockKind.ResourceReference)
+            {
+                return !string.IsNullOrWhiteSpace(block.ResourcePath) ||
+                       !string.IsNullOrWhiteSpace(block.Content);
+            }
+
+            return !string.IsNullOrWhiteSpace(block.Content);
+        }
+
+        private static bool ShouldGroupAsAssistantBubble(ChatSessionTranscriptEntry entry)
+        {
+            return entry.Role == ChatSessionParticipantRole.Assistant &&
+                   entry.Kind is ChatSessionTranscriptEntryKind.Reasoning
+                       or ChatSessionTranscriptEntryKind.AgentMessage
+                       or ChatSessionTranscriptEntryKind.AgentFinalOutput
+                       or ChatSessionTranscriptEntryKind.ToolCall
+                       or ChatSessionTranscriptEntryKind.MalformedToolCall;
+        }
+
+        private static string BuildAssistantGroupKey(ChatSessionTranscriptEntry entry)
+        {
+            return string.Join(
+                ":",
+                "assistant",
+                entry.TurnId,
+                entry.NodeId ?? string.Empty,
+                entry.AgentId ?? string.Empty);
+        }
+
+        private static bool ShouldProjectEntry(
+            ChatSessionTranscript transcript,
+            ChatSessionTranscriptEntry entry,
+            bool includeDebugEntries)
+        {
+            if (IsSyntheticRuntimeUserEntry(entry) || IsRedundantFinalOutput(transcript, entry))
+            {
+                return false;
+            }
+
+            return entry.Visibility switch
+            {
+                TranscriptVisibility.Visible or TranscriptVisibility.Collapsed => true,
+                TranscriptVisibility.DebugOnly => includeDebugEntries,
+                _ => false
             };
         }
 
-        public static ChatMessagePartModel ToPresentationPart(ChatSessionContentBlockModel block)
+        private static ChatMessagePartModel ToPresentationPart(
+            ChatSessionTranscriptEntry entry,
+            ChatSessionTranscriptBlock block)
         {
-            ArgumentNullException.ThrowIfNull(block);
-
+            var partType = ToPartType(block.Kind, entry.Kind);
             return new ChatMessagePartModel(
-                ToPartType(block.Kind),
+                partType,
                 block.Content,
-                block.Title,
+                ResolvePartTitle(entry, block),
                 block.Language,
-                block.BadgeText,
-                block.IsStreaming,
-                block.ToolCallId,
-                block.CallerAgentId,
-                block.Kind is ChatSessionContentBlockKind.Image or ChatSessionContentBlockKind.Audio
+                GetBadgeText(block.Kind, entry.Kind),
+                entry.Status == ChatSessionEntryStatus.Streaming,
+                entry.ToolCallId,
+                entry.AgentId,
+                block.Kind is ChatSessionTranscriptBlockKind.Image or ChatSessionTranscriptBlockKind.Audio
                     ? block.ResourcePath ?? block.Content
                     : block.ResourcePath,
-                IsUserVisible(block));
+                IsUserVisible(entry),
+                IsCollapsible(entry, block));
         }
 
-        private static bool IsUserVisible(ChatSessionContentBlockModel block)
+        private static string? ResolvePartTitle(
+            ChatSessionTranscriptEntry entry,
+            ChatSessionTranscriptBlock block)
         {
-            if (block.Kind is ChatSessionContentBlockKind.ToolOutput or ChatSessionContentBlockKind.ToolReference)
+            if (entry.Kind == ChatSessionTranscriptEntryKind.Reasoning)
             {
-                return string.Equals(block.Title, "Tool Parse Error", StringComparison.Ordinal) ||
-                       string.Equals(block.Title, "工具解析错误", StringComparison.Ordinal);
+                return string.IsNullOrWhiteSpace(block.Title) ? "思考" : block.Title;
             }
 
-            return true;
+            return block.Title;
         }
 
-        private static ChatSessionContentBlockKind ToBlockKind(ChatMessagePartType partType)
+        private static ChatMessagePartType ToPartType(
+            ChatSessionTranscriptBlockKind blockKind,
+            ChatSessionTranscriptEntryKind entryKind)
         {
-            return partType switch
+            if (entryKind == ChatSessionTranscriptEntryKind.ToolCall)
             {
-                ChatMessagePartType.Code => ChatSessionContentBlockKind.Code,
-                ChatMessagePartType.Status => ChatSessionContentBlockKind.Status,
-                ChatMessagePartType.Placeholder => ChatSessionContentBlockKind.Placeholder,
-                ChatMessagePartType.Tool or ChatMessagePartType.ToolOutput => ChatSessionContentBlockKind.ToolOutput,
-                ChatMessagePartType.ToolCall => ChatSessionContentBlockKind.ToolCall,
-                ChatMessagePartType.StructuredXml => ChatSessionContentBlockKind.StructuredXml,
-                ChatMessagePartType.Image => ChatSessionContentBlockKind.Image,
-                ChatMessagePartType.Audio => ChatSessionContentBlockKind.Audio,
-                ChatMessagePartType.HostPreservedContent => ChatSessionContentBlockKind.HostPreservedContent,
-                ChatMessagePartType.Reasoning => ChatSessionContentBlockKind.Reasoning,
-                _ => ChatSessionContentBlockKind.Text
-            };
-        }
+                return ChatMessagePartType.ToolCall;
+            }
 
-        private static ChatMessagePartType ToPartType(ChatSessionContentBlockKind blockKind)
-        {
+            if (entryKind is ChatSessionTranscriptEntryKind.ToolOutput or ChatSessionTranscriptEntryKind.MalformedToolCall)
+            {
+                return ChatMessagePartType.ToolOutput;
+            }
+
             return blockKind switch
             {
-                ChatSessionContentBlockKind.Code => ChatMessagePartType.Code,
-                ChatSessionContentBlockKind.Status => ChatMessagePartType.Status,
-                ChatSessionContentBlockKind.Placeholder => ChatMessagePartType.Placeholder,
-                ChatSessionContentBlockKind.ToolCall => ChatMessagePartType.ToolCall,
-                ChatSessionContentBlockKind.ToolOutput or ChatSessionContentBlockKind.ToolReference => ChatMessagePartType.ToolOutput,
-                ChatSessionContentBlockKind.StructuredXml => ChatMessagePartType.StructuredXml,
-                ChatSessionContentBlockKind.Image => ChatMessagePartType.Image,
-                ChatSessionContentBlockKind.Audio => ChatMessagePartType.Audio,
-                ChatSessionContentBlockKind.HostPreservedContent => ChatMessagePartType.HostPreservedContent,
-                ChatSessionContentBlockKind.Reasoning => ChatMessagePartType.Reasoning,
+                ChatSessionTranscriptBlockKind.Code => ChatMessagePartType.Code,
+                ChatSessionTranscriptBlockKind.StructuredXml => ChatMessagePartType.StructuredXml,
+                ChatSessionTranscriptBlockKind.ToolInvocationXml => ChatMessagePartType.ToolCall,
+                ChatSessionTranscriptBlockKind.ToolOutputXml => ChatMessagePartType.ToolOutput,
+                ChatSessionTranscriptBlockKind.Image => ChatMessagePartType.Image,
+                ChatSessionTranscriptBlockKind.Audio => ChatMessagePartType.Audio,
+                ChatSessionTranscriptBlockKind.ReasoningText => ChatMessagePartType.Reasoning,
+                ChatSessionTranscriptBlockKind.StatusText or ChatSessionTranscriptBlockKind.ErrorText => ChatMessagePartType.Status,
+                ChatSessionTranscriptBlockKind.ResourceReference => ChatMessagePartType.HostPreservedContent,
                 _ => ChatMessagePartType.Text
             };
+        }
+
+        private static string? GetBadgeText(
+            ChatSessionTranscriptBlockKind blockKind,
+            ChatSessionTranscriptEntryKind entryKind)
+        {
+            return entryKind switch
+            {
+                ChatSessionTranscriptEntryKind.ToolCall => "工具调用",
+                ChatSessionTranscriptEntryKind.ToolOutput => "工具输出",
+                ChatSessionTranscriptEntryKind.MalformedToolCall => "工具错误",
+                ChatSessionTranscriptEntryKind.Reasoning => "思考",
+                ChatSessionTranscriptEntryKind.StructuredPayload => "XML",
+                ChatSessionTranscriptEntryKind.Error => "错误",
+                _ => blockKind switch
+                {
+                    ChatSessionTranscriptBlockKind.StructuredXml => "XML",
+                    ChatSessionTranscriptBlockKind.Image => "图片",
+                    ChatSessionTranscriptBlockKind.Audio => "音频",
+                    ChatSessionTranscriptBlockKind.Code => "代码",
+                    _ => null
+                }
+            };
+        }
+
+        private static bool IsUserVisible(ChatSessionTranscriptEntry entry)
+        {
+            return entry.Visibility is TranscriptVisibility.Visible or TranscriptVisibility.Collapsed;
+        }
+
+        private static bool IsCollapsible(
+            ChatSessionTranscriptEntry entry,
+            ChatSessionTranscriptBlock block)
+        {
+            if (entry.Kind != ChatSessionTranscriptEntryKind.Reasoning)
+            {
+                return true;
+            }
+
+            if (TryReadBooleanMetadata(block.Metadata, "ReasoningCollapsible", out var blockValue))
+            {
+                return blockValue;
+            }
+
+            if (TryReadBooleanMetadata(entry.Metadata, "ReasoningCollapsible", out var entryValue))
+            {
+                return entryValue;
+            }
+
+            return entry.Visibility == TranscriptVisibility.Collapsed;
+        }
+
+        private static bool TryReadBooleanMetadata(
+            IReadOnlyDictionary<string, string> metadata,
+            string key,
+            out bool value)
+        {
+            value = false;
+            return metadata.TryGetValue(key, out var rawValue) &&
+                   bool.TryParse(rawValue, out value);
+        }
+
+        private static ChatMessageRole ToPresentationRole(ChatSessionParticipantRole role)
+        {
+            return role switch
+            {
+                ChatSessionParticipantRole.Assistant => ChatMessageRole.Assistant,
+                ChatSessionParticipantRole.System or ChatSessionParticipantRole.Runtime => ChatMessageRole.System,
+                _ => ChatMessageRole.User
+            };
+        }
+
+        private static string ResolveDisplayName(ChatSessionTranscriptEntry entry, ChatMessageRole role)
+        {
+            if (!string.IsNullOrWhiteSpace(entry.NodeTitle))
+            {
+                return entry.NodeTitle.Trim();
+            }
+
+            if (!string.IsNullOrWhiteSpace(entry.AgentName))
+            {
+                return entry.AgentName.Trim();
+            }
+
+            if (!string.IsNullOrWhiteSpace(entry.ToolName))
+            {
+                return entry.ToolName.Trim();
+            }
+
+            return role switch
+            {
+                ChatMessageRole.Assistant => "Skyweaver 助手",
+                ChatMessageRole.System => "系统",
+                _ => "用户"
+            };
+        }
+
+        private static string GetAvatarPath(ChatMessageRole role)
+        {
+            return role switch
+            {
+                ChatMessageRole.Assistant => AssistantAvatarPath,
+                ChatMessageRole.System => SystemAvatarPath,
+                _ => UserAvatarPath
+            };
+        }
+
+        private static bool IsSyntheticRuntimeUserEntry(ChatSessionTranscriptEntry entry)
+        {
+            return entry.Kind == ChatSessionTranscriptEntryKind.UserMessage &&
+                   entry.Blocks.Count == 1 &&
+                   string.Equals(
+                       entry.Blocks[0].Content?.Trim(),
+                       ChatSessionTranscriptWriter.SyntheticRuntimeTurnInputText,
+                       StringComparison.Ordinal);
+        }
+
+        private static bool IsRedundantFinalOutput(
+            ChatSessionTranscript transcript,
+            ChatSessionTranscriptEntry entry)
+        {
+            if (entry.Kind != ChatSessionTranscriptEntryKind.AgentFinalOutput)
+            {
+                return false;
+            }
+
+            var entryIndex = transcript.Entries.IndexOf(entry);
+            if (entryIndex <= 0)
+            {
+                return false;
+            }
+
+            var finalText = GetComparableEntryText(entry);
+            if (finalText.Length == 0)
+            {
+                return false;
+            }
+
+            return transcript.Entries
+                .Take(entryIndex)
+                .Any(candidate =>
+                    candidate.Kind == ChatSessionTranscriptEntryKind.AgentMessage &&
+                    candidate.Role == ChatSessionParticipantRole.Assistant &&
+                    candidate.Visibility is TranscriptVisibility.Visible or TranscriptVisibility.Collapsed &&
+                    string.Equals(candidate.TurnId, entry.TurnId, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(candidate.NodeId ?? string.Empty, entry.NodeId ?? string.Empty, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(GetComparableEntryText(candidate), finalText, StringComparison.Ordinal));
+        }
+
+        private static string GetComparableEntryText(ChatSessionTranscriptEntry entry)
+        {
+            return string.Join(
+                    Environment.NewLine + Environment.NewLine,
+                    entry.Blocks
+                        .Where(block => block.Kind is ChatSessionTranscriptBlockKind.Text
+                            or ChatSessionTranscriptBlockKind.StructuredXml
+                            or ChatSessionTranscriptBlockKind.Code)
+                        .Select(block => block.Content)
+                        .Where(content => !string.IsNullOrWhiteSpace(content)))
+                .TrimEnd();
         }
     }
 }

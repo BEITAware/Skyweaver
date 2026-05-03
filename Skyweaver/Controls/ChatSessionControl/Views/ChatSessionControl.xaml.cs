@@ -88,10 +88,8 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
 
         private void MessagesCollection_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            if (e.Action == NotifyCollectionChangedAction.Add
-                || e.Action == NotifyCollectionChangedAction.Move
-                || e.Action == NotifyCollectionChangedAction.Replace
-                || e.Action == NotifyCollectionChangedAction.Reset)
+            if (e.Action == NotifyCollectionChangedAction.Add &&
+                e.NewStartingIndex >= MessagesList.Items.Count - 1)
             {
                 ScrollToLatestMessage();
             }

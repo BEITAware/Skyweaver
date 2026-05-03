@@ -35,6 +35,8 @@ namespace Skyweaver.Services.AgentLoop
 
         public SkyweaverToolContext ToolContext { get; init; } = new();
 
+        public bool EnableGemmaThoughtCompatibility { get; init; } = true;
+
         public Func<AgentToolConfirmationRequest, CancellationToken, Task<AgentToolConfirmationResult>>? ToolConfirmationCallback { get; init; }
     }
 
@@ -283,6 +285,8 @@ namespace Skyweaver.Services.AgentLoop
         public string? TextDelta { get; init; }
 
         public string? ReasoningDelta { get; init; }
+
+        public bool IsReasoningCollapsible { get; init; } = true;
 
         public AgentLoopOutputKind? TextDeltaOutputKind { get; init; }
 

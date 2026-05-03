@@ -4,6 +4,8 @@ using Skyweaver.Controls.AgentConfigurationControl.Services;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
 using Skyweaver.Controls.WorkflowEditorControl.Models;
 using Skyweaver.Controls.WorkflowEditorControl.Services;
+using Skyweaver.Models.ChatSession;
+using Skyweaver.Services.AgentLoop;
 
 namespace Skyweaver.Services.ChatSession
 {
@@ -16,6 +18,8 @@ namespace Skyweaver.Services.ChatSession
         private readonly AgentConfigurationRepository _agentConfigurationRepository;
         private readonly IAgentLanguageModelResolver _languageModelResolver;
         private readonly SessionFlowExecutionService _executionService;
+        private readonly ChatSessionTranscriptWriter _transcriptWriter;
+        private readonly ChatSessionRepository _sessionRepository;
         private readonly SemaphoreSlim _executionGate = new(1, 1);
 
         private CancellationTokenSource? _activeExecutionCancellationSource;
@@ -27,7 +31,9 @@ namespace Skyweaver.Services.ChatSession
                 new ChatSessionFlowBindingService(),
                 new AgentConfigurationRepository(new AgentConfigurationPathProvider()),
                 new AgentLanguageModelResolver(),
-                new SessionFlowExecutionService())
+                new SessionFlowExecutionService(),
+                new ChatSessionTranscriptWriter(),
+                new ChatSessionRepository())
         {
         }
 
@@ -36,11 +42,30 @@ namespace Skyweaver.Services.ChatSession
             AgentConfigurationRepository agentConfigurationRepository,
             IAgentLanguageModelResolver languageModelResolver,
             SessionFlowExecutionService executionService)
+            : this(
+                flowBindingService,
+                agentConfigurationRepository,
+                languageModelResolver,
+                executionService,
+                new ChatSessionTranscriptWriter(),
+                new ChatSessionRepository(flowBindingService))
+        {
+        }
+
+        public ChatSessionRuntimeService(
+            ChatSessionFlowBindingService flowBindingService,
+            AgentConfigurationRepository agentConfigurationRepository,
+            IAgentLanguageModelResolver languageModelResolver,
+            SessionFlowExecutionService executionService,
+            ChatSessionTranscriptWriter transcriptWriter,
+            ChatSessionRepository sessionRepository)
         {
             _flowBindingService = flowBindingService ?? throw new ArgumentNullException(nameof(flowBindingService));
             _agentConfigurationRepository = agentConfigurationRepository ?? throw new ArgumentNullException(nameof(agentConfigurationRepository));
             _languageModelResolver = languageModelResolver ?? throw new ArgumentNullException(nameof(languageModelResolver));
             _executionService = executionService ?? throw new ArgumentNullException(nameof(executionService));
+            _transcriptWriter = transcriptWriter ?? throw new ArgumentNullException(nameof(transcriptWriter));
+            _sessionRepository = sessionRepository ?? throw new ArgumentNullException(nameof(sessionRepository));
         }
 
         public bool IsExecutionActive => _isExecutionActive;
@@ -100,14 +125,14 @@ namespace Skyweaver.Services.ChatSession
             }
 
             var hasRegisteredExecution = false;
-            ChatSessionConversationHistoryRecorder? conversationHistoryRecorder = null;
             using var linkedCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
             async ValueTask PublishRuntimeEventAsync(
                 ChatSessionRuntimeEvent runtimeEvent,
                 CancellationToken token)
             {
-                conversationHistoryRecorder?.Record(runtimeEvent);
+                _transcriptWriter.ApplyRuntimeEvent(request.Session, runtimeEvent);
+                PersistSessionIfNeeded(request.Session, runtimeEvent);
                 await PublishAsync(onEventAsync, runtimeEvent, token).ConfigureAwait(false);
             }
 
@@ -123,17 +148,21 @@ namespace Skyweaver.Services.ChatSession
                 _activeSessionId = sessionId;
                 _isExecutionActive = true;
 
+                _transcriptWriter.BeginTurn(
+                    request.Session,
+                    new ChatSessionUserInput
+                    {
+                        Text = trimmedUserText,
+                        ContentBlocks = userContentBlocks
+                    });
+                PersistSession(request.Session);
+
                 var conversationHistory = ChatSessionTurnHistoryBuilder.BuildForNextTurn(
                     request.Session,
                     trimmedUserText,
                     userContentBlocks)
                     .Select(message => message.Clone())
                     .ToList();
-
-                conversationHistoryRecorder = new ChatSessionConversationHistoryRecorder(
-                    conversationHistory,
-                    trimmedUserText,
-                    userContentBlocks);
 
                 var compilationResult = _flowBindingService.CompileBinding(request.Session.FlowBinding);
                 if (!compilationResult.IsSuccess || compilationResult.Graph == null)
@@ -205,7 +234,8 @@ namespace Skyweaver.Services.ChatSession
                         InitialUserContentBlocks = userContentBlocks,
                         ConversationHistory = conversationHistory,
                         AgentsById = agentsById,
-                        ToolConfirmationCallback = request.ToolConfirmationCallback
+                        EnableGemmaThoughtCompatibility = request.EnableGemmaThoughtCompatibility,
+                        ToolConfirmationCallback = ResolveToolConfirmationCallback(request)
                     },
                     PublishRuntimeEventAsync,
                     linkedCancellationSource.Token).ConfigureAwait(false);
@@ -271,6 +301,11 @@ namespace Skyweaver.Services.ChatSession
             {
                 if (hasRegisteredExecution)
                 {
+                    PersistSession(request.Session);
+                }
+
+                if (hasRegisteredExecution)
+                {
                     s_activeExecutions.TryRemove(sessionId, out _);
                 }
 
@@ -281,6 +316,45 @@ namespace Skyweaver.Services.ChatSession
             }
         }
 
+        private void PersistSessionIfNeeded(
+            ChatSessionModel session,
+            ChatSessionRuntimeEvent runtimeEvent)
+        {
+            if (!ShouldPersistAfter(runtimeEvent))
+            {
+                return;
+            }
+
+            PersistSession(session);
+        }
+
+        private void PersistSession(ChatSessionModel session)
+        {
+            try
+            {
+                _sessionRepository.Save(session);
+            }
+            catch
+            {
+                // Runtime persistence must not mask the original agent failure path.
+            }
+        }
+
+        private static bool ShouldPersistAfter(ChatSessionRuntimeEvent runtimeEvent)
+        {
+            return runtimeEvent.Kind switch
+            {
+                ChatSessionRuntimeEventKind.TextDelta => false,
+                ChatSessionRuntimeEventKind.ReasoningDelta => false,
+                ChatSessionRuntimeEventKind.ToolCallUpdated when runtimeEvent.ToolCallSnapshot?.IsInvocationClosed != true &&
+                                                       runtimeEvent.ToolInvocation == null => false,
+                ChatSessionRuntimeEventKind.AgentIterationStarted or
+                    ChatSessionRuntimeEventKind.AgentIterationCompleted or
+                    ChatSessionRuntimeEventKind.NodeStarted => false,
+                _ => true
+            };
+        }
+
         private Dictionary<string, AgentDefinition> LoadAgentMap()
         {
             return _agentConfigurationRepository.Load()
@@ -289,6 +363,17 @@ namespace Skyweaver.Services.ChatSession
                     agent => agent.AgentId,
                     agent => agent.DeepClone(),
                     StringComparer.OrdinalIgnoreCase);
+        }
+
+        private static Func<AgentToolConfirmationRequest, CancellationToken, Task<AgentToolConfirmationResult>>?
+            ResolveToolConfirmationCallback(ChatSessionRuntimeRequest request)
+        {
+            if (request.ToolConfirmationService != null)
+            {
+                return request.ToolConfirmationService.ConfirmAsync;
+            }
+
+            return request.ToolConfirmationCallback;
         }
 
         private List<string> ValidatePreflight(

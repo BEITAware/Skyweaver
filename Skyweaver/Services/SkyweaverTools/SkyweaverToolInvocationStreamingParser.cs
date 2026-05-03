@@ -46,12 +46,10 @@ namespace Skyweaver.Services.SkyweaverTools
                 }
 
                 var toolOpenTagEndIndex = FindTagEnd(rawContent, toolStartIndex);
-                if (toolOpenTagEndIndex < 0)
-                {
-                    break;
-                }
-
-                var toolOpenTag = rawContent[toolStartIndex..toolOpenTagEndIndex];
+                var hasCompleteOpenTag = toolOpenTagEndIndex >= 0;
+                var toolOpenTag = hasCompleteOpenTag
+                    ? rawContent[toolStartIndex..toolOpenTagEndIndex]
+                    : rawContent[toolStartIndex..];
                 toolCallIndex++;
                 var currentPartIndex = partIndex;
                 var toolName = GetAttributeValue(toolOpenTag, "ToolName") ?? GetAttributeValue(toolOpenTag, "Name");
@@ -64,29 +62,26 @@ namespace Skyweaver.Services.SkyweaverTools
                     int toolEndIndex;
                     bool isInvocationClosed;
 
-                    if (IsSelfClosingTag(toolOpenTag))
+                    if (!hasCompleteOpenTag)
+                    {
+                        parameters = Array.Empty<SkyweaverStreamingToolParameterSnapshot>();
+                        toolEndIndex = rawContent.Length;
+                        isInvocationClosed = false;
+                    }
+                    else if (IsSelfClosingTag(toolOpenTag))
                     {
                         parameters = Array.Empty<SkyweaverStreamingToolParameterSnapshot>();
                         toolEndIndex = toolOpenTagEndIndex;
                         isInvocationClosed = true;
                     }
-                    else if (toolDefinition?.Parameters.Count > 0)
+                    else
                     {
                         parameters = ParseParameterizedToolBody(
                             rawContent,
-                            toolDefinition.Parameters,
+                            toolDefinition?.Parameters ?? Array.Empty<SkyweaverToolParameterDefinition>(),
                             toolOpenTagEndIndex,
                             out toolEndIndex,
                             out isInvocationClosed);
-                    }
-                    else
-                    {
-                        parameters = Array.Empty<SkyweaverStreamingToolParameterSnapshot>();
-                        isInvocationClosed = TryFindToolClose(rawContent, toolOpenTagEndIndex, out toolEndIndex);
-                        if (!isInvocationClosed)
-                        {
-                            toolEndIndex = rawContent.Length;
-                        }
                     }
 
                     snapshots.Add(new SkyweaverStreamingToolCallSnapshot
@@ -107,6 +102,11 @@ namespace Skyweaver.Services.SkyweaverTools
 
                     searchIndex = Math.Max(toolEndIndex, toolOpenTagEndIndex);
                     continue;
+                }
+
+                if (!hasCompleteOpenTag)
+                {
+                    break;
                 }
 
                 var fallbackToolEndIndex = toolOpenTagEndIndex;
@@ -180,7 +180,19 @@ namespace Skyweaver.Services.SkyweaverTools
 
                 if (!TryReadTag(rawContent, cursor, out var tag))
                 {
-                    AppendTrailingParameterText(activeParameter, rawContent, cursor);
+                    if (activeParameter == null)
+                    {
+                        AddPartialParameterStart(
+                            rawContent,
+                            cursor,
+                            parametersByName,
+                            orderedParameters);
+                    }
+                    else
+                    {
+                        AppendTrailingParameterText(activeParameter, rawContent, cursor);
+                    }
+
                     toolEndIndex = rawContent.Length;
                     isInvocationClosed = false;
                     return BuildParameterSnapshots(orderedParameters);
@@ -320,6 +332,75 @@ namespace Skyweaver.Services.SkyweaverTools
             }
 
             return tag.Name;
+        }
+
+        private static void AddPartialParameterStart(
+            string rawContent,
+            int tagStartIndex,
+            IDictionary<string, ParameterBuilder> parametersByName,
+            ICollection<ParameterBuilder> orderedParameters)
+        {
+            if (!TryReadPartialStartTag(rawContent, tagStartIndex, out var tag) ||
+                string.Equals(tag.Name, "Tool", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            var parameterName = ResolveParameterName(tag);
+            if (parameterName.Length == 0)
+            {
+                return;
+            }
+
+            var parameter = GetOrCreateParameterBuilder(parametersByName, orderedParameters, parameterName);
+            parameter.IsClosed = false;
+
+            var attributeValue = GetAttributeValue(tag.RawText, "Value");
+            if (!string.IsNullOrWhiteSpace(attributeValue))
+            {
+                parameter.ValueBuilder.Clear();
+                parameter.ValueBuilder.Append(attributeValue);
+            }
+        }
+
+        private static bool TryReadPartialStartTag(string rawContent, int tagStartIndex, out ParsedTag tag)
+        {
+            tag = ParsedTag.Empty;
+
+            if (tagStartIndex < 0 ||
+                tagStartIndex >= rawContent.Length ||
+                rawContent[tagStartIndex] != '<' ||
+                tagStartIndex + 1 >= rawContent.Length ||
+                rawContent[tagStartIndex + 1] is '/' or '!' or '?')
+            {
+                return false;
+            }
+
+            var nameStartIndex = tagStartIndex + 1;
+            while (nameStartIndex < rawContent.Length && char.IsWhiteSpace(rawContent[nameStartIndex]))
+            {
+                nameStartIndex++;
+            }
+
+            var nameEndIndex = nameStartIndex;
+            while (nameEndIndex < rawContent.Length && !IsXmlNameBoundary(rawContent[nameEndIndex]))
+            {
+                nameEndIndex++;
+            }
+
+            if (nameEndIndex <= nameStartIndex)
+            {
+                return false;
+            }
+
+            tag = new ParsedTag(
+                rawContent[tagStartIndex..],
+                rawContent[nameStartIndex..nameEndIndex],
+                ParsedTagKind.Start,
+                IsSelfClosing: false,
+                tagStartIndex,
+                rawContent.Length);
+            return true;
         }
 
         private static bool TryFindToolClose(string rawContent, int searchStartIndex, out int toolEndIndex)

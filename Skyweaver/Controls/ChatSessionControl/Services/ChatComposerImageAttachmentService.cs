@@ -26,6 +26,15 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
             var fileName = $"{DateTime.UtcNow:yyyyMMddHHmmssfff}_{Guid.NewGuid():N}.png";
             var filePath = Path.Combine(imageFolder, fileName);
             SaveScaledPng(image, filePath);
+            session.Resources.Resources.Add(new ChatSessionResourceManifestEntry
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Kind = "Image",
+                Path = filePath,
+                MediaType = "image/png",
+                CreatedAtUtc = DateTime.UtcNow,
+                SizeBytes = new FileInfo(filePath).Length
+            });
             return new ChatComposerAttachmentModel(filePath, "image/png", fileName);
         }
 

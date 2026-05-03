@@ -1,9 +1,6 @@
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Xml.Linq;
-using Skyweaver.Controls.ChatSessionControl.Models;
-using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
 using Skyweaver.Models.ChatSession;
 
 namespace Skyweaver.Services.ChatSession
@@ -11,9 +8,6 @@ namespace Skyweaver.Services.ChatSession
     public sealed class ChatSessionRepository
     {
         private const string DefaultIconPath = "pack://application:,,,/Resources/NewNodeGraphAlt.png";
-        private const string UserAvatarPath = "pack://application:,,,/Resources/image.png";
-        private const string AssistantAvatarPath = "pack://application:,,,/Resources/GuideBot.png";
-        private const string SystemAvatarPath = "pack://application:,,,/Resources/QuestionBot.png";
 
         private readonly ChatSessionFlowBindingService _flowBindingService;
 
@@ -44,10 +38,9 @@ namespace Skyweaver.Services.ChatSession
 
             var sessionDirectories = Directory
                 .EnumerateDirectories(RootFolderPath)
-                .OrderByDescending(directory => Directory.GetLastWriteTimeUtc(directory));
+                .OrderByDescending(Directory.GetLastWriteTimeUtc);
 
             var sessions = new List<ChatSessionModel>();
-
             foreach (var sessionDirectory in sessionDirectories)
             {
                 var sessionName = Path.GetFileName(sessionDirectory);
@@ -79,20 +72,21 @@ namespace Skyweaver.Services.ChatSession
                 throw new InvalidOperationException($"会话“{validatedName}”已存在。");
             }
 
-            var resourcesFolderPath = Path.Combine(sessionFolderPath, "ChatSessionResources");
+            var resourcesFolderPath = Path.Combine(sessionFolderPath, ChatSessionResourceLayout.ResourcesFolderName);
             Directory.CreateDirectory(sessionFolderPath);
             Directory.CreateDirectory(resourcesFolderPath);
-            Directory.CreateDirectory(Path.Combine(resourcesFolderPath, "ToolCalls"));
+            Directory.CreateDirectory(Path.Combine(resourcesFolderPath, ChatSessionResourceLayout.ToolCallsFolderName));
 
+            var now = DateTime.UtcNow;
             var session = new ChatSessionModel
             {
                 SessionId = Guid.NewGuid().ToString("N"),
                 Name = validatedName,
                 IconPath = DefaultIconPath,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                ContextSummary = "新建会话，等待聊天内容写入。",
-                MetadataNote = "XML session storage",
+                CreatedAtUtc = now,
+                UpdatedAtUtc = now,
+                ContextSummary = "新建会话。",
+                MetadataNote = "XML transcript schema 3",
                 SessionFolderPath = sessionFolderPath,
                 SessionFilePath = Path.Combine(sessionFolderPath, $"{validatedName}.xml"),
                 ResourcesFolderPath = resourcesFolderPath
@@ -116,33 +110,12 @@ namespace Skyweaver.Services.ChatSession
             Directory.CreateDirectory(session.SessionFolderPath);
             ChatSessionResourceLayout.EnsureResources(session);
 
-            session.UpdatedAt = DateTime.UtcNow;
-            EnsureRecordProjection(session);
+            session.UpdatedAtUtc = DateTime.UtcNow;
+            session.Transcript.SchemaVersion = 3;
+            session.Transcript.RebuildIndex();
 
-            var conversationElement = new XElement(
-                "Conversation",
-                new XAttribute("StorageSchema", "2"),
-                session.Records.Select(record => CreateRecordElement(session, record)));
-
-            var document = new XDocument(
-                new XElement("ChatSession",
-                    new XAttribute("SessionID", session.SessionId),
-                    new XAttribute("Name", session.Name),
-                    new XElement("Metadata",
-                        new XElement("CreatedAtUtc", session.CreatedAt.ToString("O", CultureInfo.InvariantCulture)),
-                        new XElement("UpdatedAtUtc", session.UpdatedAt.ToString("O", CultureInfo.InvariantCulture)),
-                        new XElement("IconPath", session.IconPath),
-                        new XElement("SessionFolder", session.SessionFolderPath),
-                        new XElement("ResourcesFolder", session.ResourcesFolderPath),
-                        new XElement("BoundSessionFlow",
-                            new XElement("GraphId", session.FlowBinding.GraphId),
-                            new XElement("GraphName", session.FlowBinding.GraphName),
-                            new XElement("FilePath", session.FlowBinding.FilePath)),
-                        new XElement("ContextSummary", session.ContextSummary),
-                        new XElement("Note", session.MetadataNote)),
-                    conversationElement));
-
-            document.Save(session.SessionFilePath);
+            var document = CreateDocument(session);
+            SaveAtomically(document, session.SessionFilePath);
         }
 
         public void Delete(ChatSessionModel session)
@@ -158,25 +131,30 @@ namespace Skyweaver.Services.ChatSession
 
         private ChatSessionModel LoadFromFile(string sessionFilePath)
         {
-            var document = XDocument.Load(sessionFilePath);
-            var root = document.Root ?? throw new InvalidDataException("ChatSession XML 缺少根节点。");
+            var document = XDocument.Load(sessionFilePath, LoadOptions.PreserveWhitespace);
+            var root = document.Root ?? throw new InvalidDataException("ChatSession XML is missing a root element.");
+            var metadataElement = root.Element("Metadata");
 
             var name = (string?)root.Attribute("Name") ?? Path.GetFileNameWithoutExtension(sessionFilePath);
             var session = new ChatSessionModel
             {
-                SessionId = (string?)root.Attribute("SessionID") ?? Guid.NewGuid().ToString("N"),
+                SessionId = FirstNonEmpty(
+                    (string?)root.Attribute("SessionId"),
+                    (string?)root.Attribute("SessionID"),
+                    Guid.NewGuid().ToString("N")),
                 Name = name,
-                IconPath = (string?)root.Element("Metadata")?.Element("IconPath") ?? DefaultIconPath,
-                CreatedAt = ParseDateTime((string?)root.Element("Metadata")?.Element("CreatedAtUtc")),
-                UpdatedAt = ParseDateTime((string?)root.Element("Metadata")?.Element("UpdatedAtUtc")),
-                ContextSummary = (string?)root.Element("Metadata")?.Element("ContextSummary") ?? string.Empty,
-                MetadataNote = (string?)root.Element("Metadata")?.Element("Note") ?? string.Empty,
+                IconPath = (string?)metadataElement?.Element("IconPath") ?? DefaultIconPath,
+                CreatedAtUtc = ParseDateTime((string?)metadataElement?.Element("CreatedAtUtc")),
+                UpdatedAtUtc = ParseDateTime((string?)metadataElement?.Element("UpdatedAtUtc")),
+                MetadataNote = (string?)metadataElement?.Element("Note") ?? string.Empty,
                 SessionFilePath = sessionFilePath,
                 SessionFolderPath = Path.GetDirectoryName(sessionFilePath) ?? string.Empty,
-                ResourcesFolderPath = Path.Combine(Path.GetDirectoryName(sessionFilePath) ?? string.Empty, "ChatSessionResources")
+                ResourcesFolderPath = Path.Combine(
+                    Path.GetDirectoryName(sessionFilePath) ?? string.Empty,
+                    ChatSessionResourceLayout.ResourcesFolderName)
             };
 
-            var boundFlowElement = root.Element("Metadata")?.Element("BoundSessionFlow");
+            var boundFlowElement = metadataElement?.Element("BoundSessionFlow");
             if (boundFlowElement != null)
             {
                 session.FlowBinding.GraphId = ((string?)boundFlowElement.Element("GraphId") ?? string.Empty).Trim();
@@ -184,438 +162,317 @@ namespace Skyweaver.Services.ChatSession
                 session.FlowBinding.FilePath = ((string?)boundFlowElement.Element("FilePath") ?? string.Empty).Trim();
             }
 
+            LoadResourceManifest(session, root.Element("Resources"));
+            LoadTranscript(session.Transcript, root.Element("Transcript"));
+            session.ContextSummary = BuildContextSummary(session);
             ChatSessionResourceLayout.EnsureResources(session);
-
-            var messageElements = root.Element("Conversation")?.Elements("Message") ?? Enumerable.Empty<XElement>();
-            foreach (var messageElement in messageElements)
-            {
-                var record = LoadRecordElement(session, messageElement);
-                if (record.Blocks.Count == 0)
-                {
-                    continue;
-                }
-
-                session.Records.Add(record);
-                session.Messages.Add(ChatSessionPresentationProjector.ToPresentationMessage(record));
-            }
-
-            // Legacy files may contain a preprojected LLM transcript. Keep it in memory
-            // only as a fallback for sessions that do not have visible or persisted records.
-            var historyElements = root.Element("ConversationHistory")?.Elements("Message") ?? Enumerable.Empty<XElement>();
-            foreach (var historyElement in historyElements)
-            {
-                var role = Enum.TryParse<LanguageModelChatRole>((string?)historyElement.Attribute("Role"), true, out var parsedRole)
-                    ? parsedRole
-                    : LanguageModelChatRole.User;
-                var content = (string?)historyElement.Element("Content") ?? string.Empty;
-
-                session.ConversationHistory.Add(new LanguageModelChatMessage(role, content)
-                {
-                    AuthorName = NullIfWhiteSpace((string?)historyElement.Element("AuthorName"))
-                });
-            }
-
             return session;
         }
 
-        private static void EnsureRecordProjection(ChatSessionModel session)
+        private static XDocument CreateDocument(ChatSessionModel session)
         {
-            if (session.Records.Count > 0 || session.Messages.Count == 0)
-            {
-                return;
-            }
-
-            foreach (var message in session.Messages)
-            {
-                session.Records.Add(ChatSessionPresentationProjector.ToRecord(message));
-            }
+            return new XDocument(
+                new XElement(
+                    "ChatSession",
+                    new XAttribute("SchemaVersion", "3"),
+                    new XAttribute("SessionId", session.SessionId),
+                    new XAttribute("Name", session.Name),
+                    new XElement(
+                        "Metadata",
+                        new XElement("CreatedAtUtc", session.CreatedAtUtc.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture)),
+                        new XElement("UpdatedAtUtc", session.UpdatedAtUtc.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture)),
+                        new XElement("IconPath", session.IconPath),
+                        new XElement("Note", session.MetadataNote),
+                        new XElement(
+                            "BoundSessionFlow",
+                            new XElement("GraphId", session.FlowBinding.GraphId),
+                            new XElement("GraphName", session.FlowBinding.GraphName),
+                            new XElement("FilePath", session.FlowBinding.FilePath))),
+                    CreateResourcesElement(session.Resources),
+                    CreateTranscriptElement(session.Transcript)));
         }
 
-        private static XElement CreateRecordElement(
-            ChatSessionModel session,
-            ChatSessionMessageRecordModel record)
+        private static XElement CreateResourcesElement(ChatSessionResourceManifest manifest)
         {
             return new XElement(
-                "Message",
-                new XAttribute("Id", record.Id),
-                new XAttribute("Role", record.Role),
-                new XElement("DisplayName", record.DisplayName),
-                new XElement("AvatarPath", record.AvatarPath),
-                new XElement("TimestampUtc", record.TimestampUtc.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture)),
-                new XElement(
-                    "ContentBlocks",
-                    record.Blocks.Select(block => CreateBlockElement(session, block))));
+                "Resources",
+                manifest.Resources.Select(resource =>
+                    new XElement(
+                        "Resource",
+                        new XAttribute("Id", resource.Id),
+                        new XAttribute("Kind", resource.Kind),
+                        new XAttribute("Path", resource.Path),
+                        OptionalAttribute("MediaType", resource.MediaType),
+                        new XAttribute("CreatedAtUtc", resource.CreatedAtUtc.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture)),
+                        OptionalAttribute("SizeBytes", resource.SizeBytes?.ToString(CultureInfo.InvariantCulture)),
+                        OptionalAttribute("Hash", resource.Hash))));
         }
 
-        private static XElement CreateBlockElement(
-            ChatSessionModel session,
-            ChatSessionContentBlockModel block)
+        private static XElement CreateTranscriptElement(ChatSessionTranscript transcript)
+        {
+            return new XElement(
+                "Transcript",
+                new XAttribute("TranscriptId", transcript.TranscriptId),
+                new XAttribute("SchemaVersion", transcript.SchemaVersion),
+                new XAttribute("Revision", transcript.Revision),
+                new XElement("Turns", transcript.Turns.Select(CreateTurnElement)),
+                new XElement("Entries", transcript.Entries.Select(CreateEntryElement)));
+        }
+
+        private static XElement CreateTurnElement(ChatSessionTurnRecord turn)
+        {
+            return new XElement(
+                "Turn",
+                new XAttribute("Id", turn.TurnId),
+                new XAttribute("Number", turn.TurnNumber),
+                new XAttribute("Status", turn.Status),
+                new XAttribute("StartedAtUtc", turn.StartedAtUtc.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture)),
+                OptionalAttribute("CompletedAtUtc", turn.CompletedAtUtc?.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture)),
+                OptionalAttribute("UserEntryId", turn.UserEntryId),
+                OptionalAttribute("FinalEntryId", turn.FinalEntryId),
+                CreateMetadataElement(turn.Metadata));
+        }
+
+        private static XElement CreateEntryElement(ChatSessionTranscriptEntry entry)
+        {
+            return new XElement(
+                "Entry",
+                new XAttribute("Id", entry.EntryId),
+                OptionalAttribute("TurnId", entry.TurnId),
+                OptionalAttribute("ParentEntryId", entry.ParentEntryId),
+                new XAttribute("Kind", entry.Kind),
+                new XAttribute("Role", entry.Role),
+                new XAttribute("TimestampUtc", entry.TimestampUtc.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture)),
+                OptionalAttribute("NodeId", entry.NodeId),
+                OptionalAttribute("NodeTitle", entry.NodeTitle),
+                OptionalAttribute("AgentId", entry.AgentId),
+                OptionalAttribute("AgentName", entry.AgentName),
+                OptionalAttribute("IterationNumber", entry.IterationNumber?.ToString(CultureInfo.InvariantCulture)),
+                OptionalAttribute("ToolCallId", entry.ToolCallId),
+                OptionalAttribute("ToolName", entry.ToolName),
+                OptionalAttribute("ToolCallIndex", entry.ToolCallIndex?.ToString(CultureInfo.InvariantCulture)),
+                new XAttribute("Visibility", entry.Visibility),
+                new XAttribute("LlmPolicy", entry.LlmPolicy),
+                new XAttribute("HandoffPolicy", entry.HandoffPolicy),
+                new XAttribute("Status", entry.Status),
+                new XAttribute("Revision", entry.Revision),
+                new XElement("Blocks", entry.Blocks.Select(CreateBlockElement)),
+                CreateMetadataElement(entry.Metadata));
+        }
+
+        private static XElement CreateBlockElement(ChatSessionTranscriptBlock block)
         {
             var blockElement = new XElement(
                 "Block",
-                new XAttribute("Id", block.Id),
+                new XAttribute("Id", block.BlockId),
                 new XAttribute("Kind", block.Kind),
-                new XAttribute("PartType", ToLegacyPartType(block.Kind)),
-                new XElement("Title", block.Title ?? string.Empty),
-                new XElement("Language", block.Language ?? string.Empty),
-                new XElement("BadgeText", block.BadgeText ?? string.Empty),
-                new XElement("IsStreaming", block.IsStreaming));
+                OptionalAttribute("Title", block.Title),
+                OptionalAttribute("Language", block.Language),
+                OptionalAttribute("MediaType", block.MediaType),
+                OptionalAttribute("ResourceId", block.ResourceId),
+                OptionalAttribute("ResourcePath", block.ResourcePath),
+                new XAttribute("Revision", block.Revision));
 
-            AddOptionalAttribute(blockElement, "ToolCallID", block.ToolCallId);
-            AddOptionalAttribute(blockElement, "CallerAgentID", block.CallerAgentId);
-            AddOptionalAttribute(blockElement, "ResourcePath", block.ResourcePath);
-
-            if (IsHostPreservedBlock(block.Kind))
-            {
-                blockElement.Add(CreatePreservedContentElement(session, block));
-            }
-            else
-            {
-                blockElement.Add(new XElement("Content", block.Content ?? string.Empty));
-            }
-
-            if (block.Metadata.Count > 0)
-            {
-                blockElement.Add(new XElement(
-                    "Metadata",
-                    block.Metadata
-                        .OrderBy(item => item.Key, StringComparer.OrdinalIgnoreCase)
-                        .Select(item => new XElement(
-                            "Item",
-                            new XAttribute("Key", item.Key),
-                            item.Value ?? string.Empty))));
-            }
-
+            blockElement.Add(CreateContentNode(block.Kind, block.Content));
+            blockElement.Add(CreateMetadataElement(block.Metadata));
             return blockElement;
         }
 
-        private static XElement CreatePreservedContentElement(
-            ChatSessionModel session,
-            ChatSessionContentBlockModel block)
+        private static XNode CreateContentNode(ChatSessionTranscriptBlockKind kind, string? content)
+        {
+            var value = content ?? string.Empty;
+            var prefersCData = kind is ChatSessionTranscriptBlockKind.StructuredXml
+                or ChatSessionTranscriptBlockKind.ToolInvocationXml
+                or ChatSessionTranscriptBlockKind.ToolOutputXml;
+            if (prefersCData && !value.Contains("]]>", StringComparison.Ordinal))
+            {
+                return new XCData(value);
+            }
+
+            return new XText(value);
+        }
+
+        private static XElement CreateMetadataElement(IReadOnlyDictionary<string, string> metadata)
         {
             return new XElement(
-                "SkyweaverPreservedContent",
-                block.Kind switch
-                {
-                    ChatSessionContentBlockKind.ToolCall => CreateToolReferenceElement(
-                        session,
-                        block,
-                        isInvocation: true),
-                    ChatSessionContentBlockKind.ToolOutput or ChatSessionContentBlockKind.ToolReference => CreateToolReferenceElement(
-                        session,
-                        block,
-                        isInvocation: false),
-                    ChatSessionContentBlockKind.Image => new XElement(
-                        "Image",
-                        new XAttribute("Path", block.ResourcePath ?? block.Content ?? string.Empty)),
-                    ChatSessionContentBlockKind.Audio => new XElement(
-                        "Audio",
-                        new XAttribute("Path", block.ResourcePath ?? block.Content ?? string.Empty)),
-                    _ => XElement.Parse("<Content />")
-                });
+                "Metadata",
+                metadata
+                    .OrderBy(item => item.Key, StringComparer.OrdinalIgnoreCase)
+                    .Select(item => new XElement(
+                        "Item",
+                        new XAttribute("Key", item.Key),
+                        item.Value ?? string.Empty)));
         }
 
-        private static XElement CreateToolReferenceElement(
-            ChatSessionModel session,
-            ChatSessionContentBlockModel block,
-            bool isInvocation)
+        private static void LoadResourceManifest(ChatSessionModel session, XElement? resourcesElement)
         {
-            var toolCallId = ChatSessionToolCallIdGenerator.Normalize(block.ToolCallId);
-            if (toolCallId.Length == 0)
-            {
-                toolCallId = ChatSessionToolCallIdGenerator.Create(session);
-                block.ToolCallId = toolCallId;
-            }
-
-            var resourceStore = new ChatSessionToolCallResourceStore();
-            var filePath = isInvocation
-                ? resourceStore.SaveInvocation(session, toolCallId, block.CallerAgentId, block.Content)
-                : resourceStore.SaveOutput(session, toolCallId, block.CallerAgentId, block.Content);
-            block.ResourcePath = filePath;
-
-            var toolElement = new XElement("Tool", new XAttribute("ToolCallID", toolCallId));
-            AddOptionalAttribute(toolElement, "CallerAgentID", block.CallerAgentId);
-            return toolElement;
-        }
-
-        private static ChatSessionMessageRecordModel LoadRecordElement(
-            ChatSessionModel session,
-            XElement messageElement)
-        {
-            var role = Enum.TryParse<ChatMessageRole>((string?)messageElement.Attribute("Role"), true, out var parsedRole)
-                ? parsedRole
-                : ChatMessageRole.User;
-
-            var record = new ChatSessionMessageRecordModel
-            {
-                Id = ((string?)messageElement.Attribute("Id") ?? Guid.NewGuid().ToString("N")).Trim(),
-                Role = role,
-                DisplayName = (string?)messageElement.Element("DisplayName") ?? GetDisplayName(role),
-                AvatarPath = (string?)messageElement.Element("AvatarPath") ?? GetAvatarPath(role),
-                TimestampUtc = ParseDateTime((string?)messageElement.Element("TimestampUtc")).ToUniversalTime()
-            };
-
-            var blockElements = messageElement.Element("ContentBlocks")?.Elements("Block");
-            if (blockElements != null)
-            {
-                foreach (var blockElement in blockElements)
-                {
-                    record.Blocks.Add(LoadBlockElement(session, blockElement));
-                }
-
-                BackfillPersistedToolCallBlocks(session, record);
-                return record;
-            }
-
-            var legacyPartElements = messageElement.Element("Parts")?.Elements("Part") ?? Enumerable.Empty<XElement>();
-            foreach (var partElement in legacyPartElements)
-            {
-                record.Blocks.Add(LoadLegacyPartElement(partElement));
-            }
-
-            BackfillPersistedToolCallBlocks(session, record);
-            return record;
-        }
-
-        private static void BackfillPersistedToolCallBlocks(
-            ChatSessionModel session,
-            ChatSessionMessageRecordModel record)
-        {
-            if (record.Blocks.Count == 0)
+            session.Resources.Resources.Clear();
+            if (resourcesElement == null)
             {
                 return;
             }
 
-            var resourceStore = new ChatSessionToolCallResourceStore();
-            var existingToolCallIds = record.Blocks
-                .Where(block => block.Kind == ChatSessionContentBlockKind.ToolCall)
-                .Select(block => ChatSessionToolCallIdGenerator.Normalize(block.ToolCallId))
-                .Where(toolCallId => toolCallId.Length > 0)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-            for (var index = 0; index < record.Blocks.Count; index++)
+            foreach (var resourceElement in resourcesElement.Elements("Resource"))
             {
-                var block = record.Blocks[index];
-                var normalizedToolCallId = ChatSessionToolCallIdGenerator.Normalize(block.ToolCallId);
-
-                if (normalizedToolCallId.Length == 0 ||
-                    existingToolCallIds.Contains(normalizedToolCallId) ||
-                    block.Kind is not (ChatSessionContentBlockKind.ToolOutput or ChatSessionContentBlockKind.ToolReference))
+                var id = ((string?)resourceElement.Attribute("Id") ?? Guid.NewGuid().ToString("N")).Trim();
+                var path = ((string?)resourceElement.Attribute("Path") ?? string.Empty).Trim();
+                if (id.Length == 0 || path.Length == 0)
                 {
                     continue;
                 }
 
-                var invocationXml = resourceStore.LoadInvocation(session, normalizedToolCallId);
-                if (string.IsNullOrWhiteSpace(invocationXml))
+                session.Resources.Resources.Add(new ChatSessionResourceManifestEntry
                 {
-                    continue;
-                }
-
-                var toolCallBlock = new ChatSessionContentBlockModel
-                {
-                    Kind = ChatSessionContentBlockKind.ToolCall,
-                    Content = invocationXml,
-                    Title = FirstNonEmpty(TryExtractToolName(invocationXml), block.Title ?? string.Empty),
-                    BadgeText = "Tool Call",
-                    IsStreaming = false,
-                    ToolCallId = normalizedToolCallId,
-                    CallerAgentId = block.CallerAgentId,
-                    ResourcePath = block.ResourcePath
-                };
-
-                record.Blocks.Insert(index, toolCallBlock);
-                existingToolCallIds.Add(normalizedToolCallId);
-                index++;
+                    Id = id,
+                    Kind = ((string?)resourceElement.Attribute("Kind") ?? string.Empty).Trim(),
+                    Path = path,
+                    MediaType = NullIfWhiteSpace((string?)resourceElement.Attribute("MediaType")),
+                    CreatedAtUtc = ParseDateTime((string?)resourceElement.Attribute("CreatedAtUtc")),
+                    SizeBytes = ParseNullableLong((string?)resourceElement.Attribute("SizeBytes")),
+                    Hash = NullIfWhiteSpace((string?)resourceElement.Attribute("Hash"))
+                });
             }
         }
 
-        private static ChatSessionContentBlockModel LoadBlockElement(
-            ChatSessionModel session,
-            XElement blockElement)
+        private static void LoadTranscript(ChatSessionTranscript transcript, XElement? transcriptElement)
         {
-            var kind = Enum.TryParse<ChatSessionContentBlockKind>((string?)blockElement.Attribute("Kind"), true, out var parsedKind)
-                ? parsedKind
-                : ChatSessionContentBlockKind.Text;
+            transcript.Turns.Clear();
+            transcript.Entries.Clear();
 
-            var toolCallId = NullIfWhiteSpace((string?)blockElement.Attribute("ToolCallID"))
-                ?? NullIfWhiteSpace(blockElement.Element("SkyweaverPreservedContent")?
-                    .Elements()
-                    .FirstOrDefault(element => string.Equals(element.Name.LocalName, "Tool", StringComparison.OrdinalIgnoreCase))
-                    ?.Attribute("ToolCallID")
-                    ?.Value);
-            var callerAgentId = NullIfWhiteSpace((string?)blockElement.Attribute("CallerAgentID"))
-                ?? NullIfWhiteSpace(blockElement.Element("SkyweaverPreservedContent")?
-                    .Elements()
-                    .FirstOrDefault(element => string.Equals(element.Name.LocalName, "Tool", StringComparison.OrdinalIgnoreCase))
-                    ?.Attribute("CallerAgentID")
-                    ?.Value);
-            var resourcePath = NullIfWhiteSpace((string?)blockElement.Attribute("ResourcePath"));
-            var content = LoadBlockContent(session, kind, blockElement, toolCallId);
-
-            var block = new ChatSessionContentBlockModel
+            if (transcriptElement == null)
             {
-                Id = ((string?)blockElement.Attribute("Id") ?? Guid.NewGuid().ToString("N")).Trim(),
-                Kind = kind,
-                Content = content,
-                Title = NullIfWhiteSpace((string?)blockElement.Element("Title")),
-                Language = NullIfWhiteSpace((string?)blockElement.Element("Language")),
-                BadgeText = NullIfWhiteSpace((string?)blockElement.Element("BadgeText")),
-                IsStreaming = ParseBool((string?)blockElement.Element("IsStreaming")),
-                ToolCallId = toolCallId,
-                CallerAgentId = callerAgentId,
-                ResourcePath = resourcePath
+                transcript.SchemaVersion = 3;
+                transcript.RebuildIndex();
+                return;
+            }
+
+            transcript.TranscriptId = FirstNonEmpty(
+                (string?)transcriptElement.Attribute("TranscriptId"),
+                Guid.NewGuid().ToString("N"));
+            transcript.SchemaVersion = ParseInt((string?)transcriptElement.Attribute("SchemaVersion"), 3);
+            transcript.SetRevision(ParseLong((string?)transcriptElement.Attribute("Revision"), 0));
+
+            foreach (var turnElement in transcriptElement.Element("Turns")?.Elements("Turn") ?? Enumerable.Empty<XElement>())
+            {
+                transcript.Turns.Add(LoadTurnElement(turnElement));
+            }
+
+            foreach (var entryElement in transcriptElement.Element("Entries")?.Elements("Entry") ?? Enumerable.Empty<XElement>())
+            {
+                transcript.Entries.Add(LoadEntryElement(entryElement));
+            }
+
+            transcript.RebuildIndex();
+        }
+
+        private static ChatSessionTurnRecord LoadTurnElement(XElement turnElement)
+        {
+            var turn = new ChatSessionTurnRecord
+            {
+                TurnId = FirstNonEmpty((string?)turnElement.Attribute("Id"), Guid.NewGuid().ToString("N")),
+                TurnNumber = ParseInt((string?)turnElement.Attribute("Number"), 0),
+                StartedAtUtc = ParseDateTime((string?)turnElement.Attribute("StartedAtUtc")),
+                CompletedAtUtc = ParseNullableDateTime((string?)turnElement.Attribute("CompletedAtUtc")),
+                Status = ParseEnum((string?)turnElement.Attribute("Status"), ChatSessionTurnStatus.Pending),
+                UserEntryId = NullIfWhiteSpace((string?)turnElement.Attribute("UserEntryId")),
+                FinalEntryId = NullIfWhiteSpace((string?)turnElement.Attribute("FinalEntryId"))
             };
 
-            foreach (var itemElement in blockElement.Element("Metadata")?.Elements("Item") ?? Enumerable.Empty<XElement>())
+            LoadMetadata(turn.Metadata, turnElement.Element("Metadata"));
+            return turn;
+        }
+
+        private static ChatSessionTranscriptEntry LoadEntryElement(XElement entryElement)
+        {
+            var entry = new ChatSessionTranscriptEntry
+            {
+                EntryId = FirstNonEmpty((string?)entryElement.Attribute("Id"), Guid.NewGuid().ToString("N")),
+                TurnId = ((string?)entryElement.Attribute("TurnId") ?? string.Empty).Trim(),
+                ParentEntryId = NullIfWhiteSpace((string?)entryElement.Attribute("ParentEntryId")),
+                Kind = ParseEnum((string?)entryElement.Attribute("Kind"), ChatSessionTranscriptEntryKind.UserMessage),
+                Role = ParseEnum((string?)entryElement.Attribute("Role"), ChatSessionParticipantRole.User),
+                TimestampUtc = ParseDateTime((string?)entryElement.Attribute("TimestampUtc")),
+                NodeId = NullIfWhiteSpace((string?)entryElement.Attribute("NodeId")),
+                NodeTitle = NullIfWhiteSpace((string?)entryElement.Attribute("NodeTitle")),
+                AgentId = NullIfWhiteSpace((string?)entryElement.Attribute("AgentId")),
+                AgentName = NullIfWhiteSpace((string?)entryElement.Attribute("AgentName")),
+                IterationNumber = ParseNullableInt((string?)entryElement.Attribute("IterationNumber")),
+                ToolCallId = NullIfWhiteSpace((string?)entryElement.Attribute("ToolCallId")),
+                ToolName = NullIfWhiteSpace((string?)entryElement.Attribute("ToolName")),
+                ToolCallIndex = ParseNullableInt((string?)entryElement.Attribute("ToolCallIndex")),
+                Visibility = ParseEnum((string?)entryElement.Attribute("Visibility"), TranscriptVisibility.Visible),
+                LlmPolicy = ParseEnum((string?)entryElement.Attribute("LlmPolicy"), TranscriptLlmPolicy.Include),
+                HandoffPolicy = ParseEnum((string?)entryElement.Attribute("HandoffPolicy"), TranscriptHandoffPolicy.ExcludeByDefault),
+                Status = ParseEnum((string?)entryElement.Attribute("Status"), ChatSessionEntryStatus.Completed)
+            };
+            entry.SetRevision(ParseLong((string?)entryElement.Attribute("Revision"), 0));
+
+            foreach (var blockElement in entryElement.Element("Blocks")?.Elements("Block") ?? Enumerable.Empty<XElement>())
+            {
+                entry.Blocks.Add(LoadBlockElement(blockElement));
+            }
+
+            LoadMetadata(entry.Metadata, entryElement.Element("Metadata"));
+            return entry;
+        }
+
+        private static ChatSessionTranscriptBlock LoadBlockElement(XElement blockElement)
+        {
+            var block = new ChatSessionTranscriptBlock
+            {
+                BlockId = FirstNonEmpty((string?)blockElement.Attribute("Id"), Guid.NewGuid().ToString("N")),
+                Kind = ParseEnum((string?)blockElement.Attribute("Kind"), ChatSessionTranscriptBlockKind.Text),
+                Content = blockElement.Nodes().OfType<XText>().FirstOrDefault()?.Value
+                    ?? blockElement.Nodes().OfType<XCData>().FirstOrDefault()?.Value
+                    ?? string.Empty,
+                Title = NullIfWhiteSpace((string?)blockElement.Attribute("Title")),
+                Language = NullIfWhiteSpace((string?)blockElement.Attribute("Language")),
+                MediaType = NullIfWhiteSpace((string?)blockElement.Attribute("MediaType")),
+                ResourceId = NullIfWhiteSpace((string?)blockElement.Attribute("ResourceId")),
+                ResourcePath = NullIfWhiteSpace((string?)blockElement.Attribute("ResourcePath"))
+            };
+            block.SetRevision(ParseLong((string?)blockElement.Attribute("Revision"), 0));
+            LoadMetadata(block.Metadata, blockElement.Element("Metadata"));
+            return block;
+        }
+
+        private static void LoadMetadata(IDictionary<string, string> target, XElement? metadataElement)
+        {
+            target.Clear();
+            if (metadataElement == null)
+            {
+                return;
+            }
+
+            foreach (var itemElement in metadataElement.Elements("Item"))
             {
                 var key = ((string?)itemElement.Attribute("Key") ?? string.Empty).Trim();
                 if (key.Length > 0)
                 {
-                    block.Metadata[key] = itemElement.Value ?? string.Empty;
+                    target[key] = itemElement.Value ?? string.Empty;
                 }
             }
-
-            return block;
         }
 
-        private static ChatSessionContentBlockModel LoadLegacyPartElement(XElement partElement)
+        private static void SaveAtomically(XDocument document, string filePath)
         {
-            var partType = Enum.TryParse<ChatMessagePartType>((string?)partElement.Attribute("Type"), true, out var parsedPartType)
-                ? parsedPartType
-                : ChatMessagePartType.Text;
-
-            return new ChatSessionContentBlockModel
+            var directory = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrWhiteSpace(directory))
             {
-                Kind = ToBlockKind(partType),
-                Content = (string?)partElement.Element("Content") ?? string.Empty,
-                Title = NullIfWhiteSpace((string?)partElement.Element("Title")),
-                Language = NullIfWhiteSpace((string?)partElement.Element("Language")),
-                BadgeText = NullIfWhiteSpace((string?)partElement.Element("BadgeText")),
-                IsStreaming = ParseBool((string?)partElement.Element("IsStreaming")),
-                ToolCallId = NullIfWhiteSpace((string?)partElement.Attribute("ToolCallID")),
-                CallerAgentId = NullIfWhiteSpace((string?)partElement.Attribute("CallerAgentID")),
-                ResourcePath = NullIfWhiteSpace((string?)partElement.Attribute("ResourcePath"))
-            };
-        }
-
-        private static string LoadBlockContent(
-            ChatSessionModel session,
-            ChatSessionContentBlockKind kind,
-            XElement blockElement,
-            string? toolCallId)
-        {
-            var resourceStore = new ChatSessionToolCallResourceStore();
-            return kind switch
-            {
-                ChatSessionContentBlockKind.ToolCall => FirstNonEmpty(
-                    resourceStore.LoadInvocation(session, toolCallId),
-                    (string?)blockElement.Element("Content") ?? string.Empty),
-                ChatSessionContentBlockKind.ToolOutput or ChatSessionContentBlockKind.ToolReference => FirstNonEmpty(
-                    resourceStore.LoadOutput(session, toolCallId),
-                    (string?)blockElement.Element("Content") ?? string.Empty),
-                ChatSessionContentBlockKind.Image or ChatSessionContentBlockKind.Audio => FirstNonEmpty(
-                    NullIfWhiteSpace((string?)blockElement.Attribute("ResourcePath")) ?? string.Empty,
-                    blockElement.Element("SkyweaverPreservedContent")?
-                        .Elements()
-                        .FirstOrDefault()
-                        ?.Attribute("Path")
-                        ?.Value ?? string.Empty,
-                    (string?)blockElement.Element("Content") ?? string.Empty),
-                ChatSessionContentBlockKind.HostPreservedContent => blockElement.Element("SkyweaverPreservedContent")?.ToString(SaveOptions.DisableFormatting)
-                    ?? (string?)blockElement.Element("Content")
-                    ?? string.Empty,
-                _ => (string?)blockElement.Element("Content") ?? string.Empty
-            };
-        }
-
-        private static string TryExtractToolName(string? invocationXml)
-        {
-            if (string.IsNullOrWhiteSpace(invocationXml))
-            {
-                return string.Empty;
+                Directory.CreateDirectory(directory);
             }
 
-            try
-            {
-                var document = XDocument.Parse(invocationXml, LoadOptions.PreserveWhitespace);
-                var root = document.Root;
-                var toolElement = root == null
-                    ? null
-                    : string.Equals(root.Name.LocalName, "Tool", StringComparison.OrdinalIgnoreCase)
-                        ? root
-                        : root.Elements()
-                            .FirstOrDefault(element => string.Equals(element.Name.LocalName, "Tool", StringComparison.OrdinalIgnoreCase));
+            var tempPath = $"{filePath}.tmp";
+            document.Save(tempPath);
 
-                return toolElement?.Attributes()
-                    .FirstOrDefault(attribute =>
-                        string.Equals(attribute.Name.LocalName, "ToolName", StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(attribute.Name.LocalName, "Name", StringComparison.OrdinalIgnoreCase))
-                    ?.Value
-                    ?.Trim() ?? string.Empty;
+            if (File.Exists(filePath))
+            {
+                File.Replace(tempPath, filePath, null);
             }
-            catch
+            else
             {
-                return string.Empty;
+                File.Move(tempPath, filePath);
             }
-        }
-
-        private static bool IsHostPreservedBlock(ChatSessionContentBlockKind kind)
-        {
-            return kind is ChatSessionContentBlockKind.ToolCall
-                or ChatSessionContentBlockKind.ToolOutput
-                or ChatSessionContentBlockKind.ToolReference
-                or ChatSessionContentBlockKind.Image
-                or ChatSessionContentBlockKind.Audio
-                or ChatSessionContentBlockKind.HostPreservedContent;
-        }
-
-        private static ChatMessagePartType ToLegacyPartType(ChatSessionContentBlockKind kind)
-        {
-            return kind switch
-            {
-                ChatSessionContentBlockKind.Code => ChatMessagePartType.Code,
-                ChatSessionContentBlockKind.Status => ChatMessagePartType.Status,
-                ChatSessionContentBlockKind.Placeholder => ChatMessagePartType.Placeholder,
-                ChatSessionContentBlockKind.StructuredXml => ChatMessagePartType.StructuredXml,
-                ChatSessionContentBlockKind.ToolCall => ChatMessagePartType.ToolCall,
-                ChatSessionContentBlockKind.ToolOutput or ChatSessionContentBlockKind.ToolReference => ChatMessagePartType.ToolOutput,
-                ChatSessionContentBlockKind.Image => ChatMessagePartType.Image,
-                ChatSessionContentBlockKind.Audio => ChatMessagePartType.Audio,
-                ChatSessionContentBlockKind.HostPreservedContent => ChatMessagePartType.HostPreservedContent,
-                ChatSessionContentBlockKind.Reasoning => ChatMessagePartType.Reasoning,
-                _ => ChatMessagePartType.Text
-            };
-        }
-
-        private static ChatSessionContentBlockKind ToBlockKind(ChatMessagePartType partType)
-        {
-            return partType switch
-            {
-                ChatMessagePartType.Code => ChatSessionContentBlockKind.Code,
-                ChatMessagePartType.Status => ChatSessionContentBlockKind.Status,
-                ChatMessagePartType.Placeholder => ChatSessionContentBlockKind.Placeholder,
-                ChatMessagePartType.StructuredXml => ChatSessionContentBlockKind.StructuredXml,
-                ChatMessagePartType.ToolCall => ChatSessionContentBlockKind.ToolCall,
-                ChatMessagePartType.Tool or ChatMessagePartType.ToolOutput => ChatSessionContentBlockKind.ToolOutput,
-                ChatMessagePartType.Image => ChatSessionContentBlockKind.Image,
-                ChatMessagePartType.Audio => ChatSessionContentBlockKind.Audio,
-                ChatMessagePartType.HostPreservedContent => ChatSessionContentBlockKind.HostPreservedContent,
-                ChatMessagePartType.Reasoning => ChatSessionContentBlockKind.Reasoning,
-                _ => ChatSessionContentBlockKind.Text
-            };
-        }
-
-        private static void AddOptionalAttribute(XElement element, string name, string? value)
-        {
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                element.SetAttributeValue(name, value.Trim());
-            }
-        }
-
-        private static string FirstNonEmpty(params string[] values)
-        {
-            return values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value)) ?? string.Empty;
         }
 
         private void EnsureRootFolder()
@@ -632,7 +489,9 @@ namespace Skyweaver.Services.ChatSession
 
             if (string.IsNullOrWhiteSpace(session.ResourcesFolderPath))
             {
-                session.ResourcesFolderPath = Path.Combine(session.SessionFolderPath, "ChatSessionResources");
+                session.ResourcesFolderPath = Path.Combine(
+                    session.SessionFolderPath,
+                    ChatSessionResourceLayout.ResourcesFolderName);
             }
 
             if (string.IsNullOrWhiteSpace(session.SessionFilePath))
@@ -649,50 +508,92 @@ namespace Skyweaver.Services.ChatSession
                 throw new InvalidOperationException("会话名称不能为空。");
             }
 
-            var invalidChars = Path.GetInvalidFileNameChars();
-            if (trimmedName.IndexOfAny(invalidChars) >= 0)
+            if (trimmedName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
             {
-                throw new InvalidOperationException("会话名称包含无效文件名字符。");
+                throw new InvalidOperationException("会话名称包含无效的文件名字符。");
             }
 
             return trimmedName;
         }
 
+        private static XAttribute? OptionalAttribute(string name, string? value)
+        {
+            return string.IsNullOrWhiteSpace(value)
+                ? null
+                : new XAttribute(name, value.Trim());
+        }
+
+        private static string FirstNonEmpty(params string?[] values)
+        {
+            return values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value))?.Trim() ?? string.Empty;
+        }
+
         private static DateTime ParseDateTime(string? value)
         {
             return DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsed)
-                ? parsed
+                ? EnsureUtc(parsed)
                 : DateTime.UtcNow;
+        }
+
+        private static DateTime? ParseNullableDateTime(string? value)
+        {
+            return DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsed)
+                ? EnsureUtc(parsed)
+                : null;
+        }
+
+        private static DateTime EnsureUtc(DateTime value)
+        {
+            return value.Kind == DateTimeKind.Utc ? value : value.ToUniversalTime();
+        }
+
+        private static int ParseInt(string? value, int fallback)
+        {
+            return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)
+                ? parsed
+                : fallback;
+        }
+
+        private static int? ParseNullableInt(string? value)
+        {
+            return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)
+                ? parsed
+                : null;
+        }
+
+        private static long ParseLong(string? value, long fallback)
+        {
+            return long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)
+                ? parsed
+                : fallback;
+        }
+
+        private static long? ParseNullableLong(string? value)
+        {
+            return long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)
+                ? parsed
+                : null;
+        }
+
+        private static TEnum ParseEnum<TEnum>(string? value, TEnum fallback)
+            where TEnum : struct
+        {
+            return Enum.TryParse<TEnum>(value, true, out var parsed)
+                ? parsed
+                : fallback;
         }
 
         private static string? NullIfWhiteSpace(string? value)
         {
-            return string.IsNullOrWhiteSpace(value) ? null : value;
+            return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
         }
 
-        private static bool ParseBool(string? value)
+        private static string BuildContextSummary(ChatSessionModel session)
         {
-            return bool.TryParse(value, out var parsed) && parsed;
-        }
-
-        private static string GetDisplayName(ChatMessageRole role)
-        {
-            return role switch
-            {
-                ChatMessageRole.Assistant => "Skyweaver 助手",
-                ChatMessageRole.System => "系统",
-                _ => "用户"
-            };
-        }
-
-        private static string GetAvatarPath(ChatMessageRole role)
-        {
-            return role switch
-            {
-                ChatMessageRole.Assistant => AssistantAvatarPath,
-                ChatMessageRole.System => SystemAvatarPath,
-                _ => UserAvatarPath
-            };
+            var visibleCount = session.Transcript.Entries.Count(entry => entry.Visibility == TranscriptVisibility.Visible);
+            return visibleCount == 0
+                ? "空会话。"
+                : $"会话记录 {session.Transcript.Entries.Count} 条，其中 {visibleCount} 条可见。";
         }
     }
 }

@@ -481,7 +481,20 @@
 
         <DataTemplate x:Key="ToolCallMessagePartTemplate" DataType="{x:Type models:ChatMessagePartModel}">
             <StackPanel>
-                <ContentControl Content="{Binding ToolPresentationView}"/>
+                <ContentControl Content="{Binding ToolPresentationView}"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Top">
+                    <ContentControl.Style>
+                        <Style TargetType="ContentControl">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ToolPresentationView}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ContentControl.Style>
+                </ContentControl>
                 <TextBlock Text="{Binding Content}"
                            Foreground="#FFFFF2CF"
                            TextWrapping="Wrap"
@@ -609,31 +622,78 @@
         </DataTemplate>
 
         <DataTemplate x:Key="ReasoningMessagePartTemplate" DataType="{x:Type models:ChatMessagePartModel}">
-            <Expander IsExpanded="False"
-                      Background="#1414232C"
-                      BorderBrush="#4476D7EE"
-                      BorderThickness="1"
-                      Padding="0">
-                <Expander.Header>
-                    <DockPanel LastChildFill="False">
-                        <TextBlock Text="{Binding Title}"
-                                   Foreground="#FFD5F5FF"
-                                   FontWeight="SemiBold"
-                                   FontSize="12"/>
-                        <TextBlock DockPanel.Dock="Right"
-                                   Margin="10,0,0,0"
-                                   Text="{Binding BadgeText}"
-                                   Foreground="#99FFFFFF"
-                                   FontSize="11"/>
-                    </DockPanel>
-                </Expander.Header>
-                <TextBlock Text="{Binding Content}"
-                           Margin="10,8,10,10"
-                           Foreground="#DDEDFBFF"
-                           FontFamily="Consolas"
-                           FontSize="12"
-                           TextWrapping="Wrap"/>
-            </Expander>
+            <Grid>
+                <Expander IsExpanded="False"
+                          Background="#1414232C"
+                          BorderBrush="#4476D7EE"
+                          BorderThickness="1"
+                          Padding="0">
+                    <Expander.Style>
+                        <Style TargetType="Expander">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsCollapsible}" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Expander.Style>
+                    <Expander.Header>
+                        <DockPanel LastChildFill="False">
+                            <TextBlock Text="{Binding Title}"
+                                       Foreground="#FFD5F5FF"
+                                       FontWeight="SemiBold"
+                                       FontSize="12"/>
+                            <TextBlock DockPanel.Dock="Right"
+                                       Margin="10,0,0,0"
+                                       Text="{Binding BadgeText}"
+                                       Foreground="#99FFFFFF"
+                                       FontSize="11"/>
+                        </DockPanel>
+                    </Expander.Header>
+                    <TextBlock Text="{Binding Content}"
+                               Margin="10,8,10,10"
+                               Foreground="#DDEDFBFF"
+                               FontFamily="Consolas"
+                               FontSize="12"
+                               TextWrapping="Wrap"/>
+                </Expander>
+
+                <Border Background="#1414232C"
+                        BorderBrush="#4476D7EE"
+                        BorderThickness="1"
+                        Padding="10">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsCollapsible}" Value="False">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <StackPanel>
+                        <DockPanel LastChildFill="False"
+                                   Margin="0,0,0,6">
+                            <TextBlock Text="{Binding Title}"
+                                       Foreground="#FFD5F5FF"
+                                       FontWeight="SemiBold"
+                                       FontSize="12"/>
+                            <TextBlock DockPanel.Dock="Right"
+                                       Margin="10,0,0,0"
+                                       Text="{Binding BadgeText}"
+                                       Foreground="#99FFFFFF"
+                                       FontSize="11"/>
+                        </DockPanel>
+                        <TextBlock Text="{Binding Content}"
+                                   Foreground="#DDEDFBFF"
+                                   FontFamily="Consolas"
+                                   FontSize="12"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
         </DataTemplate>
 
         <local:ChatMessagePartTemplateSelector x:Key="ChatMessagePartTemplateSelector"

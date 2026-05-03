@@ -78,28 +78,48 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
                 return false;
             }
 
-            if (part.ToolPresentationState != null && part.ToolPresentationView != null)
-            {
-                return true;
-            }
-
             var snapshot = TryParseSnapshot(part.Content);
             var toolName = ResolveToolName(part, snapshot);
             var toolCallIndex = ResolveToolCallIndex(preferredToolCallIndex, snapshot, part.ToolCallId);
+
+            if (part.ToolPresentationState != null && part.ToolPresentationView != null)
+            {
+                ApplyContentToPresentationState(part, snapshot, toolName);
+                return true;
+            }
+
             var handle = CreatePresentation(toolCallIndex, toolName);
             part.AttachToolPresentation(handle.State, handle.View);
 
-            if (snapshot != null)
-            {
-                handle.State.ApplySnapshot(snapshot, ResolveParameterDefinitions(snapshot.ToolName));
-            }
-            else
-            {
-                handle.State.RawToolXml = NormalizeXml(part.Content);
-                handle.State.IsInvocationClosed = !part.IsStreaming;
-            }
+            ApplyContentToPresentationState(part, snapshot, toolName);
 
             return true;
+        }
+
+        private void ApplyContentToPresentationState(
+            ChatMessagePartModel part,
+            SkyweaverStreamingToolCallSnapshot? snapshot,
+            string? toolName)
+        {
+            var state = part.ToolPresentationState;
+            if (state == null)
+            {
+                return;
+            }
+
+            if (snapshot != null)
+            {
+                state.ApplySnapshot(snapshot, ResolveParameterDefinitions(snapshot.ToolName));
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(toolName))
+            {
+                state.ToolName = toolName.Trim();
+            }
+
+            state.RawToolXml = NormalizeXml(part.Content);
+            state.IsInvocationClosed = !part.IsStreaming;
         }
 
         private SkyweaverStreamingToolCallSnapshot? TryParseSnapshot(string? content)

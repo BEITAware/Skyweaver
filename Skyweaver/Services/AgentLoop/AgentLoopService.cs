@@ -56,6 +56,135 @@ namespace Skyweaver.Services.AgentLoop
             }
         }
 
+        private sealed record AssistantPresentationDelta(
+            bool IsReasoning,
+            string Content,
+            AgentLoopOutputKind? TextOutputKind,
+            int? PartIndex,
+            bool IsReasoningCollapsible);
+
+        private sealed record GemmaThoughtSegment(int SegmentIndex, string Content);
+
+        private sealed record GemmaThoughtExtraction(
+            string ProtocolContent,
+            IReadOnlyList<GemmaThoughtSegment> ThoughtSegments)
+        {
+            public static GemmaThoughtExtraction Empty { get; } =
+                new(string.Empty, Array.Empty<GemmaThoughtSegment>());
+        }
+
+        private sealed class AssistantPresentationStreamingTracker
+        {
+            private readonly AssistantVisibleTextStreamingTracker _fallbackVisibleTextTracker;
+            private readonly AssistantVisibleTextStreamingTracker _gemmaVisibleTextTracker;
+            private readonly bool _enableGemmaThoughtCompatibility;
+            private readonly Dictionary<int, int> _emittedGemmaThoughtLengths = new();
+            private bool? _isGemmaThoughtContent;
+
+            public AssistantPresentationStreamingTracker(
+                AgentLoopOutputKind outputKind,
+                bool enableGemmaThoughtCompatibility)
+            {
+                _fallbackVisibleTextTracker = new AssistantVisibleTextStreamingTracker(outputKind);
+                _gemmaVisibleTextTracker = new AssistantVisibleTextStreamingTracker(outputKind);
+                _enableGemmaThoughtCompatibility = enableGemmaThoughtCompatibility;
+            }
+
+            public AgentLoopOutputKind OutputKind => _fallbackVisibleTextTracker.OutputKind;
+
+            public IReadOnlyList<AssistantPresentationDelta> ExtractDeltas(string rawContent, bool isFinal)
+            {
+                if (!_enableGemmaThoughtCompatibility)
+                {
+                    return ExtractFallbackDeltas(rawContent, isFinal);
+                }
+
+                var isPendingGemmaDetection = false;
+                if (_isGemmaThoughtContent != false &&
+                    TryExtractGemmaThoughtContent(
+                        rawContent,
+                        isFinal,
+                        out var gemmaThought,
+                        out isPendingGemmaDetection))
+                {
+                    _isGemmaThoughtContent = true;
+                    return ExtractGemmaDeltas(gemmaThought, isFinal);
+                }
+
+                if (_isGemmaThoughtContent == true)
+                {
+                    return ExtractGemmaDeltas(GemmaThoughtExtraction.Empty, isFinal);
+                }
+
+                if (isPendingGemmaDetection)
+                {
+                    return Array.Empty<AssistantPresentationDelta>();
+                }
+
+                _isGemmaThoughtContent = false;
+                return ExtractFallbackDeltas(rawContent, isFinal);
+            }
+
+            private IReadOnlyList<AssistantPresentationDelta> ExtractFallbackDeltas(string rawContent, bool isFinal)
+            {
+                var delta = _fallbackVisibleTextTracker.ExtractDelta(rawContent, isFinal);
+                return string.IsNullOrEmpty(delta)
+                    ? Array.Empty<AssistantPresentationDelta>()
+                    : new[]
+                    {
+                        new AssistantPresentationDelta(
+                            false,
+                            delta,
+                            _fallbackVisibleTextTracker.OutputKind,
+                            null,
+                            true)
+                    };
+            }
+
+            private IReadOnlyList<AssistantPresentationDelta> ExtractGemmaDeltas(
+                GemmaThoughtExtraction extraction,
+                bool isFinal)
+            {
+                var deltas = new List<AssistantPresentationDelta>();
+
+                foreach (var segment in extraction.ThoughtSegments.OrderBy(segment => segment.SegmentIndex))
+                {
+                    if (string.IsNullOrEmpty(segment.Content))
+                    {
+                        continue;
+                    }
+
+                    _emittedGemmaThoughtLengths.TryGetValue(segment.SegmentIndex, out var emittedLength);
+                    if (segment.Content.Length <= emittedLength)
+                    {
+                        continue;
+                    }
+
+                    var delta = segment.Content[emittedLength..];
+                    _emittedGemmaThoughtLengths[segment.SegmentIndex] = segment.Content.Length;
+                    deltas.Add(new AssistantPresentationDelta(
+                        true,
+                        delta,
+                        null,
+                        segment.SegmentIndex,
+                        false));
+                }
+
+                var visibleDelta = _gemmaVisibleTextTracker.ExtractDelta(extraction.ProtocolContent, isFinal);
+                if (!string.IsNullOrEmpty(visibleDelta))
+                {
+                    deltas.Add(new AssistantPresentationDelta(
+                        false,
+                        visibleDelta,
+                        _gemmaVisibleTextTracker.OutputKind,
+                        null,
+                        true));
+                }
+
+                return deltas;
+            }
+        }
+
         private readonly AgentSystemPromptBuilder _systemPromptBuilder;
         private readonly IAgentLanguageModelResolver _languageModelResolver;
         private readonly ILanguageModelChatService _chatService;
@@ -340,10 +469,11 @@ namespace Skyweaver.Services.AgentLoop
                         .Select(registration => registration.Definition));
                 IReadOnlyList<SkyweaverStreamingToolCallSnapshot> previousToolCallSnapshots =
                     Array.Empty<SkyweaverStreamingToolCallSnapshot>();
-                var visibleTextTracker = new AssistantVisibleTextStreamingTracker(
+                var presentationTracker = new AssistantPresentationStreamingTracker(
                     request.Agent.IsStructuredXmlIO
                         ? AgentLoopOutputKind.StructuredXml
-                        : AgentLoopOutputKind.NaturalLanguage);
+                        : AgentLoopOutputKind.NaturalLanguage,
+                    request.EnableGemmaThoughtCompatibility);
                 var streamingUpdates = new List<AgentLoopStreamingUpdateDebugSnapshot>();
 
                 try
@@ -407,7 +537,11 @@ namespace Skyweaver.Services.AgentLoop
                         }
 
                         var currentRawContent = rawContentBuilder.ToString();
-                        var currentToolCallSnapshots = toolInvocationStreamingParser.Parse(currentRawContent);
+                        var currentProtocolContent = PrepareAssistantProtocolContent(
+                            currentRawContent,
+                            request.EnableGemmaThoughtCompatibility,
+                            isFinal: false);
+                        var currentToolCallSnapshots = toolInvocationStreamingParser.Parse(currentProtocolContent);
                         await PublishStreamingToolCallUpdatesAsync(
                             onEventAsync,
                             currentToolCallSnapshots,
@@ -417,41 +551,25 @@ namespace Skyweaver.Services.AgentLoop
                             cancellationToken).ConfigureAwait(false);
                         previousToolCallSnapshots = currentToolCallSnapshots;
 
-                        var streamedDelta = visibleTextTracker.ExtractDelta(currentRawContent, isFinal: false);
-                        if (!string.IsNullOrEmpty(streamedDelta))
-                        {
-                            await PublishAsync(
-                                onEventAsync,
-                                new AgentLoopRuntimeEvent
-                                {
-                                    Kind = AgentLoopRuntimeEventKind.TextDelta,
-                                    IterationNumber = iterationNumber,
-                                    ModelId = modelId,
-                                    TextDelta = streamedDelta,
-                                    TextDeltaOutputKind = visibleTextTracker.OutputKind
-                                },
-                                cancellationToken).ConfigureAwait(false);
-                        }
-                    }
-
-                    var rawContent = rawContentBuilder.ToString();
-                    var finalVisibleDelta = visibleTextTracker.ExtractDelta(rawContent, isFinal: true);
-                    if (!string.IsNullOrEmpty(finalVisibleDelta))
-                    {
-                        await PublishAsync(
+                        await PublishPresentationDeltasAsync(
                             onEventAsync,
-                            new AgentLoopRuntimeEvent
-                            {
-                                Kind = AgentLoopRuntimeEventKind.TextDelta,
-                                IterationNumber = iterationNumber,
-                                ModelId = modelId,
-                                TextDelta = finalVisibleDelta,
-                                TextDeltaOutputKind = visibleTextTracker.OutputKind
-                            },
+                            presentationTracker.ExtractDeltas(currentRawContent, isFinal: false),
+                            iterationNumber,
+                            modelId,
                             cancellationToken).ConfigureAwait(false);
                     }
 
-                    var assistantResponse = ParseAssistantResponse(rawContent);
+                    var rawContent = rawContentBuilder.ToString();
+                    await PublishPresentationDeltasAsync(
+                        onEventAsync,
+                        presentationTracker.ExtractDeltas(rawContent, isFinal: true),
+                        iterationNumber,
+                        modelId,
+                        cancellationToken).ConfigureAwait(false);
+
+                    var assistantResponse = ParseAssistantResponse(
+                        rawContent,
+                        request.EnableGemmaThoughtCompatibility);
                     var hasToolActivity = assistantResponse.GetToolCallParts().Count > 0;
 
                     if (hasToolActivity)
@@ -503,7 +621,10 @@ namespace Skyweaver.Services.AgentLoop
                     }
 
                     var finalOutput = latestPassdownOutput ??
-                                      BuildAssistantTextFinalOutput(request.Agent, rawContent);
+                                      BuildAssistantTextFinalOutput(
+                                          request.Agent,
+                                          rawContent,
+                                          request.EnableGemmaThoughtCompatibility);
                     await PublishAsync(
                         onEventAsync,
                         new AgentLoopRuntimeEvent
@@ -764,6 +885,49 @@ namespace Skyweaver.Services.AgentLoop
             }
         }
 
+        private static async Task PublishPresentationDeltasAsync(
+            Func<AgentLoopRuntimeEvent, CancellationToken, ValueTask>? onEventAsync,
+            IReadOnlyList<AssistantPresentationDelta> deltas,
+            int iterationNumber,
+            string? modelId,
+            CancellationToken cancellationToken)
+        {
+            if (onEventAsync == null || deltas.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var delta in deltas)
+            {
+                if (string.IsNullOrEmpty(delta.Content))
+                {
+                    continue;
+                }
+
+                await PublishAsync(
+                    onEventAsync,
+                    delta.IsReasoning
+                        ? new AgentLoopRuntimeEvent
+                        {
+                            Kind = AgentLoopRuntimeEventKind.ReasoningDelta,
+                            IterationNumber = iterationNumber,
+                            ModelId = modelId,
+                            ReasoningDelta = delta.Content,
+                            PartIndex = delta.PartIndex,
+                            IsReasoningCollapsible = delta.IsReasoningCollapsible
+                        }
+                        : new AgentLoopRuntimeEvent
+                        {
+                            Kind = AgentLoopRuntimeEventKind.TextDelta,
+                            IterationNumber = iterationNumber,
+                            ModelId = modelId,
+                            TextDelta = delta.Content,
+                            TextDeltaOutputKind = delta.TextOutputKind
+                        },
+                    cancellationToken).ConfigureAwait(false);
+            }
+        }
+
         private static bool AreEquivalent(
             SkyweaverStreamingToolCallSnapshot left,
             SkyweaverStreamingToolCallSnapshot right)
@@ -772,7 +936,32 @@ namespace Skyweaver.Services.AgentLoop
                    left.ToolCallIndex == right.ToolCallIndex &&
                    string.Equals(left.ToolName, right.ToolName, StringComparison.OrdinalIgnoreCase) &&
                    left.IsInvocationClosed == right.IsInvocationClosed &&
-                   string.Equals(left.ToolXmlFragment, right.ToolXmlFragment, StringComparison.Ordinal);
+                   string.Equals(left.ToolXmlFragment, right.ToolXmlFragment, StringComparison.Ordinal) &&
+                   AreEquivalent(left.Parameters, right.Parameters);
+        }
+
+        private static bool AreEquivalent(
+            IReadOnlyList<SkyweaverStreamingToolParameterSnapshot> left,
+            IReadOnlyList<SkyweaverStreamingToolParameterSnapshot> right)
+        {
+            if (left.Count != right.Count)
+            {
+                return false;
+            }
+
+            for (var index = 0; index < left.Count; index++)
+            {
+                var leftParameter = left[index];
+                var rightParameter = right[index];
+                if (!string.Equals(leftParameter.Name, rightParameter.Name, StringComparison.OrdinalIgnoreCase) ||
+                    !string.Equals(leftParameter.Value, rightParameter.Value, StringComparison.Ordinal) ||
+                    leftParameter.IsClosed != rightParameter.IsClosed)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private AgentToolBackfill ExecutePassdownInvocation(
@@ -831,12 +1020,17 @@ namespace Skyweaver.Services.AgentLoop
             }
         }
 
-        private AgentAssistantResponse ParseAssistantResponse(string rawContent)
+        private AgentAssistantResponse ParseAssistantResponse(
+            string rawContent,
+            bool enableGemmaThoughtCompatibility)
         {
-            var content = rawContent ?? string.Empty;
+            var content = PrepareAssistantProtocolContent(
+                rawContent,
+                enableGemmaThoughtCompatibility,
+                isFinal: true);
             if (content.Length == 0)
             {
-                return new AgentAssistantResponse(string.Empty, Array.Empty<AgentAssistantResponsePart>());
+                return new AgentAssistantResponse(rawContent ?? string.Empty, Array.Empty<AgentAssistantResponsePart>());
             }
 
             var parts = new List<AgentAssistantResponsePart>();
@@ -903,7 +1097,7 @@ namespace Skyweaver.Services.AgentLoop
                 index = toolEndIndex;
             }
 
-            return new AgentAssistantResponse(content, parts.ToArray());
+            return new AgentAssistantResponse(rawContent ?? string.Empty, parts.ToArray());
         }
 
         private static void AddNaturalLanguagePart(
@@ -919,7 +1113,387 @@ namespace Skyweaver.Services.AgentLoop
             parts.Add(AgentAssistantResponsePart.CreateNaturalLanguage(normalizedContent));
         }
 
+        private enum GemmaThoughtDetectionState
+        {
+            NotGemma = 0,
+            Pending = 1,
+            Gemma = 2
+        }
+
+        private static string PrepareAssistantProtocolContent(
+            string? rawContent,
+            bool enableGemmaThoughtCompatibility,
+            bool isFinal)
+        {
+            if (string.IsNullOrEmpty(rawContent))
+            {
+                return string.Empty;
+            }
+
+            var isPendingGemmaDetection = false;
+            if (enableGemmaThoughtCompatibility &&
+                TryExtractGemmaThoughtContent(
+                    rawContent,
+                    isFinal,
+                    out var extraction,
+                    out isPendingGemmaDetection))
+            {
+                return extraction.ProtocolContent;
+            }
+
+            return isPendingGemmaDetection ? string.Empty : rawContent;
+        }
+
+        private static bool TryExtractGemmaThoughtContent(
+            string rawContent,
+            bool isFinal,
+            out GemmaThoughtExtraction extraction,
+            out bool isPendingGemmaDetection)
+        {
+            extraction = GemmaThoughtExtraction.Empty;
+            isPendingGemmaDetection = false;
+
+            var detectionState = DetectGemmaThoughtOpening(
+                rawContent,
+                isFinal,
+                out var openingTagStartIndex,
+                out var openingTagEndIndex);
+            if (detectionState == GemmaThoughtDetectionState.Pending)
+            {
+                isPendingGemmaDetection = true;
+                return false;
+            }
+
+            if (detectionState != GemmaThoughtDetectionState.Gemma)
+            {
+                return false;
+            }
+
+            extraction = ExtractGemmaThoughtContent(
+                rawContent,
+                openingTagStartIndex,
+                openingTagEndIndex,
+                isFinal);
+            return true;
+        }
+
+        private static GemmaThoughtDetectionState DetectGemmaThoughtOpening(
+            string rawContent,
+            bool isFinal,
+            out int openingTagStartIndex,
+            out int openingTagEndIndex)
+        {
+            openingTagStartIndex = 0;
+            openingTagEndIndex = 0;
+
+            while (openingTagStartIndex < rawContent.Length &&
+                   char.IsWhiteSpace(rawContent[openingTagStartIndex]))
+            {
+                openingTagStartIndex++;
+            }
+
+            if (openingTagStartIndex >= rawContent.Length)
+            {
+                return isFinal ? GemmaThoughtDetectionState.NotGemma : GemmaThoughtDetectionState.Pending;
+            }
+
+            var candidate = rawContent[openingTagStartIndex..];
+            if (!IsPotentialInitialThoughtTag(candidate))
+            {
+                return GemmaThoughtDetectionState.NotGemma;
+            }
+
+            if (!IsOpeningTagAt(rawContent, "thought", openingTagStartIndex))
+            {
+                return isFinal ? GemmaThoughtDetectionState.NotGemma : GemmaThoughtDetectionState.Pending;
+            }
+
+            openingTagEndIndex = FindTagEnd(rawContent, openingTagStartIndex);
+            if (openingTagEndIndex < 0)
+            {
+                return isFinal ? GemmaThoughtDetectionState.NotGemma : GemmaThoughtDetectionState.Pending;
+            }
+
+            return GemmaThoughtDetectionState.Gemma;
+        }
+
+        private static bool IsPotentialInitialThoughtTag(string text)
+        {
+            const string openingTagPrefix = "<thought";
+
+            if (string.IsNullOrEmpty(text))
+            {
+                return true;
+            }
+
+            if (text.Length <= openingTagPrefix.Length)
+            {
+                return openingTagPrefix.StartsWith(text, StringComparison.OrdinalIgnoreCase);
+            }
+
+            return text.StartsWith(openingTagPrefix, StringComparison.OrdinalIgnoreCase) &&
+                   IsXmlNameBoundary(text[openingTagPrefix.Length]);
+        }
+
+        private static GemmaThoughtExtraction ExtractGemmaThoughtContent(
+            string rawContent,
+            int openingTagStartIndex,
+            int openingTagEndIndex,
+            bool isFinal)
+        {
+            var protocolBuilder = new StringBuilder(rawContent.Length);
+            var thoughtBuilder = new StringBuilder();
+            var thoughtSegments = new List<GemmaThoughtSegment>();
+            var nextThoughtSegmentIndex = 1;
+            var openingTag = rawContent[openingTagStartIndex..openingTagEndIndex];
+            var insideThought = !IsSelfClosingTag(openingTag);
+            var index = openingTagEndIndex;
+
+            if (!insideThought)
+            {
+                AppendThoughtBoundaryNewline(protocolBuilder);
+            }
+
+            while (index < rawContent.Length)
+            {
+                var nextTagIndex = FindNextGemmaRelevantTagIndex(rawContent, index);
+                if (nextTagIndex < 0)
+                {
+                    var tail = rawContent[index..];
+                    if (!isFinal)
+                    {
+                        tail = TrimTrailingPotentialGemmaTagPrefix(tail);
+                    }
+
+                    AppendGemmaSegment(protocolBuilder, thoughtBuilder, insideThought, tail);
+                    break;
+                }
+
+                if (nextTagIndex > index)
+                {
+                    AppendGemmaSegment(
+                        protocolBuilder,
+                        thoughtBuilder,
+                        insideThought,
+                        rawContent[index..nextTagIndex]);
+                }
+
+                if (IsOpeningTagAt(rawContent, "Tool", nextTagIndex))
+                {
+                    var toolEndIndex = ResolveToolElementEnd(rawContent, nextTagIndex, isFinal);
+                    if (toolEndIndex < 0)
+                    {
+                        protocolBuilder.Append(rawContent, nextTagIndex, rawContent.Length - nextTagIndex);
+                        break;
+                    }
+
+                    protocolBuilder.Append(rawContent, nextTagIndex, toolEndIndex - nextTagIndex);
+                    index = toolEndIndex;
+                    continue;
+                }
+
+                if (IsClosingTagAt(rawContent, "thought", nextTagIndex))
+                {
+                    var tagEndIndex = FindTagEnd(rawContent, nextTagIndex);
+                    if (tagEndIndex < 0)
+                    {
+                        break;
+                    }
+
+                    if (insideThought)
+                    {
+                        FlushGemmaThoughtSegment(
+                            thoughtBuilder,
+                            thoughtSegments,
+                            ref nextThoughtSegmentIndex);
+                        insideThought = false;
+                        AppendThoughtBoundaryNewline(protocolBuilder);
+                    }
+
+                    index = tagEndIndex;
+                    continue;
+                }
+
+                if (IsOpeningTagAt(rawContent, "thought", nextTagIndex))
+                {
+                    var tagEndIndex = FindTagEnd(rawContent, nextTagIndex);
+                    if (tagEndIndex < 0)
+                    {
+                        break;
+                    }
+
+                    if (insideThought)
+                    {
+                        index = tagEndIndex;
+                        continue;
+                    }
+
+                    insideThought = true;
+
+                    if (IsSelfClosingTag(rawContent[nextTagIndex..tagEndIndex]))
+                    {
+                        insideThought = false;
+                        AppendThoughtBoundaryNewline(protocolBuilder);
+                    }
+
+                    index = tagEndIndex;
+                    continue;
+                }
+
+                AppendGemmaSegment(
+                    protocolBuilder,
+                    thoughtBuilder,
+                    insideThought,
+                    rawContent[nextTagIndex].ToString());
+                index = nextTagIndex + 1;
+            }
+
+            FlushGemmaThoughtSegment(
+                thoughtBuilder,
+                thoughtSegments,
+                ref nextThoughtSegmentIndex);
+
+            return new GemmaThoughtExtraction(
+                protocolBuilder.ToString(),
+                thoughtSegments.ToArray());
+        }
+
+        private static void AppendGemmaSegment(
+            StringBuilder protocolBuilder,
+            StringBuilder thoughtBuilder,
+            bool insideThought,
+            string segment)
+        {
+            if (string.IsNullOrEmpty(segment))
+            {
+                return;
+            }
+
+            if (insideThought)
+            {
+                thoughtBuilder.Append(segment);
+            }
+            else
+            {
+                protocolBuilder.Append(segment);
+            }
+        }
+
+        private static void FlushGemmaThoughtSegment(
+            StringBuilder thoughtBuilder,
+            ICollection<GemmaThoughtSegment> thoughtSegments,
+            ref int nextThoughtSegmentIndex)
+        {
+            var content = thoughtBuilder.ToString().Trim();
+            thoughtBuilder.Clear();
+            if (content.Length == 0)
+            {
+                return;
+            }
+
+            thoughtSegments.Add(new GemmaThoughtSegment(nextThoughtSegmentIndex, content));
+            nextThoughtSegmentIndex++;
+        }
+
+        private static void AppendThoughtBoundaryNewline(StringBuilder builder)
+        {
+            if (builder.Length == 0)
+            {
+                builder.Append(Environment.NewLine);
+                return;
+            }
+
+            var lastCharacter = builder[^1];
+            if (lastCharacter is not ('\r' or '\n'))
+            {
+                builder.Append(Environment.NewLine);
+            }
+        }
+
+        private static string TrimTrailingPotentialGemmaTagPrefix(string text)
+        {
+            var trailingPrefixLength = Math.Max(
+                GetTrailingPotentialTagPrefixLength(text, "<Tool"),
+                Math.Max(
+                    GetTrailingPotentialTagPrefixLength(text, "<thought"),
+                    GetTrailingPotentialTagPrefixLength(text, "</thought")));
+            return trailingPrefixLength <= 0
+                ? text
+                : text[..(text.Length - trailingPrefixLength)];
+        }
+
+        private static int FindNextGemmaRelevantTagIndex(string text, int startIndex)
+        {
+            return MinNonNegative(
+                IndexOfOpeningTag(text, "Tool", startIndex),
+                IndexOfOpeningTag(text, "thought", startIndex),
+                IndexOfClosingTagStart(text, "thought", startIndex));
+        }
+
+        private static int MinNonNegative(params int[] values)
+        {
+            var minimum = -1;
+            foreach (var value in values)
+            {
+                if (value < 0)
+                {
+                    continue;
+                }
+
+                minimum = minimum < 0 ? value : Math.Min(minimum, value);
+            }
+
+            return minimum;
+        }
+
+        private static int ResolveToolElementEnd(string text, int toolStartIndex, bool isFinal)
+        {
+            var toolOpenTagEndIndex = FindTagEnd(text, toolStartIndex);
+            if (toolOpenTagEndIndex < 0)
+            {
+                return isFinal ? text.Length : -1;
+            }
+
+            if (IsSelfClosingTag(text[toolStartIndex..toolOpenTagEndIndex]))
+            {
+                return toolOpenTagEndIndex;
+            }
+
+            var toolEndIndex = IndexOfClosingElementEnd(text, "Tool", toolOpenTagEndIndex);
+            return toolEndIndex < 0
+                ? isFinal ? text.Length : -1
+                : toolEndIndex;
+        }
+
+        private static bool IsOpeningTagAt(string text, string elementName, int index)
+        {
+            return IndexOfOpeningTag(text, elementName, index) == index;
+        }
+
+        private static bool IsClosingTagAt(string text, string elementName, int index)
+        {
+            return IndexOfClosingTagStart(text, elementName, index) == index;
+        }
+
         private static string ExtractVisibleAssistantText(string? rawContent, bool isFinal)
+        {
+            return ExtractVisibleAssistantTextCore(rawContent, isFinal);
+        }
+
+        private static string ExtractVisibleAssistantText(
+            string? rawContent,
+            bool isFinal,
+            bool enableGemmaThoughtCompatibility)
+        {
+            return ExtractVisibleAssistantTextCore(
+                PrepareAssistantProtocolContent(
+                    rawContent,
+                    enableGemmaThoughtCompatibility,
+                    isFinal),
+                isFinal);
+        }
+
+        private static string ExtractVisibleAssistantTextCore(string? rawContent, bool isFinal)
         {
             if (string.IsNullOrEmpty(rawContent))
             {
@@ -941,13 +1515,16 @@ namespace Skyweaver.Services.AgentLoop
                         visibleTail = visibleTail[..(visibleTail.Length - trailingPrefixLength)];
                     }
 
-                    builder.Append(visibleTail);
+                    AppendVisibleAssistantTextSegment(builder, visibleTail, trimTrailing: false);
                     break;
                 }
 
                 if (toolStartIndex > index)
                 {
-                    builder.Append(rawContent, index, toolStartIndex - index);
+                    AppendVisibleAssistantTextSegment(
+                        builder,
+                        rawContent[index..toolStartIndex],
+                        trimTrailing: true);
                 }
 
                 var toolOpenTagEndIndex = FindTagEnd(rawContent, toolStartIndex);
@@ -968,6 +1545,30 @@ namespace Skyweaver.Services.AgentLoop
             }
 
             return builder.ToString();
+        }
+
+        private static void AppendVisibleAssistantTextSegment(
+            StringBuilder builder,
+            string segment,
+            bool trimTrailing)
+        {
+            if (string.IsNullOrWhiteSpace(segment))
+            {
+                return;
+            }
+
+            var normalizedSegment = builder.Length == 0
+                ? segment.TrimStart()
+                : segment;
+            if (trimTrailing)
+            {
+                normalizedSegment = normalizedSegment.TrimEnd();
+            }
+
+            if (normalizedSegment.Length > 0)
+            {
+                builder.Append(normalizedSegment);
+            }
         }
 
         private static int GetTrailingPotentialTagPrefixLength(string text, string prefix)
@@ -1282,9 +1883,13 @@ namespace Skyweaver.Services.AgentLoop
 
         private static AgentLoopFinalOutput BuildAssistantTextFinalOutput(
             AgentDefinition agent,
-            string rawContent)
+            string rawContent,
+            bool enableGemmaThoughtCompatibility)
         {
-            var payload = ExtractVisibleAssistantText(rawContent, isFinal: true).Trim();
+            var payload = ExtractVisibleAssistantText(
+                rawContent,
+                isFinal: true,
+                enableGemmaThoughtCompatibility).Trim();
             if (payload.Length == 0)
             {
                 throw new InvalidOperationException("Assistant response did not contain text or a Passdown payload.");

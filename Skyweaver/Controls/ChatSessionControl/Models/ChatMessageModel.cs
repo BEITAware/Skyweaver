@@ -9,6 +9,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
         private string _displayName;
         private string _avatarPath;
         private DateTime _timestamp;
+        private string? _sourceEntryId;
 
         public Guid Id { get; } = Guid.NewGuid();
 
@@ -46,17 +47,31 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
 
         public ObservableCollection<ChatMessagePartModel> Parts { get; } = new();
 
+        public ObservableCollection<string> SourceEntryIds { get; } = new();
+
+        public string? SourceEntryId
+        {
+            get => _sourceEntryId;
+            set => SetProperty(ref _sourceEntryId, string.IsNullOrWhiteSpace(value) ? null : value.Trim());
+        }
+
         public ChatMessageModel(
             ChatMessageRole role,
             string displayName,
             string avatarPath,
             DateTime timestamp,
-            IEnumerable<ChatMessagePartModel>? parts = null)
+            IEnumerable<ChatMessagePartModel>? parts = null,
+            string? sourceEntryId = null)
         {
             _role = role;
             _displayName = displayName;
             _avatarPath = avatarPath;
             _timestamp = timestamp;
+            _sourceEntryId = string.IsNullOrWhiteSpace(sourceEntryId) ? null : sourceEntryId.Trim();
+            if (_sourceEntryId != null)
+            {
+                SourceEntryIds.Add(_sourceEntryId);
+            }
 
             if (parts == null)
             {

@@ -39,6 +39,10 @@ namespace Skyweaver.Services.ChatSession
         public IReadOnlyList<LanguageModelChatContentBlock> UserContentBlocks { get; init; } =
             Array.Empty<LanguageModelChatContentBlock>();
 
+        public bool EnableGemmaThoughtCompatibility { get; init; } = true;
+
+        public IAgentToolConfirmationService? ToolConfirmationService { get; init; }
+
         public Func<AgentToolConfirmationRequest, CancellationToken, Task<AgentToolConfirmationResult>>? ToolConfirmationCallback { get; init; }
     }
 
@@ -87,6 +91,8 @@ namespace Skyweaver.Services.ChatSession
 
         public string? ReasoningDelta { get; init; }
 
+        public bool IsReasoningCollapsible { get; init; } = true;
+
         public AgentLoopOutputKind? TextDeltaOutputKind { get; init; }
 
         public int? PartIndex { get; init; }
@@ -133,6 +139,8 @@ namespace Skyweaver.Services.ChatSession
         public IReadOnlyDictionary<string, AgentDefinition> AgentsById { get; init; } =
             new Dictionary<string, AgentDefinition>(StringComparer.OrdinalIgnoreCase);
 
+        public bool EnableGemmaThoughtCompatibility { get; init; } = true;
+
         public Func<AgentToolConfirmationRequest, CancellationToken, Task<AgentToolConfirmationResult>>? ToolConfirmationCallback { get; init; }
     }
 
@@ -160,6 +168,8 @@ namespace Skyweaver.Services.ChatSession
         public SkyweaverToolContext ToolContext { get; init; } = new();
 
         public Func<AgentLoopRuntimeEvent, CancellationToken, ValueTask>? EventSink { get; init; }
+
+        public bool EnableGemmaThoughtCompatibility { get; init; } = true;
 
         public Func<AgentToolConfirmationRequest, CancellationToken, Task<AgentToolConfirmationResult>>? ToolConfirmationCallback { get; init; }
     }

@@ -1,6 +1,5 @@
 using System.IO;
 using System.Text;
-using Skyweaver.Controls.ChatSessionControl.Models;
 using Skyweaver.Models.ChatSession;
 
 namespace Skyweaver.Services.ChatSession
@@ -64,14 +63,9 @@ namespace Skyweaver.Services.ChatSession
         {
             var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var block in session.Records.SelectMany(message => message.Blocks))
+            foreach (var entry in session.Transcript.Entries)
             {
-                Add(block.ToolCallId);
-            }
-
-            foreach (var part in session.Messages.SelectMany(message => message.Parts))
-            {
-                Add(part.ToolCallId);
+                Add(entry.ToolCallId);
             }
 
             foreach (var filePath in EnumerateToolCallFiles(session))

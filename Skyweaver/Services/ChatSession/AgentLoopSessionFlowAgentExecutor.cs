@@ -30,6 +30,7 @@ namespace Skyweaver.Services.ChatSession
                 InputContentBlocks = request.InputContentBlocks,
                 History = request.History,
                 ToolContext = request.ToolContext,
+                EnableGemmaThoughtCompatibility = request.EnableGemmaThoughtCompatibility,
                 ToolConfirmationCallback = request.ToolConfirmationCallback
             };
 

@@ -8,7 +8,6 @@ using Skyweaver.Commands;
 using Skyweaver.Controls.ChatSessionControl.Models;
 using Skyweaver.Controls.ChatSessionControl.Services;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
-using Skyweaver.Controls.WorkflowEditorControl.Models;
 using Skyweaver.Infrastructure.Mvvm;
 using Skyweaver.Models.ChatSession;
 using Skyweaver.Services.AgentLoop;
@@ -28,16 +27,18 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         private readonly ChatSessionRuntimeService _runtimeService;
         private readonly ChatComposerImageAttachmentService _composerImageAttachmentService;
         private readonly ToolInvocationPresentationService _toolInvocationPresentationService;
+        private readonly ChatSessionPresentationProjector _presentationProjector;
         private readonly string _sessionFlowValidationSummary;
-        private readonly Dictionary<string, ChatSessionMessageBuilder> _activeAgentMessageBuilders =
-            new(StringComparer.OrdinalIgnoreCase);
 
         private string _draftMessageText = string.Empty;
         private ChatMessageModel? _selectedMessage;
         private bool _isExecutionActive;
         private string _executionStatusText = "就绪";
         private bool _suppressPersistence;
+        private DateTime _lastStreamingProjectionRefreshUtc = DateTime.MinValue;
         private CancellationTokenSource? _executionCancellationSource;
+
+        private static readonly TimeSpan StreamingProjectionRefreshInterval = TimeSpan.FromMilliseconds(80);
 
         public ObservableCollection<ChatMessageModel> Messages { get; } = new();
 
@@ -117,8 +118,8 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         }
 
         public string ComposerHintText => IsExecutionActive
-            ? "当前轮次正在运行。空闲时按 Enter 发送；Ctrl+Enter 或 Shift+Enter 换行。"
-            : "按 Enter 发送；Ctrl+Enter 或 Shift+Enter 换行。焦点在此处时可粘贴图片。";
+            ? "当前轮次正在运行。"
+            : "按 Enter 发送；Ctrl+Enter 或 Shift+Enter 换行。";
 
         public string ComposerPrimaryButtonText => IsExecutionActive ? "停止" : "发送";
 
@@ -156,6 +157,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             _runtimeService = runtimeService ?? new ChatSessionRuntimeService();
             _composerImageAttachmentService = new ChatComposerImageAttachmentService();
             _toolInvocationPresentationService = new ToolInvocationPresentationService();
+            _presentationProjector = new ChatSessionPresentationProjector();
             _flowBindingService = new ChatSessionFlowBindingService();
             _sessionFlowValidationSummary = BuildSessionFlowValidationSummary(sessionModel);
 
@@ -170,12 +172,6 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             AddImageCommand = new RelayCommand(AddImage, () => !IsExecutionActive);
             AddClipboardCommand = new RelayCommand(AddClipboard, () => !IsExecutionActive);
 
-            Messages.CollectionChanged += (_, _) =>
-            {
-                OnPropertyChanged(nameof(IsEmpty));
-                CommandManager.InvalidateRequerySuggested();
-            };
-
             Messages.CollectionChanged += OnMessagesCollectionChanged;
             PendingComposerImages.CollectionChanged += (_, _) =>
             {
@@ -186,11 +182,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
             if (_sessionModel != null)
             {
-                LoadPersistedMessages(_sessionModel);
-            }
-            else
-            {
-                SeedMessages();
+                RefreshMessagesFromTranscript();
             }
         }
 
@@ -215,38 +207,21 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                 return;
             }
 
-            var userParts = new List<ChatMessagePartModel>();
-            if (trimmedText.Length > 0)
-            {
-                userParts.Add(ChatMessagePartModel.CreateText(trimmedText));
-            }
-
-            userParts.AddRange(pendingImages.Select(image =>
-                ChatMessagePartModel.CreateImage(image.ResourcePath)));
-
             var userContentBlocks = pendingImages
                 .Select(image => LanguageModelChatContentBlock.CreateImage(
                     image.ResourcePath,
                     image.MediaType))
                 .ToArray();
 
-            var userMessage = CreateChatMessage(
-                ChatMessageRole.User,
-                userParts.ToArray());
-            Messages.Add(userMessage);
-            SelectedMessage = userMessage;
             DraftMessageText = string.Empty;
             PendingComposerImages.Clear();
-            PersistSession();
 
-            _activeAgentMessageBuilders.Clear();
             _executionCancellationSource?.Dispose();
             _executionCancellationSource = new CancellationTokenSource();
             IsExecutionActive = true;
             ExecutionStatusText = $"正在运行：{BoundSessionFlowName}";
 
             ChatSessionRuntimeResult? runtimeResult = null;
-
             try
             {
                 runtimeResult = await _runtimeService.ExecuteTurnAsync(
@@ -267,19 +242,10 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                     FailureReason = ex.Message
                 };
 
-
                 AddSystemStatusMessage(ex.Message, "执行失败");
             }
             finally
             {
-                var incompleteToolMessage = runtimeResult switch
-                {
-                    { IsCompleted: true } => null,
-                    { IsCancelled: true } => "执行已取消。",
-                    _ => "执行未完成；已关闭打开的工具调用。"
-                };
-
-                FinalizeActiveAgentMessages(incompleteToolMessage);
                 _executionCancellationSource?.Dispose();
                 _executionCancellationSource = null;
                 IsExecutionActive = false;
@@ -291,7 +257,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                     _ => "失败"
                 };
 
-                PersistSession();
+                RefreshMessagesFromTranscript();
             }
         }
 
@@ -316,9 +282,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
             if (_sessionModel == null)
             {
-                AddSystemStatusMessage(
-                    "无法保存粘贴的图片，因为此视图未绑定到 ChatSessionModel。",
-                    "图片粘贴失败");
+                AddSystemStatusMessage("无法保存粘贴的图片，因为当前视图未绑定到 ChatSessionModel。", "图片粘贴失败");
                 return false;
             }
 
@@ -336,12 +300,10 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
         private void RemoveComposerImage(ChatComposerAttachmentModel? attachment)
         {
-            if (attachment == null)
+            if (attachment != null)
             {
-                return;
+                PendingComposerImages.Remove(attachment);
             }
-
-            PendingComposerImages.Remove(attachment);
         }
 
         private void AddImage()
@@ -351,20 +313,21 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                 Filter = "图像文件|*.png;*.jpg;*.jpeg;*.bmp;*.gif|所有文件|*.*",
                 Multiselect = true
             };
-            if (openFileDialog.ShowDialog() == true)
+
+            if (openFileDialog.ShowDialog() != true)
             {
-                foreach (var fileName in openFileDialog.FileNames)
+                return;
+            }
+
+            foreach (var fileName in openFileDialog.FileNames)
+            {
+                try
                 {
-                    try
-                    {
-                        var uri = new Uri(fileName, UriKind.Absolute);
-                        var bitmap = new BitmapImage(uri);
-                        AddPastedImage(bitmap);
-                    }
-                    catch (Exception ex)
-                    {
-                        AddSystemStatusMessage($"无法加载图片 {fileName}: {ex.Message}", "添加图片失败");
-                    }
+                    AddPastedImage(new BitmapImage(new Uri(fileName, UriKind.Absolute)));
+                }
+                catch (Exception ex)
+                {
+                    AddSystemStatusMessage($"无法加载图片 {fileName}: {ex.Message}", "添加图片失败");
                 }
             }
         }
@@ -399,245 +362,27 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
         private void ApplyRuntimeEvent(ChatSessionRuntimeEvent runtimeEvent)
         {
-            switch (runtimeEvent.Kind)
+            ExecutionStatusText = runtimeEvent.Kind switch
             {
-                case ChatSessionRuntimeEventKind.ExecutionStarted:
-                    ExecutionStatusText = $"正在运行：{runtimeEvent.FlowName}";
-                    break;
+                ChatSessionRuntimeEventKind.ExecutionStarted => $"正在运行：{runtimeEvent.FlowName}",
+                ChatSessionRuntimeEventKind.NodeStarted => $"正在运行节点：{runtimeEvent.NodeTitle}",
+                ChatSessionRuntimeEventKind.NodeCompleted => $"节点已完成：{runtimeEvent.NodeTitle}",
+                ChatSessionRuntimeEventKind.AgentIterationStarted => runtimeEvent.IterationNumber is int started
+                    ? $"代理 {runtimeEvent.NodeTitle} 迭代 {started}"
+                    : $"代理 {runtimeEvent.NodeTitle} 已启动",
+                ChatSessionRuntimeEventKind.AgentIterationCompleted => runtimeEvent.IterationNumber is int completed
+                    ? $"代理 {runtimeEvent.NodeTitle} 已完成迭代 {completed}"
+                    : $"代理 {runtimeEvent.NodeTitle} 已完成",
+                ChatSessionRuntimeEventKind.ExecutionCompleted => "执行已完成",
+                ChatSessionRuntimeEventKind.ExecutionFailed => "执行失败",
+                ChatSessionRuntimeEventKind.ExecutionCancelled => "执行已取消",
+                _ => ExecutionStatusText
+            };
 
-                case ChatSessionRuntimeEventKind.NodeStarted:
-                    ExecutionStatusText = runtimeEvent.IsSkipped
-                        ? $"已跳过节点：{runtimeEvent.NodeTitle}"
-                        : $"正在运行节点：{runtimeEvent.NodeTitle}";
-                    break;
-
-                case ChatSessionRuntimeEventKind.NodeCompleted:
-                    ExecutionStatusText = runtimeEvent.IsSkipped
-                        ? $"已跳过节点：{runtimeEvent.NodeTitle}"
-                        : $"节点已完成：{runtimeEvent.NodeTitle}";
-                    ApplyNodeCompletion(runtimeEvent);
-                    break;
-
-                case ChatSessionRuntimeEventKind.AgentIterationStarted:
-                    ExecutionStatusText = runtimeEvent.IterationNumber is int startedIteration
-                        ? $"代理 {runtimeEvent.NodeTitle} 迭代 {startedIteration}"
-                        : $"代理 {runtimeEvent.NodeTitle} 已启动";
-                    break;
-
-                case ChatSessionRuntimeEventKind.AgentIterationCompleted:
-                    ExecutionStatusText = runtimeEvent.IterationNumber is int completedIteration
-                        ? $"代理 {runtimeEvent.NodeTitle} 已完成迭代 {completedIteration}"
-                        : $"代理 {runtimeEvent.NodeTitle} 已完成";
-                    break;
-
-                case ChatSessionRuntimeEventKind.TextDelta:
-                    if (!runtimeEvent.IsHiddenAgent &&
-                        !string.IsNullOrEmpty(runtimeEvent.TextDelta))
-                    {
-                        var builder = GetOrCreateAgentMessageBuilder(runtimeEvent);
-                        switch (runtimeEvent.TextDeltaOutputKind)
-                        {
-                            case AgentLoopOutputKind.StructuredXml:
-                                builder.AppendReplyStructuredXmlDelta(runtimeEvent.TextDelta);
-                                break;
-                            case AgentLoopOutputKind.NaturalLanguage:
-                                builder.AppendReplyTextDelta(runtimeEvent.TextDelta);
-                                break;
-                            default:
-                                builder.AppendTextDelta(runtimeEvent.TextDelta);
-                                break;
-                        }
-                    }
-
-                    break;
-
-                case ChatSessionRuntimeEventKind.ReasoningDelta:
-                    if (!runtimeEvent.IsHiddenAgent &&
-                        !string.IsNullOrEmpty(runtimeEvent.ReasoningDelta))
-                    {
-                        GetOrCreateAgentMessageBuilder(runtimeEvent)
-                            .AppendReasoningDelta(runtimeEvent.ReasoningDelta);
-                    }
-
-                    break;
-
-                case ChatSessionRuntimeEventKind.AssistantToolCallsReceived:
-                    break;
-
-                case ChatSessionRuntimeEventKind.ToolCallStarted:
-                    if (!runtimeEvent.IsHiddenAgent &&
-                        !ChatSessionInternalToolVisibility.IsInternalToolRuntimeEvent(runtimeEvent) &&
-                        runtimeEvent.ToolCallSnapshot != null &&
-                        runtimeEvent.ToolCallIndex is int toolCallIndex)
-                    {
-                        var toolCallKey = CreateToolCallKey(runtimeEvent, toolCallIndex);
-                        GetOrCreateAgentMessageBuilder(runtimeEvent)
-                            .AddOrUpdateToolCall(
-                                toolCallKey,
-                                runtimeEvent.ToolCallSnapshot,
-                                runtimeEvent.ToolCallId,
-                                runtimeEvent.AgentId);
-                    }
-
-                    break;
-
-                case ChatSessionRuntimeEventKind.ToolCallUpdated:
-                    if (!runtimeEvent.IsHiddenAgent &&
-                        !ChatSessionInternalToolVisibility.IsInternalToolRuntimeEvent(runtimeEvent) &&
-                        runtimeEvent.ToolCallSnapshot != null &&
-                        runtimeEvent.ToolCallIndex is int updatedToolCallIndex)
-                    {
-                        var updatedToolCallKey = CreateToolCallKey(runtimeEvent, updatedToolCallIndex);
-                        GetOrCreateAgentMessageBuilder(runtimeEvent)
-                            .AddOrUpdateToolCall(
-                                updatedToolCallKey,
-                                runtimeEvent.ToolCallSnapshot,
-                                runtimeEvent.ToolCallId,
-                                runtimeEvent.AgentId);
-                    }
-
-                    break;
-
-                case ChatSessionRuntimeEventKind.MalformedToolCall:
-                    if (!runtimeEvent.IsHiddenAgent &&
-                        !ChatSessionInternalToolVisibility.IsInternalToolRuntimeEvent(runtimeEvent) &&
-                        runtimeEvent.ToolCallIndex is int malformedToolCallIndex)
-                    {
-                        var malformedToolCallKey = CreateToolCallKey(runtimeEvent, malformedToolCallIndex);
-                        GetOrCreateAgentMessageBuilder(runtimeEvent)
-                            .AddMalformedToolCall(
-                                malformedToolCallKey,
-                                runtimeEvent.ToolXml ?? string.Empty,
-                                runtimeEvent.Message,
-                                runtimeEvent.ToolCallId,
-                                runtimeEvent.AgentId);
-                    }
-
-                    break;
-
-                case ChatSessionRuntimeEventKind.ToolOutputReceived:
-                    if (!runtimeEvent.IsHiddenAgent &&
-                        !ChatSessionInternalToolVisibility.IsInternalToolRuntimeEvent(runtimeEvent) &&
-                        runtimeEvent.ToolCallIndex is int completedToolCallIndex)
-                    {
-                        var completedToolCallKey = CreateToolCallKey(runtimeEvent, completedToolCallIndex);
-                        GetOrCreateAgentMessageBuilder(runtimeEvent)
-                            .CompleteToolCall(
-                                completedToolCallKey,
-                                runtimeEvent.ToolOutputXml ?? runtimeEvent.Message ?? string.Empty,
-                                runtimeEvent.ToolCallId,
-                                runtimeEvent.AgentId);
-                    }
-
-                    break;
-
-                case ChatSessionRuntimeEventKind.ContextCompressionApplied:
-                    AddSystemStatusMessage(BuildCompressionMessage(runtimeEvent), "上下文压缩");
-                    break;
-
-                case ChatSessionRuntimeEventKind.AgentFinalOutputProduced:
-                    ApplyAgentFinalOutput(runtimeEvent);
-                    break;
-
-                case ChatSessionRuntimeEventKind.StructuredOutputProduced:
-                    break;
-
-                case ChatSessionRuntimeEventKind.ExecutionCompleted:
-                    ExecutionStatusText = "执行已完成";
-                    AppendAssistantReturnMessage(runtimeEvent.Payload, runtimeEvent.IsPayloadAlreadyPresented);
-                    break;
-
-                case ChatSessionRuntimeEventKind.ExecutionFailed:
-                    ExecutionStatusText = "执行失败";
-                    AddSystemStatusMessage(runtimeEvent.Message ?? "执行失败。", "执行失败");
-                    break;
-
-                case ChatSessionRuntimeEventKind.ExecutionCancelled:
-                    ExecutionStatusText = "执行已取消";
-                    AddSystemStatusMessage(runtimeEvent.Message ?? "当前执行已取消。", "执行已取消");
-                    break;
-            }
-        }
-
-        private void ApplyNodeCompletion(ChatSessionRuntimeEvent runtimeEvent)
-        {
-            if (runtimeEvent.IsHiddenAgent || runtimeEvent.IsSkipped)
+            if (ShouldRefreshProjection(runtimeEvent))
             {
-                return;
+                RefreshMessagesFromTranscript();
             }
-
-            if (runtimeEvent.NodeKind != SessionFlowNodeKind.Agent)
-            {
-                return;
-            }
-
-            var builder = GetOrCreateAgentMessageBuilder(runtimeEvent);
-            builder.CompleteReasoningStreaming();
-            builder.CompleteTextStreaming();
-            builder.CompleteReplyStreaming();
-        }
-
-        private void ApplyAgentFinalOutput(ChatSessionRuntimeEvent runtimeEvent)
-        {
-            if (runtimeEvent.IsHiddenAgent || runtimeEvent.Payload == null)
-            {
-                return;
-            }
-
-            var builder = GetOrCreateAgentMessageBuilder(runtimeEvent);
-            builder.CompleteReasoningStreaming();
-            builder.CompleteTextStreaming();
-            builder.CompleteReplyStreaming();
-        }
-
-        private static ToolCallInstanceKey CreateToolCallKey(ChatSessionRuntimeEvent runtimeEvent, int toolCallIndex)
-        {
-            ArgumentNullException.ThrowIfNull(runtimeEvent);
-
-            return ToolCallInstanceKey.Create(
-                runtimeEvent.IterationNumber,
-                runtimeEvent.PartIndex,
-                toolCallIndex);
-        }
-
-        private ChatSessionMessageBuilder GetOrCreateAgentMessageBuilder(ChatSessionRuntimeEvent runtimeEvent)
-        {
-            var nodeId = runtimeEvent.NodeId ?? Guid.NewGuid().ToString("N");
-            if (_activeAgentMessageBuilders.TryGetValue(nodeId, out var builder))
-            {
-                return builder;
-            }
-
-            var message = new ChatMessageModel(
-                ChatMessageRole.Assistant,
-                string.IsNullOrWhiteSpace(runtimeEvent.NodeTitle)
-                    ? GetDisplayName(ChatMessageRole.Assistant)
-                    : runtimeEvent.NodeTitle,
-                GetAvatarPath(ChatMessageRole.Assistant),
-                DateTime.Now);
-
-            Messages.Add(message);
-            SelectedMessage = message;
-
-            builder = new ChatSessionMessageBuilder(message, _toolInvocationPresentationService);
-            _activeAgentMessageBuilders[nodeId] = builder;
-            return builder;
-        }
-
-        private void FinalizeActiveAgentMessages(string? incompleteToolMessage)
-        {
-            foreach (var builder in _activeAgentMessageBuilders.Values)
-            {
-                builder.CompleteTextStreaming();
-                builder.CompleteReplyStreaming();
-                builder.CompleteReasoningStreaming();
-                if (!string.IsNullOrWhiteSpace(incompleteToolMessage))
-                {
-                    builder.FinalizeOpenToolCalls(incompleteToolMessage);
-                }
-            }
-
-            _activeAgentMessageBuilders.Clear();
         }
 
         private Task<AgentToolConfirmationResult> ConfirmToolInvocationAsync(
@@ -677,56 +422,6 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                 : AgentToolConfirmationResult.Reject("用户拒绝了此工具调用。");
         }
 
-        private void AppendAssistantReturnMessage(
-            SessionFlowPayload? payload,
-            bool isPayloadAlreadyPresented)
-        {
-            if (payload == null || isPayloadAlreadyPresented)
-            {
-                return;
-            }
-
-            var message = payload.IsStructuredXml
-                ? CreateChatMessage(
-                    ChatMessageRole.Assistant,
-                    ChatMessagePartModel.CreateStructuredXml(payload.Content, "结构化 XML"))
-                : CreateChatMessage(
-                    ChatMessageRole.Assistant,
-                    ChatMessagePartModel.CreateText(payload.Content));
-
-            Messages.Add(message);
-            SelectedMessage = message;
-        }
-
-        private void AddSystemStatusMessage(string content, string title)
-        {
-            var message = CreateChatMessage(
-                ChatMessageRole.System,
-                ChatMessagePartModel.CreateStatus(content, title));
-            Messages.Add(message);
-            SelectedMessage = message;
-        }
-
-        private static string BuildCompressionMessage(ChatSessionRuntimeEvent runtimeEvent)
-        {
-            var info = runtimeEvent.ContextCompression;
-            if (info == null)
-            {
-                return runtimeEvent.Message ?? "This turn triggered context compression.";
-            }
-
-            return string.Join(
-                Environment.NewLine,
-                [
-                    runtimeEvent.Message ?? "此轮触发了上下文压缩。",
-                    $"压缩模型：{info.CompressionModelId ?? "未知"}",
-                    $"上下文窗口：{info.ContextWindowTokens:N0} token",
-                    $"压缩前：{info.EstimatedTokenCountBeforeCompression:N0} token",
-                    $"压缩后：{info.EstimatedTokenCountAfterCompression:N0} token",
-                    $"目标限制：{info.TargetTokenCountAfterCompression:N0} token"
-                ]);
-        }
-
         private void RemoveSelectedMessage()
         {
             RemoveMessage(SelectedMessage);
@@ -734,110 +429,107 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
         private void RemoveMessage(ChatMessageModel? message)
         {
-            if (message == null)
+            if (message == null || _sessionModel == null)
             {
                 return;
             }
 
-            var removedIndex = Messages.IndexOf(message);
-            if (removedIndex < 0)
+            var sourceEntryIds = message.SourceEntryIds.Count > 0
+                ? message.SourceEntryIds.ToHashSet(StringComparer.OrdinalIgnoreCase)
+                : string.IsNullOrWhiteSpace(message.SourceEntryId)
+                    ? new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                    : new HashSet<string>(StringComparer.OrdinalIgnoreCase) { message.SourceEntryId };
+
+            if (sourceEntryIds.Count > 0)
             {
-                return;
+                var removedEntries = _sessionModel.Transcript.Entries
+                    .Where(candidate => sourceEntryIds.Contains(candidate.EntryId))
+                    .ToArray();
+                if (removedEntries.Length > 0)
+                {
+                    foreach (var entry in removedEntries)
+                    {
+                        _sessionModel.Transcript.Entries.Remove(entry);
+                    }
+
+                    foreach (var turn in _sessionModel.Transcript.Turns)
+                    {
+                        if (!string.IsNullOrWhiteSpace(turn.UserEntryId) &&
+                            sourceEntryIds.Contains(turn.UserEntryId))
+                        {
+                            turn.UserEntryId = null;
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(turn.FinalEntryId) &&
+                            sourceEntryIds.Contains(turn.FinalEntryId))
+                        {
+                            turn.FinalEntryId = null;
+                        }
+                    }
+
+                    _sessionModel.Transcript.Touch();
+                    PersistSession();
+                    RefreshMessagesFromTranscript();
+                    return;
+                }
             }
 
-            Messages.RemoveAt(removedIndex);
-
-            if (Messages.Count == 0)
-            {
-                SelectedMessage = null;
-                RebuildConversationHistoryFromVisibleMessages();
-                PersistSession();
-                return;
-            }
-
-            var nextIndex = Math.Min(removedIndex, Messages.Count - 1);
-            SelectedMessage = Messages[nextIndex];
-            RebuildConversationHistoryFromVisibleMessages();
-            PersistSession();
+            Messages.Remove(message);
+            SelectedMessage = Messages.LastOrDefault();
         }
 
         private void ClearMessages()
         {
-            Messages.Clear();
-            SelectedMessage = null;
-            RebuildConversationHistoryFromVisibleMessages();
-            PersistSession();
+            if (_sessionModel != null)
+            {
+                _sessionModel.Transcript.Turns.Clear();
+                _sessionModel.Transcript.Entries.Clear();
+                _sessionModel.Transcript.Touch();
+                PersistSession();
+            }
+
+            RefreshMessagesFromTranscript();
         }
 
-        private void RebuildConversationHistoryFromVisibleMessages()
+        private void OnMessagesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(IsEmpty));
+            CommandManager.InvalidateRequerySuggested();
+        }
+
+        private void RefreshMessagesFromTranscript()
         {
             if (_sessionModel == null)
             {
                 return;
             }
 
-            // Keep the persisted transcript as the source of truth once it exists.
-            // Visible chat cards are only a presentation layer and may omit hidden-agent
-            // activity or intermediate tool traffic that must survive across turns.
-            if (_sessionModel.ConversationHistory.Count > 0)
-            {
-                return;
-            }
-
-            _sessionModel.ConversationHistory.Clear();
-            foreach (var message in ChatSessionTurnHistoryBuilder.BuildForNextTurn(_sessionModel, currentUserText: null))
-            {
-                _sessionModel.ConversationHistory.Add(message.Clone());
-            }
-        }
-
-        private void OnMessagesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.NewItems != null)
-            {
-                foreach (var item in e.NewItems.OfType<ChatMessageModel>())
-                {
-                    item.Parts.CollectionChanged += OnMessagePartsCollectionChanged;
-                }
-            }
-
-            if (e.OldItems != null)
-            {
-                foreach (var item in e.OldItems.OfType<ChatMessageModel>())
-                {
-                    item.Parts.CollectionChanged -= OnMessagePartsCollectionChanged;
-                }
-            }
-        }
-
-        private void OnMessagePartsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            PersistSession();
-        }
-
-        private void LoadPersistedMessages(ChatSessionModel sessionModel)
-        {
+            var projectedMessages = _presentationProjector.Project(_sessionModel.Transcript);
             _suppressPersistence = true;
-
             try
             {
-                foreach (var message in sessionModel.Messages)
+                for (var targetIndex = 0; targetIndex < projectedMessages.Count; targetIndex++)
                 {
-                    if (IsLegacySessionInitializationMessage(message))
+                    var projectedMessage = projectedMessages[targetIndex];
+                    var existingMessage = FindExistingMessage(projectedMessage);
+                    if (existingMessage == null)
                     {
+                        HydrateToolCallPresentations(projectedMessage);
+                        Messages.Insert(targetIndex, projectedMessage);
                         continue;
                     }
 
-                    if (TryCloneMessage(message, out var clonedMessage) && clonedMessage != null)
+                    UpdateMessage(existingMessage, projectedMessage);
+                    var currentIndex = Messages.IndexOf(existingMessage);
+                    if (currentIndex >= 0 && currentIndex != targetIndex)
                     {
-                        HydrateToolCallPresentations(clonedMessage);
-                        Messages.Add(clonedMessage);
+                        Messages.Move(currentIndex, targetIndex);
                     }
                 }
 
-                if (Messages.Count == 0)
+                for (var index = Messages.Count - 1; index >= projectedMessages.Count; index--)
                 {
-                    SeedMessages();
+                    Messages.RemoveAt(index);
                 }
 
                 SelectedMessage = Messages.LastOrDefault();
@@ -848,6 +540,130 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             }
         }
 
+        private bool ShouldRefreshProjection(ChatSessionRuntimeEvent runtimeEvent)
+        {
+            if (!IsHighFrequencyStreamingProjectionEvent(runtimeEvent))
+            {
+                _lastStreamingProjectionRefreshUtc = DateTime.UtcNow;
+                return true;
+            }
+
+            var now = DateTime.UtcNow;
+            if (now - _lastStreamingProjectionRefreshUtc < StreamingProjectionRefreshInterval)
+            {
+                return false;
+            }
+
+            _lastStreamingProjectionRefreshUtc = now;
+            return true;
+        }
+
+        private static bool IsHighFrequencyStreamingProjectionEvent(ChatSessionRuntimeEvent runtimeEvent)
+        {
+            return (runtimeEvent.Kind is ChatSessionRuntimeEventKind.TextDelta
+                    or ChatSessionRuntimeEventKind.ReasoningDelta) ||
+                runtimeEvent.Kind == ChatSessionRuntimeEventKind.ToolCallUpdated &&
+                runtimeEvent.ToolCallSnapshot?.IsInvocationClosed != true &&
+                runtimeEvent.ToolInvocation == null;
+        }
+
+        private ChatMessageModel? FindExistingMessage(ChatMessageModel projectedMessage)
+        {
+            return Messages.FirstOrDefault(existing =>
+                string.Equals(existing.SourceEntryId, projectedMessage.SourceEntryId, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private void UpdateMessage(ChatMessageModel target, ChatMessageModel source)
+        {
+            target.Role = source.Role;
+            target.DisplayName = source.DisplayName;
+            target.AvatarPath = source.AvatarPath;
+            target.Timestamp = source.Timestamp;
+            target.SourceEntryId = source.SourceEntryId;
+            ReplaceSourceEntryIds(target, source);
+            UpdateParts(target, source);
+            HydrateToolCallPresentations(target);
+        }
+
+        private static void ReplaceSourceEntryIds(ChatMessageModel target, ChatMessageModel source)
+        {
+            target.SourceEntryIds.Clear();
+            foreach (var entryId in source.SourceEntryIds)
+            {
+                target.SourceEntryIds.Add(entryId);
+            }
+        }
+
+        private static void UpdateParts(ChatMessageModel target, ChatMessageModel source)
+        {
+            for (var index = 0; index < source.Parts.Count; index++)
+            {
+                var sourcePart = source.Parts[index];
+                if (index >= target.Parts.Count)
+                {
+                    target.Parts.Add(sourcePart);
+                    continue;
+                }
+
+                UpdatePart(target.Parts[index], sourcePart);
+            }
+
+            for (var index = target.Parts.Count - 1; index >= source.Parts.Count; index--)
+            {
+                target.Parts.RemoveAt(index);
+            }
+        }
+
+        private static void UpdatePart(ChatMessagePartModel target, ChatMessagePartModel source)
+        {
+            if (ShouldDetachToolPresentation(target, source))
+            {
+                target.DetachToolPresentation();
+            }
+
+            target.PartType = source.PartType;
+            target.Title = source.Title;
+            target.Language = source.Language;
+            target.BadgeText = source.BadgeText;
+            target.ToolCallId = source.ToolCallId;
+            target.CallerAgentId = source.CallerAgentId;
+            target.ResourcePath = source.ResourcePath;
+            target.IsUserVisible = source.IsUserVisible;
+            target.IsCollapsible = source.IsCollapsible;
+            target.IsStreaming = source.IsStreaming;
+            target.Content = source.Content;
+        }
+
+        private static bool ShouldDetachToolPresentation(
+            ChatMessagePartModel target,
+            ChatMessagePartModel source)
+        {
+            if (target.ToolPresentationState == null && target.ToolPresentationView == null)
+            {
+                return false;
+            }
+
+            if (source.PartType != ChatMessagePartType.ToolCall ||
+                target.PartType != ChatMessagePartType.ToolCall)
+            {
+                return true;
+            }
+
+            if (!string.Equals(target.ToolCallId, source.ToolCallId, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (!string.IsNullOrWhiteSpace(target.Title) &&
+                !string.IsNullOrWhiteSpace(source.Title) &&
+                !string.Equals(target.Title, source.Title, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         private void PersistSession()
         {
             if (_suppressPersistence || _sessionModel == null || _chatSessionRepository == null)
@@ -855,103 +671,16 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                 return;
             }
 
-            _sessionModel.Messages.Clear();
-            _sessionModel.Records.Clear();
-            foreach (var message in Messages)
-            {
-                if (IsLegacySessionInitializationMessage(message))
-                {
-                    continue;
-                }
-
-                if (TryCloneMessage(message, out var clonedMessage) && clonedMessage != null)
-                {
-                    _sessionModel.Messages.Add(clonedMessage);
-                    _sessionModel.Records.Add(ChatSessionPresentationProjector.ToRecord(clonedMessage));
-                }
-            }
-
-            _sessionModel.ContextSummary = Messages.Count == 0
-                ? "空会话"
-                : $"当前对话有 {Messages.Count} 条消息。最后更新于 {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
-
             _chatSessionRepository.Save(_sessionModel);
         }
 
-        private static bool IsLegacySessionInitializationMessage(ChatMessageModel message)
+        private void AddSystemStatusMessage(string content, string title)
         {
-            if (message.Role != ChatMessageRole.System || message.Parts.Count != 1)
-            {
-                return false;
-            }
-
-            var part = message.Parts[0];
-            if (part.PartType != ChatMessagePartType.Status)
-            {
-                return false;
-            }
-
-            return string.Equals(part.Title, "Initialized", StringComparison.Ordinal)
-                || string.Equals(part.Title, "Ready", StringComparison.Ordinal);
-
-
-
-
-        }
-
-        private static bool TryCloneMessage(ChatMessageModel source, out ChatMessageModel? clone)
-        {
-            var clonedParts = source.Parts
-                .Where(part => !ChatSessionInternalToolVisibility.IsInternalToolPart(part))
-                .Where(part => !IsEmptyPresentationPart(part))
-                .Select(part => new ChatMessagePartModel(
-                    part.PartType,
-                    NormalizePresentationPartContent(part),
-                    part.Title,
-                    part.Language,
-                    part.BadgeText,
-                    part.IsStreaming,
-                    part.ToolCallId,
-                    part.CallerAgentId,
-                    part.ResourcePath,
-                    part.IsUserVisible))
-                .ToArray();
-
-            if (clonedParts.Length == 0)
-            {
-                clone = null;
-                return false;
-            }
-
-            clone = new ChatMessageModel(
-                source.Role,
-                source.DisplayName,
-                source.AvatarPath,
-                source.Timestamp,
-                clonedParts);
-            return true;
-        }
-
-        private static bool IsEmptyPresentationPart(ChatMessagePartModel part)
-        {
-            return (part.PartType is ChatMessagePartType.Text
-                or ChatMessagePartType.Code
-                or ChatMessagePartType.Status
-                or ChatMessagePartType.Placeholder
-                or ChatMessagePartType.StructuredXml
-                or ChatMessagePartType.Reasoning)
-                && string.IsNullOrWhiteSpace(part.Content)
-                && string.IsNullOrWhiteSpace(part.Title)
-                && string.IsNullOrWhiteSpace(part.ResourcePath);
-        }
-
-        private static string NormalizePresentationPartContent(ChatMessagePartModel part)
-        {
-            return part.PartType is ChatMessagePartType.Text
-                or ChatMessagePartType.StructuredXml
-                or ChatMessagePartType.Reasoning
-                ? (part.Content ?? string.Empty).TrimEnd()
-                : part.Content;
+            var message = CreateChatMessage(
+                ChatMessageRole.System,
+                ChatMessagePartModel.CreateStatus(content, title));
+            Messages.Add(message);
+            SelectedMessage = message;
         }
 
         private void HydrateToolCallPresentations(ChatMessageModel message)
@@ -971,7 +700,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             }
         }
 
-        private ChatMessageModel CreateChatMessage(ChatMessageRole role, params ChatMessagePartModel[] parts)
+        private static ChatMessageModel CreateChatMessage(ChatMessageRole role, params ChatMessagePartModel[] parts)
         {
             return new ChatMessageModel(role, GetDisplayName(role), GetAvatarPath(role), DateTime.Now, parts);
         }
@@ -1006,21 +735,12 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             var compilationResult = _flowBindingService.CompileBinding(sessionModel.FlowBinding);
             if (compilationResult.IsSuccess)
             {
-                return "绑定的会话流通过了运行时验证。";
+                return "绑定的会话流已通过运行时验证。";
             }
 
-            var firstError = compilationResult.Errors.FirstOrDefault()?.Message;
-            if (!string.IsNullOrWhiteSpace(firstError))
-            {
-                return firstError;
-            }
-
-            return compilationResult.Issues.FirstOrDefault()?.Message ?? "绑定的会话流未通过运行时验证。";
-        }
-
-        private void SeedMessages()
-        {
-            SelectedMessage = Messages.LastOrDefault();
+            return compilationResult.Errors.FirstOrDefault()?.Message
+                ?? compilationResult.Issues.FirstOrDefault()?.Message
+                ?? "绑定的会话流未通过运行时验证。";
         }
     }
 }

@@ -305,8 +305,11 @@ namespace Skyweaver.Services.ChatSession
                 throw CreateExecutionError(compiledNode, errorMessage);
             }
 
+            var agentHistory = request.ConversationHistory
+                .Select(message => message.Clone())
+                .ToList();
             AppendAgentInputToConversationHistory(
-                request,
+                agentHistory,
                 compiledNode,
                 agent,
                 agentInput,
@@ -320,8 +323,9 @@ namespace Skyweaver.Services.ChatSession
                     Agent = agent.DeepClone(),
                     Input = agentInput,
                     InputContentBlocks = agentInputContentBlocks,
-                    History = request.ConversationHistory.ToArray(),
+                    History = agentHistory.ToArray(),
                     ToolContext = BuildToolContext(request),
+                    EnableGemmaThoughtCompatibility = request.EnableGemmaThoughtCompatibility,
                     ToolConfirmationCallback = request.ToolConfirmationCallback,
                     EventSink = (update, ct) => PublishAgentLoopUpdateAsync(
                         request,
@@ -640,13 +644,13 @@ namespace Skyweaver.Services.ChatSession
         }
 
         private static void AppendAgentInputToConversationHistory(
-            SessionFlowExecutionRequest request,
+            IList<LanguageModelChatMessage> conversationHistory,
             SessionFlowCompiledNode compiledNode,
             AgentDefinition agent,
             string agentInput,
             IReadOnlyList<LanguageModelChatContentBlock>? agentInputContentBlocks)
         {
-            ArgumentNullException.ThrowIfNull(request);
+            ArgumentNullException.ThrowIfNull(conversationHistory);
             ArgumentNullException.ThrowIfNull(compiledNode);
             ArgumentNullException.ThrowIfNull(agent);
 
@@ -669,13 +673,13 @@ namespace Skyweaver.Services.ChatSession
                 return;
             }
 
-            if (request.ConversationHistory.Count > 0 &&
-                IsSameUserPayload(request.ConversationHistory[^1], contentBlocks))
+            if (conversationHistory.Count > 0 &&
+                IsSameUserPayload(conversationHistory[^1], contentBlocks))
             {
                 return;
             }
 
-            request.ConversationHistory.Add(new LanguageModelChatMessage(
+            conversationHistory.Add(new LanguageModelChatMessage(
                 LanguageModelChatRole.User,
                 contentBlocks)
             {
@@ -807,7 +811,9 @@ namespace Skyweaver.Services.ChatSession
                     compiledNode,
                     iterationNumber: update.IterationNumber,
                     modelId: update.ModelId,
-                    reasoningDelta: update.ReasoningDelta),
+                    reasoningDelta: update.ReasoningDelta,
+                    reasoningCollapsible: update.IsReasoningCollapsible,
+                    partIndex: update.PartIndex),
                 AgentLoopRuntimeEventKind.AssistantToolCallsReceived => CreateRuntimeEvent(
                     request,
                     ChatSessionRuntimeEventKind.AssistantToolCallsReceived,
@@ -922,6 +928,7 @@ namespace Skyweaver.Services.ChatSession
             string? modelId = null,
             string? textDelta = null,
             string? reasoningDelta = null,
+            bool reasoningCollapsible = true,
             AgentLoopOutputKind? textDeltaOutputKind = null,
             int? partIndex = null,
             int? toolCallIndex = null,
@@ -953,6 +960,7 @@ namespace Skyweaver.Services.ChatSession
                 IsPayloadFromPassdown = isPayloadFromPassdown,
                 TextDelta = textDelta,
                 ReasoningDelta = reasoningDelta,
+                IsReasoningCollapsible = reasoningCollapsible,
                 TextDeltaOutputKind = textDeltaOutputKind,
                 PartIndex = partIndex,
                 ToolCallIndex = toolCallIndex,

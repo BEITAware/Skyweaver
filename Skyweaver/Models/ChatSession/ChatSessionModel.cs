@@ -1,6 +1,3 @@
-using Skyweaver.Controls.ChatSessionControl.Models;
-using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
-
 namespace Skyweaver.Models.ChatSession
 {
     public sealed class ChatSessionModel
@@ -11,23 +8,20 @@ namespace Skyweaver.Models.ChatSession
 
         public string IconPath { get; set; } = "pack://application:,,,/Resources/NewNodeGraphAlt.png";
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 
+        // 会话列表摘要只是 UI 投影，不作为历史事实来源。
         public string ContextSummary { get; set; } = string.Empty;
 
         public string MetadataNote { get; set; } = string.Empty;
 
         public ChatSessionFlowBinding FlowBinding { get; } = new();
 
-        public List<ChatSessionMessageRecordModel> Records { get; } = new();
+        public ChatSessionTranscript Transcript { get; } = new();
 
-        public List<ChatMessageModel> Messages { get; } = new();
-
-        // Legacy/transient projection kept for older code paths. New persistence derives
-        // LLM history from Records instead of saving this list directly.
-        public List<LanguageModelChatMessage> ConversationHistory { get; } = new();
+        public ChatSessionResourceManifest Resources { get; } = new();
 
         public string SessionFolderPath { get; set; } = string.Empty;
 
@@ -40,5 +34,17 @@ namespace Skyweaver.Models.ChatSession
         public string BoundFlowDisplayName => string.IsNullOrWhiteSpace(FlowBinding.GraphName)
             ? "未绑定会话流"
             : FlowBinding.GraphName;
+
+        public DateTime CreatedAt
+        {
+            get => CreatedAtUtc;
+            set => CreatedAtUtc = value.Kind == DateTimeKind.Utc ? value : value.ToUniversalTime();
+        }
+
+        public DateTime UpdatedAt
+        {
+            get => UpdatedAtUtc;
+            set => UpdatedAtUtc = value.Kind == DateTimeKind.Utc ? value : value.ToUniversalTime();
+        }
     }
 }

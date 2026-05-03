@@ -11,7 +11,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
         {
             ResourcePath = resourcePath ?? string.Empty;
             MediaType = string.IsNullOrWhiteSpace(mediaType) ? "image/png" : mediaType.Trim();
-            DisplayName = string.IsNullOrWhiteSpace(displayName) ? "Image" : displayName.Trim();
+            DisplayName = string.IsNullOrWhiteSpace(displayName) ? "图片" : displayName.Trim();
         }
 
         public string ResourcePath { get; }
