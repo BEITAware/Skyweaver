@@ -1,11 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Security;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Skyweaver.Services.SkyweaverTools;
 
 namespace Skyweaver.Tools
@@ -16,7 +10,7 @@ namespace Skyweaver.Tools
 
         private static readonly SkyweaverToolDefinition s_definition = new(
             ToolName,
-            "Reads multiple images and embeds them into the tool return as preserved resources.",
+            "Reads one or more images and embeds the validated image files into the tool return as preserved resources. Paths must point to real decodable image files; missing or invalid files are reported as warnings or failures.",
             "Image",
             [
                 new SkyweaverToolParameterDefinition(
@@ -28,75 +22,75 @@ namespace Skyweaver.Tools
 
         public SkyweaverToolDefinition Definition => s_definition;
 
-        public async Task<SkyweaverToolResult> ExecuteAsync(
+        public Task<SkyweaverToolResult> ExecuteAsync(
             SkyweaverToolContext context,
             SkyweaverToolArguments arguments,
             CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var rawPaths = arguments.GetString("Paths");
             if (string.IsNullOrWhiteSpace(rawPaths))
             {
-                return SkyweaverToolResult.Failure("Paths parameter is required and cannot be empty.");
+                return Task.FromResult(SkyweaverToolResult.Failure(
+                    "Paths parameter is required and cannot be empty.",
+                    BuildData([], ["Paths parameter is required and cannot be empty."])));
             }
 
             var paths = rawPaths.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (paths.Length == 0)
+            {
+                return Task.FromResult(SkyweaverToolResult.Failure(
+                    "At least one image path is required.",
+                    BuildData([], ["At least one image path is required."])));
+            }
+
+            var errors = new List<string>();
+            var validatedImages = ToolImageSupport.ResolveAndValidateImagePaths(
+                paths,
+                context.WorkspacePath,
+                cancellationToken,
+                errors);
+
+            if (validatedImages.Count == 0)
+            {
+                return Task.FromResult(SkyweaverToolResult.Failure(
+                    $"Failed to read any valid images. Errors:{Environment.NewLine}{string.Join(Environment.NewLine, errors)}",
+                    BuildData([], errors)));
+            }
 
             var builder = new StringBuilder();
-            var validPaths = new List<string>();
-            var errors = new List<string>();
-
-            // Concurrency limit is 3
-            var semaphore = new SemaphoreSlim(3);
-            var tasks = paths.Select(async p =>
+            foreach (var image in validatedImages)
             {
-                await semaphore.WaitAsync(cancellationToken);
-                try
-                {
-                    var resolvedPath = ToolFileSystemHelper.ResolvePath(p, context.WorkspacePath);
-                    if (!File.Exists(resolvedPath))
-                    {
-                        return new { Path = p, ResolvedPath = resolvedPath, Error = "File does not exist." };
-                    }
-                    return new { Path = p, ResolvedPath = resolvedPath, Error = (string?)null };
-                }
-                catch (Exception ex)
-                {
-                    return new { Path = p, ResolvedPath = p, Error = ex.Message };
-                }
-                finally
-                {
-                    semaphore.Release();
-                }
-            });
-
-            var results = await Task.WhenAll(tasks);
-
-            foreach (var result in results)
-            {
-                if (result.Error != null)
-                {
-                    errors.Add($"Failed to process path '{result.Path}': {result.Error}");
-                }
-                else
-                {
-                    validPaths.Add(result.ResolvedPath);
-                    builder.AppendLine($"<SkyweaverPreservedContent><Image Path=\"{SecurityElement.Escape(result.ResolvedPath)}\" /></SkyweaverPreservedContent>");
-                }
+                builder.AppendLine($"<SkyweaverPreservedContent><Image Path=\"{SecurityElement.Escape(image.ResolvedPath)}\" /></SkyweaverPreservedContent>");
             }
 
-            if (validPaths.Count == 0)
-            {
-                return SkyweaverToolResult.Failure(
-                    $"Failed to read any images. Errors:\n{string.Join("\n", errors)}");
-            }
-
-            var message = builder.ToString();
             if (errors.Count > 0)
             {
-                message += $"\nNote: Some images could not be read:\n{string.Join("\n", errors)}";
+                builder.AppendLine();
+                builder.AppendLine("Note: Some images could not be read:");
+                foreach (var error in errors)
+                {
+                    builder.AppendLine(error);
+                }
             }
 
-            return SkyweaverToolResult.Success(message);
+            return Task.FromResult(SkyweaverToolResult.Success(
+                builder.ToString().TrimEnd(),
+                BuildData(validatedImages, errors)));
+        }
+
+        private static IReadOnlyDictionary<string, object?> BuildData(
+            IReadOnlyList<ValidatedImagePath> validatedImages,
+            IReadOnlyList<string> errors)
+        {
+            return new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["imageCount"] = validatedImages.Count,
+                ["validatedPaths"] = validatedImages.Select(image => image.ResolvedPath).ToArray(),
+                ["invalidCount"] = errors.Count,
+                ["errors"] = errors.ToArray()
+            };
         }
     }
 }

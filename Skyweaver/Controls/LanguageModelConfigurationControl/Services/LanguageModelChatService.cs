@@ -24,7 +24,8 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             ArgumentNullException.ThrowIfNull(model);
             ArgumentNullException.ThrowIfNull(messages);
 
-            return ResolveAdapter(model).GetResponseAsync(model, messages, cancellationToken);
+            var projectedMessages = LanguageModelChatTransportProjection.ProjectMessages(messages);
+            return ResolveAdapter(model).GetResponseAsync(model, projectedMessages, cancellationToken);
         }
 
         public IAsyncEnumerable<LanguageModelStreamingChatUpdate> GetStreamingResponseAsync(
@@ -35,7 +36,8 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             ArgumentNullException.ThrowIfNull(model);
             ArgumentNullException.ThrowIfNull(messages);
 
-            return ResolveAdapter(model).GetStreamingResponseAsync(model, messages, cancellationToken);
+            var projectedMessages = LanguageModelChatTransportProjection.ProjectMessages(messages);
+            return ResolveAdapter(model).GetStreamingResponseAsync(model, projectedMessages, cancellationToken);
         }
 
         private static ILanguageModelInterfaceAdapter ResolveAdapter(LanguageModelDefinition model)
