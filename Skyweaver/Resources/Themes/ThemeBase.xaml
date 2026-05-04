@@ -122,7 +122,7 @@
         <Setter Property="Background" Value="{StaticResource ParameterPanelHeaderBrush}"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="10,8"/>
-        <Setter Property="CornerRadius" Value="0"/>
+        <Setter Property="CornerRadius" Value="{DynamicResource StandardCornerRadius}"/>
         <Setter Property="Effect">
             <Setter.Value>
                 <DropShadowEffect Color="#20000000" Direction="270" ShadowDepth="1" BlurRadius="3" Opacity="0.5"/>

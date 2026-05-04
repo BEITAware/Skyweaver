@@ -8,6 +8,7 @@
     <Color x:Key="AeroBackgroundColor">#FF1A1F28</Color>
     <Color x:Key="AeroTextColor">#FF2E5C8A</Color>
     <Color x:Key="AeroHighlightColor">#FF0078D7</Color>
+    <Color x:Key="ErrorColor">#FFDC3545</Color>
     <Color x:Key="WindowBackgroundColor">#FFF0F0F0</Color>
     <Color x:Key="WindowForegroundColor">#FF333333</Color>
 
@@ -20,6 +21,7 @@
     <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{DynamicResource WindowBackgroundColor}"/>
     <SolidColorBrush x:Key="WindowForegroundBrush" Color="{DynamicResource WindowForegroundColor}"/>
     <SolidColorBrush x:Key="AeroForegroundBrush" Color="{DynamicResource AeroTextColor}"/>
+    <SolidColorBrush x:Key="ErrorColorBrush" Color="{DynamicResource ErrorColor}"/>
     <SolidColorBrush x:Key="PrimaryForeground" Color="#FFFFFF"/>
 
     <!-- 背景渐变画笔 -->

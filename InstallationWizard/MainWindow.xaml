@@ -9,7 +9,7 @@
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         Icon="Resources/SkyweaverAppLogo.ico"
-        Background="#FF1A1F28"
+        Background="{DynamicResource AeroBackgroundBrush}"
         Style="{DynamicResource AeroWindowStyle}">
 
     <Grid>
@@ -29,7 +29,7 @@
         </Border>
 
         <!-- 右侧内容区域 -->
-        <Grid Grid.Column="1" Background="#FFF0F0F0">
+        <Grid Grid.Column="1" Background="{DynamicResource WindowBackgroundBrush}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
@@ -40,7 +40,7 @@
 
             <!-- 底部按钮区域 -->
             <Border Grid.Row="1"
-                    BorderBrush="#FFCCCCCC"
+                    BorderBrush="{DynamicResource AeroBorderBrush}"
                     BorderThickness="0,1,0,0"
                     Padding="20,15">
                 <Border.Background>
