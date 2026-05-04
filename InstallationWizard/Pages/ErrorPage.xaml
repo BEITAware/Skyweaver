@@ -10,7 +10,7 @@
             <!-- 错误图标和标题 -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,20">
                 <Ellipse Width="60" Height="60" 
-                         Fill="#FFDC3545"
+                         Fill="{DynamicResource ErrorColorBrush}"
                          Margin="0,0,15,0">
                     <Ellipse.Effect>
                         <DropShadowEffect Color="Black" BlurRadius="8" ShadowDepth="2" Opacity="0.3"/>
@@ -42,7 +42,7 @@
             
             <!-- 错误信息 -->
             <Border Background="{DynamicResource AeroBackgroundBrush}" 
-                    BorderBrush="#FFDC3545" 
+                    BorderBrush="{DynamicResource ErrorColorBrush}"
                     BorderThickness="2" 
                     CornerRadius="3" 
                     Padding="15"

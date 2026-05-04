@@ -13,7 +13,7 @@ mc:Ignorable="d"
         Title="Skyweaver Alpha Preview" Height="720" Width="1280"
         MinHeight="576" MinWidth="1024"
         WindowState="Maximized"
-        Icon="pack://application:,,,/Resources/imgpp.png" Background="#FF1A1F28">
+        Icon="pack://application:,,,/Resources/imgpp.png" Background="{DynamicResource AeroBackgroundBrush}">
 
     <DockPanel>
         <!-- Ribbon区域 -->
