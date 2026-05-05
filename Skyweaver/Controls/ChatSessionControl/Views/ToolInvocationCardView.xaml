@@ -7,47 +7,23 @@
              d:DesignHeight="180"
              d:DesignWidth="420">
     <UserControl.Resources>
-        <DrawingBrush x:Key="ToolInvocationCardBackgroundBrush" Stretch="Fill">
-            <DrawingBrush.Drawing>
-                <DrawingGroup>
-                    <DrawingGroup.Children>
-                        <GeometryDrawing Geometry="F1 M 0.160156,0.159668L 1386.16,0.159668L 1386.16,223.646L 0.160156,223.646L 0.160156,0.159668 Z ">
-                            <GeometryDrawing.Brush>
-                                <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                                    <GradientStop Color="#6A253A43" Offset="0"/>
-                                    <GradientStop Color="#5430424B" Offset="0.52"/>
-                                    <GradientStop Color="#42232F36" Offset="1"/>
-                                </LinearGradientBrush>
-                            </GeometryDrawing.Brush>
-                        </GeometryDrawing>
-                        <GeometryDrawing Geometry="F1 M 0.160156,0.159668L 1386.16,0.159668L 1386.16,223.646L 0.160156,223.646L 0.160156,0.159668 Z ">
-                            <GeometryDrawing.Pen>
-                                <Pen Thickness="0.32" LineJoin="Round" Brush="#66172227"/>
-                            </GeometryDrawing.Pen>
-                            <GeometryDrawing.Brush>
-                                <LinearGradientBrush StartPoint="0.10059,1.65236" EndPoint="2.53982,1.65236">
-                                    <LinearGradientBrush.RelativeTransform>
-                                        <TransformGroup>
-                                            <SkewTransform CenterX="0.10059" CenterY="1.65236" AngleX="-59.7491" AngleY="0"/>
-                                            <RotateTransform CenterX="0.10059" CenterY="1.65236" Angle="-70.8836"/>
-                                        </TransformGroup>
-                                    </LinearGradientBrush.RelativeTransform>
-                                    <GradientStop Color="#3BFFFFFF" Offset="0"/>
-                                    <GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>
-                                    <GradientStop Color="#07FFFFFF" Offset="0.109195"/>
-                                    <GradientStop Color="#04FFFFFF" Offset="0.298851"/>
-                                    <GradientStop Color="#3AFFFFFF" Offset="0.327586"/>
-                                    <GradientStop Color="#1AFFFFFF" Offset="0.465517"/>
-                                    <GradientStop Color="#14FFFFFF" Offset="0.591954"/>
-                                    <GradientStop Color="#05FFFFFF" Offset="0.758621"/>
-                                    <GradientStop Color="#44FFFFFF" Offset="1"/>
-                                </LinearGradientBrush>
-                            </GeometryDrawing.Brush>
-                        </GeometryDrawing>
-                    </DrawingGroup.Children>
-                </DrawingGroup>
-            </DrawingBrush.Drawing>
-        </DrawingBrush>
+        <LinearGradientBrush x:Key="ToolInvocationCardBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#72354954" Offset="0"/>
+            <GradientStop Color="#60324451" Offset="0.38"/>
+            <GradientStop Color="#4A20303C" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="ToolInvocationCardTopSheenBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#54FFFFFF" Offset="0"/>
+            <GradientStop Color="#18FFFFFF" Offset="0.45"/>
+            <GradientStop Color="#00FFFFFF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="ToolInvocationCardBottomGlowBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#0019D2FF" Offset="0"/>
+            <GradientStop Color="#1223C8E7" Offset="0.42"/>
+            <GradientStop Color="#3838C4D8" Offset="1"/>
+        </LinearGradientBrush>
 
         <LinearGradientBrush x:Key="ToolInvocationFieldIdleBrush"
                              StartPoint="0.438,5.527"
@@ -77,13 +53,27 @@
         </Style>
     </UserControl.Resources>
 
-    <Border Padding="12"
-            CornerRadius="2,2,2,2"
+    <Border CornerRadius="4"
             Background="{StaticResource ToolInvocationCardBackgroundBrush}"
-            BorderBrush="#0036D9D1"
+            BorderBrush="#365F7E8E"
             BorderThickness="1"
             SnapsToDevicePixels="True">
-        <StackPanel>
+        <Grid>
+            <Border Height="40"
+                    Margin="1"
+                    VerticalAlignment="Top"
+                    CornerRadius="3,3,2,2"
+                    Background="{StaticResource ToolInvocationCardTopSheenBrush}"
+                    IsHitTestVisible="False"
+                    Opacity="0.74"/>
+            <Border Height="18"
+                    Margin="1"
+                    VerticalAlignment="Bottom"
+                    CornerRadius="0,0,3,3"
+                    Background="{StaticResource ToolInvocationCardBottomGlowBrush}"
+                    IsHitTestVisible="False"
+                    Opacity="0.88"/>
+            <StackPanel Margin="12">
             <Grid Margin="0,0,0,8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="40"/>
@@ -311,6 +301,7 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-        </StackPanel>
+            </StackPanel>
+        </Grid>
     </Border>
 </UserControl>
