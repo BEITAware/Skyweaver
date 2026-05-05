@@ -18,8 +18,6 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels
 
         public string DisplayName => PageInfo.DisplayName;
 
-        public string Description => PageInfo.Description;
-
         public bool IsSelected
         {
             get => _isSelected;

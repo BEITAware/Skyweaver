@@ -12,6 +12,7 @@ using Skyweaver.Infrastructure.Mvvm;
 using Skyweaver.Models.ChatSession;
 using Skyweaver.Services.AgentLoop;
 using Skyweaver.Services.ChatSession;
+using Skyweaver.Services;
 
 namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 {
@@ -135,6 +136,14 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
         public ICommand RemoveMessageCommand { get; }
 
+        public ICommand CopyMessageCommand { get; }
+
+        public ICommand CopyMessageAsMarkdownCommand { get; }
+
+        public ICommand CopyMessageAsPlainTextCommand { get; }
+
+        public ICommand EditMessageCommand { get; }
+
         public ICommand ClearMessagesCommand { get; }
 
         public ICommand RemoveComposerImageCommand { get; }
@@ -167,6 +176,16 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             CancelExecutionCommand = new RelayCommand(CancelExecution, () => CanCancelExecution);
             RemoveSelectedMessageCommand = new RelayCommand(RemoveSelectedMessage, () => SelectedMessage != null && !IsExecutionActive);
             RemoveMessageCommand = new RelayCommand<ChatMessageModel>(RemoveMessage, message => message != null && !IsExecutionActive);
+            CopyMessageCommand = new RelayCommand<ChatMessageModel>(
+                message => CopyMessageToClipboard(message, ChatMessageCopyFormat.Full),
+                message => message != null);
+            CopyMessageAsMarkdownCommand = new RelayCommand<ChatMessageModel>(
+                message => CopyMessageToClipboard(message, ChatMessageCopyFormat.Markdown),
+                message => message != null);
+            CopyMessageAsPlainTextCommand = new RelayCommand<ChatMessageModel>(
+                message => CopyMessageToClipboard(message, ChatMessageCopyFormat.PlainText),
+                message => message != null);
+            EditMessageCommand = new RelayCommand<ChatMessageModel>(ShowEditMessagePlaceholder, message => message != null);
             ClearMessagesCommand = new RelayCommand(ClearMessages, () => Messages.Count > 0 && !IsExecutionActive);
             RemoveComposerImageCommand = new RelayCommand<ChatComposerAttachmentModel>(
                 RemoveComposerImage,
@@ -373,13 +392,22 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
         private void AddClipboard()
         {
-            if (Clipboard.ContainsImage())
+            if (ClipboardAccessService.TryGetImage(out var image, out var imageError))
             {
-                AddPastedImage(Clipboard.GetImage());
+                AddPastedImage(image);
+                return;
             }
-            else if (Clipboard.ContainsText())
+
+            if (ClipboardAccessService.TryGetText(out var clipboardText, out var textError))
             {
-                DraftMessageText += Clipboard.GetText();
+                DraftMessageText += clipboardText;
+                return;
+            }
+
+            var errorMessage = imageError ?? textError;
+            if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                AddSystemStatusMessage(errorMessage, "读取剪贴板失败");
             }
         }
 
@@ -464,6 +492,42 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         private void RemoveSelectedMessage()
         {
             RemoveMessage(SelectedMessage);
+        }
+
+        private void CopyMessageToClipboard(ChatMessageModel? message, ChatMessageCopyFormat format)
+        {
+            if (message == null)
+            {
+                return;
+            }
+
+            var exportText = ChatMessageClipboardExporter.Build(message, format);
+            if (ClipboardAccessService.TrySetText(exportText, out var errorMessage))
+            {
+                return;
+            }
+
+            MessageBox.Show(
+                Application.Current?.MainWindow,
+                errorMessage ?? "无法写入系统剪贴板。",
+                "复制失败",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
+
+        private static void ShowEditMessagePlaceholder(ChatMessageModel? message)
+        {
+            if (message == null)
+            {
+                return;
+            }
+
+            MessageBox.Show(
+                Application.Current?.MainWindow,
+                "消息编辑功能尚未实现，这里先保留入口位。",
+                "编辑消息",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
         }
 
         private void RemoveMessage(ChatMessageModel? message)
@@ -667,6 +731,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             target.ToolCallId = source.ToolCallId;
             target.CallerAgentId = source.CallerAgentId;
             target.ResourcePath = source.ResourcePath;
+            target.PresentationKind = source.PresentationKind;
             target.IsUserVisible = source.IsUserVisible;
             target.IsCollapsible = source.IsCollapsible;
             target.IsStreaming = source.IsStreaming;

@@ -372,7 +372,7 @@ namespace Skyweaver.Services.LateralFileSystem
         {
             if (string.IsNullOrWhiteSpace(_configuration.WorkingRootDirectory))
             {
-                throw new InvalidOperationException("请先在“侧向文件系统配置”页面设置工作根目录。");
+                throw new InvalidOperationException("请先在首选项中的“侧向文件系统”页设置工作根目录。");
             }
 
             return _configuration.WorkingRootDirectory;

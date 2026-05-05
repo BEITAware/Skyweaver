@@ -13,6 +13,7 @@ using Skyweaver.Controls.AgentConfigurationControl.Services;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Models;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services;
 using Skyweaver.Services.SkyweaverTools;
 
 namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
@@ -101,7 +102,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             RemoveInputNodeCommand = new RelayCommand(RemoveSelectedInputNode, () => SelectedInputNode != null && !SelectedInputNode.IsRoot);
             RemoveOutputNodeCommand = new RelayCommand(RemoveSelectedOutputNode, () => SelectedOutputNode != null && !SelectedOutputNode.IsRoot);
             BuildPromptPreviewCommand = new RelayCommand(BuildPromptPreview, () => SelectedAgent != null);
-            CopyPromptPreviewCommand = new RelayCommand(CopyPromptPreview, () => !string.IsNullOrWhiteSpace(PromptBuildResult));
+            CopyPromptPreviewCommand = new RelayCommand(CopyPromptPreviewSafe, () => !string.IsNullOrWhiteSpace(PromptBuildResult));
 
             Agents.CollectionChanged += OnAgentsCollectionChanged;
             PermissionModes = new[]
@@ -463,6 +464,9 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
 
         private void CopyPromptPreview()
         {
+            CopyPromptPreviewSafe();
+            return;
+
             if (string.IsNullOrWhiteSpace(PromptBuildResult))
             {
                 return;
@@ -479,6 +483,24 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                 HasPromptBuildError = true;
                 PromptBuildStatusMessage = $"复制提示词失败：{ex.Message}";
             }
+        }
+
+        private void CopyPromptPreviewSafe()
+        {
+            if (string.IsNullOrWhiteSpace(PromptBuildResult))
+            {
+                return;
+            }
+
+            if (ClipboardAccessService.TrySetText(PromptBuildResult, out var errorMessage))
+            {
+                HasPromptBuildError = false;
+                PromptBuildStatusMessage = "提示词已复制到剪贴板。";
+                return;
+            }
+
+            HasPromptBuildError = true;
+            PromptBuildStatusMessage = $"复制提示词失败：{errorMessage}";
         }
 
         private void AddInputRootNode()
