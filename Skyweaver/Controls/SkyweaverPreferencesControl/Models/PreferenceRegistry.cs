@@ -14,20 +14,20 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.Models
             {
                 new()
                 {
-                    Id = "workbench-shell",
-                    DisplayName = "Workbench and UI",
+                    Id = "files-system",
+                    DisplayName = "文件与系统",
                     IsExpanded = true
                 },
                 new()
                 {
-                    Id = "session-agents",
-                    DisplayName = "Sessions and Agents",
+                    Id = "presentation-ui",
+                    DisplayName = "呈现与界面",
                     IsExpanded = true
                 },
                 new()
                 {
-                    Id = "system-diagnostics",
-                    DisplayName = "System and Diagnostics",
+                    Id = "about-skyweaver",
+                    DisplayName = "关于Skyweaver",
                     IsExpanded = true
                 }
             };

@@ -9,8 +9,6 @@ using Skyweaver.Controls.FileManagerControl.ViewModels;
 using Skyweaver.Controls.FileManagerControl.Views;
 using Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Views;
-using Skyweaver.Controls.LateralFileSystemConfigurationControl.ViewModels;
-using Skyweaver.Controls.LateralFileSystemConfigurationControl.Views;
 using Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels;
 using Skyweaver.Controls.LateralFileSystemTreeControl.Views;
 using Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels;
@@ -78,13 +76,12 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
             return CanCreateTabByType(typeKey);
         }
 
-        private static class TabTypes
+        public static class TabTypes
         {
             public const string SkyweaverPreferences = "skyweaver-preferences";
             public const string WorkflowEditor = "session-flow-editor";
             public const string FileManager = "file-manager";
             public const string LateralFileSystemTree = "lateral-file-system-tree";
-            public const string LateralFileSystemConfiguration = "lateral-file-system-configuration";
             public const string LanguageModelConfiguration = "language-model-configuration";
             public const string ToolConfiguration = "tool-configuration";
             public const string AgentConfiguration = "agent-configuration";
@@ -131,15 +128,6 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
                     IconPath = "pack://application:,,,/Resources/ResourcesLibrary.png",
                     MaxCount = 2,
                     ContentFactory = CreateLateralFileSystemTreeView
-                },
-                new()
-                {
-                    TypeKey = TabTypes.LateralFileSystemConfiguration,
-                    Title = "侧向文件系统配置",
-                    Description = "配置侧向文件系统树的数据来源、筛选规则与显示行为。",
-                    IconPath = "pack://application:,,,/Resources/ResourcesLibrary.png",
-                    MaxCount = 1,
-                    ContentFactory = _ => CreateLateralFileSystemConfigurationView()
                 },
                 new()
                 {
@@ -197,6 +185,11 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
             }
 
             return OpenedTabs.Count(tab => tab.TabTypeKey == typeKey) < definition.MaxCount;
+        }
+
+        public void OpenOrActivateTab(string typeKey)
+        {
+            CreateTabByType(typeKey);
         }
 
         private void CreateTabByType(string? typeKey)
@@ -271,11 +264,11 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
             RefreshTypeNumbering(document.TabTypeKey);
         }
 
-        private static SkyweaverPreferencesControl CreateSkyweaverPreferencesView()
+        private SkyweaverPreferencesControl CreateSkyweaverPreferencesView()
         {
             return new SkyweaverPreferencesControl
             {
-                DataContext = new SkyweaverPreferencesControlViewModel()
+                DataContext = new SkyweaverPreferencesControlViewModel(OpenOrActivateTab)
             };
         }
 
@@ -301,14 +294,6 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
             return new LateralFileSystemTreeControl
             {
                 DataContext = new LateralFileSystemTreeControlViewModel(instanceNumber)
-            };
-        }
-
-        private static LateralFileSystemConfigurationControl CreateLateralFileSystemConfigurationView()
-        {
-            return new LateralFileSystemConfigurationControl
-            {
-                DataContext = new LateralFileSystemConfigurationControlViewModel()
             };
         }
 

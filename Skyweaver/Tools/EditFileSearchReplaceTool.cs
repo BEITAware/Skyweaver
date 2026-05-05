@@ -125,8 +125,9 @@ namespace Skyweaver.Tools
                 await File.WriteAllBytesAsync(targetPath.ResolvedPath, updatedBytes, cancellationToken).ConfigureAwait(false);
 
                 return SkyweaverToolResult.Success(
-                    BuildSuccessContent(targetPath, settings, encodingDecision, occurrenceCount, originalBytes.LongLength, updatedBytes.LongLength),
-                    BuildData(targetPath, settings, encodingDecision, originalBytes.LongLength, originalContent.Length, occurrenceCount, updatedBytes.LongLength, didWrite: true));
+                    SkyweaverLineDiffPresentation.BuildContent(originalContent, updatedContent),
+                    BuildData(targetPath, settings, encodingDecision, originalBytes.LongLength, originalContent.Length, occurrenceCount, updatedBytes.LongLength, didWrite: true),
+                    SkyweaverToolResultPresentationHints.CreateLineDiff());
             }
             catch (OperationCanceledException)
             {

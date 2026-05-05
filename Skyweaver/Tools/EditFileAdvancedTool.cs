@@ -143,15 +143,7 @@ namespace Skyweaver.Tools
                 await File.WriteAllBytesAsync(targetPath.ResolvedPath, updatedBytes, cancellationToken).ConfigureAwait(false);
 
                 return SkyweaverToolResult.Success(
-                    BuildSuccessContent(
-                        targetPath,
-                        settings,
-                        encodingDecision,
-                        originalBytes.LongLength,
-                        updatedBytes.LongLength,
-                        originalContent.Length,
-                        currentContent.Length,
-                        blockResults),
+                    SkyweaverLineDiffPresentation.BuildContent(originalContent, currentContent),
                     BuildData(
                         targetPath,
                         settings,
@@ -162,7 +154,8 @@ namespace Skyweaver.Tools
                         currentContent.Length,
                         blockResults.Count,
                         didWrite: true,
-                        blockSummaries: blockResults.Select(item => item.Summary).ToArray()));
+                        blockSummaries: blockResults.Select(item => item.Summary).ToArray()),
+                    SkyweaverToolResultPresentationHints.CreateLineDiff());
             }
             catch (OperationCanceledException)
             {

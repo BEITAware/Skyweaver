@@ -16,7 +16,7 @@ namespace Skyweaver.Controls.LateralFileSystemConfigurationControl.ViewModels
         private string _statusMessage = "配置已加载。";
         private bool _isLoading;
 
-        public string Title { get; } = "侧向文件系统配置";
+        public string Title { get; } = "侧向文件系统";
 
         public string Description { get; } = "配置侧向文件系统是否启用，以及所有虚拟化根共享的工作根目录。";
 

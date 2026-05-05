@@ -16,6 +16,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
         private string? _toolCallId;
         private string? _callerAgentId;
         private string? _resourcePath;
+        private string? _presentationKind;
         private bool _isStreaming;
         private bool _isUserVisible;
         private bool _isCollapsible;
@@ -29,7 +30,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
             {
                 if (SetProperty(ref _partType, value))
                 {
-                    RebuildStructuredXmlNodes();
+                    RebuildDerivedPresentationState();
                 }
             }
         }
@@ -43,7 +44,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
                 {
                     if (!IsStreaming)
                     {
-                        RebuildStructuredXmlNodes();
+                        RebuildDerivedPresentationState();
                     }
                 }
             }
@@ -62,7 +63,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
             {
                 if (SetProperty(ref _isStreaming, value) && !value)
                 {
-                    RebuildStructuredXmlNodes();
+                    RebuildDerivedPresentationState();
                 }
             }
         }
@@ -109,9 +110,25 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
             set => SetProperty(ref _resourcePath, NormalizeMetadataValue(value));
         }
 
+        public string? PresentationKind
+        {
+            get => _presentationKind;
+            set
+            {
+                if (SetProperty(ref _presentationKind, NormalizeMetadataValue(value)) && !IsStreaming)
+                {
+                    RebuildDerivedPresentationState();
+                }
+            }
+        }
+
         public ObservableCollection<ChatStructuredXmlNodeModel> StructuredXmlNodes { get; } = new();
 
         public bool HasStructuredXmlNodes => StructuredXmlNodes.Count > 0;
+
+        public ObservableCollection<ChatToolOutputDiffLineModel> ToolOutputDiffLines { get; } = new();
+
+        public bool HasToolOutputDiffLines => ToolOutputDiffLines.Count > 0;
 
         public SkyweaverToolInvocationPresentationState? ToolPresentationState
         {
@@ -150,9 +167,10 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
             _callerAgentId = NormalizeMetadataValue(callerAgentId);
             _resourcePath = NormalizeMetadataValue(resourcePath);
             StructuredXmlNodes.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasStructuredXmlNodes));
+            ToolOutputDiffLines.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasToolOutputDiffLines));
             if (!_isStreaming)
             {
-                RebuildStructuredXmlNodes();
+                RebuildDerivedPresentationState();
             }
         }
 
@@ -268,6 +286,39 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
             {
                 // Keep the raw text visible even when XML is incomplete or malformed.
             }
+        }
+
+        private void RebuildToolOutputDiffLines()
+        {
+            ToolOutputDiffLines.Clear();
+
+            if (PartType != ChatMessagePartType.ToolOutput ||
+                !string.Equals(PresentationKind, SkyweaverToolResultPresentationKinds.LineDiffV1, StringComparison.OrdinalIgnoreCase) ||
+                !SkyweaverLineDiffPresentation.TryParseToolOutputXml(Content, out var diffEntries))
+            {
+                return;
+            }
+
+            foreach (var entry in diffEntries)
+            {
+                ToolOutputDiffLines.Add(new ChatToolOutputDiffLineModel(
+                    entry.LineNumberText,
+                    entry.Marker,
+                    entry.Text,
+                    entry.Kind switch
+                    {
+                        SkyweaverLineDiffEntryKind.Added => ChatToolOutputDiffLineKind.Added,
+                        SkyweaverLineDiffEntryKind.Removed => ChatToolOutputDiffLineKind.Removed,
+                        SkyweaverLineDiffEntryKind.Separator => ChatToolOutputDiffLineKind.Separator,
+                        _ => ChatToolOutputDiffLineKind.Anchor
+                    }));
+            }
+        }
+
+        private void RebuildDerivedPresentationState()
+        {
+            RebuildStructuredXmlNodes();
+            RebuildToolOutputDiffLines();
         }
 
         private static ChatStructuredXmlNodeModel CreateXmlNode(XElement element)

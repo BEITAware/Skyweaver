@@ -8,6 +8,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
         private static readonly Regex HeadingPattern = new(@"^\s*(#{1,6})\s+(.*)$", RegexOptions.Compiled);
         private static readonly Regex UnorderedListPattern = new(@"^\s*[-+*]\s+(.*)$", RegexOptions.Compiled);
         private static readonly Regex OrderedListPattern = new(@"^\s*(\d+)\.\s+(.*)$", RegexOptions.Compiled);
+        private static readonly Regex TableDelimiterCellPattern = new(@"^\s*:?-{3,}:?\s*$", RegexOptions.Compiled);
 
         public static IReadOnlyList<MarkdownBlock> Parse(string? markdown)
         {
@@ -44,6 +45,18 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                 {
                     FlushParagraph(blocks, paragraphLines);
                     blocks.Add(mathBlock);
+                    continue;
+                }
+
+                if (TryParseTable(lines, ref index, out var tableBlock, out var leadingText))
+                {
+                    if (!string.IsNullOrWhiteSpace(leadingText))
+                    {
+                        paragraphLines.Add(leadingText);
+                    }
+
+                    FlushParagraph(blocks, paragraphLines);
+                    blocks.Add(tableBlock);
                     continue;
                 }
 
@@ -209,6 +222,57 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             }
 
             block = new MarkdownQuoteBlock(ParseInlines(string.Join("\n", quoteLines).TrimEnd()));
+            return true;
+        }
+
+        private static bool TryParseTable(
+            string[] lines,
+            ref int index,
+            out MarkdownTableBlock block,
+            out string leadingText)
+        {
+            leadingText = string.Empty;
+            var headerLine = lines[index];
+            if (!LooksLikeTableRow(headerLine))
+            {
+                block = null!;
+                return false;
+            }
+
+            IReadOnlyList<string> headerCells;
+            var rowStartIndex = index + 1;
+            if (index + 1 < lines.Length &&
+                TryParseTableDelimiter(lines[index + 1], out var delimiterColumnCount) &&
+                TryResolveTableHeader(headerLine, delimiterColumnCount, out leadingText, out headerCells))
+            {
+                rowStartIndex = index + 2;
+            }
+            else if (TryResolveCombinedTableHeader(headerLine, out leadingText, out headerCells))
+            {
+                rowStartIndex = index + 1;
+            }
+            else
+            {
+                block = null!;
+                return false;
+            }
+
+            var columns = new List<MarkdownTableColumn>(headerCells.Count);
+            foreach (var headerCell in headerCells)
+            {
+                columns.Add(new MarkdownTableColumn(headerCell));
+            }
+
+            var rows = new List<MarkdownTableRow>();
+            index = rowStartIndex;
+            while (index < lines.Length && LooksLikeTableRow(lines[index]))
+            {
+                var rowCells = NormalizeTableCells(SplitTableCells(lines[index]), columns.Count);
+                rows.Add(new MarkdownTableRow(rowCells));
+                index++;
+            }
+
+            block = new MarkdownTableBlock(columns, rows);
             return true;
         }
 
@@ -512,6 +576,207 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                    string.Compare(text, index, value, 0, value.Length, StringComparison.Ordinal) == 0;
         }
 
+        private static bool LooksLikeTableRow(string line)
+        {
+            return CountUnescapedPipes(line) > 0;
+        }
+
+        private static bool TryParseTableDelimiter(string line, out int columnCount)
+        {
+            var cells = SplitTableCells(line);
+            if (cells.Count == 0)
+            {
+                columnCount = 0;
+                return false;
+            }
+
+            foreach (var cell in cells)
+            {
+                if (!TableDelimiterCellPattern.IsMatch(cell))
+                {
+                    columnCount = 0;
+                    return false;
+                }
+            }
+
+            columnCount = cells.Count;
+            return true;
+        }
+
+        private static bool TryResolveTableHeader(
+            string headerLine,
+            int delimiterColumnCount,
+            out string leadingText,
+            out IReadOnlyList<string> headerCells)
+        {
+            leadingText = string.Empty;
+
+            var fullHeaderCells = SplitTableCells(headerLine);
+            if (fullHeaderCells.Count == delimiterColumnCount)
+            {
+                headerCells = fullHeaderCells;
+                return true;
+            }
+
+            var firstPipeIndex = FindFirstUnescapedPipe(headerLine);
+            if (firstPipeIndex <= 0)
+            {
+                headerCells = Array.Empty<string>();
+                return false;
+            }
+
+            var candidateLeadingText = headerLine[..firstPipeIndex].TrimEnd();
+            var candidateHeaderCells = SplitTableCells(headerLine[firstPipeIndex..]);
+            if (candidateLeadingText.Length == 0 || candidateHeaderCells.Count != delimiterColumnCount)
+            {
+                headerCells = Array.Empty<string>();
+                return false;
+            }
+
+            leadingText = candidateLeadingText;
+            headerCells = candidateHeaderCells;
+            return true;
+        }
+
+        private static bool TryResolveCombinedTableHeader(
+            string headerLine,
+            out string leadingText,
+            out IReadOnlyList<string> headerCells)
+        {
+            leadingText = string.Empty;
+            if (TryResolveCombinedTableHeaderCore(headerLine, out headerCells))
+            {
+                return true;
+            }
+
+            var firstPipeIndex = FindFirstUnescapedPipe(headerLine);
+            if (firstPipeIndex <= 0)
+            {
+                headerCells = Array.Empty<string>();
+                return false;
+            }
+
+            var candidateLeadingText = headerLine[..firstPipeIndex].TrimEnd();
+            if (candidateLeadingText.Length == 0 ||
+                !TryResolveCombinedTableHeaderCore(headerLine[firstPipeIndex..], out headerCells))
+            {
+                headerCells = Array.Empty<string>();
+                return false;
+            }
+
+            leadingText = candidateLeadingText;
+            return true;
+        }
+
+        private static bool TryResolveCombinedTableHeaderCore(
+            string tableLine,
+            out IReadOnlyList<string> headerCells)
+        {
+            var cells = SplitTableCells(tableLine);
+            if (cells.Count < 4 || cells.Count % 2 != 0)
+            {
+                headerCells = Array.Empty<string>();
+                return false;
+            }
+
+            var headerCount = cells.Count / 2;
+            for (var cellIndex = headerCount; cellIndex < cells.Count; cellIndex++)
+            {
+                if (!TableDelimiterCellPattern.IsMatch(cells[cellIndex]))
+                {
+                    headerCells = Array.Empty<string>();
+                    return false;
+                }
+            }
+
+            headerCells = cells.Take(headerCount).ToArray();
+            return true;
+        }
+
+        private static IReadOnlyList<string> SplitTableCells(string line)
+        {
+            var trimmedLine = line.Trim();
+            if (trimmedLine.Length == 0)
+            {
+                return Array.Empty<string>();
+            }
+
+            if (trimmedLine.StartsWith("|", StringComparison.Ordinal))
+            {
+                trimmedLine = trimmedLine[1..];
+            }
+
+            if (trimmedLine.EndsWith("|", StringComparison.Ordinal))
+            {
+                trimmedLine = trimmedLine[..^1];
+            }
+
+            var cells = new List<string>();
+            var builder = new StringBuilder();
+            for (var charIndex = 0; charIndex < trimmedLine.Length; charIndex++)
+            {
+                var character = trimmedLine[charIndex];
+                if (character == '\\' &&
+                    charIndex + 1 < trimmedLine.Length &&
+                    trimmedLine[charIndex + 1] == '|')
+                {
+                    builder.Append('|');
+                    charIndex++;
+                    continue;
+                }
+
+                if (character == '|')
+                {
+                    cells.Add(builder.ToString().Trim());
+                    builder.Clear();
+                    continue;
+                }
+
+                builder.Append(character);
+            }
+
+            cells.Add(builder.ToString().Trim());
+            return cells;
+        }
+
+        private static IReadOnlyList<string> NormalizeTableCells(IReadOnlyList<string> cells, int columnCount)
+        {
+            var normalized = new string[columnCount];
+            for (var columnIndex = 0; columnIndex < columnCount; columnIndex++)
+            {
+                normalized[columnIndex] = columnIndex < cells.Count ? cells[columnIndex] : string.Empty;
+            }
+
+            return normalized;
+        }
+
+        private static int CountUnescapedPipes(string text)
+        {
+            var count = 0;
+            for (var index = 0; index < text.Length; index++)
+            {
+                if (text[index] == '|' && (index == 0 || text[index - 1] != '\\'))
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        private static int FindFirstUnescapedPipe(string text)
+        {
+            for (var index = 0; index < text.Length; index++)
+            {
+                if (text[index] == '|' && (index == 0 || text[index - 1] != '\\'))
+                {
+                    return index;
+                }
+            }
+
+            return -1;
+        }
+
         private static string NormalizeNewlines(string value)
         {
             return value
@@ -595,6 +860,19 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
         public string Content { get; }
     }
 
+    internal sealed class MarkdownTableBlock : MarkdownBlock
+    {
+        public MarkdownTableBlock(IReadOnlyList<MarkdownTableColumn> columns, IReadOnlyList<MarkdownTableRow> rows)
+        {
+            Columns = columns ?? throw new ArgumentNullException(nameof(columns));
+            Rows = rows ?? throw new ArgumentNullException(nameof(rows));
+        }
+
+        public IReadOnlyList<MarkdownTableColumn> Columns { get; }
+
+        public IReadOnlyList<MarkdownTableRow> Rows { get; }
+    }
+
     internal sealed class MarkdownListItem
     {
         public MarkdownListItem(string marker, IReadOnlyList<MarkdownInline> inlines)
@@ -606,6 +884,35 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
         public string Marker { get; }
 
         public IReadOnlyList<MarkdownInline> Inlines { get; }
+    }
+
+    internal sealed class MarkdownTableColumn
+    {
+        public MarkdownTableColumn(string header)
+        {
+            Header = header ?? string.Empty;
+        }
+
+        public string Header { get; }
+    }
+
+    internal sealed class MarkdownTableRow
+    {
+        public MarkdownTableRow(IReadOnlyList<string> cells)
+        {
+            Cells = cells ?? throw new ArgumentNullException(nameof(cells));
+        }
+
+        public IReadOnlyList<string> Cells { get; }
+
+        public string this[int columnIndex] => GetCell(columnIndex);
+
+        public string GetCell(int columnIndex)
+        {
+            return columnIndex >= 0 && columnIndex < Cells.Count
+                ? Cells[columnIndex]
+                : string.Empty;
+        }
     }
 
     internal abstract class MarkdownInline

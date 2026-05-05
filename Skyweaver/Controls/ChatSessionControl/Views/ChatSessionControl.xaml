@@ -197,16 +197,150 @@
             </Setter>
         </Style>
 
-        <Style x:Key="ChatDeleteButtonStyle" TargetType="Button">
-            <Setter Property="Padding" Value="8,2"/>
-            <Setter Property="Margin" Value="10,0,0,0"/>
-            <Setter Property="MinWidth" Value="54"/>
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Foreground" Value="#FFD8FBFF"/>
-            <Setter Property="Background" Value="#33000000"/>
-            <Setter Property="BorderBrush" Value="#4496FCFF"/>
-            <Setter Property="BorderThickness" Value="1"/>
+        <Style x:Key="ChatMessageContextMenuItemStyle"
+               TargetType="MenuItem"
+               BasedOn="{StaticResource AnimatedMenuItemStyle}">
+            <Setter Property="MinWidth" Value="360"/>
         </Style>
+
+        <Style x:Key="ChatMessageContextMenuNameTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FFF5FEFF"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+
+        <Style x:Key="ChatMessageContextMenuDescriptionTextStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,2,0,0"/>
+            <Setter Property="Width" Value="248"/>
+            <Setter Property="Foreground" Value="#B9E8FAFF"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+
+        <Style x:Key="ChatMessageContextMenuIconBadgeStyle" TargetType="Border">
+            <Setter Property="Width" Value="20"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="#55283A4D"/>
+            <Setter Property="BorderBrush" Value="#8896FCFF"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="ChatMessageContextMenuIconTextStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="8"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#FFF4FEFF"/>
+        </Style>
+
+        <ContextMenu x:Key="ChatMessageContextMenu"
+                     x:Shared="False"
+                     Style="{DynamicResource AnimatedContextMenuStyle}"
+                     DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+            <MenuItem Style="{StaticResource ChatMessageContextMenuItemStyle}"
+                      Command="{Binding PlacementTarget.Tag.RemoveMessageCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                      CommandParameter="{Binding}">
+                <MenuItem.Icon>
+                    <Border Style="{StaticResource ChatMessageContextMenuIconBadgeStyle}"
+                            Background="#66321418"
+                            BorderBrush="#99FFB1B1">
+                        <TextBlock Text="DEL"
+                                   Style="{StaticResource ChatMessageContextMenuIconTextStyle}"
+                                   Foreground="#FFFFD4D4"/>
+                    </Border>
+                </MenuItem.Icon>
+                <MenuItem.Header>
+                    <StackPanel Margin="0,2">
+                        <TextBlock Text="删除" Style="{StaticResource ChatMessageContextMenuNameTextStyle}"/>
+                        <TextBlock Text="删除这条消息，不可恢复，不再进入代理的上下文。"
+                                   Style="{StaticResource ChatMessageContextMenuDescriptionTextStyle}"/>
+                    </StackPanel>
+                </MenuItem.Header>
+            </MenuItem>
+
+            <MenuItem Style="{StaticResource ChatMessageContextMenuItemStyle}"
+                      Command="{Binding PlacementTarget.Tag.CopyMessageCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                      CommandParameter="{Binding}">
+                <MenuItem.Icon>
+                    <Border Style="{StaticResource ChatMessageContextMenuIconBadgeStyle}">
+                        <TextBlock Text="CPY" Style="{StaticResource ChatMessageContextMenuIconTextStyle}"/>
+                    </Border>
+                </MenuItem.Icon>
+                <MenuItem.Header>
+                    <StackPanel Margin="0,2">
+                        <TextBlock Text="复制" Style="{StaticResource ChatMessageContextMenuNameTextStyle}"/>
+                        <TextBlock Text="复制当前消息，包含 Markdown 格式与工具调用。"
+                                   Style="{StaticResource ChatMessageContextMenuDescriptionTextStyle}"/>
+                    </StackPanel>
+                </MenuItem.Header>
+            </MenuItem>
+
+            <MenuItem Style="{StaticResource ChatMessageContextMenuItemStyle}"
+                      Command="{Binding PlacementTarget.Tag.CopyMessageAsMarkdownCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                      CommandParameter="{Binding}">
+                <MenuItem.Icon>
+                    <Border Style="{StaticResource ChatMessageContextMenuIconBadgeStyle}"
+                            Background="#55342452"
+                            BorderBrush="#9989C6FF">
+                        <TextBlock Text="MD"
+                                   Style="{StaticResource ChatMessageContextMenuIconTextStyle}"
+                                   Foreground="#FFE7DDFF"/>
+                    </Border>
+                </MenuItem.Icon>
+                <MenuItem.Header>
+                    <StackPanel Margin="0,2">
+                        <TextBlock Text="复制为 Markdown" Style="{StaticResource ChatMessageContextMenuNameTextStyle}"/>
+                        <TextBlock Text="复制当前消息，移除工具调用。"
+                                   Style="{StaticResource ChatMessageContextMenuDescriptionTextStyle}"/>
+                    </StackPanel>
+                </MenuItem.Header>
+            </MenuItem>
+
+            <MenuItem Style="{StaticResource ChatMessageContextMenuItemStyle}"
+                      Command="{Binding PlacementTarget.Tag.CopyMessageAsPlainTextCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                      CommandParameter="{Binding}">
+                <MenuItem.Icon>
+                    <Border Style="{StaticResource ChatMessageContextMenuIconBadgeStyle}"
+                            Background="#55322E12"
+                            BorderBrush="#99FFD982">
+                        <TextBlock Text="TXT"
+                                   Style="{StaticResource ChatMessageContextMenuIconTextStyle}"
+                                   Foreground="#FFFFE7BF"/>
+                    </Border>
+                </MenuItem.Icon>
+                <MenuItem.Header>
+                    <StackPanel Margin="0,2">
+                        <TextBlock Text="复制为纯文本" Style="{StaticResource ChatMessageContextMenuNameTextStyle}"/>
+                        <TextBlock Text="复制当前消息，移除 Markdown 格式和工具调用。"
+                                   Style="{StaticResource ChatMessageContextMenuDescriptionTextStyle}"/>
+                    </StackPanel>
+                </MenuItem.Header>
+            </MenuItem>
+
+            <MenuItem Style="{StaticResource ChatMessageContextMenuItemStyle}"
+                      Command="{Binding PlacementTarget.Tag.EditMessageCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                      CommandParameter="{Binding}">
+                <MenuItem.Icon>
+                    <Border Style="{StaticResource ChatMessageContextMenuIconBadgeStyle}"
+                            Background="#55212F21"
+                            BorderBrush="#998FE9B9">
+                        <TextBlock Text="EDT"
+                                   Style="{StaticResource ChatMessageContextMenuIconTextStyle}"
+                                   Foreground="#FFD6FFE5"/>
+                    </Border>
+                </MenuItem.Icon>
+                <MenuItem.Header>
+                    <StackPanel Margin="0,2">
+                        <TextBlock Text="编辑" Style="{StaticResource ChatMessageContextMenuNameTextStyle}"/>
+                        <TextBlock Text="编辑此消息。"
+                                   Style="{StaticResource ChatMessageContextMenuDescriptionTextStyle}"/>
+                    </StackPanel>
+                </MenuItem.Header>
+            </MenuItem>
+        </ContextMenu>
 
         <Style x:Key="ChatHeaderCapsuleBorderStyle" TargetType="Border">
             <Setter Property="Background" Value="{DynamicResource ButtonIdleBrush}"/>
@@ -379,6 +513,7 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <EventSetter Event="PreviewMouseRightButtonDown" Handler="MessageListItem_PreviewMouseRightButtonDown"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBoxItem">
@@ -541,11 +676,98 @@
                             <TextBlock Text="{Binding BadgeText}" Foreground="#FF9CDCFE" FontSize="11"/>
                         </Border>
                     </DockPanel>
+                    <ItemsControl ItemsSource="{Binding ToolOutputDiffLines}">
+                        <ItemsControl.Style>
+                            <Style TargetType="ItemsControl">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasToolOutputDiffLines}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ItemsControl.Style>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type models:ChatToolOutputDiffLineModel}">
+                                <Grid>
+                                    <Border x:Name="SeparatorBorder"
+                                            Height="8"
+                                            Visibility="Collapsed"/>
+                                    <Grid x:Name="DiffRowGrid"
+                                          Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="58"/>
+                                            <ColumnDefinition Width="28"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Border x:Name="DiffGutterBackground"
+                                                Grid.Column="0"
+                                                Grid.ColumnSpan="2"
+                                                Margin="0,0,8,0"
+                                                CornerRadius="4"
+                                                Background="#5FEEF58A"/>
+
+                                        <TextBlock Grid.Column="0"
+                                                   Margin="0,0,8,0"
+                                                   Text="{Binding LineNumberText}"
+                                                   Foreground="#FF10261C"
+                                                   FontFamily="Consolas"
+                                                   FontSize="12"
+                                                   FontWeight="SemiBold"
+                                                   HorizontalAlignment="Right"
+                                                   VerticalAlignment="Center"/>
+
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding Marker}"
+                                                   Foreground="#FF10261C"
+                                                   FontFamily="Consolas"
+                                                   FontSize="12"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+
+                                        <TextBlock Grid.Column="2"
+                                                   Text="{Binding Text}"
+                                                   Foreground="#FFEAFDFF"
+                                                   FontFamily="Consolas"
+                                                   FontSize="13"
+                                                   TextWrapping="Wrap"/>
+                                    </Grid>
+                                </Grid>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding Kind}" Value="{x:Static models:ChatToolOutputDiffLineKind.Added}">
+                                        <Setter TargetName="DiffGutterBackground" Property="Background" Value="#6646D9F6"/>
+                                        <Setter TargetName="DiffRowGrid" Property="Margin" Value="0,0,0,4"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Kind}" Value="{x:Static models:ChatToolOutputDiffLineKind.Removed}">
+                                        <Setter TargetName="DiffGutterBackground" Property="Background" Value="#66F2B7B7"/>
+                                        <Setter TargetName="DiffRowGrid" Property="Margin" Value="0,0,0,4"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Kind}" Value="{x:Static models:ChatToolOutputDiffLineKind.Separator}">
+                                        <Setter TargetName="SeparatorBorder" Property="Visibility" Value="Visible"/>
+                                        <Setter TargetName="DiffRowGrid" Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                     <TextBlock Text="{Binding Content}"
                                Foreground="#FFEAFDFF"
                                TextWrapping="Wrap"
                                FontFamily="Consolas"
-                               FontSize="13"/>
+                               FontSize="13">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasToolOutputDiffLines}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                 </StackPanel>
             </Border>
         </DataTemplate>
@@ -719,11 +941,6 @@
                                Foreground="#99FFFFFF"
                                FontSize="11"
                                VerticalAlignment="Center"/>
-                    <Button DockPanel.Dock="Right"
-                            Style="{StaticResource ChatDeleteButtonStyle}"
-                            Content="删除"
-                            Command="{Binding DataContext.RemoveMessageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                            CommandParameter="{Binding}"/>
                 </DockPanel>
 
                 <ItemsControl ItemsSource="{Binding Parts}"
@@ -739,7 +956,9 @@
         </DataTemplate>
 
         <DataTemplate x:Key="UserMessageTemplate" DataType="{x:Type models:ChatMessageModel}">
-            <Grid Margin="0,0,0,18">
+            <Grid Margin="0,0,0,18"
+                  Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                  ContextMenu="{StaticResource ChatMessageContextMenu}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="60"/>
@@ -764,7 +983,9 @@
         </DataTemplate>
 
         <DataTemplate x:Key="AssistantMessageTemplate" DataType="{x:Type models:ChatMessageModel}">
-            <Grid Margin="0,0,0,18">
+            <Grid Margin="0,0,0,18"
+                  Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                  ContextMenu="{StaticResource ChatMessageContextMenu}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="60"/>
                     <ColumnDefinition Width="*"/>
@@ -790,6 +1011,8 @@
 
         <DataTemplate x:Key="SystemMessageTemplate" DataType="{x:Type models:ChatMessageModel}">
             <Border Margin="90,0,90,18"
+                    Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    ContextMenu="{StaticResource ChatMessageContextMenu}"
                     Padding="14,12"
                     CornerRadius="10"
                     Background="#33111824"

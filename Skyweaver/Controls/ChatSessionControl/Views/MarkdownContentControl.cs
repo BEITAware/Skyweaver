@@ -1,6 +1,8 @@
 using System.Diagnostics;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -23,6 +25,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
         private static readonly Brush MathBorderBrush = CreateFrozenBrush(Color.FromArgb(0x44, 0xCF, 0xB9, 0x7A));
         private static readonly Brush MathBackgroundBrush = CreateFrozenBrush(Color.FromArgb(0x18, 0x22, 0x1A, 0x10));
         private static readonly Brush MathForegroundBrush = CreateFrozenBrush(Color.FromRgb(0xF4, 0xDF, 0xB5));
+        private static readonly Style TableCellTextStyle = CreateTableCellTextStyle();
 
         public static readonly DependencyProperty MarkdownTextProperty =
             DependencyProperty.Register(
@@ -101,6 +104,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                 MarkdownQuoteBlock quote => CreateQuoteBlock(quote),
                 MarkdownListBlock list => CreateListBlock(list),
                 MarkdownMathBlock math => CreateMathBlock(math),
+                MarkdownTableBlock table => CreateTableBlock(table),
                 MarkdownParagraphBlock paragraph => CreateParagraphBlock(paragraph),
                 _ => CreateParagraphBlock(new MarkdownParagraphBlock(Array.Empty<MarkdownInline>()))
             };
@@ -239,6 +243,53 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                     TextAlignment = TextAlignment.Center
                 }
             };
+        }
+
+        private FrameworkElement CreateTableBlock(MarkdownTableBlock block)
+        {
+            var dataGrid = new DataGrid
+            {
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Top,
+                MaxHeight = 360
+            };
+
+            if (TryFindResource("TwilightBlue_DataGridStyle") is Style dataGridStyle)
+            {
+                dataGrid.Style = dataGridStyle;
+            }
+
+            var columnLookup = new Dictionary<DataGridColumn, int>();
+            for (var columnIndex = 0; columnIndex < block.Columns.Count; columnIndex++)
+            {
+                var headerText = block.Columns[columnIndex].Header;
+                if (string.IsNullOrWhiteSpace(headerText))
+                {
+                    headerText = $"Column {columnIndex + 1}";
+                }
+
+                var column = new DataGridTextColumn
+                {
+                    Header = headerText,
+                    Binding = new Binding($"Cells[{columnIndex}]"),
+                    ClipboardContentBinding = new Binding($"Cells[{columnIndex}]"),
+                    ElementStyle = TableCellTextStyle,
+                    MinWidth = 72,
+                    Width = DataGridLength.SizeToCells
+                };
+
+                dataGrid.Columns.Add(column);
+                columnLookup[column] = columnIndex;
+            }
+
+            if (dataGrid.Columns.Count > 0)
+            {
+                dataGrid.Columns[^1].Width = new DataGridLength(1.0, DataGridLengthUnitType.Star);
+            }
+
+            dataGrid.ItemsSource = block.Rows.ToList();
+            dataGrid.Sorting += (_, e) => ApplyTableSort(dataGrid, e, columnLookup);
+            return dataGrid;
         }
 
         private void AddInlines(InlineCollection collection, IEnumerable<MarkdownInline> inlines)
@@ -398,6 +449,45 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             {
                 // Ignore navigation failures and keep the content readable.
             }
+        }
+
+        private static void ApplyTableSort(
+            DataGrid dataGrid,
+            DataGridSortingEventArgs e,
+            IReadOnlyDictionary<DataGridColumn, int> columnLookup)
+        {
+            e.Handled = true;
+            if (!columnLookup.TryGetValue(e.Column, out var columnIndex) ||
+                dataGrid.ItemsSource is null)
+            {
+                return;
+            }
+
+            var direction = e.Column.SortDirection == ListSortDirection.Ascending
+                ? ListSortDirection.Descending
+                : ListSortDirection.Ascending;
+
+            foreach (var column in dataGrid.Columns)
+            {
+                if (!ReferenceEquals(column, e.Column))
+                {
+                    column.SortDirection = null;
+                }
+            }
+
+            e.Column.SortDirection = direction;
+            var rows = dataGrid.ItemsSource.Cast<MarkdownTableRow>();
+            dataGrid.ItemsSource = direction == ListSortDirection.Ascending
+                ? rows.OrderBy(row => row.GetCell(columnIndex), StringComparer.CurrentCultureIgnoreCase).ToList()
+                : rows.OrderByDescending(row => row.GetCell(columnIndex), StringComparer.CurrentCultureIgnoreCase).ToList();
+        }
+
+        private static Style CreateTableCellTextStyle()
+        {
+            var style = new Style(typeof(TextBlock));
+            style.Setters.Add(new Setter(TextBlock.TextWrappingProperty, TextWrapping.Wrap));
+            style.Setters.Add(new Setter(TextBlock.VerticalAlignmentProperty, VerticalAlignment.Center));
+            return style;
         }
     }
 }

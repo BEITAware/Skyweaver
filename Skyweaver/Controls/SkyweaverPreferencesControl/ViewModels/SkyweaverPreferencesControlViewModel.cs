@@ -8,19 +8,26 @@ using Skyweaver.Commands;
 using Skyweaver.Controls.SkyweaverPreferencesControl.Models;
 using Skyweaver.Controls.SkyweaverPreferencesControl.Services;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Panels.MultiFunctionArea.ViewModels;
 
 namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels
 {
     public sealed class SkyweaverPreferencesControlViewModel : ObservableObject
     {
+        private readonly Action<string>? _openTabByType;
         private readonly Dictionary<string, UserControl> _viewCache = new(StringComparer.Ordinal);
         private SelectablePreferencePageViewModel? _selectedPageViewModel;
         private UserControl? _currentView;
         private string? _currentPageName;
-        private string? _currentPageDescription;
 
         public SkyweaverPreferencesControlViewModel()
+            : this(null)
         {
+        }
+
+        public SkyweaverPreferencesControlViewModel(Action<string>? openTabByType)
+        {
+            _openTabByType = openTabByType;
             SkyweaverPreferencesRegistration.EnsureRegistered();
 
             var modelGroups = PreferenceRegistry.Instance.Groups;
@@ -55,23 +62,37 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels
             SelectPageCommand = new RelayCommand<SelectablePreferencePageViewModel>(
                 page => SelectedPageViewModel = page,
                 page => page is not null);
-            ReservedPrimaryActionCommand = new RelayCommand(() => { }, () => false);
-            ReservedSecondaryActionCommand = new RelayCommand(() => { }, () => false);
+            OpenLanguageModelConfigurationCommand = new RelayCommand(
+                () => OpenTab(MultiFunctionAreaPanelViewModel.TabTypes.LanguageModelConfiguration),
+                CanOpenExternalPanel);
+            OpenToolConfigurationCommand = new RelayCommand(
+                () => OpenTab(MultiFunctionAreaPanelViewModel.TabTypes.ToolConfiguration),
+                CanOpenExternalPanel);
+            OpenAgentConfigurationCommand = new RelayCommand(
+                () => OpenTab(MultiFunctionAreaPanelViewModel.TabTypes.AgentConfiguration),
+                CanOpenExternalPanel);
+            OpenWorkflowEditorCommand = new RelayCommand(
+                () => OpenTab(MultiFunctionAreaPanelViewModel.TabTypes.WorkflowEditor),
+                CanOpenExternalPanel);
         }
 
-        public string Title { get; } = "Skyweaver Preferences";
+        public string Title { get; } = "Skyweaver 首选项";
 
-        public string Description { get; } = "A Cascade-style registration shell for global preferences, workspace layout, and system defaults.";
+        public string Description { get; } = "从左侧栏目中选择要查看的配置项。";
 
-        public string Hint { get; } = "This panel currently copies architecture and styling only. Real settings repositories, validation, and save flows can be plugged in page by page later.";
+        public string Hint { get; } = "目前仅“文件与系统”栏目下提供“侧向文件系统配置”，其余栏目暂为空。";
 
         public ObservableCollection<PreferenceGroupViewModel> Groups { get; }
 
         public ICommand SelectPageCommand { get; }
 
-        public ICommand ReservedPrimaryActionCommand { get; }
+        public ICommand OpenLanguageModelConfigurationCommand { get; }
 
-        public ICommand ReservedSecondaryActionCommand { get; }
+        public ICommand OpenToolConfigurationCommand { get; }
+
+        public ICommand OpenAgentConfigurationCommand { get; }
+
+        public ICommand OpenWorkflowEditorCommand { get; }
 
         public SelectablePreferencePageViewModel? SelectedPageViewModel
         {
@@ -95,7 +116,6 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels
                 {
                     CurrentView = null;
                     CurrentPageName = null;
-                    CurrentPageDescription = null;
                     return;
                 }
 
@@ -115,12 +135,6 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels
             private set => SetProperty(ref _currentPageName, value);
         }
 
-        public string? CurrentPageDescription
-        {
-            get => _currentPageDescription;
-            private set => SetProperty(ref _currentPageDescription, value);
-        }
-
         private void ActivatePage(string pageId)
         {
             var pageInfo = PreferenceRegistry.Instance.GetPageInfo(pageId);
@@ -128,12 +142,10 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels
             {
                 CurrentView = null;
                 CurrentPageName = null;
-                CurrentPageDescription = null;
                 return;
             }
 
             CurrentPageName = pageInfo.DisplayName;
-            CurrentPageDescription = pageInfo.Description;
 
             if (_viewCache.TryGetValue(pageId, out var cachedView))
             {
@@ -177,6 +189,16 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels
             {
                 return null;
             }
+        }
+
+        private bool CanOpenExternalPanel()
+        {
+            return _openTabByType != null;
+        }
+
+        private void OpenTab(string typeKey)
+        {
+            _openTabByType?.Invoke(typeKey);
         }
     }
 }
