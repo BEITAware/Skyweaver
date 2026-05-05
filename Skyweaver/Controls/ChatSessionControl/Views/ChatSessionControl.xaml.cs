@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Skyweaver.Controls.ChatSessionControl.ViewModels;
+using Skyweaver.Services;
 
 namespace Skyweaver.Controls.ChatSessionControl.Views
 {
@@ -95,6 +96,17 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             }
         }
 
+        private void MessageListItem_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is not ListBoxItem listBoxItem)
+            {
+                return;
+            }
+
+            listBoxItem.IsSelected = true;
+            listBoxItem.Focus();
+        }
+
         private void ScrollToLatestMessage()
         {
             if (MessagesList.Items.Count == 0)
@@ -160,13 +172,13 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
 
         private static BitmapSource? TryGetPastedImage(DataObjectPastingEventArgs e)
         {
-            if (Clipboard.ContainsImage())
+            if (e.SourceDataObject.GetDataPresent(DataFormats.Bitmap, autoConvert: true))
             {
-                return Clipboard.GetImage();
+                return e.SourceDataObject.GetData(DataFormats.Bitmap, autoConvert: true) as BitmapSource;
             }
 
-            return e.SourceDataObject.GetDataPresent(DataFormats.Bitmap, autoConvert: true)
-                ? e.SourceDataObject.GetData(DataFormats.Bitmap, autoConvert: true) as BitmapSource
+            return ClipboardAccessService.TryGetImage(out var image, out _)
+                ? image
                 : null;
         }
 

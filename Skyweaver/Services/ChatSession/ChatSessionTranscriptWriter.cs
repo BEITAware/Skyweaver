@@ -3,6 +3,7 @@ using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
 using Skyweaver.Controls.WorkflowEditorControl.Models;
 using Skyweaver.Models.ChatSession;
 using Skyweaver.Services.AgentLoop;
+using Skyweaver.Services.SkyweaverTools;
 
 namespace Skyweaver.Services.ChatSession
 {
@@ -348,6 +349,7 @@ namespace Skyweaver.Services.ChatSession
             var transcript = session.Transcript;
             var turn = GetOrCreateActiveTurn(session);
             var toolCallId = NormalizeToolCallId(runtimeEvent);
+            var presentationHints = ResolveToolOutputPresentationHints(runtimeEvent.ToolReturns);
             var parent = transcript.Entries.LastOrDefault(candidate =>
                 string.Equals(candidate.TurnId, turn.TurnId, StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(candidate.ToolCallId, toolCallId, StringComparison.OrdinalIgnoreCase) &&
@@ -358,7 +360,11 @@ namespace Skyweaver.Services.ChatSession
                 runtimeEvent,
                 ChatSessionTranscriptEntryKind.ToolOutput,
                 ChatSessionParticipantRole.Tool,
-                ResolveVisibility(runtimeEvent, defaultVisibility: TranscriptVisibility.Hidden),
+                ResolveVisibility(
+                    runtimeEvent,
+                    defaultVisibility: presentationHints.IsUserVisible
+                        ? TranscriptVisibility.Visible
+                        : TranscriptVisibility.Hidden),
                 TranscriptLlmPolicy.ToolProtocol,
                 TranscriptHandoffPolicy.Evidence);
             entry.ParentEntryId = parent?.EntryId;
@@ -366,12 +372,14 @@ namespace Skyweaver.Services.ChatSession
             entry.ToolCallIndex = runtimeEvent.ToolCallIndex;
             entry.ToolName = ResolveToolName(runtimeEvent) ?? parent?.ToolName;
             entry.Status = ChatSessionEntryStatus.Completed;
-            entry.Blocks.Add(new ChatSessionTranscriptBlock
+            var block = new ChatSessionTranscriptBlock
             {
                 Kind = ChatSessionTranscriptBlockKind.ToolOutputXml,
                 Content = output,
                 Title = entry.ToolName
-            });
+            };
+            ApplyToolOutputPresentationMetadata(entry, block, presentationHints);
+            entry.Blocks.Add(block);
 
             transcript.Entries.Add(entry);
             Touch(transcript, entry);
@@ -878,6 +886,37 @@ namespace Skyweaver.Services.ChatSession
             return runtimeEvent.IsHiddenAgent
                 ? TranscriptVisibility.Hidden
                 : defaultVisibility;
+        }
+
+        private static SkyweaverToolResultPresentationHints ResolveToolOutputPresentationHints(
+            IReadOnlyList<SkyweaverToolReturnPayload> toolReturns)
+        {
+            return toolReturns
+                .Select(item => item.Result.PresentationHints)
+                .LastOrDefault(item => item != null && item.HasAnyValue)
+                ?? SkyweaverToolResultPresentationHints.None;
+        }
+
+        private static void ApplyToolOutputPresentationMetadata(
+            ChatSessionTranscriptEntry entry,
+            ChatSessionTranscriptBlock block,
+            SkyweaverToolResultPresentationHints presentationHints)
+        {
+            if (!string.IsNullOrWhiteSpace(presentationHints.PresentationKind))
+            {
+                block.Metadata[SkyweaverToolResultPresentationMetadataKeys.PresentationKind] =
+                    presentationHints.PresentationKind;
+            }
+
+            if (presentationHints.GroupWithAssistantBubble)
+            {
+                entry.Metadata[SkyweaverToolResultPresentationMetadataKeys.GroupWithAssistantBubble] = bool.TrueString;
+            }
+
+            if (presentationHints.ReplaceParentToolCall)
+            {
+                entry.Metadata[SkyweaverToolResultPresentationMetadataKeys.ReplaceParentToolCall] = bool.TrueString;
+            }
         }
 
         private static string NormalizeToolCallId(ChatSessionRuntimeEvent runtimeEvent)

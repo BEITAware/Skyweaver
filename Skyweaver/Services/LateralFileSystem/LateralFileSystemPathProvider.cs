@@ -7,7 +7,7 @@ namespace Skyweaver.Services.LateralFileSystem
         public string ConfigurationDirectoryPath => Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             "Skyweaver",
-            "Configurations");
+            "Configuration");
 
         public string ConfigurationFilePath => Path.Combine(ConfigurationDirectoryPath, "LateralFileSystem.xml");
 

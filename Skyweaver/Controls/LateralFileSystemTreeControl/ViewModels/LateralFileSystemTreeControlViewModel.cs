@@ -167,7 +167,7 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
 
                 if (!HasWorkingRootDirectory)
                 {
-                    return "尚未设置工作根目录。请先到“侧向文件系统配置”页完成连接。";
+                    return "尚未设置工作根目录。请先到首选项中的“侧向文件系统”页完成连接。";
                 }
 
                 if (!IsBackendConfiguredEnabled)
@@ -190,7 +190,7 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
 
                 if (!HasWorkingRootDirectory)
                 {
-                    return "请先在“侧向文件系统配置”页面设置工作根目录。";
+                    return "请先在首选项中的“侧向文件系统”页设置工作根目录。";
                 }
 
                 if (!IsBackendConfiguredEnabled)
@@ -446,7 +446,7 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
 
             if (!HasWorkingRootDirectory)
             {
-                StatusMessage = "请先在“侧向文件系统配置”页面设置工作根目录。";
+                StatusMessage = "请先在首选项中的“侧向文件系统”页设置工作根目录。";
             }
             else if (!IsVirtualizationBackendAvailable)
             {
@@ -761,7 +761,7 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
 
             if (!HasWorkingRootDirectory)
             {
-                MessageBox.Show(Application.Current?.MainWindow, "请先在“侧向文件系统配置”页面设置工作根目录。", "侧向文件系统树", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(Application.Current?.MainWindow, "请先在首选项中的“侧向文件系统”页设置工作根目录。", "侧向文件系统树", MessageBoxButton.OK, MessageBoxImage.Information);
                 return false;
             }
 
