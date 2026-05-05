@@ -373,6 +373,37 @@
             <Setter Property="Foreground" Value="#FFF3E4AE"/>
         </Style>
 
+        <LinearGradientBrush x:Key="ChatUserBubbleBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#B36693B0" Offset="0"/>
+            <GradientStop Color="#A63A6F8C" Offset="0.34"/>
+            <GradientStop Color="#C1234966" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="ChatAssistantBubbleBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#B06A94AF" Offset="0"/>
+            <GradientStop Color="#A040718F" Offset="0.34"/>
+            <GradientStop Color="#BC203E58" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="ChatBubbleTopSheenBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#66FFFFFF" Offset="0"/>
+            <GradientStop Color="#22FFFFFF" Offset="0.48"/>
+            <GradientStop Color="#00FFFFFF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="ChatBubbleBottomGlowBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#0028B4FF" Offset="0"/>
+            <GradientStop Color="#143BBBE8" Offset="0.42"/>
+            <GradientStop Color="#4D43D8F3" Offset="1"/>
+        </LinearGradientBrush>
+
+        <Style x:Key="ChatMessageBubbleBorderStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="BorderBrush" Value="#6687CAE3"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+        </Style>
+
         <Style x:Key="ChatComposerTextBoxStyle"
                TargetType="{x:Type TextBox}"
                BasedOn="{StaticResource DefaultTextBoxStyle}">
@@ -968,9 +999,27 @@
                         HorizontalAlignment="Right"
                         MaxWidth="620"
                         Margin="70,0,10,0"
-                        Padding="15,12"
-                        Background="{DynamicResource ChatBubbleObjectIdleBrush}">
-                    <ContentControl Content="{Binding}" ContentTemplate="{StaticResource BubbleMessageContentTemplate}"/>
+                        Style="{StaticResource ChatMessageBubbleBorderStyle}"
+                        Background="{StaticResource ChatUserBubbleBackgroundBrush}">
+                    <Grid>
+                        <Border Height="34"
+                                Margin="1"
+                                VerticalAlignment="Top"
+                                CornerRadius="9,9,6,6"
+                                Background="{StaticResource ChatBubbleTopSheenBrush}"
+                                IsHitTestVisible="False"
+                                Opacity="0.72"/>
+                        <Border Height="18"
+                                Margin="1"
+                                VerticalAlignment="Bottom"
+                                CornerRadius="0,0,9,9"
+                                Background="{StaticResource ChatBubbleBottomGlowBrush}"
+                                IsHitTestVisible="False"
+                                Opacity="0.92"/>
+                        <ContentControl Margin="15,12"
+                                        Content="{Binding}"
+                                        ContentTemplate="{StaticResource BubbleMessageContentTemplate}"/>
+                    </Grid>
                 </Border>
 
                 <Grid Grid.Column="1" Width="50" Height="50" VerticalAlignment="Top">
@@ -1002,9 +1051,27 @@
                         HorizontalAlignment="Left"
                         MaxWidth="620"
                         Margin="10,0,70,0"
-                        Padding="15,12"
-                        Background="{DynamicResource ChatBubbleObjectHoverBrush}">
-                    <ContentControl Content="{Binding}" ContentTemplate="{StaticResource BubbleMessageContentTemplate}"/>
+                        Style="{StaticResource ChatMessageBubbleBorderStyle}"
+                        Background="{StaticResource ChatAssistantBubbleBackgroundBrush}">
+                    <Grid>
+                        <Border Height="34"
+                                Margin="1"
+                                VerticalAlignment="Top"
+                                CornerRadius="9,9,6,6"
+                                Background="{StaticResource ChatBubbleTopSheenBrush}"
+                                IsHitTestVisible="False"
+                                Opacity="0.68"/>
+                        <Border Height="18"
+                                Margin="1"
+                                VerticalAlignment="Bottom"
+                                CornerRadius="0,0,9,9"
+                                Background="{StaticResource ChatBubbleBottomGlowBrush}"
+                                IsHitTestVisible="False"
+                                Opacity="0.86"/>
+                        <ContentControl Margin="15,12"
+                                        Content="{Binding}"
+                                        ContentTemplate="{StaticResource BubbleMessageContentTemplate}"/>
+                    </Grid>
                 </Border>
             </Grid>
         </DataTemplate>
