@@ -19,11 +19,13 @@ namespace Skyweaver.Services.ChatSession
 
             var messages = new List<ChatMessageModel>();
             var assistantGroups = new Dictionary<string, ChatMessageModel>(StringComparer.OrdinalIgnoreCase);
+            var projectionState = BuildProjectionState(transcript);
 
             foreach (var entry in transcript.Entries)
             {
-                if (!ShouldProjectEntry(transcript, entry, includeDebugEntries))
+                if (!ShouldProjectEntry(entry, includeDebugEntries, projectionState))
                 {
+                    TrackVisibleAssistantMessage(entry, projectionState);
                     continue;
                 }
 
@@ -37,16 +39,19 @@ namespace Skyweaver.Services.ChatSession
                         messages.Add(groupedMessage);
                     }
 
-                    AddEntryParts(groupedMessage, transcript, entry);
+                    AddEntryParts(groupedMessage, entry, projectionState);
+                    TrackVisibleAssistantMessage(entry, projectionState);
                     continue;
                 }
 
                 var message = CreatePresentationMessage(entry, entry.EntryId);
-                AddEntryParts(message, transcript, entry);
+                AddEntryParts(message, entry, projectionState);
                 if (message.Parts.Count > 0)
                 {
                     messages.Add(message);
                 }
+
+                TrackVisibleAssistantMessage(entry, projectionState);
             }
 
             return messages.Where(message => message.Parts.Count > 0).ToArray();
@@ -67,8 +72,8 @@ namespace Skyweaver.Services.ChatSession
 
         private static void AddEntryParts(
             ChatMessageModel message,
-            ChatSessionTranscript transcript,
-            ChatSessionTranscriptEntry entry)
+            ChatSessionTranscriptEntry entry,
+            ProjectionState projectionState)
         {
             if (!message.SourceEntryIds.Contains(entry.EntryId, StringComparer.OrdinalIgnoreCase))
             {
@@ -83,7 +88,7 @@ namespace Skyweaver.Services.ChatSession
                 }
 
                 var part = ToPresentationPart(entry, block);
-                MergeToolOutputPresentation(message, transcript, entry, part);
+                MergeToolOutputPresentation(message, entry, part, projectionState);
                 PrepareForAdjacentToolCall(message, part);
                 message.Parts.Add(part);
             }
@@ -165,16 +170,16 @@ namespace Skyweaver.Services.ChatSession
         }
 
         private static bool ShouldProjectEntry(
-            ChatSessionTranscript transcript,
             ChatSessionTranscriptEntry entry,
-            bool includeDebugEntries)
+            bool includeDebugEntries,
+            ProjectionState projectionState)
         {
-            if (IsMergedToolOutputEntry(transcript, entry))
+            if (IsMergedToolOutputEntry(entry, projectionState))
             {
                 return false;
             }
 
-            if (IsSyntheticRuntimeUserEntry(entry) || IsRedundantFinalOutput(transcript, entry))
+            if (IsSyntheticRuntimeUserEntry(entry) || IsRedundantFinalOutput(entry, projectionState))
             {
                 return false;
             }
@@ -214,13 +219,13 @@ namespace Skyweaver.Services.ChatSession
 
         private static void MergeToolOutputPresentation(
             ChatMessageModel message,
-            ChatSessionTranscript transcript,
             ChatSessionTranscriptEntry entry,
-            ChatMessagePartModel part)
+            ChatMessagePartModel part,
+            ProjectionState projectionState)
         {
             if (entry.Kind != ChatSessionTranscriptEntryKind.ToolCall ||
                 part.PartType != ChatMessagePartType.ToolCall ||
-                !TryFindMergedToolOutputEntry(transcript, entry, out var toolOutputEntry) ||
+                !TryFindMergedToolOutputEntry(entry, projectionState, out var toolOutputEntry) ||
                 toolOutputEntry.Blocks.FirstOrDefault(ShouldProjectBlock) is not { } toolOutputBlock)
             {
                 part.ToolResultContent = string.Empty;
@@ -358,47 +363,39 @@ namespace Skyweaver.Services.ChatSession
         }
 
         private static bool IsMergedToolOutputEntry(
-            ChatSessionTranscript transcript,
-            ChatSessionTranscriptEntry entry)
+            ChatSessionTranscriptEntry entry,
+            ProjectionState projectionState)
         {
             return entry.Kind == ChatSessionTranscriptEntryKind.ToolOutput &&
-                   TryFindOwningToolCallEntry(transcript, entry, out _);
+                   !string.IsNullOrWhiteSpace(entry.EntryId) &&
+                   projectionState.MergedToolOutputEntryIds.Contains(entry.EntryId);
         }
 
         private static bool TryFindMergedToolOutputEntry(
-            ChatSessionTranscript transcript,
             ChatSessionTranscriptEntry toolCallEntry,
+            ProjectionState projectionState,
             out ChatSessionTranscriptEntry toolOutputEntry)
         {
-            toolOutputEntry = null!;
-            if (string.IsNullOrWhiteSpace(toolCallEntry.ToolCallId))
-            {
-                return false;
-            }
-
-            toolOutputEntry = transcript.Entries.LastOrDefault(candidate =>
-                candidate.Kind == ChatSessionTranscriptEntryKind.ToolOutput &&
-                string.Equals(candidate.TurnId, toolCallEntry.TurnId, StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(candidate.ToolCallId, toolCallEntry.ToolCallId, StringComparison.OrdinalIgnoreCase))!;
-            return toolOutputEntry != null;
+            var toolEntryKey = BuildToolEntryKey(toolCallEntry.TurnId, toolCallEntry.ToolCallId);
+            return projectionState.MergedToolOutputsByKey.TryGetValue(toolEntryKey, out toolOutputEntry!);
         }
 
-        private static bool TryFindOwningToolCallEntry(
-            ChatSessionTranscript transcript,
-            ChatSessionTranscriptEntry toolOutputEntry,
-            out ChatSessionTranscriptEntry toolCallEntry)
+        private static void TrackVisibleAssistantMessage(
+            ChatSessionTranscriptEntry entry,
+            ProjectionState projectionState)
         {
-            toolCallEntry = null!;
-            if (string.IsNullOrWhiteSpace(toolOutputEntry.ToolCallId))
+            if (entry.Kind != ChatSessionTranscriptEntryKind.AgentMessage ||
+                entry.Role != ChatSessionParticipantRole.Assistant ||
+                entry.Visibility is not (TranscriptVisibility.Visible or TranscriptVisibility.Collapsed))
             {
-                return false;
+                return;
             }
 
-            toolCallEntry = transcript.Entries.LastOrDefault(candidate =>
-                candidate.Kind == ChatSessionTranscriptEntryKind.ToolCall &&
-                string.Equals(candidate.TurnId, toolOutputEntry.TurnId, StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(candidate.ToolCallId, toolOutputEntry.ToolCallId, StringComparison.OrdinalIgnoreCase))!;
-            return toolCallEntry != null;
+            var messageKey = BuildVisibleAssistantMessageKey(entry);
+            if (messageKey.Length > 0)
+            {
+                projectionState.VisibleAssistantMessageKeys.Add(messageKey);
+            }
         }
 
         private static string ResolveDisplayName(ChatSessionTranscriptEntry entry, ChatMessageRole role)
@@ -447,35 +444,17 @@ namespace Skyweaver.Services.ChatSession
         }
 
         private static bool IsRedundantFinalOutput(
-            ChatSessionTranscript transcript,
-            ChatSessionTranscriptEntry entry)
+            ChatSessionTranscriptEntry entry,
+            ProjectionState projectionState)
         {
             if (entry.Kind != ChatSessionTranscriptEntryKind.AgentFinalOutput)
             {
                 return false;
             }
 
-            var entryIndex = transcript.Entries.IndexOf(entry);
-            if (entryIndex <= 0)
-            {
-                return false;
-            }
-
-            var finalText = GetComparableEntryText(entry);
-            if (finalText.Length == 0)
-            {
-                return false;
-            }
-
-            return transcript.Entries
-                .Take(entryIndex)
-                .Any(candidate =>
-                    candidate.Kind == ChatSessionTranscriptEntryKind.AgentMessage &&
-                    candidate.Role == ChatSessionParticipantRole.Assistant &&
-                    candidate.Visibility is TranscriptVisibility.Visible or TranscriptVisibility.Collapsed &&
-                    string.Equals(candidate.TurnId, entry.TurnId, StringComparison.OrdinalIgnoreCase) &&
-                    string.Equals(candidate.NodeId ?? string.Empty, entry.NodeId ?? string.Empty, StringComparison.OrdinalIgnoreCase) &&
-                    string.Equals(GetComparableEntryText(candidate), finalText, StringComparison.Ordinal));
+            var messageKey = BuildVisibleAssistantMessageKey(entry);
+            return messageKey.Length > 0 &&
+                   projectionState.VisibleAssistantMessageKeys.Contains(messageKey);
         }
 
         private static string GetComparableEntryText(ChatSessionTranscriptEntry entry)
@@ -507,6 +486,83 @@ namespace Skyweaver.Services.ChatSession
                    !string.IsNullOrWhiteSpace(rawValue)
                 ? rawValue.Trim()
                 : null;
+        }
+
+        private static ProjectionState BuildProjectionState(ChatSessionTranscript transcript)
+        {
+            var toolCallKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var mergedToolOutputsByKey = new Dictionary<string, ChatSessionTranscriptEntry>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var entry in transcript.Entries)
+            {
+                var toolEntryKey = BuildToolEntryKey(entry.TurnId, entry.ToolCallId);
+                if (toolEntryKey.Length == 0)
+                {
+                    continue;
+                }
+
+                if (entry.Kind == ChatSessionTranscriptEntryKind.ToolCall)
+                {
+                    toolCallKeys.Add(toolEntryKey);
+                }
+                else if (entry.Kind == ChatSessionTranscriptEntryKind.ToolOutput)
+                {
+                    mergedToolOutputsByKey[toolEntryKey] = entry;
+                }
+            }
+
+            var mergedToolOutputEntryIds = mergedToolOutputsByKey
+                .Where(pair => toolCallKeys.Contains(pair.Key) && !string.IsNullOrWhiteSpace(pair.Value.EntryId))
+                .Select(pair => pair.Value.EntryId)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            return new ProjectionState(mergedToolOutputsByKey, mergedToolOutputEntryIds);
+        }
+
+        private static string BuildToolEntryKey(string? turnId, string? toolCallId)
+        {
+            var normalizedToolCallId = toolCallId?.Trim() ?? string.Empty;
+            if (normalizedToolCallId.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            return string.Join(
+                ":",
+                turnId?.Trim() ?? string.Empty,
+                normalizedToolCallId);
+        }
+
+        private static string BuildVisibleAssistantMessageKey(ChatSessionTranscriptEntry entry)
+        {
+            var comparableText = GetComparableEntryText(entry);
+            if (comparableText.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            return string.Join(
+                ":",
+                entry.TurnId,
+                entry.NodeId ?? string.Empty,
+                comparableText);
+        }
+
+        private sealed class ProjectionState
+        {
+            public ProjectionState(
+                IReadOnlyDictionary<string, ChatSessionTranscriptEntry> mergedToolOutputsByKey,
+                IReadOnlySet<string> mergedToolOutputEntryIds)
+            {
+                MergedToolOutputsByKey = mergedToolOutputsByKey;
+                MergedToolOutputEntryIds = mergedToolOutputEntryIds;
+            }
+
+            public IReadOnlyDictionary<string, ChatSessionTranscriptEntry> MergedToolOutputsByKey { get; }
+
+            public IReadOnlySet<string> MergedToolOutputEntryIds { get; }
+
+            public HashSet<string> VisibleAssistantMessageKeys { get; } = new(StringComparer.OrdinalIgnoreCase);
         }
     }
 }

@@ -208,9 +208,7 @@ namespace Skyweaver.Panels.SessionList.ViewModels
 
         private string GetNextAvailableDefaultSessionName(string? preferredName = null)
         {
-            var existingNames = _chatSessionRepository.LoadAll()
-                .Select(session => session.Name)
-                .ToHashSet(StringComparer.CurrentCultureIgnoreCase);
+            var existingNames = GetExistingSessionNames();
 
             var candidateName = string.IsNullOrWhiteSpace(preferredName)
                 ? DefaultSessionName
@@ -241,8 +239,15 @@ namespace Skyweaver.Panels.SessionList.ViewModels
         private bool SessionNameExists(string sessionName)
         {
             var trimmedName = sessionName.Trim();
-            return _chatSessionRepository.LoadAll()
-                .Any(session => string.Equals(session.Name, trimmedName, StringComparison.CurrentCultureIgnoreCase));
+            return GetExistingSessionNames().Contains(trimmedName);
+        }
+
+        private HashSet<string> GetExistingSessionNames()
+        {
+            return _allSessions
+                .Select(session => session.Session?.Name ?? session.Title)
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .ToHashSet(StringComparer.CurrentCultureIgnoreCase);
         }
 
         private static bool TryGetDefaultSessionNameNextIndex(string sessionName, out int nextIndex)
