@@ -246,6 +246,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             _executionCancellationSource = new CancellationTokenSource();
             IsExecutionActive = true;
             ExecutionStatusText = $"正在运行：{BoundSessionFlowName}";
+            await Task.Yield();
 
             ChatSessionRuntimeResult? runtimeResult = null;
             try
@@ -608,13 +609,22 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             }
 
             var projectedMessages = _presentationProjector.Project(_sessionModel.Transcript);
+            var existingMessagesBySourceEntryId = Messages
+                .Select(message => new
+                {
+                    Message = message,
+                    SourceEntryId = message.SourceEntryId?.Trim() ?? string.Empty
+                })
+                .Where(item => item.SourceEntryId.Length > 0)
+                .GroupBy(item => item.SourceEntryId, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(group => group.Key, group => group.First().Message, StringComparer.OrdinalIgnoreCase);
             _suppressPersistence = true;
             try
             {
                 for (var targetIndex = 0; targetIndex < projectedMessages.Count; targetIndex++)
                 {
                     var projectedMessage = projectedMessages[targetIndex];
-                    var existingMessage = FindExistingMessage(projectedMessage);
+                    var existingMessage = TryGetExistingMessage(existingMessagesBySourceEntryId, projectedMessage);
                     if (existingMessage == null)
                     {
                         HydrateToolCallPresentations(projectedMessage);
@@ -670,10 +680,15 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                 runtimeEvent.ToolInvocation == null;
         }
 
-        private ChatMessageModel? FindExistingMessage(ChatMessageModel projectedMessage)
+        private static ChatMessageModel? TryGetExistingMessage(
+            IReadOnlyDictionary<string, ChatMessageModel> existingMessagesBySourceEntryId,
+            ChatMessageModel projectedMessage)
         {
-            return Messages.FirstOrDefault(existing =>
-                string.Equals(existing.SourceEntryId, projectedMessage.SourceEntryId, StringComparison.OrdinalIgnoreCase));
+            var sourceEntryId = projectedMessage.SourceEntryId?.Trim() ?? string.Empty;
+            return sourceEntryId.Length > 0 &&
+                   existingMessagesBySourceEntryId.TryGetValue(sourceEntryId, out var existingMessage)
+                ? existingMessage
+                : null;
         }
 
         private void UpdateMessage(ChatMessageModel target, ChatMessageModel source)

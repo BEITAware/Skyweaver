@@ -1,8 +1,10 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Skyweaver.Controls.AgentConfigurationControl.Models;
 using Skyweaver.Controls.AgentConfigurationControl.Services;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Models;
@@ -33,10 +35,13 @@ namespace Skyweaver.Windows
             Loaded += OnLoaded;
         }
 
-        private void OnLoaded(object sender, RoutedEventArgs e)
+        private async void OnLoaded(object sender, RoutedEventArgs e)
         {
+            Loaded -= OnLoaded;
             SessionNameTextBox.Focus();
             SessionNameTextBox.SelectAll();
+            await Dispatcher.InvokeAsync(static () => { }, DispatcherPriority.Background);
+            await _viewModel.InitializeAsync();
         }
 
         private void CreateButton_Click(object sender, RoutedEventArgs e)
@@ -71,10 +76,11 @@ namespace Skyweaver.Windows
 
         private readonly SessionFlowRepository _sessionFlowRepository;
         private readonly SessionFlowRuntimeCompiler _runtimeCompiler;
-        private readonly Dictionary<string, AgentDefinition> _agentsById;
-        private readonly Dictionary<string, LanguageModelDefinition> _languageModelsByKey;
-        private readonly Dictionary<string, CapabilityLayerDefinition> _capabilityLayersByKey;
+        private readonly IReadOnlyList<ChatSessionFlowBindingOption> _initialSessionFlowOptions;
         private readonly List<string> _globalStatusMessages = new();
+        private Dictionary<string, AgentDefinition> _agentsById = new(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, LanguageModelDefinition> _languageModelsByKey = new(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, CapabilityLayerDefinition> _capabilityLayersByKey = new(StringComparer.OrdinalIgnoreCase);
 
         private string _sessionName;
         private string _flowDisplayName = "未选择会话流";
@@ -92,12 +98,14 @@ namespace Skyweaver.Windows
         private bool _isModelPreviewEmpty = true;
         private CreateChatSessionFlowOptionViewModel? _selectedFlowOption;
         private CreateChatSessionHistoryItemViewModel? _selectedHistorySession;
+        private bool _isInitialized;
 
         public CreateChatSessionDialogViewModel(
             IReadOnlyList<ChatSessionFlowBindingOption>? sessionFlowOptions,
             string? initialSessionName)
         {
             _sessionName = string.IsNullOrWhiteSpace(initialSessionName) ? "新建会话" : initialSessionName.Trim();
+            _initialSessionFlowOptions = sessionFlowOptions ?? Array.Empty<ChatSessionFlowBindingOption>();
             SessionFlowOptions = new ObservableCollection<CreateChatSessionFlowOptionViewModel>();
             RecentSessions = new ObservableCollection<CreateChatSessionHistoryItemViewModel>();
             AgentPreviews = new ObservableCollection<CreateChatSessionAgentPreviewItemViewModel>();
@@ -106,15 +114,6 @@ namespace Skyweaver.Windows
 
             _sessionFlowRepository = new SessionFlowRepository(new SessionFlowPathProvider());
             _runtimeCompiler = new SessionFlowRuntimeCompiler();
-
-            var languageModelPathProvider = new LanguageModelConfigurationPathProvider();
-            _agentsById = LoadAgents();
-            _languageModelsByKey = LoadLanguageModels(languageModelPathProvider);
-            _capabilityLayersByKey = LoadCapabilityLayers(languageModelPathProvider);
-
-            LoadSessionFlowOptions(sessionFlowOptions);
-            LoadRecentSessions();
-            RefreshFlowPreview();
         }
 
         public string SessionName
@@ -250,6 +249,28 @@ namespace Skyweaver.Windows
 
         public bool CanCreate => !string.IsNullOrWhiteSpace(SessionName) && SelectedFlowBinding != null;
 
+        public async Task InitializeAsync()
+        {
+            if (_isInitialized)
+            {
+                return;
+            }
+
+            _isInitialized = true;
+            LoadSessionFlowOptions(_initialSessionFlowOptions);
+
+            await Task.Run(() =>
+            {
+                var languageModelPathProvider = new LanguageModelConfigurationPathProvider();
+                _agentsById = LoadAgents();
+                _languageModelsByKey = LoadLanguageModels(languageModelPathProvider);
+                _capabilityLayersByKey = LoadCapabilityLayers(languageModelPathProvider);
+            }).ConfigureAwait(true);
+
+            LoadRecentSessions();
+            RefreshFlowPreview();
+        }
+
         private void LoadSessionFlowOptions(IReadOnlyList<ChatSessionFlowBindingOption>? sessionFlowOptions)
         {
             SessionFlowOptions.Clear();
@@ -259,11 +280,11 @@ namespace Skyweaver.Windows
                 SessionFlowOptions.Add(new CreateChatSessionFlowOptionViewModel(option));
             }
 
-            if (SessionFlowOptions.Count > 0)
-            {
-                _selectedFlowOption = SessionFlowOptions[0];
-                OnPropertyChanged(nameof(SelectedFlowOption));
-            }
+            _selectedFlowOption = SessionFlowOptions.Count > 0
+                ? SessionFlowOptions[0]
+                : null;
+            OnPropertyChanged(nameof(SelectedFlowOption));
+            OnPropertyChanged(nameof(CanCreate));
         }
 
         private void LoadRecentSessions()

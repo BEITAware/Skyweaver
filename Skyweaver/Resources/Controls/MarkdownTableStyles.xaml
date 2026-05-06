@@ -137,6 +137,8 @@
         <Setter Property="AutoGenerateColumns" Value="False"/>
         <Setter Property="CanUserAddRows" Value="False"/>
         <Setter Property="CanUserDeleteRows" Value="False"/>
+        <Setter Property="EnableColumnVirtualization" Value="False"/>
+        <Setter Property="EnableRowVirtualization" Value="False"/>
         <Setter Property="CanUserReorderColumns" Value="False"/>
         <Setter Property="CanUserResizeColumns" Value="False"/>
         <Setter Property="CanUserResizeRows" Value="False"/>
@@ -159,7 +161,10 @@
         <Setter Property="SelectionUnit" Value="FullRow"/>
         <Setter Property="RowHeaderWidth" Value="0"/>
         <Setter Property="MinColumnWidth" Value="72"/>
+        <Setter Property="ScrollViewer.CanContentScroll" Value="False"/>
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="UseLayoutRounding" Value="True"/>
     </Style>
 </ResourceDictionary>

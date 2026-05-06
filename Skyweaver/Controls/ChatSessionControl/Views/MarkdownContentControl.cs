@@ -11,6 +11,12 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
 {
     public sealed class MarkdownContentControl : ContentControl
     {
+        private const double TableMaxHeight = 360.0;
+        private const double TableMinColumnWidth = 72.0;
+        private const double TablePreferredColumnWidthCap = 220.0;
+        private const double TableCharacterWidthEstimate = 12.0;
+        private const double TableColumnChromeWidth = 36.0;
+
         private static readonly Brush HeadingForegroundBrush = CreateFrozenBrush(Color.FromRgb(0xBD, 0xEB, 0xFF));
         private static readonly Brush QuoteForegroundBrush = CreateFrozenBrush(Color.FromArgb(0xE0, 0xEA, 0xFD, 0xFF));
         private static readonly Brush QuoteBorderBrush = CreateFrozenBrush(Color.FromArgb(0x88, 0x7A, 0xD8, 0xF1));
@@ -251,7 +257,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             {
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Top,
-                MaxHeight = 360
+                MaxHeight = TableMaxHeight
             };
 
             if (TryFindResource("TwilightBlue_DataGridStyle") is Style dataGridStyle)
@@ -274,17 +280,12 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                     Binding = new Binding($"Cells[{columnIndex}]"),
                     ClipboardContentBinding = new Binding($"Cells[{columnIndex}]"),
                     ElementStyle = TableCellTextStyle,
-                    MinWidth = 72,
-                    Width = DataGridLength.SizeToCells
+                    MinWidth = TableMinColumnWidth,
+                    Width = ResolveTableColumnWidth(block, columnIndex)
                 };
 
                 dataGrid.Columns.Add(column);
                 columnLookup[column] = columnIndex;
-            }
-
-            if (dataGrid.Columns.Count > 0)
-            {
-                dataGrid.Columns[^1].Width = new DataGridLength(1.0, DataGridLengthUnitType.Star);
             }
 
             dataGrid.ItemsSource = block.Rows.ToList();
@@ -422,6 +423,54 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
         private static Thickness AppendBottomMargin(Thickness margin, double bottom)
         {
             return new Thickness(margin.Left, margin.Top, margin.Right, margin.Bottom + bottom);
+        }
+
+        private static DataGridLength ResolveTableColumnWidth(MarkdownTableBlock block, int columnIndex)
+        {
+            if (block.Columns.Count == 1 || columnIndex == block.Columns.Count - 1)
+            {
+                return new DataGridLength(1.0, DataGridLengthUnitType.Star);
+            }
+
+            var longestVisibleLineLength = GetLongestVisibleLineLength(block.Columns[columnIndex].Header);
+            foreach (var row in block.Rows)
+            {
+                longestVisibleLineLength = Math.Max(longestVisibleLineLength, GetLongestVisibleLineLength(row.GetCell(columnIndex)));
+            }
+
+            var preferredWidth = TableColumnChromeWidth + (longestVisibleLineLength * TableCharacterWidthEstimate);
+            preferredWidth = Math.Max(TableMinColumnWidth, preferredWidth);
+            preferredWidth = Math.Min(TablePreferredColumnWidthCap, preferredWidth);
+            return new DataGridLength(preferredWidth, DataGridLengthUnitType.Pixel);
+        }
+
+        private static int GetLongestVisibleLineLength(string? text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return 0;
+            }
+
+            var longestLineLength = 0;
+            var currentLineLength = 0;
+            foreach (var character in text)
+            {
+                if (character == '\r')
+                {
+                    continue;
+                }
+
+                if (character == '\n')
+                {
+                    longestLineLength = Math.Max(longestLineLength, currentLineLength);
+                    currentLineLength = 0;
+                    continue;
+                }
+
+                currentLineLength++;
+            }
+
+            return Math.Max(longestLineLength, currentLineLength);
         }
 
         private static Brush CreateFrozenBrush(Color color)
