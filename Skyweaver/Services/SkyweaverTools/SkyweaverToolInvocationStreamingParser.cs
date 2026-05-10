@@ -34,7 +34,7 @@ namespace Skyweaver.Services.SkyweaverTools
 
             while (searchIndex < rawContent.Length)
             {
-                var toolStartIndex = IndexOfOpeningTag(rawContent, "Tool", searchIndex);
+                var toolStartIndex = FindNextToolTagIndex(rawContent, searchIndex, out var toolElementName);
                 if (toolStartIndex < 0)
                 {
                     break;
@@ -80,6 +80,7 @@ namespace Skyweaver.Services.SkyweaverTools
                             rawContent,
                             toolDefinition?.Parameters ?? Array.Empty<SkyweaverToolParameterDefinition>(),
                             toolOpenTagEndIndex,
+                            toolElementName,
                             out toolEndIndex,
                             out isInvocationClosed);
                     }
@@ -89,6 +90,7 @@ namespace Skyweaver.Services.SkyweaverTools
                         PartIndex = currentPartIndex,
                         ToolCallIndex = toolCallIndex,
                         ToolName = normalizedToolName,
+                        IsAsyncInvocation = string.Equals(toolElementName, "ToolAsync", StringComparison.OrdinalIgnoreCase),
                         ToolXmlFragment = rawContent[toolStartIndex..Math.Min(toolEndIndex, rawContent.Length)],
                         IsInvocationClosed = isInvocationClosed,
                         Parameters = parameters
@@ -112,7 +114,7 @@ namespace Skyweaver.Services.SkyweaverTools
                 var fallbackToolEndIndex = toolOpenTagEndIndex;
                 var isFallbackInvocationClosed = true;
                 if (!IsSelfClosingTag(toolOpenTag) &&
-                    !TryFindToolClose(rawContent, toolOpenTagEndIndex, out fallbackToolEndIndex))
+                    !TryFindToolClose(rawContent, toolElementName, toolOpenTagEndIndex, out fallbackToolEndIndex))
                 {
                     fallbackToolEndIndex = rawContent.Length;
                     isFallbackInvocationClosed = false;
@@ -134,6 +136,7 @@ namespace Skyweaver.Services.SkyweaverTools
             string rawContent,
             IReadOnlyList<SkyweaverToolParameterDefinition> parameterDefinitions,
             int bodyStartIndex,
+            string toolElementName,
             out int toolEndIndex,
             out bool isInvocationClosed)
         {
@@ -164,9 +167,10 @@ namespace Skyweaver.Services.SkyweaverTools
 
                 cursor = nextTagIndex;
 
-                if (activeParameter == null && StartsWithClosingTag(rawContent, "Tool", cursor))
+                if (activeParameter == null && StartsWithClosingTag(rawContent, toolElementName, cursor))
                 {
-                    if (TryReadTag(rawContent, cursor, out var toolCloseTag))
+                    if (TryReadTag(rawContent, cursor, out var toolCloseTag) &&
+                        string.Equals(toolCloseTag.Name, toolElementName, StringComparison.OrdinalIgnoreCase))
                     {
                         toolEndIndex = toolCloseTag.EndIndex;
                         isInvocationClosed = true;
@@ -185,6 +189,7 @@ namespace Skyweaver.Services.SkyweaverTools
                         AddPartialParameterStart(
                             rawContent,
                             cursor,
+                            toolElementName,
                             parametersByName,
                             orderedParameters);
                     }
@@ -212,7 +217,7 @@ namespace Skyweaver.Services.SkyweaverTools
 
                 if (activeParameter == null)
                 {
-                    if (tag.Kind != ParsedTagKind.Start || string.Equals(tag.Name, "Tool", StringComparison.OrdinalIgnoreCase))
+                    if (tag.Kind != ParsedTagKind.Start || string.Equals(tag.Name, toolElementName, StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
                     }
@@ -337,11 +342,12 @@ namespace Skyweaver.Services.SkyweaverTools
         private static void AddPartialParameterStart(
             string rawContent,
             int tagStartIndex,
+            string toolElementName,
             IDictionary<string, ParameterBuilder> parametersByName,
             ICollection<ParameterBuilder> orderedParameters)
         {
             if (!TryReadPartialStartTag(rawContent, tagStartIndex, out var tag) ||
-                string.Equals(tag.Name, "Tool", StringComparison.OrdinalIgnoreCase))
+                string.Equals(tag.Name, toolElementName, StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
@@ -403,9 +409,9 @@ namespace Skyweaver.Services.SkyweaverTools
             return true;
         }
 
-        private static bool TryFindToolClose(string rawContent, int searchStartIndex, out int toolEndIndex)
+        private static bool TryFindToolClose(string rawContent, string toolElementName, int searchStartIndex, out int toolEndIndex)
         {
-            var toolCloseStartIndex = IndexOfClosingTagStart(rawContent, "Tool", searchStartIndex);
+            var toolCloseStartIndex = IndexOfClosingTagStart(rawContent, toolElementName, searchStartIndex);
             if (toolCloseStartIndex < 0)
             {
                 toolEndIndex = rawContent.Length;
@@ -548,6 +554,30 @@ namespace Skyweaver.Services.SkyweaverTools
             }
 
             builder.Append(rawText);
+        }
+
+        private static int FindNextToolTagIndex(
+            string text,
+            int startIndex,
+            out string toolElementName)
+        {
+            var asyncTagIndex = IndexOfOpeningTag(text, "ToolAsync", startIndex);
+            var syncTagIndex = IndexOfOpeningTag(text, "Tool", startIndex);
+
+            if (asyncTagIndex < 0 && syncTagIndex < 0)
+            {
+                toolElementName = string.Empty;
+                return -1;
+            }
+
+            if (syncTagIndex < 0 || (asyncTagIndex >= 0 && asyncTagIndex < syncTagIndex))
+            {
+                toolElementName = "ToolAsync";
+                return asyncTagIndex;
+            }
+
+            toolElementName = "Tool";
+            return syncTagIndex;
         }
 
         private static int IndexOfOpeningTag(string text, string elementName, int startIndex = 0)

@@ -145,10 +145,13 @@ namespace Skyweaver.Services.SkyweaverTools
         // <Tool ToolName="tool_name">
         //   <param_a>value</param_a>
         // </Tool>
+        // <ToolAsync ToolName="tool_name">
+        //   <param_a>value</param_a>
+        // </ToolAsync>
         //
         // Output XML:
         // <ToolsReturn>
-        //   <ToolReturn ToolName="tool_name">
+        //   <ToolReturn ToolName="tool_name" ToolCallId="TC1">
         //     <StringReturn1>...</StringReturn1>
         //   </ToolReturn>
         // </ToolsReturn>
@@ -161,9 +164,9 @@ namespace Skyweaver.Services.SkyweaverTools
 
             var invocationDocument = XDocument.Parse(toolInvocationXml, LoadOptions.PreserveWhitespace);
             var root = invocationDocument.Root;
-            if (root == null || !IsElementNamed(root, "Tool"))
+            if (root == null || !(IsElementNamed(root, "Tool") || IsElementNamed(root, "ToolAsync")))
             {
-                throw new InvalidOperationException("Tool invocation XML must use a single <Tool> root element.");
+                throw new InvalidOperationException("Tool invocation XML must use a single <Tool> or <ToolAsync> root element.");
             }
 
             return ParseInvocationDocument(invocationDocument);
@@ -222,12 +225,28 @@ namespace Skyweaver.Services.SkyweaverTools
 
         public SkyweaverToolReturnPayload CreateToolReturnPayload(string toolName, SkyweaverToolResult result)
         {
-            return new SkyweaverToolReturnPayload(toolName, result);
+            return CreateToolReturnPayload(toolName, result, toolCallId: null);
+        }
+
+        public SkyweaverToolReturnPayload CreateToolReturnPayload(
+            string toolName,
+            SkyweaverToolResult result,
+            string? toolCallId)
+        {
+            return new SkyweaverToolReturnPayload(toolName, result, toolCallId);
         }
 
         public SkyweaverToolReturnPayload CreateErrorToolReturnPayload(string toolName, string errorMessage)
         {
-            return CreateToolReturnPayload(toolName, SkyweaverToolResult.Failure(errorMessage));
+            return CreateErrorToolReturnPayload(toolName, errorMessage, toolCallId: null);
+        }
+
+        public SkyweaverToolReturnPayload CreateErrorToolReturnPayload(
+            string toolName,
+            string errorMessage,
+            string? toolCallId)
+        {
+            return CreateToolReturnPayload(toolName, SkyweaverToolResult.Failure(errorMessage), toolCallId);
         }
 
         public string BuildToolsReturnXml(IEnumerable<SkyweaverToolReturnPayload> toolReturns)
@@ -358,16 +377,17 @@ namespace Skyweaver.Services.SkyweaverTools
                 throw new InvalidOperationException("Tool invocation XML is missing a root element.");
             }
 
-            if (!IsElementNamed(root, "Tool"))
+            var isAsyncInvocation = IsElementNamed(root, "ToolAsync");
+            if (!(IsElementNamed(root, "Tool") || isAsyncInvocation))
             {
-                throw new InvalidOperationException("Tool invocation XML must use a single <Tool> root element.");
+                throw new InvalidOperationException("Tool invocation XML must use a single <Tool> or <ToolAsync> root element.");
             }
 
             var toolName = GetAttributeValue(root, "ToolName")
                 ?? GetAttributeValue(root, "Name");
             if (string.IsNullOrWhiteSpace(toolName))
             {
-                throw new InvalidOperationException("<Tool> element is missing ToolName.");
+                throw new InvalidOperationException($"<{root.Name.LocalName}> element is missing ToolName.");
             }
 
             return
@@ -375,7 +395,8 @@ namespace Skyweaver.Services.SkyweaverTools
                 new SkyweaverToolInvocation(
                     toolName,
                     ParseRawArguments(root),
-                    root)
+                    root,
+                    isAsyncInvocation)
             ];
         }
 
@@ -390,6 +411,9 @@ namespace Skyweaver.Services.SkyweaverTools
             var toolReturn = new XElement(
                 "ToolReturn",
                 new XAttribute("ToolName", payload.ToolName),
+                payload.ToolCallId == null
+                    ? null
+                    : new XAttribute("ToolCallId", payload.ToolCallId),
                 new XElement("StringReturn1", primaryMessage));
 
             if (!payload.IsSuccess)
@@ -586,6 +610,12 @@ namespace Skyweaver.Services.SkyweaverTools
             {
                 throw new InvalidOperationException(
                     $"Tool '{toolType.FullName}' changed its system-tool flag for '{baseDefinition.Name}'.");
+            }
+
+            if (baseDefinition.SupportsAsyncInvocation != effectiveDefinition.SupportsAsyncInvocation)
+            {
+                throw new InvalidOperationException(
+                    $"Tool '{toolType.FullName}' changed its async-invocation support for '{baseDefinition.Name}'.");
             }
         }
 

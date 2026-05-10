@@ -22,6 +22,8 @@ namespace Skyweaver.Services.SkyweaverTools
 
         public string ToolName { get; init; } = string.Empty;
 
+        public bool IsAsyncInvocation { get; init; }
+
         public string ToolXmlFragment { get; init; } = string.Empty;
 
         public bool IsInvocationClosed { get; init; }

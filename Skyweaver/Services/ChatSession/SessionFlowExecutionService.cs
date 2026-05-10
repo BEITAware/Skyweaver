@@ -325,6 +325,7 @@ namespace Skyweaver.Services.ChatSession
                     InputContentBlocks = agentInputContentBlocks,
                     History = agentHistory.ToArray(),
                     ToolContext = BuildToolContext(request),
+                    ToolCallIdFactory = request.ToolCallIdFactory,
                     EnableGemmaThoughtCompatibility = request.EnableGemmaThoughtCompatibility,
                     ToolConfirmationCallback = request.ToolConfirmationCallback,
                     EventSink = (update, ct) => PublishAgentLoopUpdateAsync(
@@ -901,19 +902,32 @@ namespace Skyweaver.Services.ChatSession
             IDictionary<string, string> toolCallIdsByKey,
             ISet<string> reservedToolCallIds)
         {
-            if (update.ToolCallIndex is not int toolCallIndex)
+            var providedToolCallId = ChatSessionToolCallIdGenerator.Normalize(update.ToolCallId);
+            if (providedToolCallId.Length > 0)
+            {
+                if (update.ToolCallIndex is int providedToolCallIndex)
+                {
+                    var providedToolCallKey = $"{update.IterationNumber}:{update.PartIndex ?? 0}:{providedToolCallIndex}";
+                    toolCallIdsByKey[providedToolCallKey] = providedToolCallId;
+                }
+
+                reservedToolCallIds.Add(providedToolCallId);
+                return providedToolCallId;
+            }
+
+            if (update.ToolCallIndex is not int generatedToolCallIndex)
             {
                 return null;
             }
 
-            var key = $"{update.IterationNumber}:{update.PartIndex ?? 0}:{toolCallIndex}";
-            if (toolCallIdsByKey.TryGetValue(key, out var existingId))
+            var generatedToolCallKey = $"{update.IterationNumber}:{update.PartIndex ?? 0}:{generatedToolCallIndex}";
+            if (toolCallIdsByKey.TryGetValue(generatedToolCallKey, out var existingId))
             {
                 return existingId;
             }
 
             var toolCallId = ChatSessionToolCallIdGenerator.Create(request.Session, reservedToolCallIds);
-            toolCallIdsByKey[key] = toolCallId;
+            toolCallIdsByKey[generatedToolCallKey] = toolCallId;
             return toolCallId;
         }
 

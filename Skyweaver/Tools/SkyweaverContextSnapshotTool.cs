@@ -47,7 +47,9 @@ namespace Skyweaver.Tools
                     SkyweaverToolParameterType.Boolean,
                     isRequired: false,
                     defaultValue: "false")
-            ]);
+            ],
+            defaultAgentPermission: SkyweaverToolDefaultAgentPermission.Allow,
+            defaultToolKitKeys: ["diagnostics"]);
 
         public SkyweaverToolDefinition Definition => s_definition;
 

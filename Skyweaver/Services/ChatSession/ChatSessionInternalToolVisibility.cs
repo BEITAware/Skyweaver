@@ -11,6 +11,10 @@ namespace Skyweaver.Services.ChatSession
             return string.Equals(
                 toolName?.Trim(),
                 SkyweaverBuiltInToolNames.Passdown,
+                StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(
+                       toolName?.Trim(),
+                       SkyweaverBuiltInToolNames.WaitForAsyncTools,
                 StringComparison.OrdinalIgnoreCase);
         }
 
@@ -21,8 +25,8 @@ namespace Skyweaver.Services.ChatSession
                 return false;
             }
 
-            return HasPassdownToolAttribute(xml, "ToolName") ||
-                   HasPassdownToolAttribute(xml, "Name");
+            return HasInternalToolAttribute(xml, "ToolName") ||
+                   HasInternalToolAttribute(xml, "Name");
         }
 
         public static bool IsInternalToolToolsReturnXml(string? xml)
@@ -33,8 +37,8 @@ namespace Skyweaver.Services.ChatSession
                 return false;
             }
 
-            return HasPassdownToolAttribute(xml, "ToolName") ||
-                   HasPassdownToolAttribute(xml, "Name");
+            return HasInternalToolAttribute(xml, "ToolName") ||
+                   HasInternalToolAttribute(xml, "Name");
         }
 
         public static bool IsInternalToolPart(ChatMessagePartModel? part)
@@ -72,10 +76,12 @@ namespace Skyweaver.Services.ChatSession
                    IsInternalToolToolsReturnXml(runtimeEvent.ToolOutputXml);
         }
 
-        private static bool HasPassdownToolAttribute(string xml, string attributeName)
+        private static bool HasInternalToolAttribute(string xml, string attributeName)
         {
             return xml.IndexOf($"{attributeName}=\"{SkyweaverBuiltInToolNames.Passdown}\"", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                   xml.IndexOf($"{attributeName}='{SkyweaverBuiltInToolNames.Passdown}'", StringComparison.OrdinalIgnoreCase) >= 0;
+                   xml.IndexOf($"{attributeName}='{SkyweaverBuiltInToolNames.Passdown}'", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   xml.IndexOf($"{attributeName}=\"{SkyweaverBuiltInToolNames.WaitForAsyncTools}\"", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   xml.IndexOf($"{attributeName}='{SkyweaverBuiltInToolNames.WaitForAsyncTools}'", StringComparison.OrdinalIgnoreCase) >= 0;
         }
     }
 }

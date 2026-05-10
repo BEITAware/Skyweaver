@@ -1024,7 +1024,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                     permission = new AgentToolPermissionDefinition
                     {
                         ToolName = toolRegistration.Name,
-                        Permission = AgentToolPermissionMode.RequireConfirmation
+                        Permission = ResolveDefaultPermission(toolRegistration.Name)
                     };
                 }
                 else
@@ -1064,6 +1064,26 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             {
                 agent.ToolPermissions.Add(permission);
             }
+        }
+
+        private static AgentToolPermissionMode MapDefaultPermission(SkyweaverToolDefaultAgentPermission defaultPermission)
+        {
+            return defaultPermission switch
+            {
+                SkyweaverToolDefaultAgentPermission.Disabled => AgentToolPermissionMode.Disabled,
+                SkyweaverToolDefaultAgentPermission.Allow => AgentToolPermissionMode.Allow,
+                _ => AgentToolPermissionMode.RequireConfirmation
+            };
+        }
+
+        private AgentToolPermissionMode ResolveDefaultPermission(string toolName)
+        {
+            var registration = _toolManager.GetRegisteredTools(resolveIcons: false).FirstOrDefault(item =>
+                string.Equals(item.Definition.Name, toolName, StringComparison.OrdinalIgnoreCase));
+
+            return registration == null
+                ? AgentToolPermissionMode.RequireConfirmation
+                : MapDefaultPermission(registration.Definition.DefaultAgentPermission);
         }
 
         private static string CreateUniqueNodeName(XmlElementNodeDefinition parentNode, string baseName)

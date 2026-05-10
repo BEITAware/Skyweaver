@@ -60,7 +60,8 @@ namespace Skyweaver.Tools
                     SkyweaverToolParameterType.String,
                     isRequired: false,
                     defaultValue: "utf-8")
-            ]);
+            ],
+            defaultAgentPermission: SkyweaverToolDefaultAgentPermission.Allow);
 
         public SkyweaverToolDefinition Definition => s_definition;
 

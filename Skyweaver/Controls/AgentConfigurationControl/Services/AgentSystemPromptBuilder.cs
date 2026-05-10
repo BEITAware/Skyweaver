@@ -148,6 +148,9 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
             }
 
             builder.AppendLine("- 调用 Passdown 后，Host 会返回工具结果并自动继续代理循环。之后如果不再需要工具，直接输出最终聊天内容或留空结束。");
+            builder.AppendLine($"- {SkyweaverBuiltInToolNames.WaitForAsyncTools}：等待若干异步工具调用完成。它只能同步调用，不能使用 <ToolAsync>。");
+            builder.AppendLine($"  调用格式：<Tool ToolName=\"{SkyweaverBuiltInToolNames.WaitForAsyncTools}\"><{SkyweaverBuiltInToolNames.WaitForAsyncToolsParameter}>[\"TC1\",\"TC2\"]</{SkyweaverBuiltInToolNames.WaitForAsyncToolsParameter}></Tool>");
+            builder.AppendLine("  参数是之前异步工具回填中返回的 ToolCallId JSON 数组。它会阻塞代理循环直到这些工具全部完成；工具的实际结果会在随后第一个代理循环回填。");
             builder.AppendLine();
         }
 
@@ -156,13 +159,14 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
             IReadOnlyList<SkyweaverPromptToolDefinition> tools,
             bool supportsHostToolConfirmation)
         {
-            builder.AppendLine("可调用外部工具");
+            builder.AppendLine("外部工具");
+            builder.AppendLine("- 默认使用 <Tool>；只有当你判断某个工具调用可能阻塞很久且不需要立刻获得结果时，才使用 <ToolAsync>。");
 
             if (tools.Count == 0)
             {
                 builder.AppendLine(supportsHostToolConfirmation
-                    ? "- 当前该代理没有可用的外部可调用工具。"
-                    : "- 当前该代理没有可用的外部可调用工具。仅需 Host 确认的工具因宿主不支持确认而被隐藏。");
+                    ? "- 当前该代理没有可用的外部工具。"
+                    : "- 当前该代理没有可用的外部工具。仅需 Host 确认的工具因宿主不支持确认而被隐藏。");
                 builder.AppendLine();
                 return;
             }
@@ -179,19 +183,25 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
         {
             builder.AppendLine("聊天与工具协议");
             builder.AppendLine("- 普通聊天内容直接写正文，不要把聊天消息包进 XML 工具树。正文会被 Host 持续流式显示。");
-            builder.AppendLine("- 需要调用工具时，只输出一个或多个独立的 <Tool ToolName=\"...\">...</Tool> 标签。不要再使用 <Tools> 根节点。");
-            builder.AppendLine("- <Tool> 标签之外的文本会被当成可见聊天内容；<Tool> 标签本身会被 Host 捕获、流式呈现为工具调用卡片，并从聊天正文中移除。");
-            builder.AppendLine("- 只要本次 assistant 响应包含任意 <Tool> 调用，Host 就会按出现顺序执行工具并自动继续下一轮代理循环。");
-            builder.AppendLine("- 如果本次 assistant 响应不包含 <Tool> 调用，Host 会自动结束当前代理循环。");
+            builder.AppendLine("- 需要调用外部工具时，默认输出一个或多个独立的 <Tool ToolName=\"...\">...</Tool> 标签。只有当你判断某个工具调用可能阻塞很久且不需要立刻获得结果时，才改用 <ToolAsync ToolName=\"...\">...</ToolAsync>。不要再使用 <Tools> 根节点。");
+            builder.AppendLine($"- 同步内置工具使用 <Tool ToolName=\"...\">...</Tool> 标签；当前包括 {SkyweaverBuiltInToolNames.Passdown} 和 {SkyweaverBuiltInToolNames.WaitForAsyncTools}。不要用 <ToolAsync> 调用 {SkyweaverBuiltInToolNames.WaitForAsyncTools}。");
+            builder.AppendLine("- <ToolAsync> 或 <Tool> 标签之外的文本会被当成可见聊天内容；工具标签本身会被 Host 捕获、流式呈现为工具调用卡片，并从聊天正文中移除。");
+            builder.AppendLine("- 只要本次 assistant 响应包含任意工具调用，Host 就会按出现顺序发起或执行工具并自动继续下一轮代理循环。");
+            builder.AppendLine("- 如果本次 assistant 响应不包含工具调用，Host 会自动结束当前代理循环。");
+            builder.AppendLine("- <ToolAsync> 调用会产生两次回填：第一次立即返回是否成功发起以及 ToolCallId；第二次在工具完成后的第一个代理循环返回实际结果。");
+            builder.AppendLine($"- 如果需要等待若干异步工具的实际结果，先读取第一次回填中的 ToolCallId，再调用 <Tool ToolName=\"{SkyweaverBuiltInToolNames.WaitForAsyncTools}\"> 等待这些 ID。");
             builder.AppendLine("- 不要调用未列出的外部工具。不要使用 CreateMessage、FinishTask、<tool_call>、<function_call> 或其他旧式伪协议。");
-            builder.AppendLine("- 工具参数写成子元素：");
-            builder.AppendLine("  <Tool ToolName=\"ToolName\">");
+            builder.AppendLine("- 工具参数写成子元素；同步和异步都用同样的参数结构：");
+            builder.AppendLine("  同步示例：<Tool ToolName=\"ToolName\">");
             builder.AppendLine("    <ParameterName>value</ParameterName>");
             builder.AppendLine("  </Tool>");
+            builder.AppendLine("  异步示例：<ToolAsync ToolName=\"ToolName\">");
+            builder.AppendLine("    <ParameterName>value</ParameterName>");
+            builder.AppendLine("  </ToolAsync>");
 
             if (hasExternalTools)
             {
-                builder.AppendLine("- 可以在一次响应中连续放置多个 <Tool> 标签；Host 会按标签出现顺序执行。");
+                builder.AppendLine("- 可以在一次响应中连续放置多个 <Tool> 或 <ToolAsync> 标签；Host 会按标签出现顺序处理工具调用。普通工具优先使用 <Tool>。");
             }
             else
             {
@@ -231,9 +241,9 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
             builder.AppendLine("响应规则");
             builder.AppendLine("- 若只是回答用户或结束当前代理循环，直接输出最终内容，不要调用工具。");
             builder.AppendLine("- 如果还需要代理循环继续，必须调用工具，否则代理循环将结束。");
-            builder.AppendLine("- 若需要工具结果，输出 <Tool> 标签并等待 Host 自动继续。");
+            builder.AppendLine($"- 若需要外部工具结果，默认输出 <Tool> 标签；只有当你判断某个调用可能阻塞很久且不需要立刻结果时，才使用 <ToolAsync>。若要阻塞直到若干结果就绪，使用 <Tool ToolName=\"{SkyweaverBuiltInToolNames.WaitForAsyncTools}\">。");
             builder.AppendLine("- 不要输出格式错误的 XML 工具标签；Host 不会修复工具 XML。");
-            builder.AppendLine("- 若正文需要提到字面量 <Tool> 标签，请使用实体转义（例如 &lt;Tool&gt;），否则 Host 会把它当成工具调用。");
+            builder.AppendLine("- 若正文需要提到字面量 <Tool> 或 <ToolAsync> 标签，请使用实体转义（例如 &lt;ToolAsync&gt;），否则 Host 会把它当成工具调用。");
 
             if (agent.IsStructuredXmlIO)
             {

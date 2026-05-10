@@ -501,6 +501,7 @@ namespace Skyweaver.Services.AgentLoop
                 {
                     backfill.PartIndex,
                     backfill.ToolCallIndex,
+                    backfill.ToolCallId,
                     backfill.ToolsReturnXml,
                     ToolReturns = backfill.ToolReturns.Select(BuildToolReturnRecord).ToArray()
                 })
@@ -515,6 +516,7 @@ namespace Skyweaver.Services.AgentLoop
             return new
             {
                 ToolName = invocation.ToolName,
+                invocation.IsAsyncInvocation,
                 InvocationXml = invocation.InvocationXml,
                 RawArguments = invocation.RawArguments
                     .OrderBy(item => item.Key, StringComparer.OrdinalIgnoreCase)
