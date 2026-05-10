@@ -141,6 +141,8 @@ namespace Skyweaver.Services.ChatSession
 
         public bool EnableGemmaThoughtCompatibility { get; init; } = true;
 
+        public Func<string>? ToolCallIdFactory { get; init; }
+
         public Func<AgentToolConfirmationRequest, CancellationToken, Task<AgentToolConfirmationResult>>? ToolConfirmationCallback { get; init; }
     }
 
@@ -166,6 +168,8 @@ namespace Skyweaver.Services.ChatSession
             Array.Empty<LanguageModelChatMessage>();
 
         public SkyweaverToolContext ToolContext { get; init; } = new();
+
+        public Func<string>? ToolCallIdFactory { get; init; }
 
         public Func<AgentLoopRuntimeEvent, CancellationToken, ValueTask>? EventSink { get; init; }
 

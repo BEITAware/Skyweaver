@@ -6,6 +6,7 @@ using Skyweaver.Controls.AgentConfigurationControl.Models;
 using Skyweaver.Controls.AgentConfigurationControl.Services;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Models;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
+using Skyweaver.Services.ChatSession;
 using Skyweaver.Services.SkyweaverTools;
 
 namespace Skyweaver.Services.AgentLoop
@@ -15,11 +16,24 @@ namespace Skyweaver.Services.AgentLoop
         private const int MaxIterations = 64;
         private const int StreamingTraceRawContentTailLength = 256;
         private const string ToolParseErrorName = "_tool_parse_error";
+        private const string SyncToolTagName = "Tool";
+        private const string AsyncToolTagName = "ToolAsync";
 
         private sealed record ToolExecutionAuthorization(
             bool CanExecute,
             bool HasHostConfirmation,
             string? ErrorMessage);
+
+        private sealed record PendingAsyncToolExecution(
+            string ToolCallId,
+            int PartIndex,
+            int ToolCallIndex,
+            SkyweaverToolInvocation Invocation,
+            Task<SkyweaverToolResult> ExecutionTask);
+
+        private sealed record AsyncToolFlushResult(
+            IReadOnlyList<AgentToolBackfill> ToolBackfills,
+            IReadOnlyList<string> NewlyLoadedToolKitKeys);
 
         private sealed record StreamedResponseResult(
             int AttemptNumber,
@@ -266,12 +280,28 @@ namespace Skyweaver.Services.AgentLoop
                 .ToList();
             var turnHistory = new List<LanguageModelChatMessage>();
             var iterations = new List<AgentLoopIteration>();
+            var pendingAsyncToolExecutions = new List<PendingAsyncToolExecution>();
+            var completedAsyncToolResultsById = new Dictionary<string, SkyweaverToolReturnPayload>(StringComparer.OrdinalIgnoreCase);
             string? lastModelId = null;
             AgentLoopFinalOutput? latestPassdownOutput = null;
 
             for (var iterationNumber = 1; iterationNumber <= MaxIterations; iterationNumber++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+
+                var flushedAsyncTools = await FlushCompletedAsyncToolBackfillsAsync(
+                    request,
+                    pendingAsyncToolExecutions,
+                    completedAsyncToolResultsById,
+                    turnHistory,
+                    iterationNumber,
+                    onEventAsync,
+                    cancellationToken).ConfigureAwait(false);
+
+                foreach (var toolKitKey in flushedAsyncTools.NewlyLoadedToolKitKeys)
+                {
+                    activeToolKitKeys.Add(toolKitKey);
+                }
 
                 var preparedContext = await _contextManager.PrepareAsync(
                     request.Agent,
@@ -329,6 +359,8 @@ namespace Skyweaver.Services.AgentLoop
                         runtimeToolContext,
                         toolKitMembershipMap,
                         activeToolKitKeys,
+                        pendingAsyncToolExecutions,
+                        completedAsyncToolResultsById,
                         debugRunContext,
                         iterationNumber,
                         latestPassdownOutput,
@@ -361,6 +393,10 @@ namespace Skyweaver.Services.AgentLoop
                     activeToolKitKeys.Add(toolKitKey);
                 }
 
+                var iterationToolBackfills = flushedAsyncTools.ToolBackfills
+                    .Concat(response.ToolBackfills)
+                    .ToArray();
+
                 AppendCurrentTurnHistory(
                     response.AssistantResponse,
                     response.ToolBackfills,
@@ -373,7 +409,7 @@ namespace Skyweaver.Services.AgentLoop
                     response.AttemptNumber,
                     response.ModelId,
                     response.AssistantResponse,
-                    response.ToolBackfills,
+                    iterationToolBackfills,
                     response.FinalOutput);
 
                 iterations.Add(new AgentLoopIteration
@@ -381,7 +417,7 @@ namespace Skyweaver.Services.AgentLoop
                     IterationNumber = iterationNumber,
                     ModelId = response.ModelId,
                     AssistantResponse = response.AssistantResponse,
-                    ToolBackfills = response.ToolBackfills,
+                    ToolBackfills = iterationToolBackfills,
                     FinalOutput = response.FinalOutput,
                     ContextCompression = preparedContext.ContextCompression
                 });
@@ -424,6 +460,8 @@ namespace Skyweaver.Services.AgentLoop
             SkyweaverToolContext runtimeToolContext,
             IReadOnlyDictionary<string, IReadOnlyList<string>> toolKitMembershipMap,
             IReadOnlyCollection<string> activeToolKitKeys,
+            IList<PendingAsyncToolExecution> pendingAsyncToolExecutions,
+            IDictionary<string, SkyweaverToolReturnPayload> completedAsyncToolResultsById,
             AgentLoopDebugRunContext? debugRunContext,
             int iterationNumber,
             AgentLoopFinalOutput? latestPassdownOutput,
@@ -470,6 +508,7 @@ namespace Skyweaver.Services.AgentLoop
                         .Select(registration => registration.Definition));
                 IReadOnlyList<SkyweaverStreamingToolCallSnapshot> previousToolCallSnapshots =
                     Array.Empty<SkyweaverStreamingToolCallSnapshot>();
+                var asyncToolCallIdsByIndex = new Dictionary<int, string>();
                 var presentationTracker = new AssistantPresentationStreamingTracker(
                     request.Agent.IsStructuredXmlIO
                         ? AgentLoopOutputKind.StructuredXml
@@ -548,6 +587,8 @@ namespace Skyweaver.Services.AgentLoop
                             onEventAsync,
                             currentToolCallSnapshots,
                             previousToolCallSnapshots,
+                            asyncToolCallIdsByIndex,
+                            request.ToolCallIdFactory,
                             iterationNumber,
                             modelId,
                             cancellationToken).ConfigureAwait(false);
@@ -590,6 +631,8 @@ namespace Skyweaver.Services.AgentLoop
                         onEventAsync,
                         finalToolCallSnapshots,
                         previousToolCallSnapshots,
+                        asyncToolCallIdsByIndex,
+                        request.ToolCallIdFactory,
                         iterationNumber,
                         modelId,
                         cancellationToken).ConfigureAwait(false);
@@ -621,6 +664,10 @@ namespace Skyweaver.Services.AgentLoop
                             runtimeToolContext,
                             toolKitMembershipMap,
                             activeToolKitKeys,
+                            pendingAsyncToolExecutions,
+                            completedAsyncToolResultsById,
+                            asyncToolCallIdsByIndex,
+                            request.ToolCallIdFactory,
                             iterationNumber,
                             modelId,
                             latestPassdownOutput,
@@ -797,6 +844,10 @@ namespace Skyweaver.Services.AgentLoop
                 SkyweaverToolContext runtimeToolContext,
                 IReadOnlyDictionary<string, IReadOnlyList<string>> toolKitMembershipMap,
                 IReadOnlyCollection<string> activeToolKitKeys,
+                IList<PendingAsyncToolExecution> pendingAsyncToolExecutions,
+                IDictionary<string, SkyweaverToolReturnPayload> completedAsyncToolResultsById,
+                IDictionary<int, string> asyncToolCallIdsByIndex,
+                Func<string>? toolCallIdFactory,
                 int iterationNumber,
                 string? modelId,
                 AgentLoopFinalOutput? latestPassdownOutput,
@@ -819,12 +870,19 @@ namespace Skyweaver.Services.AgentLoop
 
                 if (part.HasParseError || part.ToolCalls.Count == 0)
                 {
+                    var malformedToolCallId = asyncToolCallIdsByIndex.TryGetValue(
+                        part.ToolCallIndex,
+                        out var existingToolCallId)
+                        ? existingToolCallId
+                        : null;
                     var backfill = CreateBackfill(
                         partIndex,
                         part.ToolCallIndex,
                         [_toolManager.CreateErrorToolReturnPayload(
                             ToolParseErrorName,
-                            part.ParseError ?? "Tool call could not be parsed.")]);
+                            part.ParseError ?? "Tool call could not be parsed.",
+                            malformedToolCallId)],
+                        malformedToolCallId);
                     toolBackfills.Add(backfill);
 
                     await PublishAsync(
@@ -836,6 +894,7 @@ namespace Skyweaver.Services.AgentLoop
                             ModelId = modelId,
                             PartIndex = partIndex,
                             ToolCallIndex = part.ToolCallIndex,
+                            ToolCallId = backfill.ToolCallId,
                             ToolXml = part.Content,
                             ToolOutputXml = backfill.ToolsReturnXml,
                             ToolReturns = backfill.ToolReturns,
@@ -850,19 +909,103 @@ namespace Skyweaver.Services.AgentLoop
                 {
                     AgentToolBackfill backfill;
 
-                    if (IsPassdown(invocation.ToolName))
+                    if (IsWaitForAsyncTools(invocation.ToolName))
                     {
-                        backfill = ExecutePassdownInvocation(
-                            request.Agent,
+                        if (invocation.IsAsyncInvocation)
+                        {
+                            var asyncToolCallId = ResolveAsyncToolCallId(
+                                part.ToolCallIndex,
+                                asyncToolCallIdsByIndex,
+                                toolCallIdFactory);
+                            var failurePayload = _toolManager.CreateErrorToolReturnPayload(
+                                SkyweaverBuiltInToolNames.WaitForAsyncTools,
+                                "WaitForAsyncTools cannot be invoked asynchronously.",
+                                asyncToolCallId);
+                            backfill = CreateBackfill(
+                                partIndex,
+                                part.ToolCallIndex,
+                                [failurePayload],
+                                asyncToolCallId);
+                        }
+                        else
+                        {
+                            try
+                            {
+                                var result = await ExecuteWaitForAsyncToolsAsync(
+                                    invocation,
+                                    pendingAsyncToolExecutions,
+                                    completedAsyncToolResultsById,
+                                    cancellationToken).ConfigureAwait(false);
+                                var payload = _toolManager.CreateToolReturnPayload(
+                                    SkyweaverBuiltInToolNames.WaitForAsyncTools,
+                                    result);
+                                backfill = CreateBackfill(partIndex, part.ToolCallIndex, [payload]);
+                            }
+                            catch (OperationCanceledException)
+                            {
+                                throw;
+                            }
+                            catch (Exception ex)
+                            {
+                                var failurePayload = _toolManager.CreateErrorToolReturnPayload(
+                                    SkyweaverBuiltInToolNames.WaitForAsyncTools,
+                                    $"WaitForAsyncTools execution failed: {ex.Message}");
+                                backfill = CreateBackfill(partIndex, part.ToolCallIndex, [failurePayload]);
+                            }
+                        }
+                    }
+                    else if (IsPassdown(invocation.ToolName))
+                    {
+                        if (invocation.IsAsyncInvocation)
+                        {
+                            var asyncToolCallId = ResolveAsyncToolCallId(
+                                part.ToolCallIndex,
+                                asyncToolCallIdsByIndex,
+                                toolCallIdFactory);
+                            var failurePayload = _toolManager.CreateErrorToolReturnPayload(
+                                SkyweaverBuiltInToolNames.Passdown,
+                                "Passdown cannot be invoked asynchronously.",
+                                asyncToolCallId);
+                            completedAsyncToolResultsById[asyncToolCallId] = failurePayload;
+                            backfill = CreateBackfill(
+                                partIndex,
+                                part.ToolCallIndex,
+                                [failurePayload],
+                                asyncToolCallId);
+                        }
+                        else
+                        {
+                            backfill = ExecutePassdownInvocation(
+                                request.Agent,
+                                invocation,
+                                partIndex,
+                                part.ToolCallIndex,
+                                out var passdownOutput);
+
+                            if (passdownOutput != null)
+                            {
+                                currentPassdownOutput = passdownOutput;
+                            }
+                        }
+                    }
+                    else if (invocation.IsAsyncInvocation)
+                    {
+                        backfill = await ExecuteAsyncToolInvocationAsync(
+                            request,
                             invocation,
+                            runtimeToolContext,
+                            toolKitMembershipMap,
+                            activeToolKitKeys,
+                            pendingAsyncToolExecutions,
+                            completedAsyncToolResultsById,
+                            asyncToolCallIdsByIndex,
+                            toolCallIdFactory,
+                            iterationNumber,
                             partIndex,
                             part.ToolCallIndex,
-                            out var passdownOutput);
-
-                        if (passdownOutput != null)
-                        {
-                            currentPassdownOutput = passdownOutput;
-                        }
+                            modelId,
+                            onEventAsync,
+                            cancellationToken).ConfigureAwait(false);
                     }
                     else
                     {
@@ -899,6 +1042,7 @@ namespace Skyweaver.Services.AgentLoop
                             ModelId = modelId,
                             PartIndex = partIndex,
                             ToolCallIndex = part.ToolCallIndex,
+                            ToolCallId = backfill.ToolCallId,
                             ToolInvocation = invocation,
                             ToolOutputXml = backfill.ToolsReturnXml,
                             ToolReturns = backfill.ToolReturns
@@ -910,10 +1054,102 @@ namespace Skyweaver.Services.AgentLoop
             return (toolBackfills, currentPassdownOutput, newlyLoadedToolKitKeys.ToArray());
         }
 
+        private async Task<AsyncToolFlushResult> FlushCompletedAsyncToolBackfillsAsync(
+            AgentLoopRequest request,
+            IList<PendingAsyncToolExecution> pendingAsyncToolExecutions,
+            IDictionary<string, SkyweaverToolReturnPayload> completedAsyncToolResultsById,
+            ICollection<LanguageModelChatMessage> turnHistory,
+            int iterationNumber,
+            Func<AgentLoopRuntimeEvent, CancellationToken, ValueTask>? onEventAsync,
+            CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            ArgumentNullException.ThrowIfNull(pendingAsyncToolExecutions);
+            ArgumentNullException.ThrowIfNull(completedAsyncToolResultsById);
+            ArgumentNullException.ThrowIfNull(turnHistory);
+
+            if (pendingAsyncToolExecutions.Count == 0)
+            {
+                return new AsyncToolFlushResult(Array.Empty<AgentToolBackfill>(), Array.Empty<string>());
+            }
+
+            var flushedBackfills = new List<AgentToolBackfill>();
+            var newlyLoadedToolKitKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            for (var index = pendingAsyncToolExecutions.Count - 1; index >= 0; index--)
+            {
+                var execution = pendingAsyncToolExecutions[index];
+                if (!execution.ExecutionTask.IsCompleted)
+                {
+                    continue;
+                }
+
+                pendingAsyncToolExecutions.RemoveAt(index);
+                cancellationToken.ThrowIfCancellationRequested();
+
+                SkyweaverToolReturnPayload payload;
+                try
+                {
+                    var result = await execution.ExecutionTask.ConfigureAwait(false);
+                    payload = _toolManager.CreateToolReturnPayload(
+                        execution.Invocation.ToolName,
+                        result,
+                        execution.ToolCallId);
+
+                    if (IsLoadToolKits(execution.Invocation.ToolName))
+                    {
+                        foreach (var toolKitKey in ExtractLoadedToolKitKeys([payload]))
+                        {
+                            newlyLoadedToolKitKeys.Add(toolKitKey);
+                        }
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    payload = _toolManager.CreateErrorToolReturnPayload(
+                        execution.Invocation.ToolName,
+                        $"Tool execution failed: {ex.Message}",
+                        execution.ToolCallId);
+                }
+
+                completedAsyncToolResultsById[execution.ToolCallId] = payload;
+                var backfill = CreateBackfill(
+                    execution.PartIndex,
+                    execution.ToolCallIndex,
+                    [payload],
+                    execution.ToolCallId);
+                flushedBackfills.Add(backfill);
+                turnHistory.Add(CreateToolResultMessage(backfill));
+
+                await PublishAsync(
+                    onEventAsync,
+                    new AgentLoopRuntimeEvent
+                    {
+                        Kind = AgentLoopRuntimeEventKind.ToolOutputReceived,
+                        IterationNumber = iterationNumber,
+                        PartIndex = execution.PartIndex,
+                        ToolCallIndex = execution.ToolCallIndex,
+                        ToolCallId = execution.ToolCallId,
+                        ToolInvocation = execution.Invocation,
+                        ToolOutputXml = backfill.ToolsReturnXml,
+                        ToolReturns = backfill.ToolReturns
+                    },
+                    cancellationToken).ConfigureAwait(false);
+            }
+
+            return new AsyncToolFlushResult(flushedBackfills, newlyLoadedToolKitKeys.ToArray());
+        }
+
         private static async Task PublishStreamingToolCallUpdatesAsync(
             Func<AgentLoopRuntimeEvent, CancellationToken, ValueTask>? onEventAsync,
             IReadOnlyList<SkyweaverStreamingToolCallSnapshot> currentSnapshots,
             IReadOnlyList<SkyweaverStreamingToolCallSnapshot> previousSnapshots,
+            IDictionary<int, string> asyncToolCallIdsByIndex,
+            Func<string>? toolCallIdFactory,
             int iterationNumber,
             string? modelId,
             CancellationToken cancellationToken)
@@ -949,6 +1185,12 @@ namespace Skyweaver.Services.AgentLoop
                         ModelId = modelId,
                         PartIndex = snapshot.PartIndex,
                         ToolCallIndex = snapshot.ToolCallIndex,
+                        ToolCallId = snapshot.IsAsyncInvocation
+                            ? ResolveAsyncToolCallId(
+                                snapshot.ToolCallIndex,
+                                asyncToolCallIdsByIndex,
+                                toolCallIdFactory)
+                            : null,
                         ToolCallSnapshot = snapshot,
                         ToolXml = snapshot.ToolXmlFragment
                     },
@@ -1006,6 +1248,7 @@ namespace Skyweaver.Services.AgentLoop
             return left.PartIndex == right.PartIndex &&
                    left.ToolCallIndex == right.ToolCallIndex &&
                    string.Equals(left.ToolName, right.ToolName, StringComparison.OrdinalIgnoreCase) &&
+                   left.IsAsyncInvocation == right.IsAsyncInvocation &&
                    left.IsInvocationClosed == right.IsInvocationClosed &&
                    string.Equals(left.ToolXmlFragment, right.ToolXmlFragment, StringComparison.Ordinal) &&
                    AreEquivalent(left.Parameters, right.Parameters);
@@ -1110,7 +1353,7 @@ namespace Skyweaver.Services.AgentLoop
 
             while (index < content.Length)
             {
-                var toolStartIndex = IndexOfOpeningTag(content, "Tool", index);
+                var toolStartIndex = FindNextToolTagIndex(content, index, out var toolElementName);
                 if (toolStartIndex < 0)
                 {
                     AddNaturalLanguagePart(parts, content[index..]);
@@ -1129,20 +1372,20 @@ namespace Skyweaver.Services.AgentLoop
                     parts.Add(AgentAssistantResponsePart.CreateToolCall(
                         content[toolStartIndex..],
                         Array.Empty<SkyweaverToolInvocation>(),
-                        "The <Tool> opening tag is incomplete.",
+                        $"The <{toolElementName}> opening tag is incomplete.",
                         toolCallIndex));
                     break;
                 }
 
                 var toolEndIndex = IsSelfClosingTag(content[toolStartIndex..toolOpenTagEndIndex])
                     ? toolOpenTagEndIndex
-                    : IndexOfClosingElementEnd(content, "Tool", toolOpenTagEndIndex);
+                    : IndexOfClosingElementEnd(content, toolElementName, toolOpenTagEndIndex);
                 if (toolEndIndex < 0)
                 {
                     parts.Add(AgentAssistantResponsePart.CreateToolCall(
                         content[toolStartIndex..],
                         Array.Empty<SkyweaverToolInvocation>(),
-                        "The <Tool> element is missing a closing </Tool> tag.",
+                        $"The <{toolElementName}> element is missing a closing </{toolElementName}> tag.",
                         toolCallIndex));
                     break;
                 }
@@ -1349,9 +1592,9 @@ namespace Skyweaver.Services.AgentLoop
                         rawContent[index..nextTagIndex]);
                 }
 
-                if (IsOpeningTagAt(rawContent, "Tool", nextTagIndex))
+                if (FindNextToolTagIndex(rawContent, nextTagIndex, out var toolElementName) == nextTagIndex)
                 {
-                    var toolEndIndex = ResolveToolElementEnd(rawContent, nextTagIndex, isFinal);
+                    var toolEndIndex = ResolveToolElementEnd(rawContent, nextTagIndex, toolElementName, isFinal);
                     if (toolEndIndex < 0)
                     {
                         protocolBuilder.Append(rawContent, nextTagIndex, rawContent.Length - nextTagIndex);
@@ -1484,10 +1727,16 @@ namespace Skyweaver.Services.AgentLoop
         private static string TrimTrailingPotentialGemmaTagPrefix(string text)
         {
             var trailingPrefixLength = Math.Max(
-                GetTrailingPotentialTagPrefixLength(text, "<Tool"),
                 Math.Max(
-                    GetTrailingPotentialTagPrefixLength(text, "<thought"),
-                    GetTrailingPotentialTagPrefixLength(text, "</thought")));
+                    GetTrailingPotentialTagPrefixLength(text, "<Tool"),
+                    GetTrailingPotentialTagPrefixLength(text, "<ToolAsync")),
+                Math.Max(
+                    Math.Max(
+                        GetTrailingPotentialTagPrefixLength(text, "</Tool"),
+                        GetTrailingPotentialTagPrefixLength(text, "</ToolAsync")),
+                    Math.Max(
+                        GetTrailingPotentialTagPrefixLength(text, "<thought"),
+                        GetTrailingPotentialTagPrefixLength(text, "</thought"))));
             return trailingPrefixLength <= 0
                 ? text
                 : text[..(text.Length - trailingPrefixLength)];
@@ -1496,7 +1745,7 @@ namespace Skyweaver.Services.AgentLoop
         private static int FindNextGemmaRelevantTagIndex(string text, int startIndex)
         {
             return MinNonNegative(
-                IndexOfOpeningTag(text, "Tool", startIndex),
+                FindNextToolTagIndex(text, startIndex, out _),
                 IndexOfOpeningTag(text, "thought", startIndex),
                 IndexOfClosingTagStart(text, "thought", startIndex));
         }
@@ -1517,7 +1766,11 @@ namespace Skyweaver.Services.AgentLoop
             return minimum;
         }
 
-        private static int ResolveToolElementEnd(string text, int toolStartIndex, bool isFinal)
+        private static int ResolveToolElementEnd(
+            string text,
+            int toolStartIndex,
+            string toolElementName,
+            bool isFinal)
         {
             var toolOpenTagEndIndex = FindTagEnd(text, toolStartIndex);
             if (toolOpenTagEndIndex < 0)
@@ -1530,7 +1783,7 @@ namespace Skyweaver.Services.AgentLoop
                 return toolOpenTagEndIndex;
             }
 
-            var toolEndIndex = IndexOfClosingElementEnd(text, "Tool", toolOpenTagEndIndex);
+            var toolEndIndex = IndexOfClosingElementEnd(text, toolElementName, toolOpenTagEndIndex);
             return toolEndIndex < 0
                 ? isFinal ? text.Length : -1
                 : toolEndIndex;
@@ -1576,13 +1829,15 @@ namespace Skyweaver.Services.AgentLoop
 
             while (index < rawContent.Length)
             {
-                var toolStartIndex = IndexOfOpeningTag(rawContent, "Tool", index);
+                var toolStartIndex = FindNextToolTagIndex(rawContent, index, out var toolElementName);
                 if (toolStartIndex < 0)
                 {
                     var visibleTail = rawContent[index..];
                     if (!isFinal)
                     {
-                        var trailingPrefixLength = GetTrailingPotentialTagPrefixLength(visibleTail, "<Tool");
+                        var trailingPrefixLength = Math.Max(
+                            GetTrailingPotentialTagPrefixLength(visibleTail, "<Tool"),
+                            GetTrailingPotentialTagPrefixLength(visibleTail, "<ToolAsync"));
                         visibleTail = visibleTail[..(visibleTail.Length - trailingPrefixLength)];
                     }
 
@@ -1606,7 +1861,7 @@ namespace Skyweaver.Services.AgentLoop
 
                 var toolEndIndex = IsSelfClosingTag(rawContent[toolStartIndex..toolOpenTagEndIndex])
                     ? toolOpenTagEndIndex
-                    : IndexOfClosingElementEnd(rawContent, "Tool", toolOpenTagEndIndex);
+                    : IndexOfClosingElementEnd(rawContent, toolElementName, toolOpenTagEndIndex);
                 if (toolEndIndex < 0)
                 {
                     break;
@@ -1659,6 +1914,30 @@ namespace Skyweaver.Services.AgentLoop
             }
 
             return 0;
+        }
+
+        private static int FindNextToolTagIndex(
+            string text,
+            int startIndex,
+            out string toolElementName)
+        {
+            var asyncTagIndex = IndexOfOpeningTag(text, AsyncToolTagName, startIndex);
+            var syncTagIndex = IndexOfOpeningTag(text, SyncToolTagName, startIndex);
+
+            if (asyncTagIndex < 0 && syncTagIndex < 0)
+            {
+                toolElementName = string.Empty;
+                return -1;
+            }
+
+            if (syncTagIndex < 0 || (asyncTagIndex >= 0 && asyncTagIndex < syncTagIndex))
+            {
+                toolElementName = AsyncToolTagName;
+                return asyncTagIndex;
+            }
+
+            toolElementName = SyncToolTagName;
+            return syncTagIndex;
         }
 
         private static int IndexOfOpeningTag(string text, string elementName, int startIndex = 0)
@@ -1761,6 +2040,11 @@ namespace Skyweaver.Services.AgentLoop
             return string.Equals(toolName, SkyweaverBuiltInToolNames.Passdown, StringComparison.OrdinalIgnoreCase);
         }
 
+        private static bool IsWaitForAsyncTools(string toolName)
+        {
+            return string.Equals(toolName, SkyweaverBuiltInToolNames.WaitForAsyncTools, StringComparison.OrdinalIgnoreCase);
+        }
+
         private static bool IsLoadToolKits(string toolName)
         {
             return string.Equals(toolName, SkyweaverBuiltInToolNames.LoadToolKits, StringComparison.OrdinalIgnoreCase);
@@ -1828,6 +2112,226 @@ namespace Skyweaver.Services.AgentLoop
             return toolReturns;
         }
 
+        private async Task<AgentToolBackfill> ExecuteAsyncToolInvocationAsync(
+            AgentLoopRequest request,
+            SkyweaverToolInvocation invocation,
+            SkyweaverToolContext runtimeToolContext,
+            IReadOnlyDictionary<string, IReadOnlyList<string>> toolKitMembershipMap,
+            IReadOnlyCollection<string> activeToolKitKeys,
+            IList<PendingAsyncToolExecution> pendingAsyncToolExecutions,
+            IDictionary<string, SkyweaverToolReturnPayload> completedAsyncToolResultsById,
+            IDictionary<int, string> asyncToolCallIdsByIndex,
+            Func<string>? toolCallIdFactory,
+            int iterationNumber,
+            int partIndex,
+            int toolCallIndex,
+            string? modelId,
+            Func<AgentLoopRuntimeEvent, CancellationToken, ValueTask>? onEventAsync,
+            CancellationToken cancellationToken)
+        {
+            var toolCallId = ResolveAsyncToolCallId(
+                toolCallIndex,
+                asyncToolCallIdsByIndex,
+                toolCallIdFactory);
+
+            var authorization = await AuthorizeToolInvocationAsync(
+                request,
+                invocation,
+                runtimeToolContext,
+                toolKitMembershipMap,
+                activeToolKitKeys,
+                iterationNumber,
+                partIndex,
+                toolCallIndex,
+                cancellationToken).ConfigureAwait(false);
+
+            if (!authorization.CanExecute)
+            {
+                var failurePayload = _toolManager.CreateErrorToolReturnPayload(
+                    invocation.ToolName,
+                    authorization.ErrorMessage ?? $"Tool '{invocation.ToolName}' cannot be executed.",
+                    toolCallId);
+                completedAsyncToolResultsById[toolCallId] = failurePayload;
+                return CreateBackfill(partIndex, toolCallIndex, [failurePayload], toolCallId);
+            }
+
+            try
+            {
+                var executionTask = _toolManager.ExecuteAsync(
+                    invocation.ToolName,
+                    invocation.RawArguments,
+                    runtimeToolContext,
+                    request.Agent,
+                    authorization.HasHostConfirmation,
+                    cancellationToken);
+
+                pendingAsyncToolExecutions.Add(new PendingAsyncToolExecution(
+                    toolCallId,
+                    partIndex,
+                    toolCallIndex,
+                    invocation,
+                    executionTask));
+
+                var acknowledgmentPayload = _toolManager.CreateToolReturnPayload(
+                    invocation.ToolName,
+                    SkyweaverToolResult.Success($"Async tool call accepted. ToolCallId={toolCallId}."),
+                    toolCallId);
+                return CreateBackfill(partIndex, toolCallIndex, [acknowledgmentPayload], toolCallId);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                var failurePayload = _toolManager.CreateErrorToolReturnPayload(
+                    invocation.ToolName,
+                    $"Async tool scheduling failed: {ex.Message}",
+                    toolCallId);
+                completedAsyncToolResultsById[toolCallId] = failurePayload;
+                return CreateBackfill(partIndex, toolCallIndex, [failurePayload], toolCallId);
+            }
+        }
+
+        private async Task<SkyweaverToolResult> ExecuteWaitForAsyncToolsAsync(
+            SkyweaverToolInvocation invocation,
+            IList<PendingAsyncToolExecution> pendingAsyncToolExecutions,
+            IDictionary<string, SkyweaverToolReturnPayload> completedAsyncToolResultsById,
+            CancellationToken cancellationToken)
+        {
+            var registration = _toolManager.GetRegisteredTools(resolveIcons: false).FirstOrDefault(item =>
+                string.Equals(item.Definition.Name, invocation.ToolName, StringComparison.OrdinalIgnoreCase));
+
+            if (registration == null)
+            {
+                return SkyweaverToolResult.Failure($"Tool not found: {invocation.ToolName}");
+            }
+
+            var arguments = SkyweaverToolArguments.Bind(registration.Definition.Parameters, invocation.RawArguments);
+            var requestedToolCallIds = ExtractRequestedToolCallIds(
+                arguments.GetJson(SkyweaverBuiltInToolNames.WaitForAsyncToolsParameter));
+            if (requestedToolCallIds.Count == 0)
+            {
+                return SkyweaverToolResult.Failure(
+                    "WaitForAsyncTools requires at least one ToolCallId.");
+            }
+
+            var waitedToolCallIds = await WaitForAsyncToolCallsAsync(
+                requestedToolCallIds,
+                pendingAsyncToolExecutions,
+                completedAsyncToolResultsById,
+                cancellationToken).ConfigureAwait(false);
+
+            var summary = waitedToolCallIds.Count == 1
+                ? $"Waited for async tool {waitedToolCallIds[0]} to complete."
+                : $"Waited for {waitedToolCallIds.Count} async tools to complete.";
+
+            return SkyweaverToolResult.Success(
+                summary,
+                new Dictionary<string, object?>
+                {
+                    ["requestedToolCallIds"] = new JArray(requestedToolCallIds),
+                    ["completedToolCallIds"] = new JArray(waitedToolCallIds)
+                });
+        }
+
+        private static async Task<IReadOnlyList<string>> WaitForAsyncToolCallsAsync(
+            IReadOnlyCollection<string> requestedToolCallIds,
+            IList<PendingAsyncToolExecution> pendingAsyncToolExecutions,
+            IDictionary<string, SkyweaverToolReturnPayload> completedAsyncToolResultsById,
+            CancellationToken cancellationToken)
+        {
+            var normalizedRequestedToolCallIds = requestedToolCallIds
+                .Select(ChatSessionToolCallIdGenerator.Normalize)
+                .Where(item => item.Length > 0)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            var missingToolCallIds = normalizedRequestedToolCallIds
+                .Where(toolCallId =>
+                    !completedAsyncToolResultsById.ContainsKey(toolCallId) &&
+                    !pendingAsyncToolExecutions.Any(execution =>
+                        string.Equals(execution.ToolCallId, toolCallId, StringComparison.OrdinalIgnoreCase)))
+                .ToArray();
+            if (missingToolCallIds.Length > 0)
+            {
+                throw new InvalidOperationException(
+                    $"Unknown async tool call id(s): {string.Join(", ", missingToolCallIds)}");
+            }
+
+            var pendingTasks = pendingAsyncToolExecutions
+                .Where(execution => normalizedRequestedToolCallIds.Contains(execution.ToolCallId, StringComparer.OrdinalIgnoreCase))
+                .Select(execution => IgnoreToolTaskFaultsAsync(execution.ExecutionTask, cancellationToken))
+                .ToArray();
+
+            if (pendingTasks.Length > 0)
+            {
+                await Task.WhenAll(pendingTasks).ConfigureAwait(false);
+            }
+
+            return normalizedRequestedToolCallIds;
+        }
+
+        private static async Task IgnoreToolTaskFaultsAsync(
+            Task<SkyweaverToolResult> task,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                await task.WaitAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch
+            {
+                // The async tool's real result will be backfilled separately.
+            }
+        }
+
+        private static IReadOnlyList<string> ExtractRequestedToolCallIds(JToken? token)
+        {
+            if (token is not JArray array)
+            {
+                return Array.Empty<string>();
+            }
+
+            return array
+                .Values<string>()
+                .Where(item => !string.IsNullOrWhiteSpace(item))
+                .Select(item => ChatSessionToolCallIdGenerator.Normalize(item))
+                .Where(item => item.Length > 0)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+        }
+
+        private static string ResolveAsyncToolCallId(
+            int toolCallIndex,
+            IDictionary<int, string> asyncToolCallIdsByIndex,
+            Func<string>? toolCallIdFactory)
+        {
+            if (asyncToolCallIdsByIndex.TryGetValue(toolCallIndex, out var existingId))
+            {
+                return existingId;
+            }
+
+            if (toolCallIdFactory == null)
+            {
+                throw new InvalidOperationException(
+                    "Async tool invocation requires a ToolCallIdFactory.");
+            }
+
+            var resolvedToolCallId = ChatSessionToolCallIdGenerator.Normalize(toolCallIdFactory());
+            if (resolvedToolCallId.Length == 0)
+            {
+                throw new InvalidOperationException("ToolCallIdFactory returned an empty tool call id.");
+            }
+
+            asyncToolCallIdsByIndex[toolCallIndex] = resolvedToolCallId;
+            return resolvedToolCallId;
+        }
+
         private async Task<ToolExecutionAuthorization> AuthorizeToolInvocationAsync(
             AgentLoopRequest request,
             SkyweaverToolInvocation invocation,
@@ -1856,6 +2360,14 @@ namespace Skyweaver.Services.AgentLoop
                     false,
                     false,
                     $"Tool '{invocation.ToolName}' is currently disabled.");
+            }
+
+            if (invocation.IsAsyncInvocation && !registration.Definition.SupportsAsyncInvocation)
+            {
+                return new ToolExecutionAuthorization(
+                    false,
+                    false,
+                    $"Tool '{invocation.ToolName}' does not support asynchronous invocation.");
             }
 
             if (registration.Definition.CanBelongToToolKit &&
@@ -2088,12 +2600,14 @@ namespace Skyweaver.Services.AgentLoop
         private AgentToolBackfill CreateBackfill(
             int partIndex,
             int toolCallIndex,
-            IReadOnlyList<SkyweaverToolReturnPayload> toolReturns)
+            IReadOnlyList<SkyweaverToolReturnPayload> toolReturns,
+            string? toolCallId = null)
         {
             return new AgentToolBackfill
             {
                 PartIndex = partIndex,
                 ToolCallIndex = toolCallIndex,
+                ToolCallId = toolCallId,
                 ToolReturns = toolReturns,
                 ToolsReturnXml = _toolManager.BuildToolsReturnXml(toolReturns)
             };

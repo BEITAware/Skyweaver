@@ -12,7 +12,10 @@ namespace Skyweaver.Services.SkyweaverTools
             string? iconName = null,
             IReadOnlyList<SkyweaverToolParameterDefinition>? parameters = null,
             bool isSystemTool = false,
-            bool canBelongToToolKit = true)
+            bool canBelongToToolKit = true,
+            SkyweaverToolDefaultAgentPermission defaultAgentPermission = SkyweaverToolDefaultAgentPermission.RequireConfirmation,
+            IReadOnlyList<string>? defaultToolKitKeys = null,
+            bool supportsAsyncInvocation = true)
         {
             var normalizedName = (name ?? string.Empty).Trim();
             if (normalizedName.Length == 0)
@@ -26,6 +29,7 @@ namespace Skyweaver.Services.SkyweaverTools
             }
 
             var normalizedParameters = parameters?.ToArray() ?? Array.Empty<SkyweaverToolParameterDefinition>();
+            var normalizedToolKitKeys = NormalizeToolKitKeys(defaultToolKitKeys);
             var parameterNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var parameter in normalizedParameters)
             {
@@ -35,12 +39,22 @@ namespace Skyweaver.Services.SkyweaverTools
                 }
             }
 
+            if ((!canBelongToToolKit || isSystemTool) && normalizedToolKitKeys.Count > 0)
+            {
+                throw new ArgumentException(
+                    $"Tool '{normalizedName}' cannot declare default toolkit membership because toolkit membership is disabled for this tool.",
+                    nameof(defaultToolKitKeys));
+            }
+
             Name = normalizedName;
             Description = (description ?? string.Empty).Trim();
             IconName = string.IsNullOrWhiteSpace(iconName) ? null : iconName.Trim();
             Parameters = normalizedParameters;
             IsSystemTool = isSystemTool;
             CanBelongToToolKit = !isSystemTool && canBelongToToolKit;
+            DefaultAgentPermission = defaultAgentPermission;
+            DefaultToolKitKeys = normalizedToolKitKeys;
+            SupportsAsyncInvocation = supportsAsyncInvocation;
         }
 
         public string Name { get; }
@@ -55,8 +69,48 @@ namespace Skyweaver.Services.SkyweaverTools
 
         public bool CanBelongToToolKit { get; }
 
+        public SkyweaverToolDefaultAgentPermission DefaultAgentPermission { get; }
+
+        public IReadOnlyList<string> DefaultToolKitKeys { get; }
+
+        public bool SupportsAsyncInvocation { get; }
+
         public bool CanUserDisable => !IsSystemTool;
 
         public bool RequiresAgentPermission => !IsSystemTool;
+
+        private static IReadOnlyList<string> NormalizeToolKitKeys(IReadOnlyList<string>? defaultToolKitKeys)
+        {
+            if (defaultToolKitKeys == null || defaultToolKitKeys.Count == 0)
+            {
+                return Array.Empty<string>();
+            }
+
+            var normalizedKeys = new List<string>(defaultToolKitKeys.Count);
+            var seenKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var rawKey in defaultToolKitKeys)
+            {
+                var normalizedKey = (rawKey ?? string.Empty).Trim();
+                if (normalizedKey.Length == 0)
+                {
+                    continue;
+                }
+
+                if (!s_namePattern.IsMatch(normalizedKey))
+                {
+                    throw new ArgumentException(
+                        $"Toolkit keys may only contain letters, numbers, '_' or '-': {normalizedKey}",
+                        nameof(defaultToolKitKeys));
+                }
+
+                if (seenKeys.Add(normalizedKey))
+                {
+                    normalizedKeys.Add(normalizedKey);
+                }
+            }
+
+            return normalizedKeys.ToArray();
+        }
     }
 }

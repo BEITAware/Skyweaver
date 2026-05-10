@@ -3,21 +3,41 @@ namespace Skyweaver.Services.SkyweaverTools
     public sealed class SkyweaverToolKitService
     {
         private readonly SkyweaverToolKitConfigurationRepository _repository;
+        private readonly SkyweaverToolManager _toolManager;
 
         public SkyweaverToolKitService()
-            : this(new SkyweaverToolKitConfigurationRepository())
+            : this(new SkyweaverToolKitConfigurationRepository(), new SkyweaverToolManager())
         {
         }
 
-        public SkyweaverToolKitService(SkyweaverToolKitConfigurationRepository repository)
+        public SkyweaverToolKitService(
+            SkyweaverToolKitConfigurationRepository repository,
+            SkyweaverToolManager toolManager)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _toolManager = toolManager ?? throw new ArgumentNullException(nameof(toolManager));
         }
 
         public IReadOnlyList<SkyweaverToolKitDefinition> Load()
         {
-            return _repository.Load()
-                .Select(definition => definition.DeepClone())
+            var defaultToolKits = BuildDefaultToolKits()
+                .ToDictionary(toolKit => toolKit.Key, toolKit => toolKit, StringComparer.OrdinalIgnoreCase);
+            var persistedToolKits = _repository.Load();
+
+            foreach (var persistedToolKit in persistedToolKits)
+            {
+                if (string.IsNullOrWhiteSpace(persistedToolKit.Key))
+                {
+                    continue;
+                }
+
+                var clone = persistedToolKit.DeepClone();
+                clone.IsDefaultToolKit = defaultToolKits.ContainsKey(persistedToolKit.Key);
+                defaultToolKits[persistedToolKit.Key] = clone;
+            }
+
+            return defaultToolKits.Values
+                .OrderBy(toolKit => toolKit.DisplayNameOrFallback, StringComparer.OrdinalIgnoreCase)
                 .ToArray();
         }
 
@@ -104,6 +124,59 @@ namespace Skyweaver.Services.SkyweaverTools
                 MissingNames = missing,
                 AmbiguousNames = ambiguous
             };
+        }
+
+        private IReadOnlyList<SkyweaverToolKitDefinition> BuildDefaultToolKits()
+        {
+            var toolKitsByKey = new Dictionary<string, SkyweaverToolKitDefinition>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var registration in _toolManager.GetRegisteredTools(resolveIcons: false)
+                         .Where(item => item.Definition.CanBelongToToolKit))
+            {
+                foreach (var toolKitKey in registration.Definition.DefaultToolKitKeys)
+                {
+                    if (!toolKitsByKey.TryGetValue(toolKitKey, out var toolKit))
+                    {
+                        toolKit = new SkyweaverToolKitDefinition
+                        {
+                            Key = toolKitKey,
+                            Name = toolKitKey,
+                            IsDefaultToolKit = true
+                        };
+                        toolKitsByKey[toolKitKey] = toolKit;
+                    }
+
+                    if (toolKit.Tools.Any(entry =>
+                            string.Equals(entry.ToolName, registration.Definition.Name, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        continue;
+                    }
+
+                    toolKit.Tools.Add(new SkyweaverToolKitEntry
+                    {
+                        ToolName = registration.Definition.Name
+                    });
+                }
+            }
+
+            foreach (var toolKit in toolKitsByKey.Values)
+            {
+                var orderedEntries = toolKit.Tools
+                    .OrderBy(entry => entry.ToolName, StringComparer.OrdinalIgnoreCase)
+                    .Select(entry => entry.DeepClone())
+                    .ToArray();
+
+                toolKit.Tools.Clear();
+                foreach (var orderedEntry in orderedEntries)
+                {
+                    toolKit.Tools.Add(orderedEntry);
+                }
+            }
+
+            return toolKitsByKey.Values
+                .Where(toolKit => toolKit.Tools.Count > 0)
+                .Select(toolKit => toolKit.DeepClone())
+                .ToArray();
         }
     }
 }

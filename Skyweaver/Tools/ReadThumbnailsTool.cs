@@ -22,7 +22,9 @@ namespace Skyweaver.Tools
                     "A pipe-separated (|) list of image file paths to read. Maximum 75 paths allowed.",
                     SkyweaverToolParameterType.String,
                     isRequired: true)
-            ]);
+            ],
+            defaultAgentPermission: SkyweaverToolDefaultAgentPermission.Allow,
+            defaultToolKitKeys: ["multimodal"]);
 
         public SkyweaverToolDefinition Definition => s_definition;
 

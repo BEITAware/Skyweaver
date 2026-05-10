@@ -37,6 +37,8 @@ namespace Skyweaver.Services.AgentLoop
 
         public bool EnableGemmaThoughtCompatibility { get; init; } = true;
 
+        public Func<string>? ToolCallIdFactory { get; init; }
+
         public Func<AgentToolConfirmationRequest, CancellationToken, Task<AgentToolConfirmationResult>>? ToolConfirmationCallback { get; init; }
     }
 
@@ -179,6 +181,8 @@ namespace Skyweaver.Services.AgentLoop
 
         public int ToolCallIndex { get; init; }
 
+        public string? ToolCallId { get; init; }
+
         public string ToolsReturnXml { get; init; } = string.Empty;
 
         public IReadOnlyList<SkyweaverToolReturnPayload> ToolReturns { get; init; } = Array.Empty<SkyweaverToolReturnPayload>();
@@ -295,6 +299,8 @@ namespace Skyweaver.Services.AgentLoop
         public int? PartIndex { get; init; }
 
         public int? ToolCallIndex { get; init; }
+
+        public string? ToolCallId { get; init; }
 
         public SkyweaverToolInvocation? ToolInvocation { get; init; }
 

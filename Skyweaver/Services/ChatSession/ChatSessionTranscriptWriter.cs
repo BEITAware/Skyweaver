@@ -938,10 +938,10 @@ namespace Skyweaver.Services.ChatSession
                 var root = XDocument.Parse(xml, LoadOptions.PreserveWhitespace).Root;
                 var element = root == null
                     ? null
-                    : string.Equals(root.Name.LocalName, "Tool", StringComparison.OrdinalIgnoreCase)
+                    : IsToolInvocationElement(root)
                         ? root
                         : root.Descendants().FirstOrDefault(descendant =>
-                            string.Equals(descendant.Name.LocalName, "Tool", StringComparison.OrdinalIgnoreCase) ||
+                            IsToolInvocationElement(descendant) ||
                             string.Equals(descendant.Name.LocalName, "ToolReturn", StringComparison.OrdinalIgnoreCase));
 
                 return element?.Attributes()
@@ -955,6 +955,12 @@ namespace Skyweaver.Services.ChatSession
             {
                 return null;
             }
+        }
+
+        private static bool IsToolInvocationElement(XElement element)
+        {
+            return string.Equals(element.Name.LocalName, "Tool", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(element.Name.LocalName, "ToolAsync", StringComparison.OrdinalIgnoreCase);
         }
 
         private static void Touch(ChatSessionTranscript transcript, ChatSessionTranscriptEntry entry)
