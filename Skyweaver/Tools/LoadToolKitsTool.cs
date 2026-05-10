@@ -25,7 +25,8 @@ namespace Skyweaver.Tools
                     isRequired: true)
             ],
             isSystemTool: false,
-            canBelongToToolKit: false);
+            canBelongToToolKit: false,
+            defaultAgentPermission: SkyweaverToolDefaultAgentPermission.Allow);
 
         public LoadToolKitsTool()
             : this(new SkyweaverToolKitService(), new SkyweaverPromptToolCatalogService())

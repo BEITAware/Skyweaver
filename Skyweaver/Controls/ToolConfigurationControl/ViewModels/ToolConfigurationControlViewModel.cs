@@ -275,6 +275,7 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
 
         private readonly SkyweaverToolManager _toolManager = new();
         private readonly SkyweaverToolKitConfigurationRepository _toolKitRepository = new();
+        private readonly SkyweaverToolKitService _toolKitService = new();
         private bool _isLoading;
         private ToolItemViewModel? _selectedTool;
         private SkyweaverToolKitDefinition? _selectedToolKit;
@@ -426,7 +427,7 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
                 DisposeToolKits();
                 ToolKits.Clear();
 
-                foreach (var toolKit in _toolKitRepository.Load())
+                foreach (var toolKit in _toolKitService.Load())
                 {
                     AttachToolKit(toolKit);
                     ToolKits.Add(toolKit);
@@ -516,6 +517,18 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
         {
             if (SelectedToolKit == null)
             {
+                return;
+            }
+
+            if (SelectedToolKit.IsDefaultToolKit)
+            {
+                foreach (var entry in SelectedToolKit.Tools.ToArray())
+                {
+                    DetachToolKitEntry(entry);
+                }
+
+                SelectedToolKit.Tools.Clear();
+                PersistToolKits("Default ToolKit membership override saved.");
                 return;
             }
 

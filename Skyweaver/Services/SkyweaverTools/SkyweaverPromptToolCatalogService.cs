@@ -46,7 +46,7 @@ namespace Skyweaver.Services.SkyweaverTools
             var tools = new List<SkyweaverPromptToolDefinition>();
 
             foreach (var registration in _toolManager.GetRegisteredTools(resolveIcons: false)
-                         .Where(item => item.RequiresAgentPermission)
+                         .Where(item => item.RequiresAgentPermission && item.Definition.SupportsAsyncInvocation)
                          .OrderBy(item => item.Definition.Name, StringComparer.OrdinalIgnoreCase))
             {
                 if (restrictedToolNameSet != null &&

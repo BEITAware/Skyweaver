@@ -27,7 +27,8 @@ namespace Skyweaver.Tools
                     SkyweaverToolParameterType.Integer,
                     isRequired: false,
                     defaultValue: "1")
-            ]);
+            ],
+            defaultAgentPermission: SkyweaverToolDefaultAgentPermission.Allow);
 
         public SkyweaverToolDefinition Definition => s_definition;
 

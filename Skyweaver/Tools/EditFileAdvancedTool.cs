@@ -23,11 +23,12 @@ namespace Skyweaver.Tools
         public const string ToolName = "EditFile_Advanced";
 
         private const int MaximumAnchorLines = 16;
+        private const int DefaultIndentTabWidth = 4;
         private const string BeginningOfFileMarker = "[BOF]";
         private const string EndOfFileMarker = "[EOF]";
 
         private static readonly Regex s_editMarkerPattern = new(
-            @"^[ \t]*\[Existing Code\][ \t]*\r?$",
+            @"^[ \t]*\[Existing Code\](?:[ \t]*(?://[^\r\n]*|#[^\r\n]*|/\*[^\r\n]*\*/|<!--[^\r\n]*-->))?[ \t]*\r?$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
         private static readonly SkyweaverToolDefinition s_definition = BuildDefinition(new EditFileAdvancedToolSettings());
@@ -203,13 +204,13 @@ namespace Skyweaver.Tools
                 : "Permission: LateralFileSystemOnly, so the tool may write only inside LateralFS virtual folders. In this mode, use LateralFS\\NodeName\\relative\\file.ext or an actual path under a LateralFS virtual root; do not use the original projected source path.";
 
             return "Advanced existing-file editing tool. EditText is plain text, not a diff. " +
-                "Primary protocol: use one or more full-line [Existing Code] ... [Existing Code] blocks. As a relaxed edge form, the first block may start with [BOF] instead of [Existing Code], and the last block may end with [EOF] instead of [Existing Code]. Inside each block, the first real line(s) are unchanged top anchors, the middle is the final edited text, and the last real line(s) are unchanged bottom anchors. [Existing Code] only marks block boundaries; it is never an anchor. " +
-                "Single-block shorthand: if you omit [Existing Code] entirely, the whole EditText body is treated as one edit block. This is the fallback form for simple edits. " +
+                "Primary protocol: use one or more full-line [Existing Code] ... [Existing Code] blocks. As a relaxed edge form, the first block may start with [BOF] instead of [Existing Code], and the last block may end with [EOF] instead of [Existing Code]. Inside each block, the first real line(s) are unchanged top anchors, the middle is the final edited text, and the last real line(s) are unchanged bottom anchors. [Existing Code] only marks block boundaries; it is never an anchor, and a standalone sentinel line may carry a trailing comment. " +
+                "Single-block shorthand: if you omit [Existing Code] entirely, the whole EditText body is treated as one edit block. A one-line shorthand only rewrites an empty or one-line file. " +
                 "You may use the literal marker [BOF] as the first line of a block to anchor at the beginning of the file, and/or [EOF] as the last line of a block to anchor at the end of the file. Those marker lines are virtual anchors and are not written into the file. Use [BOF] when editing the first line, [EOF] when editing the last line, and [BOF] plus [EOF] together when rewriting the whole file. " +
                 "Prefer 2-5 exact unchanged context lines around the real edit when possible. The tool considers at most 16 anchor lines on each side. " +
                 "If EditText may contain '<', '>', or '&' such as XML, HTML, or generic code, wrap the entire EditText value in CDATA in the outer XML tool call; the host/parser unwraps that CDATA automatically, so do not leave literal <![CDATA[ or ]]> markers inside the edit body. " +
                 "Few-shot samples: first-line edit => [BOF]\\nnew first line\\nunchanged second line. Last-line edit => unchanged previous line\\nnew last line\\n[EOF]. Relaxed first block => [BOF]\\nnew first line\\nunchanged second line\\n[Existing Code]. Relaxed last block => [Existing Code]\\nunchanged previous line\\nnew last line\\n[EOF]. Multi-edit => [Existing Code]\\nunchanged top\\nnew middle\\nunchanged bottom\\n[Existing Code]\\n\\n[Existing Code]\\nsecond top\\nsecond new middle\\nsecond bottom\\n[Existing Code]. Whole-file rewrite => [BOF]\\nfull final file content\\n[EOF]. " +
-                "Only whitespace is allowed outside complete edit blocks. The standard multi-block form is [Existing Code] ... [Existing Code], with [BOF] ... [Existing Code] and [Existing Code] ... [EOF] also accepted for the outermost first/last block. If anchors are missing, duplicated, or not unique, the tool fails without writing the file. " +
+                "Text outside complete edit blocks is ignored. The standard multi-block form is [Existing Code] ... [Existing Code], with [BOF] ... [Existing Code] and [Existing Code] ... [EOF] also accepted for the outermost first/last block. If anchors are missing, duplicated, or not unique, the tool fails without writing the file. " +
                 "FilePath can be a LateralFS shortcut in the form LateralFS\\NodeName\\relative\\file.ext; the shortcut is resolved to that node's virtual folder before writing, and '..' traversal outside the node is rejected. " +
                 permissionText;
 
@@ -231,7 +232,7 @@ namespace Skyweaver.Tools
         private static string BuildEditTextParameterDescription()
         {
             return "Anchored final-text editing parameter. EditText is plain text, not a diff. " +
-                "Preferred form: one or more [Existing Code] ... [Existing Code] blocks with only whitespace outside those blocks. Relaxed edge forms [BOF] ... [Existing Code] and [Existing Code] ... [EOF] are also accepted for the outermost first/last block. Shorthand fallback: if no [Existing Code] sentinel appears, the entire EditText body becomes one edit block. " +
+                "Preferred form: one or more [Existing Code] ... [Existing Code] blocks. Extra prose outside complete blocks is ignored. Relaxed edge forms [BOF] ... [Existing Code] and [Existing Code] ... [EOF] are also accepted for the outermost first/last block. Trailing comments after a standalone sentinel line are allowed. Shorthand fallback: if no [Existing Code] sentinel appears, the entire EditText body becomes one edit block; a one-line shorthand only rewrites an empty or one-line file. " +
                 "Within a block, the default form is unchanged top anchor line(s), final edited content, unchanged bottom anchor line(s). To edit the first line, you may use [BOF] as the first line inside the block. To edit the last line, you may use [EOF] as the last line inside the block. [BOF] and [EOF] are virtual file-boundary anchors and are not written into the file. " +
                 "Without [BOF] or [EOF], the first and last lines inside the block must be unchanged original lines. Prefer 2-5 exact unchanged context lines when possible; repeated code may require larger anchors. " +
                 "Few-shot samples: [BOF]\\nnew first line\\nunchanged second line ; unchanged previous line\\nnew last line\\n[EOF] ; [BOF]\\nnew first line\\nunchanged second line\\n[Existing Code] ; [Existing Code]\\nunchanged previous line\\nnew last line\\n[EOF] ; [BOF]\\nfull final file content\\n[EOF]. " +
@@ -295,25 +296,19 @@ namespace Skyweaver.Tools
 
             normalized = UnwrapOuterCData(normalized);
 
-            if (!StartsWithElement(normalized, "EditText"))
+            if (TryExtractEditTextElementPayload(normalized, out var extracted))
             {
-                return normalized;
+                return extracted;
             }
 
-            try
+            var unescaped = UnescapeCommonXmlEntities(normalized);
+            if (!string.Equals(unescaped, normalized, StringComparison.Ordinal) &&
+                TryExtractEditTextElementPayload(unescaped, out extracted))
             {
-                var element = XElement.Parse(normalized, LoadOptions.PreserveWhitespace);
-                if (!string.Equals(element.Name.LocalName, "EditText", StringComparison.OrdinalIgnoreCase))
-                {
-                    return normalized;
-                }
+                return extracted;
+            }
 
-                return UnwrapOuterCData(ExtractElementText(element).Trim());
-            }
-            catch (Exception ex) when (ex is InvalidOperationException or System.Xml.XmlException)
-            {
-                return normalized;
-            }
+            return UnwrapOuterCData(unescaped);
         }
 
         private static IReadOnlyList<EditBlock> ParseEditBlocks(string editText)
@@ -331,16 +326,10 @@ namespace Skyweaver.Tools
             }
 
             var blocks = new List<EditBlock>(matches.Count / 2);
-            var previousEnd = 0;
             for (var index = 0; index < matches.Count; index += 2)
             {
                 var openMarker = matches[index];
                 var closeMarker = matches[index + 1];
-
-                if (!IsWhitespaceOnly(editText, previousEnd, openMarker.Index))
-                {
-                    throw new InvalidOperationException(BuildOutsideBlockTextMessage(editText));
-                }
 
                 var blockStart = openMarker.Index + openMarker.Length;
                 var blockLength = closeMarker.Index - blockStart;
@@ -351,12 +340,6 @@ namespace Skyweaver.Tools
                 }
 
                 blocks.Add(ParseEditBlock(blocks.Count + 1, blockText));
-                previousEnd = closeMarker.Index + closeMarker.Length;
-            }
-
-            if (!IsWhitespaceOnly(editText, previousEnd, editText.Length))
-            {
-                throw new InvalidOperationException(BuildOutsideBlockTextMessage(editText));
             }
 
             return blocks;
@@ -382,14 +365,8 @@ namespace Skyweaver.Tools
                 return editText;
             }
 
-            var rewriteStart = string.Equals(
-                split.Lines[firstContentLineIndex].Text,
-                BeginningOfFileMarker,
-                StringComparison.Ordinal);
-            var rewriteEnd = string.Equals(
-                split.Lines[lastContentLineIndex].Text,
-                EndOfFileMarker,
-                StringComparison.Ordinal);
+            var rewriteStart = IsBeginningOfFileMarkerLine(split.Lines[firstContentLineIndex].Text);
+            var rewriteEnd = IsEndOfFileMarkerLine(split.Lines[lastContentLineIndex].Text);
             if (!rewriteStart && !rewriteEnd)
             {
                 return editText;
@@ -489,7 +466,11 @@ namespace Skyweaver.Tools
                 block.AnchoredAtBeginningOfFile,
                 block.AnchoredAtEndOfFile,
                 block.Index);
-            var replacementText = NormalizeReplacementLineEndings(block.FinalText, newline);
+            var replacementText = BuildReplacementText(
+                fileLines.Lines,
+                replacementLines.Lines,
+                match,
+                newline);
             var startOffset = GetLineStartOffset(fileLines.Lines, match.StartLineIndex);
             var endOffset = GetLineEndOffset(fileLines.Lines, match.EndLineExclusive);
             var originalSpan = BuildTextFromLines(fileLines.Lines, match.StartLineIndex, match.EndLineExclusive);
@@ -518,12 +499,71 @@ namespace Skyweaver.Tools
             bool anchoredAtEndOfFile,
             int blockIndex)
         {
+            if (!anchoredAtBeginningOfFile &&
+                !anchoredAtEndOfFile &&
+                replacementLineTexts.Count == 1 &&
+                fileLineTexts.Count <= 1)
+            {
+                return new BlockMatch(0, fileLineTexts.Count, 0, 0, false, LineMatchMode.Exact);
+            }
+
+            foreach (var lineMatchMode in new[]
+                     {
+                         LineMatchMode.Exact,
+                         LineMatchMode.TrimEnd,
+                         LineMatchMode.IndentNormalized
+                     })
+            {
+                var resolution = TryResolveStandardBlockMatch(
+                    fileLineTexts,
+                    replacementLineTexts,
+                    anchoredAtBeginningOfFile,
+                    anchoredAtEndOfFile,
+                    blockIndex,
+                    lineMatchMode);
+
+                if (resolution.Match != null)
+                {
+                    return resolution.Match;
+                }
+
+                if (resolution.IsAmbiguous)
+                {
+                    throw new InvalidOperationException(
+                        BuildAmbiguousBlockMessage(blockIndex, resolution.CandidateMatches, fileLineTexts, lineMatchMode));
+                }
+            }
+
+            if (TryResolveWholeFileShorthandMatch(fileLineTexts, replacementLineTexts, anchoredAtBeginningOfFile, anchoredAtEndOfFile, out var shorthandMatch))
+            {
+                return shorthandMatch;
+            }
+
+            throw new InvalidOperationException(
+                BuildCouldNotLocateBlockMessage(
+                    blockIndex,
+                    fileLineTexts,
+                    replacementLineTexts,
+                    anchoredAtBeginningOfFile,
+                    anchoredAtEndOfFile));
+        }
+
+        private static BlockMatchResolution TryResolveStandardBlockMatch(
+            IReadOnlyList<string> fileLineTexts,
+            IReadOnlyList<string> replacementLineTexts,
+            bool anchoredAtBeginningOfFile,
+            bool anchoredAtEndOfFile,
+            int blockIndex,
+            LineMatchMode lineMatchMode)
+        {
             var replacementLineCount = replacementLineTexts.Count;
             var minimumPrefixLines = anchoredAtBeginningOfFile ? 0 : 1;
             var minimumSuffixLines = anchoredAtEndOfFile ? 0 : 1;
             var maximumPrefixLines = Math.Min(MaximumAnchorLines, replacementLineCount - minimumSuffixLines);
-            var candidatesBySpan = new Dictionary<(int Start, int End), BlockMatch>();
-            var bestAnchorLineScore = 0;
+            var uniqueCandidatesBySpan = new Dictionary<(int Start, int End), BlockMatch>();
+            var ambiguousCandidatesBySpan = new Dictionary<(int Start, int End), BlockMatch>();
+            var bestUniqueAnchorLineScore = -1;
+            var bestAmbiguousAnchorLineScore = -1;
 
             for (var prefixLineCount = maximumPrefixLines; prefixLineCount >= minimumPrefixLines; prefixLineCount--)
             {
@@ -536,47 +576,101 @@ namespace Skyweaver.Tools
                         prefixLineCount,
                         suffixLineCount,
                         anchoredAtBeginningOfFile,
-                        anchoredAtEndOfFile);
+                        anchoredAtEndOfFile,
+                        lineMatchMode);
 
                     if (matches.Count == 1)
                     {
                         var anchorLineScore = prefixLineCount + suffixLineCount;
-                        if (anchorLineScore < bestAnchorLineScore)
+                        if (anchorLineScore < bestUniqueAnchorLineScore)
                         {
                             continue;
                         }
 
-                        if (anchorLineScore > bestAnchorLineScore)
+                        if (anchorLineScore > bestUniqueAnchorLineScore)
                         {
-                            candidatesBySpan.Clear();
-                            bestAnchorLineScore = anchorLineScore;
+                            uniqueCandidatesBySpan.Clear();
+                            bestUniqueAnchorLineScore = anchorLineScore;
                         }
 
                         var match = matches[0];
-                        candidatesBySpan.TryAdd((match.StartLineIndex, match.EndLineExclusive), match);
+                        uniqueCandidatesBySpan.TryAdd(
+                            (match.StartLineIndex, match.EndLineExclusive),
+                            match with
+                            {
+                                LineMatchMode = lineMatchMode,
+                                PreserveAnchors = true
+                            });
+                        continue;
+                    }
+
+                    if (matches.Count > 1)
+                    {
+                        var anchorLineScore = prefixLineCount + suffixLineCount;
+                        if (anchorLineScore < bestAmbiguousAnchorLineScore)
+                        {
+                            continue;
+                        }
+
+                        if (anchorLineScore > bestAmbiguousAnchorLineScore)
+                        {
+                            ambiguousCandidatesBySpan.Clear();
+                            bestAmbiguousAnchorLineScore = anchorLineScore;
+                        }
+
+                        foreach (var match in matches)
+                        {
+                            ambiguousCandidatesBySpan.TryAdd(
+                                (match.StartLineIndex, match.EndLineExclusive),
+                                match with
+                                {
+                                    LineMatchMode = lineMatchMode,
+                                    PreserveAnchors = true
+                                });
+                        }
                     }
                 }
             }
 
-            if (candidatesBySpan.Count == 0)
+            if (uniqueCandidatesBySpan.Count == 1)
             {
-                throw new InvalidOperationException(
-                    $"Edit block {blockIndex} could not be uniquely located. Use unchanged original anchor lines, or [BOF]/[EOF] file-boundary markers when editing the first or last line. Add more exact unchanged context around the real edit and make sure changed/deleted lines stay between the anchors.");
+                return new BlockMatchResolution(uniqueCandidatesBySpan.Values.Single(), Array.Empty<BlockMatch>());
             }
 
-            if (candidatesBySpan.Count > 1)
+            if (uniqueCandidatesBySpan.Count > 1)
             {
-                var spans = string.Join(
-                    ", ",
-                    candidatesBySpan.Values
-                        .OrderBy(item => item.StartLineIndex)
-                        .Take(5)
-                        .Select(item => $"{item.StartLineIndex + 1}-{item.EndLineExclusive}"));
-                throw new InvalidOperationException(
-                    $"Edit block {blockIndex} is ambiguous across different line spans ({spans}). Use a larger block with more unchanged original anchor lines at the top and bottom until the target span is unique.");
+                return new BlockMatchResolution(null, uniqueCandidatesBySpan.Values.ToArray());
             }
 
-            return candidatesBySpan.Values.Single();
+            if (ambiguousCandidatesBySpan.Count > 0)
+            {
+                return new BlockMatchResolution(null, ambiguousCandidatesBySpan.Values.ToArray());
+            }
+
+            return new BlockMatchResolution(null, Array.Empty<BlockMatch>());
+        }
+
+        private static bool TryResolveWholeFileShorthandMatch(
+            IReadOnlyList<string> fileLineTexts,
+            IReadOnlyList<string> replacementLineTexts,
+            bool anchoredAtBeginningOfFile,
+            bool anchoredAtEndOfFile,
+            out BlockMatch match)
+        {
+            if (anchoredAtBeginningOfFile || anchoredAtEndOfFile || replacementLineTexts.Count != 1)
+            {
+                match = null!;
+                return false;
+            }
+
+            if (fileLineTexts.Count > 1)
+            {
+                match = null!;
+                return false;
+            }
+
+            match = new BlockMatch(0, fileLineTexts.Count, 0, 0, false, LineMatchMode.Exact);
+            return true;
         }
 
         private static List<BlockMatch> FindMatches(
@@ -585,7 +679,8 @@ namespace Skyweaver.Tools
             int prefixLineCount,
             int suffixLineCount,
             bool anchoredAtBeginningOfFile,
-            bool anchoredAtEndOfFile)
+            bool anchoredAtEndOfFile,
+            LineMatchMode lineMatchMode)
         {
             var matches = new List<BlockMatch>();
             var prefix = replacementLineTexts.Take(prefixLineCount).ToArray();
@@ -597,7 +692,7 @@ namespace Skyweaver.Tools
 
             for (var start = 0; start <= maximumStart; start++)
             {
-                if (prefixLineCount > 0 && !SequenceEquals(fileLineTexts, start, prefix))
+                if (prefixLineCount > 0 && !SequenceMatches(fileLineTexts, start, prefix, lineMatchMode))
                 {
                     continue;
                 }
@@ -610,7 +705,7 @@ namespace Skyweaver.Tools
                         continue;
                     }
 
-                    if (suffixLineCount > 0 && !SequenceEquals(fileLineTexts, suffixStart, suffix))
+                    if (suffixLineCount > 0 && !SequenceMatches(fileLineTexts, suffixStart, suffix, lineMatchMode))
                     {
                         continue;
                     }
@@ -619,14 +714,16 @@ namespace Skyweaver.Tools
                         start,
                         suffixStart + suffixLineCount,
                         prefixLineCount,
-                        suffixLineCount));
+                        suffixLineCount,
+                        true,
+                        lineMatchMode));
                     continue;
                 }
 
                 var suffixSearchStart = start + prefixLineCount;
                 for (var suffixStart = suffixSearchStart; suffixStart <= fileLineTexts.Count - suffixLineCount; suffixStart++)
                 {
-                    if (suffixLineCount > 0 && !SequenceEquals(fileLineTexts, suffixStart, suffix))
+                    if (suffixLineCount > 0 && !SequenceMatches(fileLineTexts, suffixStart, suffix, lineMatchMode))
                     {
                         continue;
                     }
@@ -635,14 +732,20 @@ namespace Skyweaver.Tools
                         start,
                         suffixStart + suffixLineCount,
                         prefixLineCount,
-                        suffixLineCount));
+                        suffixLineCount,
+                        true,
+                        lineMatchMode));
                 }
             }
 
             return matches;
         }
 
-        private static bool SequenceEquals(IReadOnlyList<string> lines, int startIndex, IReadOnlyList<string> expected)
+        private static bool SequenceMatches(
+            IReadOnlyList<string> lines,
+            int startIndex,
+            IReadOnlyList<string> expected,
+            LineMatchMode lineMatchMode)
         {
             if (startIndex < 0 || startIndex + expected.Count > lines.Count)
             {
@@ -651,13 +754,62 @@ namespace Skyweaver.Tools
 
             for (var index = 0; index < expected.Count; index++)
             {
-                if (!string.Equals(lines[startIndex + index], expected[index], StringComparison.Ordinal))
+                if (!LineMatches(lines[startIndex + index], expected[index], lineMatchMode))
                 {
                     return false;
                 }
             }
 
             return true;
+        }
+
+        private static bool LineMatches(string source, string expected, LineMatchMode lineMatchMode)
+        {
+            return lineMatchMode switch
+            {
+                LineMatchMode.Exact => string.Equals(source, expected, StringComparison.Ordinal),
+                LineMatchMode.TrimEnd => string.Equals(source.TrimEnd(), expected.TrimEnd(), StringComparison.Ordinal),
+                LineMatchMode.IndentNormalized => string.Equals(
+                    NormalizeIndentationKey(source),
+                    NormalizeIndentationKey(expected),
+                    StringComparison.Ordinal),
+                _ => string.Equals(source, expected, StringComparison.Ordinal)
+            };
+        }
+
+        private static string NormalizeIndentationKey(string line)
+        {
+            if (line.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            var index = 0;
+            var indentationColumns = 0;
+            while (index < line.Length)
+            {
+                var current = line[index];
+                if (current == ' ')
+                {
+                    indentationColumns++;
+                    index++;
+                    continue;
+                }
+
+                if (current == '\t')
+                {
+                    indentationColumns += DefaultIndentTabWidth - indentationColumns % DefaultIndentTabWidth;
+                    index++;
+                    continue;
+                }
+
+                break;
+            }
+
+            return string.Concat(
+                indentationColumns.ToString(CultureInfo.InvariantCulture),
+                "\u0000",
+                line[index..].TrimEnd());
         }
 
         private static SplitLineResult SplitLines(string text)
@@ -870,10 +1022,8 @@ namespace Skyweaver.Tools
         {
             var split = SplitLines(blockText);
             var lineTexts = split.LineTexts;
-            var anchoredAtBeginningOfFile = lineTexts.Count > 0 &&
-                string.Equals(lineTexts[0], BeginningOfFileMarker, StringComparison.Ordinal);
-            var anchoredAtEndOfFile = lineTexts.Count > 0 &&
-                string.Equals(lineTexts[^1], EndOfFileMarker, StringComparison.Ordinal);
+            var anchoredAtBeginningOfFile = lineTexts.Count > 0 && IsBeginningOfFileMarkerLine(lineTexts[0]);
+            var anchoredAtEndOfFile = lineTexts.Count > 0 && IsEndOfFileMarkerLine(lineTexts[^1]);
 
             ValidateBoundaryMarkers(blockIndex, lineTexts, anchoredAtBeginningOfFile, anchoredAtEndOfFile);
 
@@ -893,14 +1043,14 @@ namespace Skyweaver.Tools
             for (var index = 0; index < lineTexts.Count; index++)
             {
                 var lineText = lineTexts[index];
-                if (string.Equals(lineText, BeginningOfFileMarker, StringComparison.Ordinal) &&
+                if (IsBeginningOfFileMarkerLine(lineText) &&
                     (!anchoredAtBeginningOfFile || index != 0))
                 {
                     throw new InvalidOperationException(
                         $"Edit block {blockIndex} uses {BeginningOfFileMarker} in an invalid position. {BeginningOfFileMarker} is only allowed as the first line inside a block.");
                 }
 
-                if (string.Equals(lineText, EndOfFileMarker, StringComparison.Ordinal) &&
+                if (IsEndOfFileMarkerLine(lineText) &&
                     (!anchoredAtEndOfFile || index != lineTexts.Count - 1))
                 {
                     throw new InvalidOperationException(
@@ -947,10 +1097,10 @@ namespace Skyweaver.Tools
                 return;
             }
 
-            if (replacementLineCount < 2)
+            if (replacementLineCount == 0)
             {
                 throw new InvalidOperationException(
-                    $"Edit block {block.Index} must contain at least two lines: an unchanged top anchor and an unchanged bottom anchor. To edit the first or last line, use {BeginningOfFileMarker} or {EndOfFileMarker} as the file-boundary anchor.");
+                    $"Edit block {block.Index} cannot be empty. Use {BeginningOfFileMarker} plus {EndOfFileMarker} when intentionally rewriting a whole file to empty content.");
             }
         }
 
@@ -964,6 +1114,102 @@ namespace Skyweaver.Tools
             }
 
             return trimmed.Length == prefix.Length || char.IsWhiteSpace(trimmed[prefix.Length]) || trimmed[prefix.Length] is '>' or '/';
+        }
+
+        private static bool TryExtractEditTextElementPayload(string text, out string payload)
+        {
+            payload = string.Empty;
+            if (!StartsWithElement(text, "EditText"))
+            {
+                return false;
+            }
+
+            try
+            {
+                var element = XElement.Parse(text, LoadOptions.PreserveWhitespace);
+                if (!string.Equals(element.Name.LocalName, "EditText", StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
+                payload = UnwrapOuterCData(UnescapeCommonXmlEntities(ExtractElementText(element).Trim()));
+                return true;
+            }
+            catch (Exception ex) when (ex is InvalidOperationException or System.Xml.XmlException)
+            {
+                return false;
+            }
+        }
+
+        private static string UnescapeCommonXmlEntities(string text)
+        {
+            if (!ContainsCommonXmlEntity(text))
+            {
+                return text;
+            }
+
+            var current = text;
+            for (var pass = 0; pass < 3; pass++)
+            {
+                var next = current
+                    .Replace("&lt;", "<", StringComparison.OrdinalIgnoreCase)
+                    .Replace("&gt;", ">", StringComparison.OrdinalIgnoreCase)
+                    .Replace("&quot;", "\"", StringComparison.OrdinalIgnoreCase)
+                    .Replace("&apos;", "'", StringComparison.OrdinalIgnoreCase)
+                    .Replace("&amp;", "&", StringComparison.OrdinalIgnoreCase);
+
+                if (string.Equals(next, current, StringComparison.Ordinal))
+                {
+                    break;
+                }
+
+                current = next;
+                if (!ContainsCommonXmlEntity(current))
+                {
+                    break;
+                }
+            }
+
+            return current;
+        }
+
+        private static bool ContainsCommonXmlEntity(string text)
+        {
+            return text.Contains("&lt;", StringComparison.OrdinalIgnoreCase) ||
+                text.Contains("&gt;", StringComparison.OrdinalIgnoreCase) ||
+                text.Contains("&amp;", StringComparison.OrdinalIgnoreCase) ||
+                text.Contains("&quot;", StringComparison.OrdinalIgnoreCase) ||
+                text.Contains("&apos;", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsMarkerLine(string line, string marker)
+        {
+            var trimmed = line.Trim();
+            if (!trimmed.StartsWith(marker, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            if (trimmed.Length == marker.Length)
+            {
+                return true;
+            }
+
+            var suffix = trimmed[marker.Length..].TrimStart();
+            return suffix.StartsWith("//", StringComparison.Ordinal) ||
+                suffix.StartsWith("#", StringComparison.Ordinal) ||
+                suffix.StartsWith("/*", StringComparison.Ordinal) ||
+                suffix.StartsWith("<!--", StringComparison.Ordinal);
+        }
+
+        private static bool IsBeginningOfFileMarkerLine(string line)
+        {
+            return IsMarkerLine(line, BeginningOfFileMarker);
+        }
+
+        private static bool IsEndOfFileMarkerLine(string line)
+        {
+            return IsMarkerLine(line, EndOfFileMarker);
         }
 
         private static string ExtractElementText(XElement element)
@@ -982,6 +1228,53 @@ namespace Skyweaver.Tools
                     default:
                         builder.Append(node.ToString(SaveOptions.DisableFormatting));
                         break;
+                }
+            }
+
+            return builder.ToString();
+        }
+
+        private static string BuildReplacementText(
+            IReadOnlyList<TextLine> fileLines,
+            IReadOnlyList<TextLine> replacementLines,
+            BlockMatch match,
+            string newline)
+        {
+            if (replacementLines.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            var builder = new StringBuilder();
+            var suffixReplacementStart = replacementLines.Count - match.SuffixLineCount;
+            for (var index = 0; index < replacementLines.Count; index++)
+            {
+                var lineText = replacementLines[index].Text;
+                if (match.PreserveAnchors)
+                {
+                    if (index < match.PrefixLineCount)
+                    {
+                        var fileLineIndex = match.StartLineIndex + index;
+                        if (fileLineIndex >= 0 && fileLineIndex < fileLines.Count)
+                        {
+                            lineText = fileLines[fileLineIndex].Text;
+                        }
+                    }
+                    else if (index >= suffixReplacementStart)
+                    {
+                        var suffixOffset = index - suffixReplacementStart;
+                        var fileLineIndex = match.EndLineExclusive - match.SuffixLineCount + suffixOffset;
+                        if (fileLineIndex >= 0 && fileLineIndex < fileLines.Count)
+                        {
+                            lineText = fileLines[fileLineIndex].Text;
+                        }
+                    }
+                }
+
+                builder.Append(lineText);
+                if (replacementLines[index].Newline.Length > 0)
+                {
+                    builder.Append(newline);
                 }
             }
 
@@ -1033,25 +1326,25 @@ namespace Skyweaver.Tools
         {
             if (ContainsNonStandaloneExistingCodeLine(editText))
             {
-                return "EditText contains [Existing Code] on a non-sentinel line. [Existing Code] must appear alone on its own line. Put [BOF], [EOF], or any real code on the next/previous line instead. Example: [Existing Code]\\n[BOF]\\n...\\n[Existing Code]. If you only need one block, you may also omit [Existing Code] entirely and let the whole EditText body act as the block.";
+                return "EditText contains [Existing Code] on a non-sentinel line. [Existing Code] must appear alone on its own line, but it may carry a trailing comment such as // note. Put [BOF], [EOF], or any real code on the next/previous line instead. Example: [Existing Code]\\n[BOF]\\n...\\n[Existing Code]. If you only need one block, you may also omit [Existing Code] entirely and let the whole EditText body act as the block.";
             }
 
-            return "EditText contains unmatched edit-block sentinels. The standard multi-block form is [Existing Code] ... [Existing Code]. The outermost first block may also start with [BOF], and the outermost last block may also end with [EOF]. If you only need one block, you may omit [Existing Code] entirely and use the whole EditText body as a single shorthand block.";
+            return "EditText contains unmatched edit-block sentinels. The standard multi-block form is [Existing Code] ... [Existing Code]. The outermost first block may also start with [BOF], and the outermost last block may also end with [EOF]. Commentary outside complete blocks is ignored, but every sentinel must still be paired. If you only need one block, you may omit [Existing Code] entirely and use the whole EditText body as a single shorthand block.";
         }
 
         private static string BuildOutsideBlockTextMessage(string editText)
         {
             if (ContainsLiteralCDataMarker(editText))
             {
-                return "Only whitespace is allowed outside [Existing Code] edit blocks. Literal <![CDATA[ or ]]> markers were found in EditText. CDATA should wrap the outer XML parameter only; do not leave the CDATA markers themselves inside the edit body.";
+                return "Text outside complete [Existing Code] blocks is ignored, but literal <![CDATA[ or ]]> markers were found in EditText. CDATA should wrap the outer XML parameter only; do not leave the CDATA markers themselves inside the edit body.";
             }
 
             if (ContainsNonStandaloneExistingCodeLine(editText))
             {
-                return "Only whitespace is allowed outside [Existing Code] edit blocks. [Existing Code] must be alone on its own line; do not combine it with [BOF], [EOF], or real code on the same line.";
+                return "[Existing Code] must be alone on its own line; do not combine it with [BOF], [EOF], or real code on the same line.";
             }
 
-            return "Only whitespace is allowed outside edit blocks. Put all source/final text inside complete blocks; the standard multi-block form is [Existing Code] ... [Existing Code], and the outermost first/last block may also use [BOF] ... [Existing Code] or [Existing Code] ... [EOF]. If you only need one block, you may omit [Existing Code] entirely and let the whole EditText body be that block.";
+            return "Text outside complete edit blocks is ignored. Put all source/final text inside complete blocks; the standard multi-block form is [Existing Code] ... [Existing Code], and the outermost first/last block may also use [BOF] ... [Existing Code] or [Existing Code] ... [EOF]. If you only need one block, you may omit [Existing Code] entirely and let the whole EditText body be that block.";
         }
 
         private static string BuildFallbackBlockFailureMessage(string editText, string reason)
@@ -1066,7 +1359,7 @@ namespace Skyweaver.Tools
                 return $"{reason} Literal <![CDATA[ or ]]> markers were found in EditText. CDATA should wrap the outer XML parameter only; do not keep those markers inside the edit body.";
             }
 
-            return $"{reason} No complete edit block was found, so the whole EditText body was treated as one shorthand block. For multiple distant edits, wrap each block in matched sentinels: usually [Existing Code] ... [Existing Code], with [BOF] ... [Existing Code] and [Existing Code] ... [EOF] also accepted for the outermost first/last block. For a full-file fallback rewrite, use [BOF] as the first line and [EOF] as the last line.";
+            return $"{reason} No complete edit block was found, so the whole EditText body was treated as one shorthand block. A one-line shorthand only rewrites an empty or one-line file; for multi-line files, add unchanged anchor lines or use [BOF] / [EOF] for file-boundary edits. For multiple distant edits, wrap each block in matched sentinels: usually [Existing Code] ... [Existing Code], with [BOF] ... [Existing Code] and [Existing Code] ... [EOF] also accepted for the outermost first/last block.";
         }
 
         private static bool ContainsNonStandaloneExistingCodeLine(string text)
@@ -1085,13 +1378,345 @@ namespace Skyweaver.Tools
 
         private static bool IsExistingCodeSentinelLine(string line)
         {
-            return string.Equals(line.Trim(), "[Existing Code]", StringComparison.OrdinalIgnoreCase);
+            return IsMarkerLine(line, "[Existing Code]");
         }
 
         private static bool ContainsLiteralCDataMarker(string text)
         {
             return text.Contains("<![CDATA[", StringComparison.Ordinal) ||
                 text.Contains("]]>", StringComparison.Ordinal);
+        }
+
+        private static string BuildCouldNotLocateBlockMessage(
+            int blockIndex,
+            IReadOnlyList<string> fileLineTexts,
+            IReadOnlyList<string> replacementLineTexts,
+            bool anchoredAtBeginningOfFile,
+            bool anchoredAtEndOfFile)
+        {
+            var builder = new StringBuilder();
+            builder.Append($"Edit block {blockIndex} could not be uniquely located. ");
+            builder.Append("Tried exact, trim-end, and tab/space-normalized anchor matching. ");
+
+            if (!anchoredAtBeginningOfFile &&
+                !anchoredAtEndOfFile &&
+                replacementLineTexts.Count == 1 &&
+                fileLineTexts.Count > 1)
+            {
+                builder.Append("This one-line shorthand only rewrites an empty or one-line file. ");
+            }
+
+            var closestReport = BuildClosestMatchReport(
+                fileLineTexts,
+                replacementLineTexts,
+                anchoredAtBeginningOfFile,
+                anchoredAtEndOfFile);
+            if (closestReport.Length > 0)
+            {
+                builder.Append(closestReport);
+                builder.Append(' ');
+            }
+
+            builder.Append("Add more exact unchanged context around the real edit and make sure changed or deleted lines stay between the anchors.");
+            return builder.ToString();
+        }
+
+        private static string BuildAmbiguousBlockMessage(
+            int blockIndex,
+            IReadOnlyList<BlockMatch> candidateMatches,
+            IReadOnlyList<string> fileLineTexts,
+            LineMatchMode lineMatchMode)
+        {
+            var orderedMatches = candidateMatches
+                .OrderBy(match => match.StartLineIndex)
+                .ThenBy(match => match.EndLineExclusive)
+                .Take(5)
+                .ToArray();
+
+            var spans = string.Join(
+                ", ",
+                orderedMatches.Select(match => $"{FormatLineRange(match.StartLineIndex, match.EndLineExclusive)}: {BuildSpanPreview(fileLineTexts, match)}"));
+            var moreText = candidateMatches.Count > orderedMatches.Length
+                ? $" (+{candidateMatches.Count - orderedMatches.Length} more)"
+                : string.Empty;
+
+            return $"Edit block {blockIndex} is ambiguous under {FormatLineMatchMode(lineMatchMode)} matching. Candidate spans: {spans}{moreText}. Add more unchanged context above and below the real edit until the target span is unique.";
+        }
+
+        private static string BuildClosestMatchReport(
+            IReadOnlyList<string> fileLineTexts,
+            IReadOnlyList<string> replacementLineTexts,
+            bool anchoredAtBeginningOfFile,
+            bool anchoredAtEndOfFile)
+        {
+            var reports = new List<(int Score, string Message)>(2);
+            var sampleLength = Math.Min(MaximumAnchorLines, Math.Min(5, replacementLineTexts.Count));
+            if (sampleLength <= 0)
+            {
+                return string.Empty;
+            }
+
+            IReadOnlyList<string>? topSample = null;
+            if (!anchoredAtBeginningOfFile)
+            {
+                topSample = replacementLineTexts.Take(sampleLength).ToArray();
+                var topReport = FindClosestSequenceMatch(fileLineTexts, topSample);
+                if (topReport != null)
+                {
+                    reports.Add((topReport.TotalScore, FormatClosestAnchorReport("top", topSample, topReport)));
+                }
+            }
+
+            if (!anchoredAtEndOfFile)
+            {
+                var bottomSample = replacementLineTexts.Skip(replacementLineTexts.Count - sampleLength).ToArray();
+                if (topSample == null || !topSample.SequenceEqual(bottomSample, StringComparer.Ordinal))
+                {
+                    var bottomReport = FindClosestSequenceMatch(fileLineTexts, bottomSample);
+                    if (bottomReport != null)
+                    {
+                        reports.Add((bottomReport.TotalScore, FormatClosestAnchorReport("bottom", bottomSample, bottomReport)));
+                    }
+                }
+            }
+
+            if (reports.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            return "Closest candidate: " + string.Join(" | ", reports.OrderBy(report => report.Score).Select(report => report.Message));
+        }
+
+        private static string FormatClosestAnchorReport(
+            string label,
+            IReadOnlyList<string> expectedLines,
+            SequenceComparisonResult comparison)
+        {
+            var range = FormatLineRange(comparison.StartLineIndex, comparison.StartLineIndex + expectedLines.Count);
+            if (comparison.FirstDifferenceIndex < 0)
+            {
+                return $"{label} sample matches file lines {range}";
+            }
+
+            var expectedLineNumber = comparison.FirstDifferenceIndex + 1;
+            var actualLineNumber = comparison.StartLineIndex + comparison.FirstDifferenceIndex + 1;
+            return $"{label} sample at file lines {range}: {comparison.MatchedLineCount}/{expectedLines.Count} lines matched; first difference at sample line {expectedLineNumber} vs file line {actualLineNumber} ({comparison.FirstDifferenceReason}): expected \"{TruncateLineForMessage(comparison.FirstExpectedLine, 80)}\", found \"{TruncateLineForMessage(comparison.FirstActualLine, 80)}\"";
+        }
+
+        private static SequenceComparisonResult? FindClosestSequenceMatch(
+            IReadOnlyList<string> fileLineTexts,
+            IReadOnlyList<string> expectedLines)
+        {
+            if (expectedLines.Count == 0 || fileLineTexts.Count < expectedLines.Count)
+            {
+                return null;
+            }
+
+            SequenceComparisonResult? bestResult = null;
+            for (var start = 0; start <= fileLineTexts.Count - expectedLines.Count; start++)
+            {
+                var result = CompareSequence(fileLineTexts, start, expectedLines);
+                if (bestResult == null ||
+                    result.TotalScore < bestResult!.TotalScore ||
+                    (result.TotalScore == bestResult.TotalScore && result.MatchedLineCount > bestResult.MatchedLineCount) ||
+                    (result.TotalScore == bestResult.TotalScore && result.MatchedLineCount == bestResult.MatchedLineCount && result.StartLineIndex < bestResult.StartLineIndex))
+                {
+                    bestResult = result;
+                }
+            }
+
+            return bestResult;
+        }
+
+        private static SequenceComparisonResult CompareSequence(
+            IReadOnlyList<string> fileLineTexts,
+            int startIndex,
+            IReadOnlyList<string> expectedLines)
+        {
+            var totalScore = 0;
+            var matchedLineCount = 0;
+            var firstDifferenceIndex = -1;
+            var firstExpectedLine = string.Empty;
+            var firstActualLine = string.Empty;
+            var firstDifferenceReason = string.Empty;
+
+            for (var index = 0; index < expectedLines.Count; index++)
+            {
+                var actualLine = fileLineTexts[startIndex + index];
+                var expectedLine = expectedLines[index];
+                var comparison = CompareLine(actualLine, expectedLine);
+                totalScore += comparison.Score;
+                if (comparison.Score <= 2)
+                {
+                    matchedLineCount++;
+                }
+
+                if (comparison.Score > 0 && firstDifferenceIndex < 0)
+                {
+                    firstDifferenceIndex = index;
+                    firstExpectedLine = expectedLine;
+                    firstActualLine = actualLine;
+                    firstDifferenceReason = comparison.Reason;
+                }
+            }
+
+            return new SequenceComparisonResult(
+                startIndex,
+                totalScore,
+                matchedLineCount,
+                firstDifferenceIndex,
+                firstExpectedLine,
+                firstActualLine,
+                firstDifferenceReason);
+        }
+
+        private static LineComparisonResult CompareLine(string actualLine, string expectedLine)
+        {
+            if (string.Equals(actualLine, expectedLine, StringComparison.Ordinal))
+            {
+                return new LineComparisonResult(0, "exact text");
+            }
+
+            if (string.Equals(actualLine.TrimEnd(), expectedLine.TrimEnd(), StringComparison.Ordinal))
+            {
+                return new LineComparisonResult(1, "trailing whitespace differs");
+            }
+
+            if (string.Equals(NormalizeIndentationKey(actualLine), NormalizeIndentationKey(expectedLine), StringComparison.Ordinal))
+            {
+                return new LineComparisonResult(2, "indentation differs");
+            }
+
+            var distance = CalculateBoundedEditDistance(
+                actualLine.TrimEnd(),
+                expectedLine.TrimEnd(),
+                80);
+            return new LineComparisonResult(3 + distance, "text differs");
+        }
+
+        private static int CalculateBoundedEditDistance(string left, string right, int maximumDistance)
+        {
+            if (maximumDistance < 0)
+            {
+                maximumDistance = int.MaxValue;
+            }
+
+            if (string.Equals(left, right, StringComparison.Ordinal))
+            {
+                return 0;
+            }
+
+            if (Math.Abs(left.Length - right.Length) > maximumDistance)
+            {
+                return maximumDistance + 1;
+            }
+
+            var previous = new int[right.Length + 1];
+            var current = new int[right.Length + 1];
+            for (var index = 0; index <= right.Length; index++)
+            {
+                previous[index] = index;
+            }
+
+            for (var leftIndex = 1; leftIndex <= left.Length; leftIndex++)
+            {
+                current[0] = leftIndex;
+                var rowMinimum = current[0];
+                var leftChar = left[leftIndex - 1];
+
+                for (var rightIndex = 1; rightIndex <= right.Length; rightIndex++)
+                {
+                    var cost = leftChar == right[rightIndex - 1] ? 0 : 1;
+                    var deletion = previous[rightIndex] + 1;
+                    var insertion = current[rightIndex - 1] + 1;
+                    var substitution = previous[rightIndex - 1] + cost;
+                    var value = Math.Min(Math.Min(deletion, insertion), substitution);
+                    current[rightIndex] = value;
+                    if (value < rowMinimum)
+                    {
+                        rowMinimum = value;
+                    }
+                }
+
+                if (rowMinimum > maximumDistance)
+                {
+                    return maximumDistance + 1;
+                }
+
+                (previous, current) = (current, previous);
+            }
+
+            return previous[right.Length];
+        }
+
+        private static string BuildSpanPreview(IReadOnlyList<string> fileLineTexts, BlockMatch match)
+        {
+            if (fileLineTexts.Count == 0)
+            {
+                return "<empty file>";
+            }
+
+            var start = Math.Max(0, match.StartLineIndex - 1);
+            var end = Math.Min(fileLineTexts.Count, match.EndLineExclusive + 1);
+            var builder = new StringBuilder();
+            for (var index = start; index < end; index++)
+            {
+                if (builder.Length > 0)
+                {
+                    builder.Append(" | ");
+                }
+
+                var prefix = index >= match.StartLineIndex && index < match.EndLineExclusive ? ">" : " ";
+                builder.Append(prefix);
+                builder.Append(index + 1);
+                builder.Append(": ");
+                builder.Append(TruncateLineForMessage(fileLineTexts[index], 64));
+            }
+
+            return builder.ToString();
+        }
+
+        private static string FormatLineRange(int startLineIndex, int endLineExclusive)
+        {
+            if (endLineExclusive <= startLineIndex)
+            {
+                return (startLineIndex + 1).ToString(CultureInfo.InvariantCulture);
+            }
+
+            if (endLineExclusive == startLineIndex + 1)
+            {
+                return (startLineIndex + 1).ToString(CultureInfo.InvariantCulture);
+            }
+
+            return $"{startLineIndex + 1}-{endLineExclusive}";
+        }
+
+        private static string TruncateLineForMessage(string text, int maxLength)
+        {
+            var normalized = text.Replace("\r", "\\r", StringComparison.Ordinal).Replace("\n", "\\n", StringComparison.Ordinal);
+            if (normalized.Length <= maxLength)
+            {
+                return normalized;
+            }
+
+            if (maxLength <= 3)
+            {
+                return normalized[..maxLength];
+            }
+
+            return normalized[..(maxLength - 3)] + "...";
+        }
+
+        private static string FormatLineMatchMode(LineMatchMode lineMatchMode)
+        {
+            return lineMatchMode switch
+            {
+                LineMatchMode.Exact => "exact",
+                LineMatchMode.TrimEnd => "trim-end",
+                LineMatchMode.IndentNormalized => "tab/space-normalized",
+                _ => lineMatchMode.ToString()
+            };
         }
 
         private static string BuildSuccessContent(
@@ -1622,7 +2247,25 @@ namespace Skyweaver.Tools
             int StartLineIndex,
             int EndLineExclusive,
             int PrefixLineCount,
-            int SuffixLineCount);
+            int SuffixLineCount,
+            bool PreserveAnchors,
+            LineMatchMode LineMatchMode);
+
+        private sealed record BlockMatchResolution(BlockMatch? Match, IReadOnlyList<BlockMatch> CandidateMatches)
+        {
+            public bool IsAmbiguous => CandidateMatches.Count > 1;
+        }
+
+        private sealed record SequenceComparisonResult(
+            int StartLineIndex,
+            int TotalScore,
+            int MatchedLineCount,
+            int FirstDifferenceIndex,
+            string FirstExpectedLine,
+            string FirstActualLine,
+            string FirstDifferenceReason);
+
+        private readonly record struct LineComparisonResult(int Score, string Reason);
 
         private sealed record AppliedEditBlock(string UpdatedContent, AppliedEditBlockSummary Summary);
 
@@ -1635,6 +2278,13 @@ namespace Skyweaver.Tools
             int ReplacedLineCount,
             int ReplacementLineCount,
             bool Changed);
+
+        private enum LineMatchMode
+        {
+            Exact,
+            TrimEnd,
+            IndentNormalized
+        }
     }
 
     internal enum EditFileAdvancedPermissionScope

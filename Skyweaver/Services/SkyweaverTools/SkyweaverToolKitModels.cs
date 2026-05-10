@@ -26,6 +26,7 @@ namespace Skyweaver.Services.SkyweaverTools
     {
         private string _key = Guid.NewGuid().ToString("N");
         private string _name = string.Empty;
+        private bool _isDefaultToolKit;
 
         public string Key
         {
@@ -47,6 +48,12 @@ namespace Skyweaver.Services.SkyweaverTools
 
         public ObservableCollection<SkyweaverToolKitEntry> Tools { get; } = new();
 
+        public bool IsDefaultToolKit
+        {
+            get => _isDefaultToolKit;
+            set => SetProperty(ref _isDefaultToolKit, value);
+        }
+
         public string DisplayNameOrFallback => string.IsNullOrWhiteSpace(Name)
             ? $"未命名工具集 ({GetShortKey(Key)})"
             : Name;
@@ -58,7 +65,8 @@ namespace Skyweaver.Services.SkyweaverTools
             var clone = new SkyweaverToolKitDefinition
             {
                 Key = Key,
-                Name = Name
+                Name = Name,
+                IsDefaultToolKit = IsDefaultToolKit
             };
 
             foreach (var tool in Tools)

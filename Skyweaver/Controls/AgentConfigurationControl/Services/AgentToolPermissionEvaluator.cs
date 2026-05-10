@@ -25,12 +25,22 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
             var permission = agent.ToolPermissions.FirstOrDefault(item =>
                 string.Equals(item.ToolName, registration.Definition.Name, StringComparison.OrdinalIgnoreCase));
 
-            var mode = permission?.Permission ?? AgentToolPermissionMode.RequireConfirmation;
+            var mode = permission?.Permission ?? MapDefaultPermission(registration.Definition.DefaultAgentPermission);
             return mode switch
             {
                 AgentToolPermissionMode.Disabled => AgentToolEffectiveDecision.Denied,
                 AgentToolPermissionMode.RequireConfirmation => AgentToolEffectiveDecision.RequiresUserConfirmation,
                 _ => AgentToolEffectiveDecision.Allowed
+            };
+        }
+
+        private static AgentToolPermissionMode MapDefaultPermission(SkyweaverToolDefaultAgentPermission defaultPermission)
+        {
+            return defaultPermission switch
+            {
+                SkyweaverToolDefaultAgentPermission.Disabled => AgentToolPermissionMode.Disabled,
+                SkyweaverToolDefaultAgentPermission.Allow => AgentToolPermissionMode.Allow,
+                _ => AgentToolPermissionMode.RequireConfirmation
             };
         }
     }
