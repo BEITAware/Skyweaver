@@ -460,10 +460,25 @@
                                     <DockPanel>
                                         <TextBlock Text="工具权限"
                                                    FontWeight="SemiBold"/>
-                                        <Button DockPanel.Dock="Right"
-                                                Width="120"
-                                                Command="{Binding ReloadToolsCommand}"
-                                                Content="重新加载工具"/>
+                                        <WrapPanel DockPanel.Dock="Right"
+                                                   HorizontalAlignment="Right">
+                                            <Button Width="120"
+                                                    Margin="8,0,0,0"
+                                                    Command="{Binding ReloadToolsCommand}"
+                                                    Content="重新加载工具"/>
+                                            <Button Width="96"
+                                                    Margin="8,0,0,0"
+                                                    Command="{Binding AllowAllToolPermissionsCommand}"
+                                                    Content="全部允许"/>
+                                            <Button Width="96"
+                                                    Margin="8,0,0,0"
+                                                    Command="{Binding DisableAllToolPermissionsCommand}"
+                                                    Content="全部禁止"/>
+                                            <Button Width="108"
+                                                    Margin="8,0,0,0"
+                                                    Command="{Binding RequireConfirmationAllToolPermissionsCommand}"
+                                                    Content="全部需确认"/>
+                                        </WrapPanel>
                                     </DockPanel>
 
                                     <ListView Margin="0,8,0,0"

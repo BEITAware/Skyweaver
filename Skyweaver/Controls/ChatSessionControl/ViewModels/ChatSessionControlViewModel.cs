@@ -1,5 +1,6 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
@@ -26,6 +27,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         private readonly ChatSessionRepository? _chatSessionRepository;
         private readonly ChatSessionFlowBindingService _flowBindingService;
         private readonly ChatSessionRuntimeService _runtimeService;
+        private readonly ChatSessionContextWindowService _contextWindowService;
         private readonly ChatComposerImageAttachmentService _composerImageAttachmentService;
         private readonly ToolInvocationPresentationService _toolInvocationPresentationService;
         private readonly ChatSessionPresentationProjector _presentationProjector;
@@ -40,6 +42,10 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         private CancellationTokenSource? _executionCancellationSource;
 
         private static readonly TimeSpan StreamingProjectionRefreshInterval = TimeSpan.FromMilliseconds(80);
+
+        private double _contextWindowUsageRatio;
+        private string _contextWindowUsageText = "正在读取上下文窗口。";
+        private string _contextWindowStatusText = "上下文 --";
 
         public ObservableCollection<ChatMessageModel> Messages { get; } = new();
 
@@ -58,6 +64,24 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             : "未绑定会话流。";
 
         public string SessionFlowValidationSummary => _sessionFlowValidationSummary;
+
+        public double ContextWindowUsageRatio
+        {
+            get => _contextWindowUsageRatio;
+            set => SetProperty(ref _contextWindowUsageRatio, value);
+        }
+
+        public string ContextWindowUsageText
+        {
+            get => _contextWindowUsageText;
+            set => SetProperty(ref _contextWindowUsageText, value ?? string.Empty);
+        }
+
+        public string ContextWindowStatusText
+        {
+            get => _contextWindowStatusText;
+            set => SetProperty(ref _contextWindowStatusText, value ?? string.Empty);
+        }
 
         public string DraftMessageText
         {
@@ -166,6 +190,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             _sessionModel = sessionModel;
             _chatSessionRepository = chatSessionRepository;
             _runtimeService = runtimeService ?? new ChatSessionRuntimeService();
+            _contextWindowService = new ChatSessionContextWindowService();
             _composerImageAttachmentService = new ChatComposerImageAttachmentService();
             _toolInvocationPresentationService = new ToolInvocationPresentationService();
             _presentationProjector = new ChatSessionPresentationProjector();
@@ -205,6 +230,10 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             if (_sessionModel != null)
             {
                 RefreshMessagesFromTranscript();
+            }
+            else
+            {
+                ApplyUnavailableContextWindowStatus("此聊天视图未绑定到 ChatSessionModel。");
             }
         }
 
@@ -447,9 +476,20 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                 _ => ExecutionStatusText
             };
 
-            if (ShouldRefreshProjection(runtimeEvent))
+            var shouldRefreshProjection = ShouldRefreshProjection(runtimeEvent);
+            if (shouldRefreshProjection)
             {
-                RefreshMessagesFromTranscript();
+                RefreshMessagesFromTranscript(ShouldRefreshContextWindowAfterRuntimeEvent(runtimeEvent));
+            }
+
+            if (runtimeEvent.ContextCompression != null)
+            {
+                ApplyRuntimeContextWindowStatus(runtimeEvent.ContextCompression);
+            }
+
+            if (runtimeEvent.TokenUsage != null)
+            {
+                ApplyRuntimeTokenUsageStatus(runtimeEvent.TokenUsage);
             }
         }
 
@@ -601,10 +641,11 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             CommandManager.InvalidateRequerySuggested();
         }
 
-        private void RefreshMessagesFromTranscript()
+        private void RefreshMessagesFromTranscript(bool refreshContextWindow = true)
         {
             if (_sessionModel == null)
             {
+                ApplyUnavailableContextWindowStatus("此聊天视图未绑定到 ChatSessionModel。");
                 return;
             }
 
@@ -651,6 +692,171 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             {
                 _suppressPersistence = false;
             }
+
+            if (refreshContextWindow)
+            {
+                RefreshContextWindowStatusFromBackend();
+            }
+        }
+
+        private void RefreshContextWindowStatusFromBackend()
+        {
+            if (_sessionModel == null)
+            {
+                ApplyUnavailableContextWindowStatus("此聊天视图未绑定到 ChatSessionModel。");
+                return;
+            }
+
+            try
+            {
+                ApplyContextWindowSnapshot(_contextWindowService.CreateSnapshot(_sessionModel));
+            }
+            catch (Exception ex)
+            {
+                ApplyUnavailableContextWindowStatus(ex.Message);
+            }
+        }
+
+        private void ApplyContextWindowSnapshot(ChatSessionContextWindowSnapshot snapshot)
+        {
+            ArgumentNullException.ThrowIfNull(snapshot);
+
+            if (!snapshot.IsAvailable)
+            {
+                ApplyUnavailableContextWindowStatus(snapshot.Message ?? "上下文窗口暂不可用。");
+                return;
+            }
+
+            var detail = $"估算 {FormatTokens(snapshot.EstimatedTokenCount)} / {FormatTokens(snapshot.ContextWindowTokens)} Tokens ({FormatPercent(snapshot.UsageRatio)})";
+            var bottleneck = BuildContextWindowBottleneckText(snapshot.AgentName, snapshot.ModelName);
+            if (bottleneck.Length > 0)
+            {
+                detail += Environment.NewLine + bottleneck;
+            }
+
+            ApplyContextWindowStatus(
+                snapshot.EstimatedTokenCount,
+                snapshot.ContextWindowTokens,
+                snapshot.UsageRatio,
+                detail);
+        }
+
+        private void ApplyRuntimeContextWindowStatus(AgentLoopContextCompressionInfo contextCompression)
+        {
+            ArgumentNullException.ThrowIfNull(contextCompression);
+
+            if (contextCompression.ContextWindowTokens <= 0)
+            {
+                return;
+            }
+
+            var usedTokens = contextCompression.EstimatedTokenCountAfterCompression > 0
+                ? contextCompression.EstimatedTokenCountAfterCompression
+                : contextCompression.EstimatedTokenCountBeforeCompression;
+            var ratio = usedTokens / (double)contextCompression.ContextWindowTokens;
+            var detail = $"运行时 {FormatTokens(usedTokens)} / {FormatTokens(contextCompression.ContextWindowTokens)} Tokens ({FormatPercent(ratio)})";
+            if (contextCompression.EstimatedTokenCountBeforeCompression > 0 &&
+                contextCompression.EstimatedTokenCountAfterCompression > 0)
+            {
+                detail += Environment.NewLine +
+                          $"压缩前 {FormatTokens(contextCompression.EstimatedTokenCountBeforeCompression)} Tokens";
+            }
+
+            ApplyContextWindowStatus(
+                usedTokens,
+                contextCompression.ContextWindowTokens,
+                ratio,
+                detail);
+        }
+
+        private void ApplyRuntimeTokenUsageStatus(AgentLoopTokenUsageInfo tokenUsage)
+        {
+            ArgumentNullException.ThrowIfNull(tokenUsage);
+
+            if (tokenUsage.ContextWindowTokens <= 0)
+            {
+                return;
+            }
+
+            var totalTokens = tokenUsage.EstimatedTotalTokenCount;
+            var ratio = totalTokens / (double)tokenUsage.ContextWindowTokens;
+            var detail = $"Streaming estimate {FormatTokens(totalTokens)} / {FormatTokens(tokenUsage.ContextWindowTokens)} Tokens ({FormatPercent(ratio)})";
+            detail += Environment.NewLine +
+                      $"Input {FormatTokens(tokenUsage.EstimatedInputTokenCount)} / Output {FormatTokens(tokenUsage.EstimatedOutputTokenCount)} Tokens";
+            if (!string.IsNullOrWhiteSpace(tokenUsage.ModelId))
+            {
+                detail += Environment.NewLine + $"Model: {tokenUsage.ModelId}";
+            }
+
+            ApplyContextWindowStatus(
+                totalTokens,
+                tokenUsage.ContextWindowTokens,
+                ratio,
+                detail);
+        }
+
+        private void ApplyContextWindowStatus(
+            int usedTokens,
+            int contextWindowTokens,
+            double usageRatio,
+            string usageText)
+        {
+            var boundedRatio = Math.Clamp(usageRatio, 0d, 1d);
+            ContextWindowUsageRatio = boundedRatio;
+            ContextWindowUsageText = string.IsNullOrWhiteSpace(usageText)
+                ? $"{FormatTokens(usedTokens)} / {FormatTokens(contextWindowTokens)} Tokens ({FormatPercent(boundedRatio)})"
+                : usageText;
+            ContextWindowStatusText = $"上下文 {FormatPercent(boundedRatio)}";
+        }
+
+        private void ApplyUnavailableContextWindowStatus(string message)
+        {
+            ContextWindowUsageRatio = 0d;
+            ContextWindowUsageText = string.IsNullOrWhiteSpace(message)
+                ? "上下文窗口暂不可用。"
+                : message.Trim();
+            ContextWindowStatusText = "上下文 --";
+        }
+
+        private static string BuildContextWindowBottleneckText(string? agentName, string? modelName)
+        {
+            var normalizedAgentName = agentName?.Trim() ?? string.Empty;
+            var normalizedModelName = modelName?.Trim() ?? string.Empty;
+            if (normalizedAgentName.Length == 0 && normalizedModelName.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            if (normalizedAgentName.Length == 0)
+            {
+                return $"模型：{normalizedModelName}";
+            }
+
+            if (normalizedModelName.Length == 0)
+            {
+                return $"瓶颈代理：{normalizedAgentName}";
+            }
+
+            return $"瓶颈代理：{normalizedAgentName} / {normalizedModelName}";
+        }
+
+        private static string FormatTokens(int tokens)
+        {
+            return Math.Max(0, tokens).ToString("N0", CultureInfo.CurrentCulture);
+        }
+
+        private static string FormatPercent(double ratio)
+        {
+            return Math.Clamp(ratio, 0d, 1d).ToString("P0", CultureInfo.CurrentCulture);
+        }
+
+        private static bool ShouldRefreshContextWindowAfterRuntimeEvent(ChatSessionRuntimeEvent runtimeEvent)
+        {
+            return runtimeEvent.Kind is ChatSessionRuntimeEventKind.ExecutionStarted
+                or ChatSessionRuntimeEventKind.ContextCompressionApplied
+                or ChatSessionRuntimeEventKind.ExecutionCompleted
+                or ChatSessionRuntimeEventKind.ExecutionFailed
+                or ChatSessionRuntimeEventKind.ExecutionCancelled;
         }
 
         private bool ShouldRefreshProjection(ChatSessionRuntimeEvent runtimeEvent)

@@ -95,6 +95,15 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             BrowseAvatarCommand = new RelayCommand(BrowseAvatar, () => SelectedAgent != null);
             OpenConfigurationDirectoryCommand = new RelayCommand(OpenConfigurationDirectory);
             ReloadToolsCommand = new RelayCommand(ReloadTools);
+            AllowAllToolPermissionsCommand = new RelayCommand(
+                () => SetAllToolPermissions(AgentToolPermissionMode.Allow, "已将当前代理的全部工具权限设为允许。"),
+                () => SelectedAgent != null);
+            DisableAllToolPermissionsCommand = new RelayCommand(
+                () => SetAllToolPermissions(AgentToolPermissionMode.Disabled, "已将当前代理的全部工具权限设为禁止。"),
+                () => SelectedAgent != null);
+            RequireConfirmationAllToolPermissionsCommand = new RelayCommand(
+                () => SetAllToolPermissions(AgentToolPermissionMode.RequireConfirmation, "已将当前代理的全部工具权限设为需确认。"),
+                () => SelectedAgent != null);
             ReloadLanguageModelCatalogCommand = new RelayCommand(ReloadLanguageModelCatalog);
             AddInputRootNodeCommand = new RelayCommand(AddInputRootNode, () => SelectedAgent != null);
             AddOutputRootNodeCommand = new RelayCommand(AddOutputRootNode, () => SelectedAgent != null);
@@ -268,6 +277,12 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
         public ICommand OpenConfigurationDirectoryCommand { get; }
 
         public ICommand ReloadToolsCommand { get; }
+
+        public ICommand AllowAllToolPermissionsCommand { get; }
+
+        public ICommand DisableAllToolPermissionsCommand { get; }
+
+        public ICommand RequireConfirmationAllToolPermissionsCommand { get; }
 
         public ICommand ReloadLanguageModelCatalogCommand { get; }
 
@@ -457,6 +472,24 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             }
 
             PersistAll("已根据当前工具注册表刷新工具权限。");
+        }
+
+        private void SetAllToolPermissions(AgentToolPermissionMode permissionMode, string successMessage)
+        {
+            if (SelectedAgent == null)
+            {
+                return;
+            }
+
+            using (SuspendPersistence())
+            {
+                foreach (var permission in SelectedAgent.ToolPermissions)
+                {
+                    permission.Permission = permissionMode;
+                }
+            }
+
+            PersistAll(successMessage);
         }
 
         private void ReloadLanguageModelCatalog()

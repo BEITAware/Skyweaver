@@ -231,6 +231,24 @@ namespace Skyweaver.Services.AgentLoop
         public IReadOnlyList<string> CompactedToolCallIds { get; init; } = Array.Empty<string>();
     }
 
+    public sealed class AgentLoopTokenUsageInfo
+    {
+        public int ContextWindowTokens { get; init; }
+
+        public int EstimatedInputTokenCount { get; init; }
+
+        public int EstimatedOutputTokenCount { get; init; }
+
+        public string? ModelId { get; init; }
+
+        public int EstimatedTotalTokenCount => Math.Max(0, EstimatedInputTokenCount) +
+                                               Math.Max(0, EstimatedOutputTokenCount);
+
+        public double UsageRatio => ContextWindowTokens <= 0
+            ? 0d
+            : Math.Clamp(EstimatedTotalTokenCount / (double)ContextWindowTokens, 0d, 1d);
+    }
+
     public sealed class AgentLoopIteration
     {
         public int IterationNumber { get; init; }
@@ -328,5 +346,7 @@ namespace Skyweaver.Services.AgentLoop
         public AgentLoopFinalOutput? FinalOutput { get; init; }
 
         public AgentLoopContextCompressionInfo? ContextCompression { get; init; }
+
+        public AgentLoopTokenUsageInfo? TokenUsage { get; init; }
     }
 }

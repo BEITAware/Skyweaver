@@ -373,6 +373,93 @@
             <Setter Property="Foreground" Value="#FFF3E4AE"/>
         </Style>
 
+        <Style x:Key="AeroContextWindowToolTipStyle" TargetType="ToolTip">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="HasDropShadow" Value="True"/>
+            <Setter Property="Placement" Value="Bottom"/>
+            <Setter Property="VerticalOffset" Value="4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToolTip">
+                        <Grid Margin="4">
+                            <Border CornerRadius="4" Margin="-2">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="2" Opacity="0.6"/>
+                                </Border.Effect>
+                                <Border.Background>
+                                    <SolidColorBrush Color="#01000000"/>
+                                </Border.Background>
+                            </Border>
+
+                            <Border CornerRadius="4">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#F0102030" Offset="0"/>
+                                        <GradientStop Color="#F0183050" Offset="0.3"/>
+                                        <GradientStop Color="#F0102840" Offset="0.7"/>
+                                        <GradientStop Color="#F0081828" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                            </Border>
+
+                            <Border CornerRadius="4,4,0,0" Height="20" VerticalAlignment="Top" IsHitTestVisible="False">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#25FFFFFF" Offset="0"/>
+                                        <GradientStop Color="#10FFFFFF" Offset="0.5"/>
+                                        <GradientStop Color="#00FFFFFF" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                            </Border>
+
+                            <Border CornerRadius="0,0,4,4" Height="30" VerticalAlignment="Bottom" IsHitTestVisible="False">
+                                <Border.Background>
+                                    <RadialGradientBrush RadiusX="0.8" RadiusY="1.5" Center="0.5,1" GradientOrigin="0.5,1">
+                                        <GradientStop Color="#3040A0E0" Offset="0"/>
+                                        <GradientStop Color="#0040A0E0" Offset="1"/>
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                            </Border>
+
+                            <Border CornerRadius="4" BorderThickness="1" IsHitTestVisible="False">
+                                <Border.BorderBrush>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#60FFFFFF" Offset="0"/>
+                                        <GradientStop Color="#30FFFFFF" Offset="0.3"/>
+                                        <GradientStop Color="#20FFFFFF" Offset="0.7"/>
+                                        <GradientStop Color="#4080C0E0" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.BorderBrush>
+                            </Border>
+
+                            <ContentPresenter Margin="12,8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="AeroContextWindowProgressBarStyle" TargetType="ProgressBar">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Border CornerRadius="11" Background="Transparent">
+                            <Grid>
+                                <Border x:Name="PART_Indicator" 
+                                        CornerRadius="11" 
+                                        HorizontalAlignment="Left" 
+                                        Background="{TemplateBinding Foreground}">
+                                    <Border.Effect>
+                                        <BlurEffect Radius="2"/>
+                                    </Border.Effect>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <LinearGradientBrush x:Key="ChatUserBubbleBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
             <GradientStop Color="#B36693B0" Offset="0"/>
             <GradientStop Color="#A63A6F8C" Offset="0.34"/>
@@ -1151,6 +1238,27 @@
                         <Border Style="{StaticResource ChatHeaderStatusCapsuleBorderStyle}">
                             <TextBlock Text="{Binding ExecutionStatusText}"
                                        Style="{StaticResource ChatHeaderStatusCapsuleTextStyle}"/>
+                        </Border>
+                        
+                        <Border Style="{StaticResource ChatHeaderCapsuleBorderStyle}">
+                            <Border.ToolTip>
+                                <ToolTip Style="{StaticResource AeroContextWindowToolTipStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="上下文窗口占用" Foreground="#FF96FCFF" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
+                                        <TextBlock Text="{Binding ContextWindowUsageText}" Foreground="White" FontSize="11"/>
+                                    </StackPanel>
+                                </ToolTip>
+                            </Border.ToolTip>
+                            <Grid>
+                                <ProgressBar Value="{Binding ContextWindowUsageRatio}" Maximum="1" 
+                                             Style="{StaticResource AeroContextWindowProgressBarStyle}"
+                                             Foreground="#44F3C96B"
+                                             HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                             Margin="-10,0"/>
+                                <TextBlock Text="{Binding ContextWindowStatusText}"
+                                           Style="{StaticResource ChatHeaderCapsuleTextStyle}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
                         </Border>
                     </WrapPanel>
 

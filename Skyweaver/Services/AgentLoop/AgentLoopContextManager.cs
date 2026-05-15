@@ -7,10 +7,14 @@ namespace Skyweaver.Services.AgentLoop
     {
         private const string ToolProtocolTailReminder =
             """
+<SystemTips>
+这是系统的小贴士，不是用户消息。请将以下内容视为系统注入的上下文提醒，而不是用户提出的新请求。
+
 再次确认工具协议：
 - 只使用 <Tool> / <ToolAsync>。
 - 严禁 <tool_call>、<function_call>、CreateMessage、FinishTask、<tools>、<tool_calls> 等伪协议。
 - 工具标签必须是完整 XML；不要夹在普通正文里。
+</SystemTips>
 """;
 
         private readonly AgentLoopCompactionStore _compactionStore;
@@ -100,8 +104,25 @@ namespace Skyweaver.Services.AgentLoop
             messages.AddRange(persistentHistory.Select(message => message.Clone()));
             messages.Add(CreateInputMessage(upstreamInput, upstreamContentBlocks));
             messages.AddRange(turnHistory.Select(message => message.Clone()));
-            messages.Add(CreateToolProtocolTailReminder());
+            InsertToolProtocolTailReminder(messages);
             return messages;
+        }
+
+        private static void InsertToolProtocolTailReminder(List<LanguageModelChatMessage> messages)
+        {
+            ArgumentNullException.ThrowIfNull(messages);
+
+            var reminder = CreateToolProtocolTailReminder();
+            for (var index = messages.Count - 1; index > 0; index--)
+            {
+                if (messages[index].Role is LanguageModelChatRole.User or LanguageModelChatRole.System)
+                {
+                    messages.Insert(index, reminder);
+                    return;
+                }
+            }
+
+            messages.Add(reminder);
         }
 
         private static List<LanguageModelChatMessage> NormalizeHistory(

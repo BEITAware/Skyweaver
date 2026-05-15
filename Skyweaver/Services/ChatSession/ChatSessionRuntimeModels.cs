@@ -117,6 +117,8 @@ namespace Skyweaver.Services.ChatSession
 
         public AgentLoopContextCompressionInfo? ContextCompression { get; init; }
 
+        public AgentLoopTokenUsageInfo? TokenUsage { get; init; }
+
         public SessionFlowPayload? Payload { get; init; }
 
         public bool IsPayloadFromPassdown { get; init; }

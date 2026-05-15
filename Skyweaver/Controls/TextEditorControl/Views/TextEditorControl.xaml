@@ -6,53 +6,675 @@
              xmlns:viewModels="clr-namespace:Skyweaver.Controls.TextEditorControl.ViewModels"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewModels:TextEditorControlViewModel, IsDesignTimeCreatable=False}"
-             d:DesignHeight="420"
-             d:DesignWidth="640">
-    <Grid>
-        <Grid.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="#FF19222D" Offset="0"/>
-                <GradientStop Color="#FF10161E" Offset="1"/>
-            </LinearGradientBrush>
-        </Grid.Background>
+             d:DesignHeight="620"
+             d:DesignWidth="920"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True"
+             TextOptions.TextFormattingMode="Display">
+    <UserControl.Resources>
+        <LinearGradientBrush x:Key="TextEditorFormatBarBrush"
+                             StartPoint="0.5,0"
+                             EndPoint="0.5,1">
+            <GradientStop Color="#FF263A50" Offset="0"/>
+            <GradientStop Color="#FF172537" Offset="0.46"/>
+            <GradientStop Color="#FF0B1524" Offset="0.51"/>
+            <GradientStop Color="#FF1F3854" Offset="1"/>
+        </LinearGradientBrush>
 
-        <Border Margin="18"
-                Padding="20"
-                Background="#16000000"
-                BorderBrush="#335596FC"
-                BorderThickness="1"
-                CornerRadius="12">
-            <StackPanel VerticalAlignment="Center">
-                <TextBlock Text="{Binding Title}"
-                           FontSize="15"
-                           FontWeight="SemiBold"
-                           Foreground="#FF96FCFF"/>
-                <TextBlock Margin="0,12,0,0"
-                           Text="{Binding Description}"
-                           TextWrapping="Wrap"
-                           Foreground="#E6FFFFFF"
-                           FontSize="13"/>
-                <TextBlock Margin="0,12,0,0"
-                           Text="{Binding Hint}"
-                           TextWrapping="Wrap"
-                           Foreground="#AAFFFFFF"
-                           FontSize="12"/>
-                <Separator Margin="0,16,0,16" Opacity="0.35"/>
-                <TextBlock Text="{Binding Scaffold.EmptyStateTitle}"
-                           Foreground="White"
-                           FontWeight="SemiBold"
-                           FontSize="14"/>
-                <TextBlock Margin="0,10,0,0"
-                           Text="{Binding Scaffold.EmptyStateDescription}"
-                           Foreground="#D9FFFFFF"
-                           TextWrapping="Wrap"
-                           FontSize="12"/>
-                <TextBlock Margin="0,10,0,0"
-                           Text="{Binding Scaffold.EmptyStateHint}"
-                           Foreground="#A6FFFFFF"
-                           TextWrapping="Wrap"
-                           FontSize="12"/>
-            </StackPanel>
-        </Border>
-    </Grid>
+        <LinearGradientBrush x:Key="TextEditorWorkSurfaceBrush"
+                             StartPoint="0,0"
+                             EndPoint="0,1">
+            <GradientStop Color="#FF122033" Offset="0"/>
+            <GradientStop Color="#FF09101B" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="TextEditorPaperBrush"
+                             StartPoint="0,0"
+                             EndPoint="0,1">
+            <GradientStop Color="#FFFFFFFF" Offset="0"/>
+            <GradientStop Color="#FFF8FCFF" Offset="0.54"/>
+            <GradientStop Color="#FFEAF4FA" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="TextEditorSidebarPanelBrush"
+                             StartPoint="0.5,0"
+                             EndPoint="0.5,1">
+            <GradientStop Color="#E7355876" Offset="0"/>
+            <GradientStop Color="#D2182B42" Offset="0.52"/>
+            <GradientStop Color="#E50B1524" Offset="1"/>
+        </LinearGradientBrush>
+
+        <Style x:Key="TextEditorHeaderTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FFF6FBFF"/>
+            <Setter Property="FontFamily" Value="{DynamicResource AeroFontFamily}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <Style x:Key="TextEditorSidebarCaptionStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FFDFF3FF"/>
+            <Setter Property="FontFamily" Value="{DynamicResource AeroFontFamily}"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+
+        <Style x:Key="TextEditorCompactRibbonButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource RibbonButtonStyle}">
+            <Setter Property="Height" Value="22"/>
+            <Setter Property="MinHeight" Value="22"/>
+            <Setter Property="Padding" Value="4,1"/>
+            <Setter Property="Margin" Value="1"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Background="{DynamicResource DocumentTabBackgroundBrush}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="24"/>
+                <RowDefinition Height="26"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="24"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0"
+                    Background="{DynamicResource PreferencesGroupHeaderBackgroundBrush}"
+                    BorderBrush="{DynamicResource PreferencesGroupHeaderBorderBrush}"
+                    BorderThickness="0,0,0,1"
+                    Padding="8,0">
+                <DockPanel LastChildFill="False">
+                    <TextBlock Text="{Binding HeaderStatusText}"
+                               Foreground="#E9F8FFFF"
+                               FontFamily="{DynamicResource AeroFontFamily}"
+                               FontSize="{DynamicResource AeroSmallFontSize}"
+                               VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"/>
+                    <TextBlock DockPanel.Dock="Right"
+                               Text="{Binding DocumentSummary}"
+                               Foreground="#BDE7F8FF"
+                               FontFamily="{DynamicResource AeroFontFamily}"
+                               FontSize="{DynamicResource AeroSmallFontSize}"
+                               VerticalAlignment="Center"
+                               Margin="16,0,0,0"
+                               TextTrimming="CharacterEllipsis"/>
+                </DockPanel>
+            </Border>
+
+            <Border Grid.Row="1"
+                    Background="{DynamicResource ToolbarBackgroundBrush}"
+                    BorderBrush="#8DB6D9EE"
+                    BorderThickness="0,0,0,1"
+                    Padding="4,2">
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Disabled">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{StaticResource TextEditorCompactRibbonButtonStyle}"
+                                MinWidth="62"
+                                Command="{Binding NewDocumentCommand}"
+                                ToolTip="创建空白文档">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Width="14"
+                                       Height="14"
+                                       Source="pack://application:,,,/Resources/NewNodeGraph.png"
+                                       Stretch="Uniform"
+                                       Margin="0,0,5,0"/>
+                                <TextBlock Text="New"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource TextEditorCompactRibbonButtonStyle}"
+                                MinWidth="62"
+                                Command="{Binding OpenDocumentCommand}"
+                                ToolTip="打开文本文件">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Width="14"
+                                       Height="14"
+                                       Source="pack://application:,,,/Resources/open.png"
+                                       Stretch="Uniform"
+                                       Margin="0,0,5,0"/>
+                                <TextBlock Text="Open"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource TextEditorCompactRibbonButtonStyle}"
+                                MinWidth="62"
+                                Command="{Binding SaveDocumentCommand}"
+                                ToolTip="保存当前文档">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Width="14"
+                                       Height="14"
+                                       Source="pack://application:,,,/Resources/save.png"
+                                       Stretch="Uniform"
+                                       Margin="0,0,5,0"/>
+                                <TextBlock Text="Save"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource TextEditorCompactRibbonButtonStyle}"
+                                MinWidth="74"
+                                Command="{Binding SaveDocumentAsCommand}"
+                                ToolTip="另存为">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Width="14"
+                                       Height="14"
+                                       Source="pack://application:,,,/Resources/export.png"
+                                       Stretch="Uniform"
+                                       Margin="0,0,5,0"/>
+                                <TextBlock Text="Save As"/>
+                            </StackPanel>
+                        </Button>
+                        <Separator Width="1"
+                                   Margin="5,2"
+                                   Background="#55D5F3FF"/>
+                        <Button Style="{StaticResource TextEditorCompactRibbonButtonStyle}"
+                                MinWidth="64"
+                                Command="{x:Static ApplicationCommands.Undo}"
+                                ToolTip="撤销上一步编辑">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Undo"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource TextEditorCompactRibbonButtonStyle}"
+                                MinWidth="64"
+                                Command="{x:Static ApplicationCommands.Redo}"
+                                ToolTip="重做上一步编辑">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Redo"/>
+                            </StackPanel>
+                        </Button>
+                        <Separator Width="1"
+                                   Margin="5,2"
+                                   Background="#55D5F3FF"
+                                   Visibility="{Binding IsPrintablePagesMode, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <Button Style="{StaticResource TextEditorCompactRibbonButtonStyle}"
+                                MinWidth="72"
+                                Visibility="{Binding IsPrintablePagesMode, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                ToolTip="插入链接">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="URL"
+                                           FontSize="10"
+                                           Margin="0,0,5,0"/>
+                                <TextBlock Text="Link"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource TextEditorCompactRibbonButtonStyle}"
+                                MinWidth="76"
+                                Visibility="{Binding IsPrintablePagesMode, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                ToolTip="插入图片">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Width="14"
+                                       Height="14"
+                                       Source="pack://application:,,,/Resources/image.png"
+                                       Stretch="Uniform"
+                                       Margin="0,0,5,0"/>
+                                <TextBlock Text="Picture"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource TextEditorCompactRibbonButtonStyle}"
+                                MinWidth="72"
+                                Visibility="{Binding IsPrintablePagesMode, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                ToolTip="刷新预览">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Width="14"
+                                       Height="14"
+                                       Source="pack://application:,,,/Resources/Refresh.png"
+                                       Stretch="Uniform"
+                                       Margin="0,0,5,0"/>
+                                <TextBlock Text="Refresh"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <Border Grid.Row="2"
+                    Background="{StaticResource TextEditorFormatBarBrush}"
+                    BorderBrush="#4A9BC9E9"
+                    BorderThickness="0,0,0,1"
+                    Padding="6,4"
+                    Visibility="{Binding IsPrintablePagesMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <DockPanel LastChildFill="False">
+                    <StackPanel DockPanel.Dock="Left"
+                                Orientation="Horizontal">
+                        <ComboBox Width="124"
+                                  Height="24"
+                                  SelectedIndex="0"
+                                  ToolTip="段落样式">
+                            <ComboBoxItem Content="Paragraph"/>
+                            <ComboBoxItem Content="Heading 1"/>
+                            <ComboBoxItem Content="Heading 2"/>
+                            <ComboBoxItem Content="Code Block"/>
+                        </ComboBox>
+
+                        <ComboBox Width="120"
+                                  Height="24"
+                                  Margin="6,0,0,0"
+                                  SelectedIndex="0"
+                                  ToolTip="字体">
+                            <ComboBoxItem Content="Segoe UI"/>
+                            <ComboBoxItem Content="Consolas"/>
+                            <ComboBoxItem Content="Microsoft YaHei UI"/>
+                            <ComboBoxItem Content="Georgia"/>
+                        </ComboBox>
+
+                        <ComboBox Width="58"
+                                  Height="24"
+                                  Margin="6,0,0,0"
+                                  SelectedIndex="1"
+                                  ToolTip="字号">
+                            <ComboBoxItem Content="10"/>
+                            <ComboBoxItem Content="11"/>
+                            <ComboBoxItem Content="12"/>
+                            <ComboBoxItem Content="14"/>
+                            <ComboBoxItem Content="18"/>
+                        </ComboBox>
+
+                        <Button Width="28"
+                                Height="24"
+                                Margin="8,0,0,0"
+                                Padding="0"
+                                FontWeight="Bold"
+                                Content="B"
+                                ToolTip="加粗"/>
+                        <Button Width="28"
+                                Height="24"
+                                Margin="2,0,0,0"
+                                Padding="0"
+                                FontStyle="Italic"
+                                Content="I"
+                                ToolTip="斜体"/>
+                        <Button Width="28"
+                                Height="24"
+                                Margin="2,0,0,0"
+                                Padding="0"
+                                ToolTip="下划线">
+                            <TextBlock Text="U"
+                                       TextDecorations="Underline"/>
+                        </Button>
+                        <Button Width="28"
+                                Height="24"
+                                Margin="2,0,0,0"
+                                Padding="0"
+                                Content="A"
+                                Foreground="#FFE8F8FF"
+                                ToolTip="文字颜色"/>
+
+                        <Separator Width="1"
+                                   Margin="8,2"
+                                   Background="#707DA9C2"/>
+
+                        <Button Width="30"
+                                Height="24"
+                                Padding="0"
+                                Content="•"
+                                ToolTip="项目符号"/>
+                        <Button Width="30"
+                                Height="24"
+                                Margin="2,0,0,0"
+                                Padding="0"
+                                Content="1."
+                                ToolTip="编号列表"/>
+                        <Button Width="30"
+                                Height="24"
+                                Margin="2,0,0,0"
+                                Padding="0"
+                                Content="≡"
+                                ToolTip="左对齐"/>
+                        <Button Width="30"
+                                Height="24"
+                                Margin="2,0,0,0"
+                                Padding="0"
+                                Content="≣"
+                                ToolTip="两端对齐"/>
+                    </StackPanel>
+
+                    <StackPanel DockPanel.Dock="Right"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="Zoom"
+                                   Foreground="#FFE8F8FF"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,6,0"/>
+                        <Slider Width="96"
+                                Minimum="80"
+                                Maximum="160"
+                                Value="100"
+                                VerticalAlignment="Center"
+                                ToolTip="缩放"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <Grid Grid.Row="3"
+                  Background="{StaticResource TextEditorWorkSurfaceBrush}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"
+                                      MinWidth="420"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0"
+                        Margin="10"
+                        Background="#45000000"
+                        BorderBrush="#406F98B7"
+                        BorderThickness="1"
+                        Visibility="{Binding IsDefaultMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0"
+                                Background="#DDF4FAFF"
+                                BorderBrush="#FFC5D8E7"
+                                BorderThickness="0,0,0,1"
+                                Padding="8,5">
+                            <DockPanel>
+                                <TextBlock Text="{Binding DocumentTitle}"
+                                           Foreground="#FF17344A"
+                                           FontFamily="{DynamicResource AeroFontFamily}"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock DockPanel.Dock="Right"
+                                           Text="{Binding ModeSummaryText}"
+                                           Foreground="#FF4A6578"
+                                           FontFamily="{DynamicResource AeroFontFamily}"
+                                           FontSize="{DynamicResource AeroSmallFontSize}"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis"/>
+                            </DockPanel>
+                        </Border>
+
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="{Binding LineNumberColumnWidth}"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0"
+                                    Background="#EEF0F5F8"
+                                    BorderBrush="#FFC5D8E7"
+                                    BorderThickness="0,0,1,0">
+                                <ScrollViewer x:Name="LineNumberScrollViewer"
+                                              HorizontalScrollBarVisibility="Disabled"
+                                              VerticalScrollBarVisibility="Hidden"
+                                              Focusable="False">
+                                    <TextBlock Text="{Binding LineNumbersText}"
+                                               TextAlignment="Right"
+                                               Padding="0,16,8,16"
+                                               Foreground="#FF7790A0"
+                                               FontFamily="{DynamicResource AeroFontFamily}"
+                                               FontSize="12"/>
+                                </ScrollViewer>
+                            </Border>
+
+                            <TextBox x:Name="PlainTextEditor"
+                                     Grid.Column="1"
+                                     Text="{Binding TextContent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0"
+                                     Padding="20,16"
+                                     AcceptsReturn="True"
+                                     AcceptsTab="True"
+                                     BorderThickness="0"
+                                     Background="{StaticResource TextEditorPaperBrush}"
+                                     Foreground="#FF1F2D36"
+                                     FontFamily="Segoe UI, Microsoft YaHei UI, Arial"
+                                     FontSize="13"
+                                     TextWrapping="NoWrap"
+                                     VerticalScrollBarVisibility="Auto"
+                                     HorizontalScrollBarVisibility="Auto"
+                                     SelectionBrush="#804B9DCC"
+                                     ScrollViewer.ScrollChanged="PlainTextEditor_ScrollChanged"
+                                     SelectionChanged="PlainTextEditor_SelectionChanged"/>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Column="0"
+                        Margin="10"
+                        Background="#45000000"
+                        BorderBrush="#406F98B7"
+                        BorderThickness="1"
+                        Visibility="{Binding IsPrintablePagesMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0"
+                                Background="#DDF4FAFF"
+                                BorderBrush="#FFC5D8E7"
+                                BorderThickness="0,0,0,1"
+                                Padding="8,5">
+                            <DockPanel>
+                                <TextBlock Text="{Binding DocumentTitle}"
+                                           Foreground="#FF17344A"
+                                           FontFamily="{DynamicResource AeroFontFamily}"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock DockPanel.Dock="Right"
+                                           Text="{Binding ModeSummaryText}"
+                                           Foreground="#FF4A6578"
+                                           FontFamily="{DynamicResource AeroFontFamily}"
+                                           FontSize="{DynamicResource AeroSmallFontSize}"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis"/>
+                            </DockPanel>
+                        </Border>
+
+                        <TextBox Grid.Row="1"
+                                 Text="{Binding TextContent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0"
+                                 Padding="26,22"
+                                 AcceptsReturn="True"
+                                 AcceptsTab="True"
+                                 BorderThickness="0"
+                                 Background="{StaticResource TextEditorPaperBrush}"
+                                 Foreground="#FF1F2D36"
+                                 FontFamily="Segoe UI, Microsoft YaHei UI, Arial"
+                                 FontSize="14"
+                                 TextWrapping="Wrap"
+                                 VerticalScrollBarVisibility="Auto"
+                                 HorizontalScrollBarVisibility="Disabled"
+                                 SelectionBrush="#804B9DCC"/>
+                    </Grid>
+                </Border>
+
+                <GridSplitter Grid.Column="1"
+                              Width="6"
+                              HorizontalAlignment="Stretch"
+                              Style="{DynamicResource AeroVerticalSplitterStyle}"
+                              Visibility="{Binding IsPrintablePagesMode, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                <Border Grid.Column="2"
+                        Width="250"
+                        Margin="0,10,10,10"
+                        Style="{DynamicResource PreferencesSidebarShellBorderStyle}"
+                        Visibility="{Binding IsPrintablePagesMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="42"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0"
+                                Background="{DynamicResource PreferencesSidebarTopBackgroundBrush}"
+                                BorderBrush="{DynamicResource PreferencesSidebarTopBorderBrush}"
+                                BorderThickness="0,0,0,1">
+                            <Grid>
+                                <Border Background="{DynamicResource PreferencesSidebarTopHighlightBrush}"
+                                        Opacity="0.45"/>
+                                <DockPanel Margin="10,0">
+                                    <Image DockPanel.Dock="Left"
+                                           Width="22"
+                                           Height="22"
+                                           Source="pack://application:,,,/Resources/Script.png"
+                                           Stretch="Uniform"
+                                           Margin="0,0,8,0"
+                                           VerticalAlignment="Center"/>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="PrintablePages"
+                                                   Style="{StaticResource PreferencesSidebarTitleTextStyle}"/>
+                                        <TextBlock Text="outline and helpers"
+                                                   Foreground="#A8E6F7FF"
+                                                   FontSize="10"/>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Grid>
+                        </Border>
+
+                        <ScrollViewer Grid.Row="1"
+                                      Padding="8"
+                                      VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <Expander Header="Document"
+                                          IsExpanded="True"
+                                          Style="{DynamicResource PreferencesSidebarExpanderStyle}">
+                                    <StackPanel>
+                                        <Border Margin="2,4,2,6"
+                                                Padding="8"
+                                                Background="{StaticResource TextEditorSidebarPanelBrush}"
+                                                BorderBrush="#4589BEE0"
+                                                BorderThickness="1"
+                                                CornerRadius="3">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding DocumentTitle}"
+                                                           Style="{StaticResource TextEditorHeaderTextStyle}"/>
+                                                <TextBlock Margin="0,5,0,0"
+                                                           Text="{Binding DocumentSummary}"
+                                                           Style="{StaticResource TextEditorSidebarCaptionStyle}"/>
+                                                <TextBlock Margin="0,8,0,0"
+                                                           Text="Markdown rich-text backend pending"
+                                                           Style="{StaticResource TextEditorSidebarCaptionStyle}"/>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <Button Style="{DynamicResource PreferencesSidebarItemButtonStyle}"
+                                                Tag="True"
+                                                ToolTip="当前文档">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Width="18"
+                                                       Height="18"
+                                                       Source="pack://application:,,,/Resources/Script.png"
+                                                       Stretch="Uniform"
+                                                       Margin="0,0,8,0"/>
+                                                <TextBlock Text="Source"
+                                                           VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Style="{DynamicResource PreferencesSidebarItemButtonStyle}"
+                                                ToolTip="页面设置">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Width="18"
+                                                       Height="18"
+                                                       Source="pack://application:,,,/Resources/Template.png"
+                                                       Stretch="Uniform"
+                                                       Margin="0,0,8,0"/>
+                                                <TextBlock Text="Pages"
+                                                           VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                </Expander>
+
+                                <Expander Header="Insert"
+                                          IsExpanded="True"
+                                          Style="{DynamicResource PreferencesSidebarExpanderStyle}">
+                                    <StackPanel>
+                                        <Button Style="{DynamicResource PreferencesSidebarItemButtonStyle}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="URL"
+                                                           Width="18"
+                                                           Margin="0,0,8,0"/>
+                                                <TextBlock Text="Hyperlink"/>
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Style="{DynamicResource PreferencesSidebarItemButtonStyle}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Width="18"
+                                                       Height="18"
+                                                       Source="pack://application:,,,/Resources/imagealt.png"
+                                                       Stretch="Uniform"
+                                                       Margin="0,0,8,0"/>
+                                                <TextBlock Text="Picture"/>
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Style="{DynamicResource PreferencesSidebarItemButtonStyle}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="&lt;/&gt;"
+                                                           Width="18"
+                                                           Margin="0,0,8,0"
+                                                           FontFamily="Consolas"/>
+                                                <TextBlock Text="Code Block"/>
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                </Expander>
+
+                                <Expander Header="Outline"
+                                          IsExpanded="True"
+                                          Style="{DynamicResource PreferencesSidebarExpanderStyle}">
+                                    <StackPanel>
+                                        <Border Margin="2,4,2,2"
+                                                Padding="8,6"
+                                                Background="#30102030"
+                                                BorderBrush="#305D91B4"
+                                                BorderThickness="1"
+                                                CornerRadius="3">
+                                            <TextBlock Text="PrintablePages outline pending"
+                                                       Style="{StaticResource TextEditorSidebarCaptionStyle}"/>
+                                        </Border>
+                                    </StackPanel>
+                                </Expander>
+                            </StackPanel>
+                        </ScrollViewer>
+
+                        <Border Grid.Row="2"
+                                Background="{DynamicResource PreferencesSidebarTopBottomGlowBrush}"
+                                Padding="8,6">
+                            <TextBlock Text="{Binding StatusText}"
+                                       Foreground="#D9F4FCFF"
+                                       FontSize="{DynamicResource AeroSmallFontSize}"
+                                       TextWrapping="Wrap"/>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Border Grid.Row="4"
+                    Background="{DynamicResource PanelHeaderBackgroundBrush}"
+                    BorderBrush="#4A9BC9E9"
+                    BorderThickness="0,1,0,0"
+                    Padding="8,0">
+                <DockPanel LastChildFill="False">
+                    <StackPanel Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <Image Width="16"
+                               Height="16"
+                               Source="pack://application:,,,/Resources/GreyLight.png"
+                               Stretch="Uniform"
+                               Margin="0,0,6,0"/>
+                        <TextBlock Text="{Binding StatusText}"
+                                   Foreground="#E9F8FFFF"
+                                   FontFamily="{DynamicResource AeroFontFamily}"
+                                   FontSize="{DynamicResource AeroSmallFontSize}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel DockPanel.Dock="Right"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="{Binding LineColumnText}"
+                                   Foreground="#C8E8F6FF"
+                                   FontSize="{DynamicResource AeroSmallFontSize}"
+                                   Margin="0,0,12,0"/>
+                        <TextBlock Text="{Binding WordCountText}"
+                                   Foreground="#C8E8F6FF"
+                                   FontSize="{DynamicResource AeroSmallFontSize}"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </Border>
 </UserControl>

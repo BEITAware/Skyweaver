@@ -760,6 +760,7 @@ namespace Skyweaver.Services.AgentLoop
                 var hasStartedStreaming = false;
                 var rawContentBuilder = new StringBuilder();
                 var rawReasoningContentBuilder = new StringBuilder();
+                var estimatedInputTokenCount = AgentLoopTokenCounter.EstimateMessages(preparedSnapshot.PreparedMessages);
                 var toolInvocationStreamingParser = new SkyweaverToolInvocationStreamingParser(
                     _toolManager.GetRegisteredTools(resolveIcons: false)
                         .Select(registration => registration.Definition));
@@ -773,6 +774,19 @@ namespace Skyweaver.Services.AgentLoop
                     request.EnableGemmaThoughtCompatibility);
                 var streamingUpdates = new List<AgentLoopStreamingUpdateDebugSnapshot>();
 
+                AgentLoopTokenUsageInfo BuildStreamingTokenUsage()
+                {
+                    return new AgentLoopTokenUsageInfo
+                    {
+                        ContextWindowTokens = candidate.EffectiveContextWindowTokens,
+                        EstimatedInputTokenCount = estimatedInputTokenCount,
+                        EstimatedOutputTokenCount =
+                            AgentLoopTokenCounter.EstimateText(rawContentBuilder.ToString()) +
+                            AgentLoopTokenCounter.EstimateText(rawReasoningContentBuilder.ToString()),
+                        ModelId = modelId
+                    };
+                }
+
                 try
                 {
                     await PublishAsync(
@@ -781,7 +795,8 @@ namespace Skyweaver.Services.AgentLoop
                         {
                             Kind = AgentLoopRuntimeEventKind.IterationStarted,
                             IterationNumber = iterationNumber,
-                            ModelId = modelId
+                            ModelId = modelId,
+                            TokenUsage = BuildStreamingTokenUsage()
                         },
                         cancellationToken).ConfigureAwait(false);
 
@@ -805,7 +820,8 @@ namespace Skyweaver.Services.AgentLoop
                                     Kind = AgentLoopRuntimeEventKind.ReasoningDelta,
                                     IterationNumber = iterationNumber,
                                     ModelId = modelId,
-                                    ReasoningDelta = update.ReasoningTextDelta
+                                    ReasoningDelta = update.ReasoningTextDelta,
+                                    TokenUsage = BuildStreamingTokenUsage()
                                 },
                                 cancellationToken).ConfigureAwait(false);
                         }
@@ -856,6 +872,7 @@ namespace Skyweaver.Services.AgentLoop
                             presentationTracker.ExtractDeltas(currentRawContent, isFinal: false),
                             iterationNumber,
                             modelId,
+                            BuildStreamingTokenUsage(),
                             cancellationToken).ConfigureAwait(false);
                     }
 
@@ -899,6 +916,7 @@ namespace Skyweaver.Services.AgentLoop
                         presentationTracker.ExtractDeltas(rawContent, isFinal: true),
                         iterationNumber,
                         modelId,
+                        BuildStreamingTokenUsage(),
                         cancellationToken).ConfigureAwait(false);
                     var hasToolActivity = assistantResponse.GetToolCallParts().Count > 0;
 
@@ -1562,6 +1580,7 @@ namespace Skyweaver.Services.AgentLoop
             IReadOnlyList<AssistantPresentationDelta> deltas,
             int iterationNumber,
             string? modelId,
+            AgentLoopTokenUsageInfo? tokenUsage,
             CancellationToken cancellationToken)
         {
             if (onEventAsync == null || deltas.Count == 0)
@@ -1586,7 +1605,8 @@ namespace Skyweaver.Services.AgentLoop
                             ModelId = modelId,
                             ReasoningDelta = delta.Content,
                             PartIndex = delta.PartIndex,
-                            IsReasoningCollapsible = delta.IsReasoningCollapsible
+                            IsReasoningCollapsible = delta.IsReasoningCollapsible,
+                            TokenUsage = tokenUsage
                         }
                         : new AgentLoopRuntimeEvent
                         {
@@ -1594,7 +1614,8 @@ namespace Skyweaver.Services.AgentLoop
                             IterationNumber = iterationNumber,
                             ModelId = modelId,
                             TextDelta = delta.Content,
-                            TextDeltaOutputKind = delta.TextOutputKind
+                            TextDeltaOutputKind = delta.TextOutputKind,
+                            TokenUsage = tokenUsage
                         },
                     cancellationToken).ConfigureAwait(false);
             }

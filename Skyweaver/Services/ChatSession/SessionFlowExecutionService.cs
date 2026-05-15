@@ -797,7 +797,8 @@ namespace Skyweaver.Services.ChatSession
                     compiledNode,
                     message: "代理迭代开始。",
                     iterationNumber: update.IterationNumber,
-                    modelId: update.ModelId),
+                    modelId: update.ModelId,
+                    tokenUsage: update.TokenUsage),
                 AgentLoopRuntimeEventKind.IterationCompleted => CreateRuntimeEvent(
                     request,
                     ChatSessionRuntimeEventKind.AgentIterationCompleted,
@@ -812,7 +813,8 @@ namespace Skyweaver.Services.ChatSession
                     iterationNumber: update.IterationNumber,
                     modelId: update.ModelId,
                     textDelta: update.TextDelta,
-                    textDeltaOutputKind: update.TextDeltaOutputKind),
+                    textDeltaOutputKind: update.TextDeltaOutputKind,
+                    tokenUsage: update.TokenUsage),
                 AgentLoopRuntimeEventKind.ReasoningDelta => CreateRuntimeEvent(
                     request,
                     ChatSessionRuntimeEventKind.ReasoningDelta,
@@ -821,7 +823,8 @@ namespace Skyweaver.Services.ChatSession
                     modelId: update.ModelId,
                     reasoningDelta: update.ReasoningDelta,
                     reasoningCollapsible: update.IsReasoningCollapsible,
-                    partIndex: update.PartIndex),
+                    partIndex: update.PartIndex,
+                    tokenUsage: update.TokenUsage),
                 AgentLoopRuntimeEventKind.AssistantToolCallsReceived => CreateRuntimeEvent(
                     request,
                     ChatSessionRuntimeEventKind.AssistantToolCallsReceived,
@@ -960,6 +963,7 @@ namespace Skyweaver.Services.ChatSession
             string? toolOutputXml = null,
             IReadOnlyList<SkyweaverToolReturnPayload>? toolReturns = null,
             AgentLoopContextCompressionInfo? contextCompression = null,
+            AgentLoopTokenUsageInfo? tokenUsage = null,
             bool isPayloadFromPassdown = false)
         {
             return new ChatSessionRuntimeEvent
@@ -991,7 +995,8 @@ namespace Skyweaver.Services.ChatSession
                 ToolXml = toolXml,
                 ToolOutputXml = toolOutputXml,
                 ToolReturns = toolReturns ?? Array.Empty<SkyweaverToolReturnPayload>(),
-                ContextCompression = contextCompression
+                ContextCompression = contextCompression,
+                TokenUsage = tokenUsage
             };
         }
 
