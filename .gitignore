@@ -364,6 +364,8 @@ FodyWeavers.xsd
 
 # Project-specific ignores
 profile_path.txt
+test_plan.md
+testplan.md
 TODO.md
 TestImages/
 WORKFOLDER/
