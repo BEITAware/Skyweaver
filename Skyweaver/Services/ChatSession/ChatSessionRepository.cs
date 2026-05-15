@@ -2,6 +2,7 @@ using System.Globalization;
 using System.IO;
 using System.Xml.Linq;
 using Skyweaver.Models.ChatSession;
+using Skyweaver.Services.Directories;
 
 namespace Skyweaver.Services.ChatSession
 {
@@ -11,7 +12,7 @@ namespace Skyweaver.Services.ChatSession
 
         private readonly ChatSessionFlowBindingService _flowBindingService;
 
-        public string RootFolderPath { get; }
+        public string RootFolderPath => SkyweaverDirectoryRuntime.Instance.ChatSessionsDirectoryPath;
 
         public ChatSessionRepository()
             : this(new ChatSessionFlowBindingService())
@@ -21,10 +22,6 @@ namespace Skyweaver.Services.ChatSession
         public ChatSessionRepository(ChatSessionFlowBindingService flowBindingService)
         {
             _flowBindingService = flowBindingService ?? throw new ArgumentNullException(nameof(flowBindingService));
-            RootFolderPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                "Skyweaver",
-                "ChatSessions");
         }
 
         public IReadOnlyList<ChatSessionModel> LoadAll()

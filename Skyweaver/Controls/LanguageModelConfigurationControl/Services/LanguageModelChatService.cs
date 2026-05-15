@@ -28,6 +28,18 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             return ResolveAdapter(model).GetResponseAsync(model, projectedMessages, cancellationToken);
         }
 
+        public Task<int> CountTokensAsync(
+            LanguageModelDefinition model,
+            IReadOnlyList<LanguageModelChatMessage> messages,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(model);
+            ArgumentNullException.ThrowIfNull(messages);
+
+            var projectedMessages = LanguageModelChatTransportProjection.ProjectMessages(messages);
+            return ResolveAdapter(model).CountTokensAsync(model, projectedMessages, cancellationToken);
+        }
+
         public IAsyncEnumerable<LanguageModelStreamingChatUpdate> GetStreamingResponseAsync(
             LanguageModelDefinition model,
             IReadOnlyList<LanguageModelChatMessage> messages,

@@ -15,6 +15,11 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             IReadOnlyList<LanguageModelChatMessage> messages,
             CancellationToken cancellationToken = default);
 
+        Task<int> CountTokensAsync(
+            LanguageModelDefinition model,
+            IReadOnlyList<LanguageModelChatMessage> messages,
+            CancellationToken cancellationToken = default);
+
         IAsyncEnumerable<LanguageModelStreamingChatUpdate> GetStreamingResponseAsync(
             LanguageModelDefinition model,
             IReadOnlyList<LanguageModelChatMessage> messages,

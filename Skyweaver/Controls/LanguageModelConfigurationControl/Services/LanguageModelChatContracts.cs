@@ -202,6 +202,10 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
         public string ReasoningText { get; init; } = string.Empty;
 
         public string? ModelId { get; init; }
+
+        public int? InputTokenCount { get; init; }
+
+        public int? TotalTokenCount { get; init; }
     }
 
     public sealed class LanguageModelStreamingContentDebugItem

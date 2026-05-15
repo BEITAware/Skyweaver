@@ -1,5 +1,6 @@
 using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
 using Skyweaver.Models.ChatSession;
+using Skyweaver.Services.AgentLoop;
 
 namespace Skyweaver.Services.ChatSession
 {
@@ -272,7 +273,7 @@ namespace Skyweaver.Services.ChatSession
                 return true;
             }
 
-            var content = BuildTextContent(block);
+            var content = BuildTextContent(entry, block);
             if (content.Length == 0)
             {
                 reason = "Block has no projectable content.";
@@ -319,12 +320,25 @@ namespace Skyweaver.Services.ChatSession
                 ?? NullIfWhiteSpace(entry.AgentName);
         }
 
-        private static string BuildTextContent(ChatSessionTranscriptBlock block)
+        private static string BuildTextContent(ChatSessionTranscriptEntry entry, ChatSessionTranscriptBlock block)
         {
             var content = Normalize(block.Content);
             if (content.Length == 0)
             {
                 return string.Empty;
+            }
+
+            if (block.Kind == ChatSessionTranscriptBlockKind.ToolInvocationXml)
+            {
+                content = AgentLoopCompactionStore.EnsureToolCallIdInToolInvocationXml(
+                    content,
+                    entry.ToolCallId);
+            }
+            else if (block.Kind == ChatSessionTranscriptBlockKind.ToolOutputXml)
+            {
+                content = AgentLoopCompactionStore.EnsureToolCallIdInToolsReturnXml(
+                    content,
+                    entry.ToolCallId);
             }
 
             return block.Kind switch

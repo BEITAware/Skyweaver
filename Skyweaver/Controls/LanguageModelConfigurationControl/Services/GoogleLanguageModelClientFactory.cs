@@ -60,8 +60,36 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             {
                 Text = parsed.Text,
                 ReasoningText = parsed.ReasoningText,
-                ModelId = parsed.ModelId
+                ModelId = parsed.ModelId,
+                InputTokenCount = parsed.InputTokenCount,
+                TotalTokenCount = parsed.TotalTokenCount
             };
+        }
+
+        public async Task<int> CountTokensAsync(
+            LanguageModelDefinition model,
+            IReadOnlyList<LanguageModelChatMessage> messages,
+            CancellationToken cancellationToken = default)
+        {
+            var settings = GetSettings(model);
+            using var request = await CreateCountTokensRequestAsync(settings, messages, cancellationToken).ConfigureAwait(false);
+            using var response = await s_httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            var responsePayload = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new InvalidOperationException(
+                    $"Google countTokens request failed with status {(int)response.StatusCode} ({response.ReasonPhrase}). {TryExtractErrorMessage(responsePayload)}");
+            }
+
+            using var document = JsonDocument.Parse(responsePayload);
+            if (document.RootElement.TryGetProperty("totalTokens", out var totalTokensElement) &&
+                totalTokensElement.TryGetInt32(out var totalTokens) &&
+                totalTokens > 0)
+            {
+                return totalTokens;
+            }
+
+            throw new InvalidOperationException("Google countTokens response did not include totalTokens.");
         }
 
         public async IAsyncEnumerable<LanguageModelStreamingChatUpdate> GetStreamingResponseAsync(
@@ -186,6 +214,22 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             var action = useStreamingEndpoint
                 ? $"{NormalizeModelIdForPath(settings.ModelId)}:streamGenerateContent?alt=sse"
                 : $"{NormalizeModelIdForPath(settings.ModelId)}:generateContent";
+            var request = new HttpRequestMessage(HttpMethod.Post, BuildApiUri(settings, $"v1beta/models/{action}"));
+            request.Headers.Add("x-goog-api-key", settings.ApiKey);
+            request.Content = new StringContent(
+                JsonSerializer.Serialize(payload, s_jsonOptions),
+                Encoding.UTF8,
+                "application/json");
+            return request;
+        }
+
+        private static async Task<HttpRequestMessage> CreateCountTokensRequestAsync(
+            GoogleLanguageModelSettings settings,
+            IReadOnlyList<LanguageModelChatMessage> messages,
+            CancellationToken cancellationToken)
+        {
+            var payload = await BuildRequestPayloadAsync(settings, messages, cancellationToken).ConfigureAwait(false);
+            var action = $"{NormalizeModelIdForPath(settings.ModelId)}:countTokens";
             var request = new HttpRequestMessage(HttpMethod.Post, BuildApiUri(settings, $"v1beta/models/{action}"));
             request.Headers.Add("x-goog-api-key", settings.ApiKey);
             request.Content = new StringContent(
@@ -603,7 +647,9 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 SanitizeModelText(textBuilder.ToString()),
                 SanitizeModelText(reasoningBuilder.ToString()),
                 GetOptionalString(rootElement, "modelVersion") ?? fallbackModelId,
-                debugItems);
+                debugItems,
+                NormalizeUsageCount(GetUsageMetadataNumber(rootElement, "promptTokenCount")),
+                NormalizeUsageCount(GetUsageMetadataNumber(rootElement, "totalTokenCount")));
         }
 
         private static LanguageModelStreamingChatUpdate ParseStreamingEventPayload(string payload, string fallbackModelId)
@@ -975,6 +1021,16 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             return null;
         }
 
+        private static int? NormalizeUsageCount(long? value)
+        {
+            if (value is not long count || count <= 0)
+            {
+                return null;
+            }
+
+            return count > int.MaxValue ? int.MaxValue : (int)count;
+        }
+
         private static int EstimateBase64Length(int byteCount)
         {
             if (byteCount <= 0)
@@ -1053,7 +1109,9 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             string Text,
             string ReasoningText,
             string ModelId,
-            IReadOnlyList<LanguageModelStreamingContentDebugItem> DebugItems);
+            IReadOnlyList<LanguageModelStreamingContentDebugItem> DebugItems,
+            int? InputTokenCount,
+            int? TotalTokenCount);
 
         private sealed record UploadedGoogleFileReference(
             string FileUri,

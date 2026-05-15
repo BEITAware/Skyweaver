@@ -183,6 +183,8 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
             builder.AppendLine($"- {SkyweaverBuiltInToolNames.WaitForAsyncTools}：等待若干异步工具调用完成。它只能同步调用，不能使用 <ToolAsync>。");
             builder.AppendLine($"  调用格式：<Tool ToolName=\"{SkyweaverBuiltInToolNames.WaitForAsyncTools}\"><{SkyweaverBuiltInToolNames.WaitForAsyncToolsParameter}>[\"TC1\",\"TC2\"]</{SkyweaverBuiltInToolNames.WaitForAsyncToolsParameter}></Tool>");
             builder.AppendLine("  参数是之前异步工具回填中返回的 ToolCallId JSON 数组。它会阻塞代理循环直到这些工具全部完成；工具的实际结果会在随后第一个代理循环回填。");
+            builder.AppendLine($"- {SkyweaverBuiltInToolNames.RetrieveCompactedToolCalls}：取回被压缩隐藏的工具调用参数与返回内容。仅当系统提示说明存在已压缩 ToolCallID 时使用。");
+            builder.AppendLine($"  调用格式：<Tool ToolName=\"{SkyweaverBuiltInToolNames.RetrieveCompactedToolCalls}\"><{SkyweaverBuiltInToolNames.CompactionToolCallIdsParameter}>[\"TC1\",\"TC2\"]</{SkyweaverBuiltInToolNames.CompactionToolCallIdsParameter}></Tool>");
             builder.AppendLine();
         }
 
@@ -225,6 +227,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
             {
                 builder.AppendLine($"- 同步内置工具使用 <Tool ToolName=\"...\">...</Tool> 标签；当前包括 {SkyweaverBuiltInToolNames.Passdown} 和 {SkyweaverBuiltInToolNames.WaitForAsyncTools}。不要用 <ToolAsync> 调用 {SkyweaverBuiltInToolNames.WaitForAsyncTools}。");
             }
+            builder.AppendLine($"- 如果系统提示说明部分工具调用已被压缩，可以同步调用 {SkyweaverBuiltInToolNames.RetrieveCompactedToolCalls} 取回指定 ToolCallID 的原文。不要用 <ToolAsync> 调用它。");
             builder.AppendLine("- <ToolAsync> 或 <Tool> 标签之外的文本会被当成可见聊天内容；工具标签本身会被 Host 捕获、流式呈现为工具调用卡片，并从聊天正文中移除。");
             builder.AppendLine("- 只要本次 assistant 响应包含任意工具调用，Host 就会按出现顺序发起或执行工具并自动继续下一轮代理循环。");
             if (isSubAgent)

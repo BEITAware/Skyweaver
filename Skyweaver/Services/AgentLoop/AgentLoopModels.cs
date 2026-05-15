@@ -40,6 +40,12 @@ namespace Skyweaver.Services.AgentLoop
 
         public bool IsSubAgent { get; init; }
 
+        public bool MinCompactionEnabled { get; init; }
+
+        public string? CompactionFilePath { get; init; }
+
+        public bool EnableCompactionTools { get; init; }
+
         public Func<string>? ToolCallIdFactory { get; init; }
 
         public Func<AgentToolConfirmationRequest, CancellationToken, Task<AgentToolConfirmationResult>>? ToolConfirmationCallback { get; init; }
@@ -221,6 +227,8 @@ namespace Skyweaver.Services.AgentLoop
         public string CompressionLayerKey { get; init; } = string.Empty;
 
         public string? CompressionModelId { get; init; }
+
+        public IReadOnlyList<string> CompactedToolCallIds { get; init; } = Array.Empty<string>();
     }
 
     public sealed class AgentLoopIteration

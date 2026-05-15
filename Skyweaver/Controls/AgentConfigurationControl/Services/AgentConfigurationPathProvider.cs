@@ -1,13 +1,11 @@
 using System.IO;
+using Skyweaver.Services.Directories;
 
 namespace Skyweaver.Controls.AgentConfigurationControl.Services
 {
     public sealed class AgentConfigurationPathProvider
     {
-        public string ConfigurationDirectoryPath => Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            "Skyweaver",
-            "Configuration");
+        public string ConfigurationDirectoryPath => SkyweaverDirectoryRuntime.Instance.ConfigurationDirectoryPath;
 
         public string ConfigurationFilePath => Path.Combine(ConfigurationDirectoryPath, "AgentConfiguration.xml");
     }

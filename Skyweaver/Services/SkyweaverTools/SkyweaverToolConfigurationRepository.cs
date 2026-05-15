@@ -1,5 +1,6 @@
 using System.IO;
 using System.Xml.Linq;
+using Skyweaver.Services.Directories;
 
 namespace Skyweaver.Services.SkyweaverTools
 {
@@ -7,10 +8,7 @@ namespace Skyweaver.Services.SkyweaverTools
     {
         private readonly object _syncRoot = new();
 
-        public string ConfigurationDirectoryPath => Path.Combine(
-            ResolveUserProfilePath(),
-            "Skyweaver",
-            "Configuration");
+        public string ConfigurationDirectoryPath => SkyweaverDirectoryRuntime.Instance.ConfigurationDirectoryPath;
 
         public string ConfigurationFilePath => Path.Combine(ConfigurationDirectoryPath, "ToolConfiguration.xml");
 
@@ -64,29 +62,6 @@ namespace Skyweaver.Services.SkyweaverTools
         private void EnsureConfigurationDirectory()
         {
             Directory.CreateDirectory(ConfigurationDirectoryPath);
-        }
-
-        private static string ResolveUserProfilePath()
-        {
-            var userProfile = Environment.GetEnvironmentVariable("USERPROFILE");
-            if (!string.IsNullOrWhiteSpace(userProfile))
-            {
-                return userProfile.Trim();
-            }
-
-            userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            if (!string.IsNullOrWhiteSpace(userProfile))
-            {
-                return userProfile;
-            }
-
-            userProfile = Environment.GetEnvironmentVariable("HOME");
-            if (!string.IsNullOrWhiteSpace(userProfile))
-            {
-                return userProfile.Trim();
-            }
-
-            return AppContext.BaseDirectory;
         }
 
         private static bool ParseBool(string? value, bool fallback)

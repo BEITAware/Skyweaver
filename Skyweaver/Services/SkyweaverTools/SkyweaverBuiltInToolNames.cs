@@ -12,6 +12,12 @@ namespace Skyweaver.Services.SkyweaverTools
 
         public const string LoadToolKits = "LoadToolKits";
 
+        public const string CompactToolCalls = "CompactToolCalls";
+
+        public const string RetrieveCompactedToolCalls = "RetrieveCompactedToolCalls";
+
+        public const string CompactionToolCallIdsParameter = "ToolCallIDs";
+
         public const string SpawnSubAgent = "SpawnSubAgent";
 
         public const string SpawnSubAgentMissionParameter = "Mission";
