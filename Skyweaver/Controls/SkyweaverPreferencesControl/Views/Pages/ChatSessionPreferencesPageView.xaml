@@ -134,7 +134,7 @@
                        Style="{StaticResource PreferenceSectionTitleStyle}"/>
 
             <TextBlock Margin="0,12,0,0"
-                       Text="1. 此设置会立即写入用户目录下的 SkyWeaver\\Configuration\\PresentationUI.xml。"
+                       Text="1. 此设置会立即写入当前配置文件目录中的 PresentationUI.xml。"
                        Style="{StaticResource PreferenceMetaStyle}"/>
             <TextBlock Margin="0,6,0,0"
                        Text="2. 此设置决定后续新出现的可折叠思维链，进入界面时默认是展开还是折叠。"

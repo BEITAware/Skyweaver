@@ -7,6 +7,7 @@ using System.Text.Json;
 using Skyweaver.Controls.AgentConfigurationControl.Models;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Models;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
+using Skyweaver.Services.Directories;
 using Skyweaver.Services.SkyweaverTools;
 
 namespace Skyweaver.Services.AgentLoop
@@ -74,10 +75,7 @@ namespace Skyweaver.Services.AgentLoop
 
             try
             {
-                var rootDirectoryPath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                    "Skyweaver",
-                    "Debug");
+                var rootDirectoryPath = SkyweaverDirectoryRuntime.Instance.DebugDirectoryPath;
                 Directory.CreateDirectory(rootDirectoryPath);
 
                 var timestamp = DateTimeOffset.Now.ToString("yyyyMMdd_HHmmss_fff");
@@ -290,113 +288,6 @@ namespace Skyweaver.Services.AgentLoop
                     AssistantResponse = BuildAssistantResponseRecord(assistantResponse),
                     ToolBackfills = BuildToolBackfillRecords(toolBackfills),
                     FinalOutput = BuildFinalOutputRecord(finalOutput)
-                });
-#endif
-        }
-
-        public static void RecordCompressionRequest(
-            AgentLoopDebugRunContext? runContext,
-            AgentDefinition agent,
-            LanguageModelDefinition activeCandidate,
-            int iterationNumber,
-            int attemptNumber,
-            int targetHistoryTokens,
-            string upstreamInput,
-            IReadOnlyList<LanguageModelChatMessage> persistentHistory,
-            IReadOnlyList<LanguageModelChatMessage> compressionMessages)
-        {
-#if DEBUG
-            if (runContext == null)
-            {
-                return;
-            }
-
-            var fileName = BuildCompressionRequestFileName(iterationNumber, attemptNumber);
-            TryWriteJson(
-                runContext,
-                fileName,
-                new
-                {
-                    Kind = "AgentLoopContextCompressionRequest",
-                    RunId = runContext.RunId,
-                    GeneratedAtLocal = DateTimeOffset.Now,
-                    IterationNumber = iterationNumber,
-                    AttemptNumber = attemptNumber,
-                    Agent = BuildAgentRecord(agent),
-                    CapabilityLayerKey = CapabilityLayerBuiltIns.ContextCompressionLayerKey,
-                    ActiveCandidate = BuildModelRecord(activeCandidate),
-                    TargetHistoryTokens = targetHistoryTokens,
-                    UpstreamInput = upstreamInput ?? string.Empty,
-                    PersistentHistory = BuildMessageRecords(persistentHistory),
-                    PersistentHistoryTranscript = BuildTranscript(persistentHistory),
-                    CompressionMessages = BuildMessageRecords(compressionMessages),
-                    CompressionMessagesTranscript = BuildTranscript(compressionMessages)
-                });
-#endif
-        }
-
-        public static void RecordCompressionResult(
-            AgentLoopDebugRunContext? runContext,
-            AgentDefinition agent,
-            LanguageModelDefinition activeCandidate,
-            int iterationNumber,
-            int attemptNumber,
-            string? responseModelId,
-            string summaryText)
-        {
-#if DEBUG
-            if (runContext == null)
-            {
-                return;
-            }
-
-            var fileName = BuildCompressionResultFileName(iterationNumber, attemptNumber);
-            TryWriteJson(
-                runContext,
-                fileName,
-                new
-                {
-                    Kind = "AgentLoopContextCompressionResult",
-                    RunId = runContext.RunId,
-                    GeneratedAtLocal = DateTimeOffset.Now,
-                    IterationNumber = iterationNumber,
-                    AttemptNumber = attemptNumber,
-                    Agent = BuildAgentRecord(agent),
-                    ActiveCandidate = BuildModelRecord(activeCandidate),
-                    ResponseModelId = NormalizeText(responseModelId),
-                    SummaryText = summaryText ?? string.Empty
-                });
-#endif
-        }
-
-        public static void RecordCompressionFailure(
-            AgentLoopDebugRunContext? runContext,
-            AgentDefinition agent,
-            LanguageModelDefinition activeCandidate,
-            int iterationNumber,
-            int attemptNumber,
-            Exception exception)
-        {
-#if DEBUG
-            if (runContext == null)
-            {
-                return;
-            }
-
-            var fileName = BuildCompressionFailureFileName(iterationNumber, attemptNumber);
-            TryWriteJson(
-                runContext,
-                fileName,
-                new
-                {
-                    Kind = "AgentLoopContextCompressionFailure",
-                    RunId = runContext.RunId,
-                    GeneratedAtLocal = DateTimeOffset.Now,
-                    IterationNumber = iterationNumber,
-                    AttemptNumber = attemptNumber,
-                    Agent = BuildAgentRecord(agent),
-                    ActiveCandidate = BuildModelRecord(activeCandidate),
-                    Exception = BuildExceptionRecord(exception)
                 });
 #endif
         }
@@ -761,21 +652,6 @@ namespace Skyweaver.Services.AgentLoop
         private static string BuildIterationOutcomeFileName(int iterationNumber)
         {
             return $"iteration{iterationNumber:00}_outcome.json";
-        }
-
-        private static string BuildCompressionRequestFileName(int iterationNumber, int attemptNumber)
-        {
-            return $"iteration{iterationNumber:00}_compression_attempt{attemptNumber:00}_request.json";
-        }
-
-        private static string BuildCompressionResultFileName(int iterationNumber, int attemptNumber)
-        {
-            return $"iteration{iterationNumber:00}_compression_attempt{attemptNumber:00}_result.json";
-        }
-
-        private static string BuildCompressionFailureFileName(int iterationNumber, int attemptNumber)
-        {
-            return $"iteration{iterationNumber:00}_compression_attempt{attemptNumber:00}_failure.json";
         }
 
         private static string SanitizeSegment(string? value, string fallback)

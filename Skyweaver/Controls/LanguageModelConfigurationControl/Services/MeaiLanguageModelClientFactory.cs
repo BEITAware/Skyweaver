@@ -38,8 +38,30 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             {
                 Text = SanitizeModelText(response.Text),
                 ReasoningText = ExtractReasoningText(response.Messages.SelectMany(message => message.Contents)),
-                ModelId = response.ModelId
+                ModelId = response.ModelId,
+                InputTokenCount = NormalizeUsageCount(response.Usage?.InputTokenCount),
+                TotalTokenCount = NormalizeUsageCount(response.Usage?.TotalTokenCount)
             };
+        }
+
+        public async Task<int> CountTokensAsync(
+            LanguageModelDefinition model,
+            IReadOnlyList<LanguageModelChatMessage> messages,
+            CancellationToken cancellationToken = default)
+        {
+            var settings = GetSettings(model);
+            var response = await CreateChatClient(settings).GetResponseAsync(
+                messages.Select(ToSdkMessage).ToArray(),
+                CreateTokenCountingChatOptions(settings),
+                cancellationToken).ConfigureAwait(false);
+
+            var inputTokenCount = NormalizeUsageCount(response.Usage?.InputTokenCount);
+            if (inputTokenCount is int tokens && tokens > 0)
+            {
+                return tokens;
+            }
+
+            throw new InvalidOperationException("MEAI backend did not return input token usage for the counting probe.");
         }
 
         public async IAsyncEnumerable<LanguageModelStreamingChatUpdate> GetStreamingResponseAsync(
@@ -441,6 +463,13 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             return options;
         }
 
+        private static ChatOptions CreateTokenCountingChatOptions(MeaiLanguageModelSettings settings)
+        {
+            var options = CreateChatOptions(settings);
+            options.MaxOutputTokens = 1;
+            return options;
+        }
+
         private static ChatMessage ToSdkMessage(LanguageModelChatMessage message)
         {
             ArgumentNullException.ThrowIfNull(message);
@@ -580,6 +609,16 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 contents
                     .OfType<TextReasoningContent>()
                     .Select(content => content.Text ?? string.Empty));
+        }
+
+        private static int? NormalizeUsageCount(long? value)
+        {
+            if (value is not long count || count <= 0)
+            {
+                return null;
+            }
+
+            return count > int.MaxValue ? int.MaxValue : (int)count;
         }
 
         private static ChatRole ToSdkRole(LanguageModelChatRole role)

@@ -41,6 +41,8 @@ namespace Skyweaver.Services.ChatSession
 
         public bool EnableGemmaThoughtCompatibility { get; init; } = true;
 
+        public bool MinCompactionEnabled { get; init; }
+
         public Func<string>? ToolCallIdFactory { get; init; }
 
         public IAgentToolConfirmationService? ToolConfirmationService { get; init; }
@@ -143,6 +145,8 @@ namespace Skyweaver.Services.ChatSession
 
         public bool EnableGemmaThoughtCompatibility { get; init; } = true;
 
+        public bool MinCompactionEnabled { get; init; }
+
         public Func<string>? ToolCallIdFactory { get; init; }
 
         public Func<AgentToolConfirmationRequest, CancellationToken, Task<AgentToolConfirmationResult>>? ToolConfirmationCallback { get; init; }
@@ -178,6 +182,10 @@ namespace Skyweaver.Services.ChatSession
         public bool EnableGemmaThoughtCompatibility { get; init; } = true;
 
         public bool IsSubAgent { get; init; }
+
+        public bool MinCompactionEnabled { get; init; }
+
+        public string? CompactionFilePath { get; init; }
 
         public Func<AgentToolConfirmationRequest, CancellationToken, Task<AgentToolConfirmationResult>>? ToolConfirmationCallback { get; init; }
     }

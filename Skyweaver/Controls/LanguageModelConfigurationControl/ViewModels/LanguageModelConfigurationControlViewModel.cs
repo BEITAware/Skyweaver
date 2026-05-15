@@ -43,8 +43,6 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
 
         public string CapabilityLayerConfigurationFilePath => _capabilityLayerRepository.ConfigurationFilePath;
 
-        public string ContextCompressionValidationText => BuildContextCompressionValidationText();
-
         public LanguageModelDefinition? SelectedLanguageModel
         {
             get => _selectedLanguageModel;
@@ -65,7 +63,6 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
             {
                 if (SetProperty(ref _selectedCapabilityLayer, value))
                 {
-                    OnPropertyChanged(nameof(ContextCompressionValidationText));
                     CommandManager.InvalidateRequerySuggested();
                 }
             }
@@ -153,7 +150,6 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
 
                 SelectedLanguageModel = LanguageModels.FirstOrDefault();
                 SelectedCapabilityLayer = CapabilityLayers.FirstOrDefault();
-                OnPropertyChanged(nameof(ContextCompressionValidationText));
             }
             finally
             {
@@ -369,7 +365,6 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
             }
 
             OnPropertyChanged(nameof(LanguageModels));
-            OnPropertyChanged(nameof(ContextCompressionValidationText));
             CommandManager.InvalidateRequerySuggested();
         }
 
@@ -392,7 +387,6 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
             }
 
             OnPropertyChanged(nameof(CapabilityLayers));
-            OnPropertyChanged(nameof(ContextCompressionValidationText));
             CommandManager.InvalidateRequerySuggested();
         }
 
@@ -544,13 +538,11 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
                 OnPropertyChanged(nameof(InterfaceSettingsSectionTitle));
             }
 
-            OnPropertyChanged(nameof(ContextCompressionValidationText));
             PersistAll("语言模型配置已保存。", refreshCapabilityLayerDisplayNames: string.Equals(e.PropertyName, nameof(LanguageModelDefinition.DisplayName), StringComparison.Ordinal));
         }
 
         private void OnCapabilityLayerPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            OnPropertyChanged(nameof(ContextCompressionValidationText));
             PersistAll("功能层级配置已保存。");
         }
 
@@ -572,43 +564,18 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
                 }
             }
 
-            OnPropertyChanged(nameof(ContextCompressionValidationText));
             PersistAll("功能层级配置已保存。");
             CommandManager.InvalidateRequerySuggested();
         }
 
         private void OnCapabilityLayerEntryPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            OnPropertyChanged(nameof(ContextCompressionValidationText));
             PersistAll("功能层级配置已保存。");
         }
 
         private CapabilityLayerDefinition? FindParentLayer(CapabilityLayerEntry entry)
         {
             return CapabilityLayers.FirstOrDefault(layer => layer.LanguageModels.Contains(entry));
-        }
-
-        private string BuildContextCompressionValidationText()
-        {
-            var compressionLayer = CapabilityLayers.FirstOrDefault(layer =>
-                string.Equals(layer.Key, CapabilityLayerBuiltIns.ContextCompressionLayerKey, StringComparison.OrdinalIgnoreCase));
-
-            if (compressionLayer == null)
-            {
-                return "缺少内置“上下文压缩”功能层级，重新加载后会自动恢复。";
-            }
-
-            var configuredModelCount = compressionLayer.LanguageModels.Count(entry =>
-            {
-                var key = entry.LanguageModelKey?.Trim() ?? string.Empty;
-                return key.Length > 0 && LanguageModels.Any(model =>
-                    string.Equals(model.Key, key, StringComparison.Ordinal) &&
-                    model.IsFullyConfigured);
-            });
-
-            return configuredModelCount > 0
-                ? $"内置“上下文压缩”层已配置 {configuredModelCount} 个可用模型。"
-                : "内置“上下文压缩”层尚未绑定可用模型，后续代理上下文压缩将无法执行。";
         }
 
         private void PersistAll(string successMessage, bool refreshCapabilityLayerDisplayNames = false)

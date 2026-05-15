@@ -363,6 +363,7 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # Project-specific ignores
+profile_path.txt
 TODO.md
 TestImages/
 WORKFOLDER/

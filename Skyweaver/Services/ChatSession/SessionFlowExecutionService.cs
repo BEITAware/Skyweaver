@@ -332,6 +332,8 @@ namespace Skyweaver.Services.ChatSession
                     ToolContext = BuildToolContext(request),
                     ToolCallIdFactory = request.ToolCallIdFactory,
                     EnableGemmaThoughtCompatibility = request.EnableGemmaThoughtCompatibility,
+                    MinCompactionEnabled = request.MinCompactionEnabled,
+                    CompactionFilePath = ChatSessionResourceLayout.EnsureCompactionFile(request.Session),
                     ToolConfirmationCallback = request.ToolConfirmationCallback,
                     EventSink = (update, ct) => PublishAgentLoopUpdateAsync(
                         request,

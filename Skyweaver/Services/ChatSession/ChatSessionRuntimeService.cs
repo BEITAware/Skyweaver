@@ -6,6 +6,7 @@ using Skyweaver.Controls.WorkflowEditorControl.Models;
 using Skyweaver.Controls.WorkflowEditorControl.Services;
 using Skyweaver.Models.ChatSession;
 using Skyweaver.Services.AgentLoop;
+using Skyweaver.Services.ContextManagement;
 
 namespace Skyweaver.Services.ChatSession
 {
@@ -238,6 +239,8 @@ namespace Skyweaver.Services.ChatSession
                         ConversationHistory = conversationHistory,
                         AgentsById = agentsById,
                         EnableGemmaThoughtCompatibility = request.EnableGemmaThoughtCompatibility,
+                        MinCompactionEnabled = request.MinCompactionEnabled ||
+                                                ContextManagementRuntime.Instance.MinCompactionEnabled,
                         ToolCallIdFactory = toolCallIdFactory,
                         ToolConfirmationCallback = ResolveToolConfirmationCallback(request)
                     },
@@ -385,17 +388,6 @@ namespace Skyweaver.Services.ChatSession
             IReadOnlyDictionary<string, AgentDefinition> agentsById)
         {
             var errors = new List<string>();
-
-            var compressionCandidates = _languageModelResolver.GetCandidateModelsForCapabilityLayer(
-                CapabilityLayerBuiltIns.ContextCompressionLayerKey);
-            if (compressionCandidates.Count == 0)
-            {
-                errors.Add("内置 capability layer“上下文压缩”当前没有绑定任何候选模型。请先在语言模型配置中为它绑定至少一个模型。");
-            }
-            else if (compressionCandidates.All(model => !model.InterfaceSettings.IsFullyConfigured))
-            {
-                errors.Add("内置 capability layer“上下文压缩”虽然已绑定模型，但没有任何一个模型的接口配置完整可用。");
-            }
 
             foreach (var compiledNode in graph.NodesById.Values.Where(node => node.Node.Kind == SessionFlowNodeKind.Agent))
             {

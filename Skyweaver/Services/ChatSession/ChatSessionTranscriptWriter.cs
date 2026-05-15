@@ -318,6 +318,7 @@ namespace Skyweaver.Services.ChatSession
                 runtimeEvent.Message);
             if (content.Length > 0)
             {
+                content = AgentLoopCompactionStore.EnsureToolCallIdInToolInvocationXml(content, toolCallId);
                 var block = entry.Blocks.FirstOrDefault()
                     ?? AddBlock(entry, ChatSessionTranscriptBlockKind.ToolInvocationXml, content);
                 block.Content = content;
@@ -372,6 +373,7 @@ namespace Skyweaver.Services.ChatSession
             entry.ToolCallIndex = runtimeEvent.ToolCallIndex;
             entry.ToolName = ResolveToolName(runtimeEvent) ?? parent?.ToolName;
             entry.Status = ChatSessionEntryStatus.Completed;
+            output = AgentLoopCompactionStore.EnsureToolCallIdInToolsReturnXml(output, toolCallId);
             var block = new ChatSessionTranscriptBlock
             {
                 Kind = ChatSessionTranscriptBlockKind.ToolOutputXml,
@@ -399,7 +401,10 @@ namespace Skyweaver.Services.ChatSession
                         $"ContextWindowTokens: {info.ContextWindowTokens}",
                         $"EstimatedBefore: {info.EstimatedTokenCountBeforeCompression}",
                         $"EstimatedAfter: {info.EstimatedTokenCountAfterCompression}",
-                        $"TargetAfter: {info.TargetTokenCountAfterCompression}"
+                        $"TargetAfter: {info.TargetTokenCountAfterCompression}",
+                        info.CompactedToolCallIds.Count > 0
+                            ? $"CompactedToolCallIds: {string.Join(", ", info.CompactedToolCallIds)}"
+                            : string.Empty
                     }.Where(line => !string.IsNullOrWhiteSpace(line)));
 
             if (string.IsNullOrWhiteSpace(content))

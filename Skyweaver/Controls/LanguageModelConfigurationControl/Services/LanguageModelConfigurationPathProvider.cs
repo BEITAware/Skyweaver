@@ -1,13 +1,11 @@
 using System.IO;
+using Skyweaver.Services.Directories;
 
 namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
 {
     public sealed class LanguageModelConfigurationPathProvider
     {
-        public string ConfigurationDirectoryPath => Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            "Skyweaver",
-            "Configuration");
+        public string ConfigurationDirectoryPath => SkyweaverDirectoryRuntime.Instance.ConfigurationDirectoryPath;
 
         public string LanguageModelFilePath => Path.Combine(ConfigurationDirectoryPath, "LanguageModel.xml");
 

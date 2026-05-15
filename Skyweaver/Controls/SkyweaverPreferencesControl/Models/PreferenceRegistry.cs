@@ -26,6 +26,12 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.Models
                 },
                 new()
                 {
+                    Id = "context-management",
+                    DisplayName = "上下文管理",
+                    IsExpanded = true
+                },
+                new()
+                {
                     Id = "about-skyweaver",
                     DisplayName = "关于Skyweaver",
                     IsExpanded = true
