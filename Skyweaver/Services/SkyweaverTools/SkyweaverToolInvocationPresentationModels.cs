@@ -132,6 +132,13 @@ namespace Skyweaver.Services.SkyweaverTools
         private string _toolResultContent;
         private string? _toolResultPresentationKind;
         private bool _isInvocationClosed;
+        private bool _hasToolProgress;
+        private string _toolProgressPhase;
+        private string _toolProgressStatusText;
+        private int? _toolProgressCompletedItems;
+        private int? _toolProgressTotalItems;
+        private double? _toolProgressFraction;
+        private bool _isToolProgressCompleted;
 
         public SkyweaverToolInvocationPresentationState(
             int toolCallIndex,
@@ -145,10 +152,16 @@ namespace Skyweaver.Services.SkyweaverTools
             _iconPath = iconPath ?? string.Empty;
             _rawToolXml = string.Empty;
             _toolResultContent = string.Empty;
+            _toolProgressPhase = string.Empty;
+            _toolProgressStatusText = string.Empty;
             ToolResultDiffLines.CollectionChanged += (_, _) =>
             {
                 OnPropertyChanged(nameof(HasToolResultDiffLines));
                 OnPropertyChanged(nameof(HasToolResultText));
+            };
+            ToolProgressActiveItems.CollectionChanged += (_, _) =>
+            {
+                OnPropertyChanged(nameof(HasToolProgressActiveItems));
             };
         }
 
@@ -207,11 +220,104 @@ namespace Skyweaver.Services.SkyweaverTools
 
         public ObservableCollection<SkyweaverLineDiffEntry> ToolResultDiffLines { get; } = new();
 
+        public ObservableCollection<string> ToolProgressActiveItems { get; } = new();
+
         public bool HasToolResult => !string.IsNullOrWhiteSpace(ToolResultContent);
 
         public bool HasToolResultDiffLines => ToolResultDiffLines.Count > 0;
 
         public bool HasToolResultText => HasToolResult && !HasToolResultDiffLines;
+
+        public bool HasToolProgress
+        {
+            get => _hasToolProgress;
+            private set => SetProperty(ref _hasToolProgress, value);
+        }
+
+        public string ToolProgressPhase
+        {
+            get => _toolProgressPhase;
+            private set => SetProperty(ref _toolProgressPhase, value ?? string.Empty);
+        }
+
+        public string ToolProgressStatusText
+        {
+            get => _toolProgressStatusText;
+            private set => SetProperty(ref _toolProgressStatusText, value ?? string.Empty);
+        }
+
+        public int? ToolProgressCompletedItems
+        {
+            get => _toolProgressCompletedItems;
+            private set
+            {
+                if (SetProperty(ref _toolProgressCompletedItems, value))
+                {
+                    OnPropertyChanged(nameof(ToolProgressCountText));
+                    OnPropertyChanged(nameof(HasToolProgressCount));
+                }
+            }
+        }
+
+        public int? ToolProgressTotalItems
+        {
+            get => _toolProgressTotalItems;
+            private set
+            {
+                if (SetProperty(ref _toolProgressTotalItems, value))
+                {
+                    OnPropertyChanged(nameof(ToolProgressCountText));
+                    OnPropertyChanged(nameof(HasToolProgressCount));
+                }
+            }
+        }
+
+        public double? ToolProgressFraction
+        {
+            get => _toolProgressFraction;
+            private set
+            {
+                if (SetProperty(ref _toolProgressFraction, value))
+                {
+                    OnPropertyChanged(nameof(ToolProgressValue));
+                    OnPropertyChanged(nameof(IsToolProgressIndeterminate));
+                }
+            }
+        }
+
+        public bool IsToolProgressCompleted
+        {
+            get => _isToolProgressCompleted;
+            private set => SetProperty(ref _isToolProgressCompleted, value);
+        }
+
+        public double ToolProgressValue => Math.Clamp(ToolProgressFraction ?? 0d, 0d, 1d) * 100d;
+
+        public bool IsToolProgressIndeterminate => ToolProgressFraction == null && !IsToolProgressCompleted;
+
+        public bool HasToolProgressActiveItems => ToolProgressActiveItems.Count > 0;
+
+        public bool HasToolProgressCount => ToolProgressCompletedItems != null || ToolProgressTotalItems != null;
+
+        public string ToolProgressCountText
+        {
+            get
+            {
+                if (ToolProgressCompletedItems != null && ToolProgressTotalItems != null)
+                {
+                    return $"{ToolProgressCompletedItems.Value} / {ToolProgressTotalItems.Value}";
+                }
+
+                if (ToolProgressCompletedItems != null)
+                {
+                    return ToolProgressCompletedItems.Value.ToString();
+                }
+
+                return ToolProgressTotalItems != null
+                    ? $"0 / {ToolProgressTotalItems.Value}"
+                    : string.Empty;
+            }
+        }
 
         public SkyweaverToolInvocationParameterPresentationState GetOrCreateParameterState(
             string parameterName,
@@ -298,6 +404,29 @@ namespace Skyweaver.Services.SkyweaverTools
             ToolResultContent = content ?? string.Empty;
             ToolResultPresentationKind = presentationKind;
             RebuildToolResultDiffLines();
+        }
+
+        public void ApplyToolProgress(SkyweaverToolProgressUpdate? progress)
+        {
+            if (progress == null)
+            {
+                return;
+            }
+
+            var normalized = progress.Normalize();
+            HasToolProgress = true;
+            ToolProgressPhase = normalized.Phase;
+            ToolProgressStatusText = normalized.StatusText;
+            ToolProgressCompletedItems = normalized.CompletedItems;
+            ToolProgressTotalItems = normalized.TotalItems;
+            ToolProgressFraction = normalized.ProgressFraction;
+            IsToolProgressCompleted = normalized.IsCompleted;
+
+            ToolProgressActiveItems.Clear();
+            foreach (var item in normalized.ActiveItems)
+            {
+                ToolProgressActiveItems.Add(item);
+            }
         }
 
         private void RebuildToolResultDiffLines()

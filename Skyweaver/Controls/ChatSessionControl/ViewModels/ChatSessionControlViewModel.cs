@@ -473,6 +473,8 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                 ChatSessionRuntimeEventKind.ExecutionCompleted => "执行已完成",
                 ChatSessionRuntimeEventKind.ExecutionFailed => "执行失败",
                 ChatSessionRuntimeEventKind.ExecutionCancelled => "执行已取消",
+                ChatSessionRuntimeEventKind.ToolProgressUpdated when !string.IsNullOrWhiteSpace(runtimeEvent.ToolProgress?.StatusText) =>
+                    runtimeEvent.ToolProgress!.StatusText,
                 _ => ExecutionStatusText
             };
 
@@ -880,7 +882,8 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         private static bool IsHighFrequencyStreamingProjectionEvent(ChatSessionRuntimeEvent runtimeEvent)
         {
             return (runtimeEvent.Kind is ChatSessionRuntimeEventKind.TextDelta
-                    or ChatSessionRuntimeEventKind.ReasoningDelta) ||
+                    or ChatSessionRuntimeEventKind.ReasoningDelta
+                    or ChatSessionRuntimeEventKind.ToolProgressUpdated) ||
                 runtimeEvent.Kind == ChatSessionRuntimeEventKind.ToolCallUpdated &&
                 runtimeEvent.ToolCallSnapshot?.IsInvocationClosed != true &&
                 runtimeEvent.ToolInvocation == null;
@@ -959,6 +962,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             target.ResourcePath = source.ResourcePath;
             target.PresentationKind = source.PresentationKind;
             target.ToolResultPresentationKind = source.ToolResultPresentationKind;
+            target.ToolProgress = source.ToolProgress;
             target.IsUserVisible = source.IsUserVisible;
             target.IsCollapsible = source.IsCollapsible;
             target.IsStreaming = source.IsStreaming;

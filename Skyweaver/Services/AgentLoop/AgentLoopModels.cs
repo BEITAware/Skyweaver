@@ -306,7 +306,8 @@ namespace Skyweaver.Services.AgentLoop
         ToolOutputReceived = 7,
         ContextCompressionApplied = 8,
         FinalOutputProduced = 9,
-        IterationCompleted = 10
+        IterationCompleted = 10,
+        ToolProgressUpdated = 11
     }
 
     public sealed class AgentLoopRuntimeEvent
@@ -342,6 +343,8 @@ namespace Skyweaver.Services.AgentLoop
         public string? ToolOutputXml { get; init; }
 
         public IReadOnlyList<SkyweaverToolReturnPayload> ToolReturns { get; init; } = Array.Empty<SkyweaverToolReturnPayload>();
+
+        public SkyweaverToolProgressUpdate? ToolProgress { get; init; }
 
         public AgentLoopFinalOutput? FinalOutput { get; init; }
 

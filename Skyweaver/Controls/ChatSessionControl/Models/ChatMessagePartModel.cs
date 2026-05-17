@@ -19,6 +19,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
         private string? _presentationKind;
         private string _toolResultContent;
         private string? _toolResultPresentationKind;
+        private SkyweaverToolProgressUpdate? _toolProgress;
         private bool _isStreaming;
         private bool _isUserVisible;
         private bool _isCollapsible;
@@ -141,6 +142,12 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
         {
             get => _toolResultPresentationKind;
             set => SetProperty(ref _toolResultPresentationKind, NormalizeMetadataValue(value));
+        }
+
+        public SkyweaverToolProgressUpdate? ToolProgress
+        {
+            get => _toolProgress;
+            set => SetProperty(ref _toolProgress, value?.Normalize());
         }
 
         public bool HasToolResult => !string.IsNullOrWhiteSpace(ToolResultContent);

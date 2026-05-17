@@ -35,7 +35,11 @@ namespace Skyweaver.Services.AerialCityRag
                     IsEnabled = ParseBool((string?)rag.Attribute("Enabled") ?? (string?)rag.Element("Enabled")),
                     SelectedEmbeddingModelKey = ((string?)rag.Attribute("SelectedEmbeddingModelKey")
                         ?? (string?)rag.Element("SelectedEmbeddingModelKey")
-                        ?? string.Empty).Trim()
+                        ?? string.Empty).Trim(),
+                    EmbeddingConcurrency = ParseInt(
+                        (string?)rag.Attribute("EmbeddingConcurrency") ??
+                        (string?)rag.Element("EmbeddingConcurrency"),
+                        AerialCityRagConfiguration.MinimumEmbeddingConcurrency)
                 };
             }
         }
@@ -53,7 +57,8 @@ namespace Skyweaver.Services.AerialCityRag
                         new XAttribute("SchemaVersion", 1),
                         new XElement("AerialCityRag",
                             new XAttribute("Enabled", configuration.IsEnabled),
-                            new XAttribute("SelectedEmbeddingModelKey", configuration.SelectedEmbeddingModelKey))));
+                            new XAttribute("SelectedEmbeddingModelKey", configuration.SelectedEmbeddingModelKey),
+                            new XAttribute("EmbeddingConcurrency", configuration.EmbeddingConcurrency))));
 
                 document.Save(ConfigurationFilePath);
             }
@@ -67,6 +72,11 @@ namespace Skyweaver.Services.AerialCityRag
         private static bool ParseBool(string? value)
         {
             return bool.TryParse(value, out var parsed) && parsed;
+        }
+
+        private static int ParseInt(string? value, int fallback)
+        {
+            return int.TryParse(value, out var parsed) ? parsed : fallback;
         }
     }
 }

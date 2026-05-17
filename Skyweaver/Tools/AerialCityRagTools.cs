@@ -15,14 +15,20 @@ namespace Skyweaver.Tools
 
         private static readonly SkyweaverToolDefinition s_definition = new(
             ToolName,
-            "Initializes AerialCity RAG for a target folder. It creates AerialCity.xml in the configured AerialCity directory when missing, records the target-folder to database-folder mapping, embeds text/code files with the selected embedding model, embeds images when the model supports multimodal embedding, and inserts segments into the AerialCity vector and graph database.",
-            "Script",
+            "Initializes AerialCity RAG for a target folder. It creates AerialCity.xml in the configured AerialCity directory when missing, records the target-folder to database-folder mapping, writes ExcludedFiles.xml in the folder's AerialCity database directory, embeds text/code files with the selected embedding model, embeds images when the model supports multimodal embedding, and inserts segments into the AerialCity vector and graph database.",
+            "ResourcesLibrary",
             [
                 new SkyweaverToolParameterDefinition(
                     "TargetDirectory",
                     "Target folder to initialize for AerialCity RAG. Relative paths resolve against the current workspace.",
                     SkyweaverToolParameterType.String,
                     isRequired: true),
+                new SkyweaverToolParameterDefinition(
+                    "Mode",
+                    "Optional indexing mode. Code is the default and excludes version-control, generated, hidden-dot, dependency-cache and noisy output files. Everything performs no mode-based exclusions.",
+                    SkyweaverToolParameterType.String,
+                    isRequired: false,
+                    defaultValue: "Code"),
                 new SkyweaverToolParameterDefinition(
                     "MaxFileBytes",
                     "Maximum single file size to embed. Default is 10485760 bytes. Use 0 to disable this guard.",
@@ -40,17 +46,18 @@ namespace Skyweaver.Tools
         {
             ArgumentNullException.ThrowIfNull(context);
 
-            return "Initializes AerialCity RAG for TargetDirectory. This tool is available only when Preferences > Semantic Search has AerialCity RAG enabled and an AerialCity directory is configured. It creates/updates AerialCity.xml, records the current embedding model, segments code files and text files with AerialCity's dedicated methods, embeds images when the selected model supports multimodal embedding, and stores the resulting vectors plus source metadata in AerialCity. MaxFileBytes defaults to 10485760; pass 0 to disable the size guard.";
+            return "Initializes AerialCity RAG for TargetDirectory. This tool is available only when Preferences > Semantic Search has AerialCity RAG enabled and an AerialCity directory is configured. It creates/updates AerialCity.xml, writes ExcludedFiles.xml in the database folder, records the current embedding model, segments code files and text files with AerialCity's dedicated methods, embeds images when the selected model supports multimodal embedding, and stores the resulting vectors plus source metadata in AerialCity. Mode is optional: Code is the default and excludes generated/version-control/cache/noisy files; Everything applies no mode exclusions. MaxFileBytes defaults to 10485760; pass 0 to disable the size guard.";
         }
 
         public FrameworkElement? CreateInvocationPresentation(SkyweaverToolInvocationPresentationContext context)
         {
             ArgumentNullException.ThrowIfNull(context);
 
-            return ToolInvocationCardFactory.Create(
+            return ToolInvocationCardFactory.CreateAerialCity(
                 context,
                 [
                     new ToolInvocationCardFieldDefinition("Target directory", "TargetDirectory", "Waiting for target directory..."),
+                    new ToolInvocationCardFieldDefinition("Mode", "Mode", "Code"),
                     new ToolInvocationCardFieldDefinition("Max file bytes", "MaxFileBytes", "Default 10485760")
                 ]);
         }
@@ -61,6 +68,7 @@ namespace Skyweaver.Tools
             CancellationToken cancellationToken = default)
         {
             var targetDirectory = arguments.GetString("TargetDirectory") ?? string.Empty;
+            var mode = arguments.GetString("Mode");
             var maxFileBytes = arguments.GetInteger("MaxFileBytes", 10 * 1024 * 1024);
 
             try
@@ -68,8 +76,10 @@ namespace Skyweaver.Tools
                 var result = await _ragService.InitializeAsync(
                     targetDirectory,
                     context.WorkspacePath,
+                    mode,
                     maxFileBytes,
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken,
+                    context.ReportProgressAsync).ConfigureAwait(false);
 
                 return SkyweaverToolResult.Success(
                     AerialCityRagService.FormatInitializationResult(result),
@@ -80,10 +90,14 @@ namespace Skyweaver.Tools
                         ["registryFilePath"] = result.RegistryFilePath,
                         ["databasePath"] = result.DatabasePath,
                         ["databaseFolderName"] = result.DatabaseFolderName,
+                        ["mode"] = result.Mode.ToString(),
+                        ["excludedFilesPath"] = result.ExcludedFilesPath,
+                        ["excludedFileCount"] = result.ExcludedFileCount,
                         ["embeddingModel"] = result.EmbeddingModelDisplayName,
                         ["embeddingModelId"] = result.EmbeddingModelId,
                         ["supportsMultimodalEmbedding"] = result.SupportsMultimodalEmbedding,
                         ["filesVisited"] = result.Statistics.FilesVisited,
+                        ["filesExcludedByMode"] = result.Statistics.FilesExcludedByMode,
                         ["segmentsInserted"] = result.Statistics.SegmentsInserted,
                         ["filesFailed"] = result.Statistics.FilesFailed
                     });
@@ -202,6 +216,106 @@ namespace Skyweaver.Tools
                 ["topK"] = result.TopK,
                 ["resultCount"] = result.Results.Count
             };
+        }
+    }
+
+    public sealed class UpdateAerialCityDbTool :
+        ISkyweaverTool,
+        ISkyweaverToolInvocationPresentationProvider,
+        ISkyweaverToolPromptDescriptionProvider
+    {
+        public const string ToolName = "UpdateAerialCityDB";
+
+        private static readonly SkyweaverToolDefinition s_definition = new(
+            ToolName,
+            "Updates the initialized AerialCity database that contains the supplied path. It can refresh folders, files, deleted paths, and ExcludedFiles.xml; it follows the database folder's current mode, compares files against hashes recorded in AerialCity.xml and re-embeds changed files.",
+            "Refresh",
+            [
+                new SkyweaverToolParameterDefinition(
+                    "FolderPath",
+                    "Folder, file, or deleted path to refresh. Relative paths resolve against the current workspace. The path must be equal to or inside a folder initialized with InitializeAerialCityRAG.",
+                    SkyweaverToolParameterType.String,
+                    isRequired: true),
+                new SkyweaverToolParameterDefinition(
+                    "MaxFileBytes",
+                    "Maximum single file size to embed. Default is 10485760 bytes. Use 0 to disable this guard.",
+                    SkyweaverToolParameterType.Integer,
+                    isRequired: false,
+                    defaultValue: "10485760")
+            ],
+            defaultToolKitKeys: ["Investigate"]);
+
+        private readonly AerialCityRagService _ragService = new();
+
+        public SkyweaverToolDefinition Definition => s_definition;
+
+        public string GetPromptDescription(SkyweaverToolPromptDescriptionContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            return "Updates an existing AerialCity RAG database for FolderPath. The tool finds the initialized AerialCity DB whose target folder contains FolderPath, follows that database's current mode from ExcludedFiles.xml, honors its excluded file list, and can refresh folders, single files, or deleted paths. The update adds new matching files, re-embeds changed files, removes deleted files, and removes files that no longer satisfy the configured mode. MaxFileBytes defaults to 10485760; pass 0 to disable the size guard.";
+        }
+
+        public FrameworkElement? CreateInvocationPresentation(SkyweaverToolInvocationPresentationContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            return ToolInvocationCardFactory.CreateAerialCity(
+                context,
+                [
+                    new ToolInvocationCardFieldDefinition("Path", "FolderPath", "Waiting for path..."),
+                    new ToolInvocationCardFieldDefinition("Max file bytes", "MaxFileBytes", "Default 10485760")
+                ]);
+        }
+
+        public async Task<SkyweaverToolResult> ExecuteAsync(
+            SkyweaverToolContext context,
+            SkyweaverToolArguments arguments,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var result = await _ragService.UpdateDatabaseAsync(
+                    arguments.GetString("FolderPath") ?? string.Empty,
+                    context.WorkspacePath,
+                    arguments.GetInteger("MaxFileBytes", 10 * 1024 * 1024),
+                    cancellationToken,
+                    context.ReportProgressAsync).ConfigureAwait(false);
+
+                return SkyweaverToolResult.Success(
+                    AerialCityRagService.FormatUpdateResult(result),
+                    new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        ["folderPath"] = result.RequestedDirectory,
+                        ["targetDirectory"] = result.TargetDirectory,
+                        ["aerialCityDirectory"] = result.AerialCityDirectory,
+                        ["registryFilePath"] = result.RegistryFilePath,
+                        ["databasePath"] = result.DatabasePath,
+                        ["databaseFolderName"] = result.DatabaseFolderName,
+                        ["mode"] = result.Mode.ToString(),
+                        ["excludedFilesPath"] = result.ExcludedFilesPath,
+                        ["excludedFileCount"] = result.ExcludedFileCount,
+                        ["embeddingModel"] = result.EmbeddingModelDisplayName,
+                        ["embeddingModelId"] = result.EmbeddingModelId,
+                        ["filesVisited"] = result.Statistics.FilesVisited,
+                        ["filesExcludedByMode"] = result.Statistics.FilesExcludedByMode,
+                        ["filesReembedded"] = result.Statistics.FilesReembedded,
+                        ["filesRemoved"] = result.Statistics.FilesRemoved,
+                        ["segmentsInserted"] = result.Statistics.SegmentsInserted,
+                        ["segmentsUpdated"] = result.Statistics.SegmentsUpdated,
+                        ["segmentsReused"] = result.Statistics.SegmentsReused,
+                        ["segmentsDeleted"] = result.Statistics.SegmentsDeleted,
+                        ["filesFailed"] = result.Statistics.FilesFailed
+                    });
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex) when (ex is InvalidOperationException or IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+            {
+                return SkyweaverToolResult.Failure($"Failed to update AerialCity DB: {ex.Message}");
+            }
         }
     }
 

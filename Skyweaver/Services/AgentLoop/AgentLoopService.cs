@@ -1397,6 +1397,8 @@ namespace Skyweaver.Services.AgentLoop
                             partIndex,
                             part.ToolCallIndex,
                             toolCallId,
+                            modelId,
+                            onEventAsync,
                             cancellationToken).ConfigureAwait(false);
 
                         if (IsLoadToolKits(invocation.ToolName))
@@ -2567,6 +2569,51 @@ namespace Skyweaver.Services.AgentLoop
             }
         }
 
+        private static SkyweaverToolContext CreateToolProgressContext(
+            SkyweaverToolContext runtimeToolContext,
+            SkyweaverToolInvocation invocation,
+            int iterationNumber,
+            int partIndex,
+            int toolCallIndex,
+            string toolCallId,
+            string? modelId,
+            Func<AgentLoopRuntimeEvent, CancellationToken, ValueTask>? onEventAsync)
+        {
+            if (onEventAsync == null)
+            {
+                return runtimeToolContext;
+            }
+
+            return runtimeToolContext.WithToolProgressReporter(async (progress, cancellationToken) =>
+            {
+                try
+                {
+                    await PublishAsync(
+                        onEventAsync,
+                        new AgentLoopRuntimeEvent
+                        {
+                            Kind = AgentLoopRuntimeEventKind.ToolProgressUpdated,
+                            IterationNumber = iterationNumber,
+                            ModelId = modelId,
+                            PartIndex = partIndex,
+                            ToolCallIndex = toolCallIndex,
+                            ToolCallId = toolCallId,
+                            ToolInvocation = invocation,
+                            ToolProgress = progress.Normalize()
+                        },
+                        cancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch
+                {
+                    // Progress rendering must not fail the tool itself.
+                }
+            });
+        }
+
         private async Task<IReadOnlyList<SkyweaverToolReturnPayload>> ExecuteAuthorizedInvocationsAsync(
             AgentLoopRequest request,
             IReadOnlyList<SkyweaverToolInvocation> invocations,
@@ -2577,6 +2624,8 @@ namespace Skyweaver.Services.AgentLoop
             int partIndex,
             int toolCallIndex,
             string toolCallId,
+            string? modelId,
+            Func<AgentLoopRuntimeEvent, CancellationToken, ValueTask>? onEventAsync,
             CancellationToken cancellationToken)
         {
             var toolReturns = new List<SkyweaverToolReturnPayload>(invocations.Count);
@@ -2607,10 +2656,19 @@ namespace Skyweaver.Services.AgentLoop
 
                 try
                 {
+                    var progressToolContext = CreateToolProgressContext(
+                        runtimeToolContext,
+                        invocation,
+                        iterationNumber,
+                        partIndex,
+                        toolCallIndex,
+                        toolCallId,
+                        modelId,
+                        onEventAsync);
                     var result = await _toolManager.ExecuteAsync(
                         invocation.ToolName,
                         invocation.RawArguments,
-                        runtimeToolContext,
+                        progressToolContext,
                         request.Agent,
                         authorization.HasHostConfirmation,
                         cancellationToken).ConfigureAwait(false);
@@ -2671,10 +2729,19 @@ namespace Skyweaver.Services.AgentLoop
 
             try
             {
+                var progressToolContext = CreateToolProgressContext(
+                    runtimeToolContext,
+                    invocation,
+                    iterationNumber,
+                    partIndex,
+                    toolCallIndex,
+                    toolCallId,
+                    modelId,
+                    onEventAsync);
                 var executionTask = _toolManager.ExecuteAsync(
                     invocation.ToolName,
                     invocation.RawArguments,
-                    runtimeToolContext,
+                    progressToolContext,
                     request.Agent,
                     authorization.HasHostConfirmation,
                     cancellationToken);

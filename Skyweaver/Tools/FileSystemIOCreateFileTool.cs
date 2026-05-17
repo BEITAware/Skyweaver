@@ -46,7 +46,7 @@ namespace Skyweaver.Tools
                 ]);
         }
 
-        public Task<SkyweaverToolResult> ExecuteAsync(
+        public async Task<SkyweaverToolResult> ExecuteAsync(
             SkyweaverToolContext context,
             SkyweaverToolArguments arguments,
             CancellationToken cancellationToken = default)
@@ -66,16 +66,16 @@ namespace Skyweaver.Tools
 
                 if (Directory.Exists(targetPath.ResolvedPath))
                 {
-                    return Task.FromResult(SkyweaverToolResult.Failure(
+                    return SkyweaverToolResult.Failure(
                         $"Path points to an existing directory, not a file: {targetPath.ResolvedPath}",
-                        BuildData(targetPath, settings, parentDirectoryCreated: false, didCreate: false)));
+                        BuildData(targetPath, settings, parentDirectoryCreated: false, didCreate: false));
                 }
 
                 if (File.Exists(targetPath.ResolvedPath))
                 {
-                    return Task.FromResult(SkyweaverToolResult.Failure(
+                    return SkyweaverToolResult.Failure(
                         $"File already exists: {targetPath.ResolvedPath}",
-                        BuildData(targetPath, settings, parentDirectoryCreated: false, didCreate: false)));
+                        BuildData(targetPath, settings, parentDirectoryCreated: false, didCreate: false));
                 }
 
                 var parentDirectory = Path.GetDirectoryName(targetPath.ResolvedPath);
@@ -84,9 +84,9 @@ namespace Skyweaver.Tools
                 {
                     if (File.Exists(parentDirectory))
                     {
-                        return Task.FromResult(SkyweaverToolResult.Failure(
+                        return SkyweaverToolResult.Failure(
                             $"The parent path is an existing file, not a directory: {parentDirectory}",
-                            BuildData(targetPath, settings, parentDirectoryCreated: false, didCreate: false)));
+                            BuildData(targetPath, settings, parentDirectoryCreated: false, didCreate: false));
                     }
 
                     if (!Directory.Exists(parentDirectory))
@@ -99,10 +99,16 @@ namespace Skyweaver.Tools
                 using (new FileStream(targetPath.ResolvedPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
                 {
                 }
+                var ragSync = await AerialCityRagToolSync.RefreshFileAsync(
+                    targetPath.ResolvedPath,
+                    context.WorkspacePath,
+                    cancellationToken).ConfigureAwait(false);
 
-                return Task.FromResult(SkyweaverToolResult.Success(
+                return SkyweaverToolResult.Success(
                     BuildSuccessContent(targetPath, settings, parentDirectoryCreated),
-                    BuildData(targetPath, settings, parentDirectoryCreated, didCreate: true)));
+                    AerialCityRagToolSync.WithSyncData(
+                        BuildData(targetPath, settings, parentDirectoryCreated, didCreate: true),
+                        ragSync));
             }
             catch (OperationCanceledException)
             {
@@ -110,9 +116,9 @@ namespace Skyweaver.Tools
             }
             catch (Exception ex) when (IsExpectedException(ex))
             {
-                return Task.FromResult(SkyweaverToolResult.Failure(
+                return SkyweaverToolResult.Failure(
                     $"Failed to create file: {ex.Message}",
-                    BuildData(targetPath, settings, parentDirectoryCreated: false, didCreate: false)));
+                    BuildData(targetPath, settings, parentDirectoryCreated: false, didCreate: false));
             }
         }
 

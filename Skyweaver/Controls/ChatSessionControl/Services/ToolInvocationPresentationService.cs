@@ -131,6 +131,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
             if (snapshot != null)
             {
                 state.ApplySnapshot(snapshot, ResolveParameterDefinitions(snapshot.ToolName));
+                state.ApplyToolProgress(part.ToolProgress);
                 ApplyResultToPresentationState(part, state);
                 return;
             }
@@ -142,6 +143,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
 
             state.RawToolXml = NormalizeXml(part.Content);
             state.IsInvocationClosed = !part.IsStreaming;
+            state.ApplyToolProgress(part.ToolProgress);
             ApplyResultToPresentationState(part, state);
         }
 

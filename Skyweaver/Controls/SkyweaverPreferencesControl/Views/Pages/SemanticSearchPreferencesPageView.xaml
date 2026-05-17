@@ -56,6 +56,10 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="8"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="16"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="8"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="170"/>
@@ -75,7 +79,7 @@
                 <TextBlock Grid.Row="2"
                            Grid.Column="1"
                            Grid.ColumnSpan="2"
-                           Text="启用后，InitializeAerialCityRAG、SemanticSearch 与 KeywordSearch 会进入 Agent 可调用工具目录。"
+                           Text="启用后，InitializeAerialCityRAG、UpdateAerialCityDB、SemanticSearch 与 KeywordSearch 会进入 Agent 可调用工具目录；文件编辑工具写入后会自动同步已初始化的 AerialCity DB。"
                            Style="{StaticResource PreferenceMetaStyle}"/>
 
                 <TextBlock Grid.Row="4"
@@ -97,6 +101,31 @@
                            Grid.Column="1"
                            Grid.ColumnSpan="2"
                            Text="{Binding SelectedEmbeddingModelSummary}"
+                           Style="{StaticResource PreferenceMetaStyle}"/>
+
+                <TextBlock Grid.Row="8"
+                           Grid.Column="0"
+                           Text="嵌入并发量"
+                           Style="{StaticResource PreferenceLabelStyle}"/>
+                <Slider Grid.Row="8"
+                        Grid.Column="1"
+                        Margin="0,0,10,0"
+                        Minimum="{Binding MinimumEmbeddingConcurrency}"
+                        Maximum="{Binding MaximumEmbeddingConcurrency}"
+                        Value="{Binding EmbeddingConcurrency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        TickFrequency="1"
+                        IsSnapToTickEnabled="True"
+                        SmallChange="1"
+                        LargeChange="10"/>
+                <TextBlock Grid.Row="8"
+                           Grid.Column="2"
+                           MinWidth="96"
+                           Text="{Binding EmbeddingConcurrency}"
+                           Style="{StaticResource PreferenceValueStyle}"/>
+                <TextBlock Grid.Row="10"
+                           Grid.Column="1"
+                           Grid.ColumnSpan="2"
+                           Text="{Binding EmbeddingConcurrencySummary}"
                            Style="{StaticResource PreferenceMetaStyle}"/>
             </Grid>
 

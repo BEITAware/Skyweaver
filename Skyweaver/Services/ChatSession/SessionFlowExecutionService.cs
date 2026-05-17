@@ -878,6 +878,17 @@ namespace Skyweaver.Services.ChatSession
                     toolInvocation: update.ToolInvocation,
                     toolOutputXml: update.ToolOutputXml,
                     toolReturns: update.ToolReturns),
+                AgentLoopRuntimeEventKind.ToolProgressUpdated => CreateRuntimeEvent(
+                    request,
+                    ChatSessionRuntimeEventKind.ToolProgressUpdated,
+                    compiledNode,
+                    iterationNumber: update.IterationNumber,
+                    modelId: update.ModelId,
+                    partIndex: update.PartIndex,
+                    toolCallIndex: update.ToolCallIndex,
+                    toolCallId: toolCallId,
+                    toolInvocation: update.ToolInvocation,
+                    toolProgress: update.ToolProgress),
                 AgentLoopRuntimeEventKind.ContextCompressionApplied => CreateRuntimeEvent(
                     request,
                     ChatSessionRuntimeEventKind.ContextCompressionApplied,
@@ -962,6 +973,7 @@ namespace Skyweaver.Services.ChatSession
             string? toolXml = null,
             string? toolOutputXml = null,
             IReadOnlyList<SkyweaverToolReturnPayload>? toolReturns = null,
+            SkyweaverToolProgressUpdate? toolProgress = null,
             AgentLoopContextCompressionInfo? contextCompression = null,
             AgentLoopTokenUsageInfo? tokenUsage = null,
             bool isPayloadFromPassdown = false)
@@ -995,6 +1007,7 @@ namespace Skyweaver.Services.ChatSession
                 ToolXml = toolXml,
                 ToolOutputXml = toolOutputXml,
                 ToolReturns = toolReturns ?? Array.Empty<SkyweaverToolReturnPayload>(),
+                ToolProgress = toolProgress?.Normalize(),
                 ContextCompression = contextCompression,
                 TokenUsage = tokenUsage
             };

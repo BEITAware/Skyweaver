@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text.Json;
 using Skyweaver.Controls.ChatSessionControl.Models;
 using Skyweaver.Models.ChatSession;
 using Skyweaver.Services.PresentationUI;
@@ -214,6 +216,7 @@ namespace Skyweaver.Services.ChatSession
                 isCollapsible,
                 ResolveInitialExpandedState(partType, isCollapsible));
             part.PresentationKind = ResolvePresentationKind(entry, block);
+            part.ToolProgress = ResolveToolProgress(entry, block);
             return part;
         }
 
@@ -478,6 +481,36 @@ namespace Skyweaver.Services.ChatSession
                    TryGetMetadataValue(entry.Metadata, SkyweaverToolResultPresentationMetadataKeys.PresentationKind);
         }
 
+        private static SkyweaverToolProgressUpdate? ResolveToolProgress(
+            ChatSessionTranscriptEntry entry,
+            ChatSessionTranscriptBlock block)
+        {
+            var phase = TryGetProgressMetadataValue(entry, block, SkyweaverToolProgressMetadataKeys.Phase);
+            var statusText = TryGetProgressMetadataValue(entry, block, SkyweaverToolProgressMetadataKeys.StatusText);
+            var activeItemsJson = TryGetProgressMetadataValue(entry, block, SkyweaverToolProgressMetadataKeys.ActiveItems);
+            var activeItems = ParseActiveItems(activeItemsJson);
+            if (string.IsNullOrWhiteSpace(phase) &&
+                string.IsNullOrWhiteSpace(statusText) &&
+                activeItems.Count == 0 &&
+                !TryGetProgressMetadataValue(entry, block, SkyweaverToolProgressMetadataKeys.ProgressFraction, out _) &&
+                !TryGetProgressMetadataValue(entry, block, SkyweaverToolProgressMetadataKeys.CompletedItems, out _) &&
+                !TryGetProgressMetadataValue(entry, block, SkyweaverToolProgressMetadataKeys.TotalItems, out _))
+            {
+                return null;
+            }
+
+            return new SkyweaverToolProgressUpdate
+            {
+                Phase = phase ?? string.Empty,
+                StatusText = statusText ?? string.Empty,
+                CompletedItems = TryParseInt(TryGetProgressMetadataValue(entry, block, SkyweaverToolProgressMetadataKeys.CompletedItems)),
+                TotalItems = TryParseInt(TryGetProgressMetadataValue(entry, block, SkyweaverToolProgressMetadataKeys.TotalItems)),
+                ProgressFraction = TryParseDouble(TryGetProgressMetadataValue(entry, block, SkyweaverToolProgressMetadataKeys.ProgressFraction)),
+                IsCompleted = TryParseBoolean(TryGetProgressMetadataValue(entry, block, SkyweaverToolProgressMetadataKeys.IsCompleted)),
+                ActiveItems = activeItems
+            }.Normalize();
+        }
+
         private static string? TryGetMetadataValue(
             IReadOnlyDictionary<string, string> metadata,
             string key)
@@ -486,6 +519,63 @@ namespace Skyweaver.Services.ChatSession
                    !string.IsNullOrWhiteSpace(rawValue)
                 ? rawValue.Trim()
                 : null;
+        }
+
+        private static string? TryGetProgressMetadataValue(
+            ChatSessionTranscriptEntry entry,
+            ChatSessionTranscriptBlock block,
+            string key)
+        {
+            return TryGetMetadataValue(block.Metadata, key) ??
+                   TryGetMetadataValue(entry.Metadata, key);
+        }
+
+        private static bool TryGetProgressMetadataValue(
+            ChatSessionTranscriptEntry entry,
+            ChatSessionTranscriptBlock block,
+            string key,
+            out string? value)
+        {
+            value = TryGetProgressMetadataValue(entry, block, key);
+            return value != null;
+        }
+
+        private static int? TryParseInt(string? value)
+        {
+            return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)
+                ? parsed
+                : null;
+        }
+
+        private static double? TryParseDouble(string? value)
+        {
+            return double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed)
+                ? parsed
+                : null;
+        }
+
+        private static bool TryParseBoolean(string? value)
+        {
+            return bool.TryParse(value, out var parsed) && parsed;
+        }
+
+        private static IReadOnlyList<string> ParseActiveItems(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return Array.Empty<string>();
+            }
+
+            try
+            {
+                return JsonSerializer.Deserialize<string[]>(value) ?? Array.Empty<string>();
+            }
+            catch (JsonException)
+            {
+                return value
+                    .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .ToArray();
+            }
         }
 
         private static ProjectionState BuildProjectionState(ChatSessionTranscript transcript)

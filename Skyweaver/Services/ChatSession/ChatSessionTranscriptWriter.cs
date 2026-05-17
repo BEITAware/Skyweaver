@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text.Json;
 using System.Xml.Linq;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
 using Skyweaver.Controls.WorkflowEditorControl.Models;
@@ -126,6 +128,10 @@ namespace Skyweaver.Services.ChatSession
 
                     case ChatSessionRuntimeEventKind.ToolOutputReceived:
                         AppendToolOutput(session, runtimeEvent);
+                        break;
+
+                    case ChatSessionRuntimeEventKind.ToolProgressUpdated:
+                        UpsertToolProgress(session, runtimeEvent);
                         break;
 
                     case ChatSessionRuntimeEventKind.ContextCompressionApplied:
@@ -384,6 +390,40 @@ namespace Skyweaver.Services.ChatSession
             entry.Blocks.Add(block);
 
             transcript.Entries.Add(entry);
+            Touch(transcript, entry);
+        }
+
+        private void UpsertToolProgress(ChatSessionModel session, ChatSessionRuntimeEvent runtimeEvent)
+        {
+            var progress = runtimeEvent.ToolProgress?.Normalize();
+            if (progress == null)
+            {
+                return;
+            }
+
+            var transcript = session.Transcript;
+            var turn = GetOrCreateActiveTurn(session);
+            var toolCallId = NormalizeToolCallId(runtimeEvent);
+            var entry = transcript.Entries.LastOrDefault(candidate =>
+                string.Equals(candidate.TurnId, turn.TurnId, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(candidate.ToolCallId, toolCallId, StringComparison.OrdinalIgnoreCase) &&
+                candidate.Kind is ChatSessionTranscriptEntryKind.ToolCall or ChatSessionTranscriptEntryKind.MalformedToolCall);
+
+            if (entry == null)
+            {
+                return;
+            }
+
+            entry.ToolName = ResolveToolName(runtimeEvent) ?? entry.ToolName;
+
+            var block = entry.Blocks.FirstOrDefault(block => block.Kind == ChatSessionTranscriptBlockKind.ToolInvocationXml)
+                ?? entry.Blocks.FirstOrDefault();
+            if (block == null)
+            {
+                return;
+            }
+
+            ApplyToolProgressMetadata(block, progress);
             Touch(transcript, entry);
         }
 
@@ -911,6 +951,48 @@ namespace Skyweaver.Services.ChatSession
                 block.Metadata[SkyweaverToolResultPresentationMetadataKeys.PresentationKind] =
                     presentationHints.PresentationKind;
             }
+        }
+
+        private static void ApplyToolProgressMetadata(
+            ChatSessionTranscriptBlock block,
+            SkyweaverToolProgressUpdate progress)
+        {
+            SetMetadata(block.Metadata, SkyweaverToolProgressMetadataKeys.Phase, progress.Phase);
+            SetMetadata(block.Metadata, SkyweaverToolProgressMetadataKeys.StatusText, progress.StatusText);
+            SetMetadata(
+                block.Metadata,
+                SkyweaverToolProgressMetadataKeys.CompletedItems,
+                progress.CompletedItems?.ToString(CultureInfo.InvariantCulture));
+            SetMetadata(
+                block.Metadata,
+                SkyweaverToolProgressMetadataKeys.TotalItems,
+                progress.TotalItems?.ToString(CultureInfo.InvariantCulture));
+            SetMetadata(
+                block.Metadata,
+                SkyweaverToolProgressMetadataKeys.ProgressFraction,
+                progress.ProgressFraction?.ToString("R", CultureInfo.InvariantCulture));
+            SetMetadata(
+                block.Metadata,
+                SkyweaverToolProgressMetadataKeys.IsCompleted,
+                progress.IsCompleted ? "true" : "false");
+            SetMetadata(
+                block.Metadata,
+                SkyweaverToolProgressMetadataKeys.ActiveItems,
+                JsonSerializer.Serialize(progress.ActiveItems));
+        }
+
+        private static void SetMetadata(
+            IDictionary<string, string> metadata,
+            string key,
+            string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                metadata.Remove(key);
+                return;
+            }
+
+            metadata[key] = value.Trim();
         }
 
         private static string NormalizeToolCallId(ChatSessionRuntimeEvent runtimeEvent)

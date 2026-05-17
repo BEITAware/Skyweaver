@@ -63,7 +63,7 @@ namespace Skyweaver.Tools
                 ]);
         }
 
-        public Task<SkyweaverToolResult> ExecuteAsync(
+        public async Task<SkyweaverToolResult> ExecuteAsync(
             SkyweaverToolContext context,
             SkyweaverToolArguments arguments,
             CancellationToken cancellationToken = default)
@@ -80,6 +80,14 @@ namespace Skyweaver.Tools
 
                 File.WriteAllText(resolvedFileSet.XamlFilePath, xamlContent, s_utf8WithoutBom);
                 File.WriteAllText(resolvedFileSet.CodeBehindFilePath, codeBehindContent, s_utf8WithoutBom);
+                var xamlRagSync = await AerialCityRagToolSync.RefreshFileAsync(
+                    resolvedFileSet.XamlFilePath,
+                    context.WorkspacePath,
+                    cancellationToken).ConfigureAwait(false);
+                var codeBehindRagSync = await AerialCityRagToolSync.RefreshFileAsync(
+                    resolvedFileSet.CodeBehindFilePath,
+                    context.WorkspacePath,
+                    cancellationToken).ConfigureAwait(false);
 
                 var validationResult = LiveXamlRuntime.Validate(
                     resolvedFileSet.XamlFilePath,
@@ -91,21 +99,24 @@ namespace Skyweaver.Tools
                     ["rootDirectoryPath"] = resolvedFileSet.RootDirectoryPath,
                     ["rootClassName"] = validationResult.RootClassName,
                     ["rootElementTypeName"] = validationResult.RootElementTypeName,
-                    ["isValid"] = validationResult.IsSuccess
+                    ["isValid"] = validationResult.IsSuccess,
+                    ["xamlAerialCityRagSyncSucceeded"] = xamlRagSync.Succeeded,
+                    ["xamlAerialCityRagSyncMessage"] = xamlRagSync.Message,
+                    ["codeBehindAerialCityRagSyncSucceeded"] = codeBehindRagSync.Succeeded,
+                    ["codeBehindAerialCityRagSyncMessage"] = codeBehindRagSync.Message
                 };
 
                 var content = BuildInitializeResultContent(
                     resolvedFileSet,
                     validationResult,
                     LiveXamlFileSupport.BuildSuggestedRootClassName(arguments.GetString("XAMLFileName") ?? string.Empty));
-                return Task.FromResult(validationResult.IsSuccess
+                return validationResult.IsSuccess
                     ? SkyweaverToolResult.Success(content, toolData)
-                    : SkyweaverToolResult.Failure(content, toolData));
+                    : SkyweaverToolResult.Failure(content, toolData);
             }
             catch (Exception ex)
             {
-                return Task.FromResult(SkyweaverToolResult.Failure(
-                    $"InitializeLiveXAML failed: {ex.Message}"));
+                return SkyweaverToolResult.Failure($"InitializeLiveXAML failed: {ex.Message}");
             }
         }
 

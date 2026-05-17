@@ -126,7 +126,36 @@ namespace Skyweaver.Services.AerialCityRag
                 EmbeddingDimensions = ParseInt((string?)element.Attribute("EmbeddingDimensions")),
                 SupportsMultimodalEmbedding = ParseBool((string?)element.Attribute("SupportsMultimodalEmbedding")),
                 InitializedAtUtc = ParseDate((string?)element.Attribute("InitializedAtUtc")),
-                UpdatedAtUtc = ParseDate((string?)element.Attribute("UpdatedAtUtc"))
+                UpdatedAtUtc = ParseDate((string?)element.Attribute("UpdatedAtUtc")),
+                FileSnapshots = element.Element("Files")?.Elements("File")
+                    .Select(ParseFileSnapshot)
+                    .Where(snapshot => snapshot != null)
+                    .Cast<AerialCityRagFileSnapshot>()
+                    .ToArray() ?? []
+            };
+        }
+
+        private static AerialCityRagFileSnapshot? ParseFileSnapshot(XElement element)
+        {
+            var relativePath = ((string?)element.Attribute("RelativePath") ?? string.Empty).Trim();
+            var hash = ((string?)element.Attribute("Hash") ?? string.Empty).Trim();
+
+            if (relativePath.Length == 0 || hash.Length == 0)
+            {
+                return null;
+            }
+
+            return new AerialCityRagFileSnapshot
+            {
+                RelativePath = relativePath.Replace('\\', '/'),
+                Hash = hash,
+                HashAlgorithm = ((string?)element.Attribute("HashAlgorithm") ?? string.Empty).Trim(),
+                Length = ParseLong((string?)element.Attribute("Length")),
+                LastWriteTimeUtc = ParseDate((string?)element.Attribute("LastWriteTimeUtc")),
+                UpdatedAtUtc = ParseDate((string?)element.Attribute("UpdatedAtUtc")),
+                Embedded = ParseBool((string?)element.Attribute("Embedded")),
+                SegmentCount = ParseInt((string?)element.Attribute("SegmentCount")),
+                SourceType = ((string?)element.Attribute("SourceType") ?? string.Empty).Trim()
             };
         }
 
@@ -137,7 +166,7 @@ namespace Skyweaver.Services.AerialCityRag
 
             var document = new XDocument(
                 new XElement("AerialCity",
-                    new XAttribute("SchemaVersion", 1),
+                    new XAttribute("SchemaVersion", 2),
                     new XElement("Folders",
                         mappings.Select(CreateMappingElement))));
 
@@ -164,12 +193,35 @@ namespace Skyweaver.Services.AerialCityRag
                 new XAttribute("EmbeddingDimensions", mapping.EmbeddingDimensions),
                 new XAttribute("SupportsMultimodalEmbedding", mapping.SupportsMultimodalEmbedding),
                 new XAttribute("InitializedAtUtc", initializedAtUtc.ToString("O")),
-                new XAttribute("UpdatedAtUtc", updatedAtUtc.ToString("O")));
+                new XAttribute("UpdatedAtUtc", updatedAtUtc.ToString("O")),
+                new XElement("Files",
+                    mapping.FileSnapshots
+                        .OrderBy(snapshot => snapshot.RelativePath, StringComparer.OrdinalIgnoreCase)
+                        .Select(CreateFileSnapshotElement)));
+        }
+
+        private static XElement CreateFileSnapshotElement(AerialCityRagFileSnapshot snapshot)
+        {
+            return new XElement("File",
+                new XAttribute("RelativePath", snapshot.RelativePath),
+                new XAttribute("Hash", snapshot.Hash),
+                new XAttribute("HashAlgorithm", snapshot.HashAlgorithm),
+                new XAttribute("Length", snapshot.Length),
+                new XAttribute("LastWriteTimeUtc", snapshot.LastWriteTimeUtc.ToString("O")),
+                new XAttribute("UpdatedAtUtc", snapshot.UpdatedAtUtc.ToString("O")),
+                new XAttribute("Embedded", snapshot.Embedded),
+                new XAttribute("SegmentCount", snapshot.SegmentCount),
+                new XAttribute("SourceType", snapshot.SourceType));
         }
 
         private static int ParseInt(string? value)
         {
             return int.TryParse(value, out var parsed) ? parsed : 0;
+        }
+
+        private static long ParseLong(string? value)
+        {
+            return long.TryParse(value, out var parsed) ? parsed : 0L;
         }
 
         private static bool ParseBool(string? value)
@@ -206,5 +258,28 @@ namespace Skyweaver.Services.AerialCityRag
         public DateTimeOffset InitializedAtUtc { get; init; }
 
         public DateTimeOffset UpdatedAtUtc { get; init; }
+
+        public IReadOnlyList<AerialCityRagFileSnapshot> FileSnapshots { get; init; } = [];
+    }
+
+    public sealed class AerialCityRagFileSnapshot
+    {
+        public required string RelativePath { get; init; }
+
+        public required string Hash { get; init; }
+
+        public string HashAlgorithm { get; init; } = string.Empty;
+
+        public long Length { get; init; }
+
+        public DateTimeOffset LastWriteTimeUtc { get; init; }
+
+        public DateTimeOffset UpdatedAtUtc { get; init; }
+
+        public bool Embedded { get; init; }
+
+        public int SegmentCount { get; init; }
+
+        public string SourceType { get; init; } = string.Empty;
     }
 }

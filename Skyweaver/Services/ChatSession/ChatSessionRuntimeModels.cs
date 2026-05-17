@@ -27,7 +27,8 @@ namespace Skyweaver.Services.ChatSession
         ExecutionCompleted = 14,
         ExecutionFailed = 15,
         ExecutionCancelled = 16,
-        ReasoningDelta = 17
+        ReasoningDelta = 17,
+        ToolProgressUpdated = 18
     }
 
     public sealed class ChatSessionRuntimeRequest
@@ -114,6 +115,8 @@ namespace Skyweaver.Services.ChatSession
         public string? ToolOutputXml { get; init; }
 
         public IReadOnlyList<SkyweaverToolReturnPayload> ToolReturns { get; init; } = Array.Empty<SkyweaverToolReturnPayload>();
+
+        public SkyweaverToolProgressUpdate? ToolProgress { get; init; }
 
         public AgentLoopContextCompressionInfo? ContextCompression { get; init; }
 

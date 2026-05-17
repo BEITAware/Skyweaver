@@ -72,6 +72,29 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
 
         public string SelectedEmbeddingModelSummary => SelectedEmbeddingModel?.Summary ?? "未选择嵌入模型";
 
+        public int MinimumEmbeddingConcurrency => AerialCityRagConfiguration.MinimumEmbeddingConcurrency;
+
+        public int MaximumEmbeddingConcurrency => AerialCityRagConfiguration.MaximumEmbeddingConcurrency;
+
+        public int EmbeddingConcurrency
+        {
+            get => _configuration.EmbeddingConcurrency;
+            set
+            {
+                if (_configuration.EmbeddingConcurrency == value)
+                {
+                    return;
+                }
+
+                _configuration.EmbeddingConcurrency = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(EmbeddingConcurrencySummary));
+                PersistConfiguration($"嵌入并发量已设为 {_configuration.EmbeddingConcurrency}。");
+            }
+        }
+
+        public string EmbeddingConcurrencySummary => $"{EmbeddingConcurrency} 个并发请求";
+
         public string AerialCityDirectoryPath => SkyweaverDirectoryRuntime.Instance.AerialCityDirectoryPath;
 
         public string ConfigurationFilePath => _configurationRepository.ConfigurationFilePath;
@@ -137,6 +160,8 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
                 _configurationRepository.Save(_configuration);
                 _configuration = _configurationRepository.Load();
                 OnPropertyChanged(nameof(IsAerialCityRagEnabled));
+                OnPropertyChanged(nameof(EmbeddingConcurrency));
+                OnPropertyChanged(nameof(EmbeddingConcurrencySummary));
                 OnPropertyChanged(nameof(AerialCityDirectoryPath));
                 OnPropertyChanged(nameof(ConfigurationFilePath));
                 StatusMessage = successMessage;

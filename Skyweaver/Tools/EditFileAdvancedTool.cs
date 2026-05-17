@@ -142,20 +142,26 @@ namespace Skyweaver.Tools
 
                 var updatedBytes = EncodeContent(currentContent, encodingDecision);
                 await File.WriteAllBytesAsync(targetPath.ResolvedPath, updatedBytes, cancellationToken).ConfigureAwait(false);
+                var ragSync = await AerialCityRagToolSync.RefreshFileAsync(
+                    targetPath.ResolvedPath,
+                    context.WorkspacePath,
+                    cancellationToken).ConfigureAwait(false);
 
                 return SkyweaverToolResult.Success(
                     SkyweaverLineDiffPresentation.BuildContent(originalContent, currentContent),
-                    BuildData(
-                        targetPath,
-                        settings,
-                        encodingDecision,
-                        originalBytes.LongLength,
-                        originalContent.Length,
-                        updatedBytes.LongLength,
-                        currentContent.Length,
-                        blockResults.Count,
-                        didWrite: true,
-                        blockSummaries: blockResults.Select(item => item.Summary).ToArray()),
+                    AerialCityRagToolSync.WithSyncData(
+                        BuildData(
+                            targetPath,
+                            settings,
+                            encodingDecision,
+                            originalBytes.LongLength,
+                            originalContent.Length,
+                            updatedBytes.LongLength,
+                            currentContent.Length,
+                            blockResults.Count,
+                            didWrite: true,
+                            blockSummaries: blockResults.Select(item => item.Summary).ToArray()),
+                        ragSync),
                     SkyweaverToolResultPresentationHints.CreateLineDiff());
             }
             catch (OperationCanceledException)

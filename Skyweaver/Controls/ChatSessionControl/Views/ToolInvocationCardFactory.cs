@@ -99,6 +99,35 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             };
         }
 
+        public static FrameworkElement CreateAerialCity(
+            SkyweaverToolInvocationPresentationContext context,
+            IEnumerable<ToolInvocationCardFieldDefinition>? fields = null)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            context.State.EnsureParameterDefinitions(context.EffectiveDefinition.Parameters);
+
+            var fieldViewModels = (fields ?? Array.Empty<ToolInvocationCardFieldDefinition>())
+                .Where(field => !string.IsNullOrWhiteSpace(field.ParameterName))
+                .Select(field =>
+                {
+                    var definition = context.EffectiveDefinition.Parameters.FirstOrDefault(parameter =>
+                        string.Equals(parameter.Name, field.ParameterName, StringComparison.OrdinalIgnoreCase));
+                    var parameterState = context.State.GetOrCreateParameterState(field.ParameterName, definition);
+                    return new ToolInvocationCardFieldViewModel(field.Label, parameterState, field.EmptyValueText);
+                })
+                .ToArray();
+
+            return new AerialCityToolInvocationCardView
+            {
+                DataContext = new ToolInvocationCardViewModel(
+                    context.State,
+                    context.EffectiveDefinition.Description,
+                    context.IconPath,
+                    fieldViewModels)
+            };
+        }
+
         public static FrameworkElement CreateDefault(
             SkyweaverToolInvocationPresentationState state,
             string? description,

@@ -29,6 +29,45 @@ namespace Skyweaver.Services.SkyweaverTools
 
         public bool IsSubAgent { get; init; }
 
+        public Func<SkyweaverToolProgressUpdate, CancellationToken, ValueTask>? ToolProgressReporter { get; init; }
+
+        public bool SupportsToolProgress => ToolProgressReporter != null;
+
+        public ValueTask ReportProgressAsync(
+            SkyweaverToolProgressUpdate progress,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(progress);
+
+            return ToolProgressReporter == null
+                ? ValueTask.CompletedTask
+                : ToolProgressReporter(progress.Normalize(), cancellationToken);
+        }
+
+        public SkyweaverToolContext WithToolProgressReporter(
+            Func<SkyweaverToolProgressUpdate, CancellationToken, ValueTask>? toolProgressReporter)
+        {
+            return new SkyweaverToolContext
+            {
+                ApplicationName = ApplicationName,
+                SessionTitle = SessionTitle,
+                WorkspacePath = WorkspacePath,
+                Timestamp = Timestamp,
+                Properties = CloneProperties(Properties),
+                CurrentToolName = CurrentToolName,
+                CurrentToolConfiguration = CurrentToolConfiguration == null
+                    ? null
+                    : new SkyweaverToolConfigurationState(
+                        CurrentToolConfiguration.ToolName,
+                        CurrentToolConfiguration.GetPayload()),
+                CurrentAgent = CurrentAgent,
+                SupportsHostToolConfirmation = SupportsHostToolConfirmation,
+                AvailableToolKits = CloneToolKits(AvailableToolKits),
+                IsSubAgent = IsSubAgent,
+                ToolProgressReporter = toolProgressReporter
+            };
+        }
+
         public SkyweaverToolContext WithRuntimeAgent(
             AgentDefinition? agent,
             bool supportsHostToolConfirmation)
@@ -49,7 +88,8 @@ namespace Skyweaver.Services.SkyweaverTools
                 CurrentAgent = agent,
                 SupportsHostToolConfirmation = supportsHostToolConfirmation,
                 AvailableToolKits = CloneToolKits(AvailableToolKits),
-                IsSubAgent = IsSubAgent
+                IsSubAgent = IsSubAgent,
+                ToolProgressReporter = ToolProgressReporter
             };
         }
 
@@ -71,7 +111,8 @@ namespace Skyweaver.Services.SkyweaverTools
                 CurrentAgent = CurrentAgent,
                 SupportsHostToolConfirmation = SupportsHostToolConfirmation,
                 AvailableToolKits = CloneToolKits(AvailableToolKits),
-                IsSubAgent = isSubAgent
+                IsSubAgent = isSubAgent,
+                ToolProgressReporter = ToolProgressReporter
             };
         }
 
@@ -93,7 +134,8 @@ namespace Skyweaver.Services.SkyweaverTools
                 CurrentAgent = CurrentAgent,
                 SupportsHostToolConfirmation = SupportsHostToolConfirmation,
                 AvailableToolKits = CloneToolKits(availableToolKits),
-                IsSubAgent = IsSubAgent
+                IsSubAgent = IsSubAgent,
+                ToolProgressReporter = ToolProgressReporter
             };
         }
 
@@ -117,7 +159,8 @@ namespace Skyweaver.Services.SkyweaverTools
                 CurrentAgent = CurrentAgent,
                 SupportsHostToolConfirmation = SupportsHostToolConfirmation,
                 AvailableToolKits = CloneToolKits(AvailableToolKits),
-                IsSubAgent = IsSubAgent
+                IsSubAgent = IsSubAgent,
+                ToolProgressReporter = ToolProgressReporter
             };
         }
 

@@ -316,6 +316,112 @@
                         <Style TargetType="Border">
                             <Setter Property="Visibility" Value="Collapsed"/>
                             <Style.Triggers>
+                                <DataTrigger Binding="{Binding State.HasToolProgress}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="{Binding State.ToolProgressPhase}"
+                                           FontFamily="{DynamicResource AeroFontFamily}"
+                                           FontSize="{DynamicResource AeroSmallFontSize}"
+                                           FontWeight="SemiBold"
+                                           Foreground="#FFD6E8FF">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding State.ToolProgressPhase}" Value="">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock Margin="0,2,0,0"
+                                           Text="{Binding State.ToolProgressStatusText}"
+                                           FontFamily="{DynamicResource AeroFontFamily}"
+                                           FontSize="{DynamicResource AeroFontSize}"
+                                           Foreground="#FFEAFDFF"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+
+                            <TextBlock Grid.Column="1"
+                                       Margin="12,0,0,0"
+                                       Text="{Binding State.ToolProgressCountText}"
+                                       FontFamily="Consolas, Microsoft YaHei UI"
+                                       FontSize="12"
+                                       Foreground="#FFE2FFF8"
+                                       VerticalAlignment="Top">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding State.HasToolProgressCount}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+
+                        <ProgressBar Margin="0,8,0,0"
+                                     Height="6"
+                                     Minimum="0"
+                                     Maximum="100"
+                                     Value="{Binding State.ToolProgressValue, Mode=OneWay}"
+                                     IsIndeterminate="{Binding State.IsToolProgressIndeterminate, Mode=OneWay}"/>
+
+                        <ScrollViewer Margin="0,8,0,0"
+                                      MaxHeight="96"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled">
+                            <ScrollViewer.Style>
+                                <Style TargetType="ScrollViewer">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding State.HasToolProgressActiveItems}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ScrollViewer.Style>
+                            <ItemsControl ItemsSource="{Binding State.ToolProgressActiveItems}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Margin="0,0,0,3"
+                                                   Text="{Binding}"
+                                                   FontFamily="Consolas, Microsoft YaHei UI"
+                                                   FontSize="12"
+                                                   Foreground="#FFF7FBFF"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip="{Binding}"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </StackPanel>
+                </Border>
+
+                <Border Margin="0,8,0,0"
+                        Padding="10,8"
+                        Background="#1A08131A"
+                        BorderBrush="#4438C4D8"
+                        BorderThickness="1"
+                        CornerRadius="4">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
                                 <DataTrigger Binding="{Binding State.HasToolResult}" Value="True">
                                     <Setter Property="Visibility" Value="Visible"/>
                                 </DataTrigger>
