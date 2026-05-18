@@ -13,6 +13,7 @@ using Skyweaver.Controls.AgentConfigurationControl.Services;
 using Skyweaver.Controls.WorkflowEditorControl.Models;
 using Skyweaver.Controls.WorkflowEditorControl.Services;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
 {
@@ -69,10 +70,11 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
         private SessionFlowPortModel? _pendingSourcePort;
         private double _spawnX = 420;
         private double _spawnY = 180;
+        private readonly int _instanceNumber;
 
         public WorkflowEditorControlViewModel(int instanceNumber)
         {
-            Title = instanceNumber > 1 ? $"会话流编辑器 {instanceNumber}" : "会话流编辑器";
+            _instanceNumber = instanceNumber;
 
             var pathProvider = new SessionFlowPathProvider();
             _sessionFlowRepository = new SessionFlowRepository(pathProvider);
@@ -88,7 +90,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
             AddNextLogicExecutionNodeCommand = new RelayCommand(AddNextLogicExecutionNode);
             DeleteSelectedNodeCommand = new RelayCommand(DeleteSelectedNode, () => SelectedNode?.CanDelete == true);
             ClearSelectionCommand = new RelayCommand(ClearSelection);
-            SaveCommand = new RelayCommand(() => PersistGraph("会话流已保存。"));
+            SaveCommand = new RelayCommand(() => PersistGraph(L("WorkflowEditor.Status.Saved", "会话流已保存。")));
             OpenConfigurationDirectoryCommand = new RelayCommand(OpenConfigurationDirectory);
             AddExecutionNaturalLanguageInputCommand = new RelayCommand(
                 () => AddExecutionTransparentInput(SessionFlowPortType.NaturalLanguage),
@@ -100,18 +102,21 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
 
             _nodes.CollectionChanged += OnNodesCollectionChanged;
             _connections.CollectionChanged += (_, _) => CommandManager.InvalidateRequerySuggested();
+            LocalizationRuntime.Instance.LanguageChanged += (_, _) => RefreshLocalizedText();
 
             LoadAgents();
             InitializeGraphLibrary();
         }
 
-        public string Title { get; }
+        public string Title => _instanceNumber > 1
+            ? LF("WorkflowEditor.Title.NumberedFormat", "会话流编辑器 {0}", _instanceNumber)
+            : L("WorkflowEditor.Title", "会话流编辑器");
 
-        public string Description { get; } = "编辑代理会话流图结构，管理节点连接与执行路径。";
+        public string Description => L("WorkflowEditor.Description", "编辑代理会话流图结构，管理节点连接与执行路径。");
 
-        public string Hint { get; } = "开始节点固定为“用户输入”，终止节点固定为“返回”。";
+        public string Hint => L("WorkflowEditor.Hint", "开始节点固定为“用户输入”，终止节点固定为“返回”。");
 
-        public string PersistenceFilePath => _currentNodeGraph?.FilePath ?? "未打开节点图";
+        public string PersistenceFilePath => _currentNodeGraph?.FilePath ?? L("WorkflowEditor.Graph.NotOpen", "未打开节点图");
 
         public string ConfigurationDirectoryPath => _sessionFlowRepository.ConfigurationDirectoryPath;
 
@@ -124,8 +129,8 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
         public bool HasAvailableAgents => _agentOptionMap.Count > 0;
 
         public string AvailableAgentSummaryText => HasAvailableAgents
-            ? $"已接入 {_agentOptionMap.Count} 个代理配置。代理节点的输入/输出类型会自动跟随“代理配置”页面。"
-            : "当前没有可用代理配置。请先在“代理配置”页面创建代理。";
+            ? LF("WorkflowEditor.AgentSummary.Format", "已接入 {0} 个代理配置。代理节点的输入/输出类型会自动跟随“代理配置”页面。", _agentOptionMap.Count)
+            : L("WorkflowEditor.AgentSummary.Empty", "当前没有可用代理配置。请先在“代理配置”页面创建代理。");
 
         public SessionFlowNodeModel? SelectedNode
         {
@@ -152,7 +157,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
 
         public string InspectorTitle => SelectedNode == null
             ? string.Empty
-            : $"{SelectedNode.Title} 设置";
+            : LF("WorkflowEditor.InspectorTitleFormat", "{0} 设置", SelectedNode.Title);
 
         public bool IsSelectedNodeAgent => SelectedNode?.IsAgentNode == true;
 
@@ -161,10 +166,10 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
         public string SelectedNodeKindHint => SelectedNode switch
         {
             null => string.Empty,
-            { IsAgentNode: true } => "代理节点可配置“是否为隐代理”。",
-            { IsLogicExecutionNode: true } => "可新增透传输入端口，每个输入自动生成对应输出。",
-            { IsNextLogicExecutionNode: true } => "智能输入端口会在连接后自动定型，并新增下一个智能输入。",
-            _ => "该节点暂未提供额外配置。"
+            { IsAgentNode: true } => L("WorkflowEditor.SelectedNodeHint.Agent", "代理节点可配置“是否为隐代理”。"),
+            { IsLogicExecutionNode: true } => L("WorkflowEditor.SelectedNodeHint.LogicExecution", "可新增透传输入端口，每个输入自动生成对应输出。"),
+            { IsNextLogicExecutionNode: true } => L("WorkflowEditor.SelectedNodeHint.NextLogicExecution", "智能输入端口会在连接后自动定型，并新增下一个智能输入。"),
+            _ => L("WorkflowEditor.SelectedNodeHint.Default", "该节点暂未提供额外配置。")
         };
 
         public Thickness InspectorMargin
@@ -193,10 +198,10 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
             {
                 if (_pendingSourceNode == null || _pendingSourcePort == null)
                 {
-                    return "未选择连接起点";
+                    return L("WorkflowEditor.PendingConnection.None", "未选择连接起点");
                 }
 
-                return $"起点：{_pendingSourceNode.Title} / {_pendingSourcePort.Name}";
+                return LF("WorkflowEditor.PendingConnection.Format", "起点：{0} / {1}", _pendingSourceNode.Title, _pendingSourcePort.Name);
             }
         }
 
@@ -267,7 +272,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
                 return;
             }
 
-            PersistGraph("会话流布局已保存。");
+            PersistGraph(L("WorkflowEditor.Status.LayoutSaved", "会话流布局已保存。"));
         }
 
         public void HandlePortClick(SessionFlowNodeModel node, SessionFlowPortModel port)
@@ -283,7 +288,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
             {
                 _pendingSourceNode = node;
                 _pendingSourcePort = port;
-                StatusMessage = $"已选择输出端口：{node.Title} / {port.Name}。请点击目标输入端口。";
+                StatusMessage = LF("WorkflowEditor.Status.OutputPortSelectedFormat", "已选择输出端口：{0} / {1}。请点击目标输入端口。", node.Title, port.Name);
                 OnPropertyChanged(nameof(PendingConnectionText));
                 CommandManager.InvalidateRequerySuggested();
                 return;
@@ -291,13 +296,13 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
 
             if (_pendingSourceNode == null || _pendingSourcePort == null)
             {
-                StatusMessage = "请先选择一个输出端口作为连接起点。";
+                StatusMessage = L("WorkflowEditor.Status.SelectOutputPortFirst", "请先选择一个输出端口作为连接起点。");
                 return;
             }
 
             if (TryConnectPorts(_pendingSourceNode, _pendingSourcePort, node, port))
             {
-                PersistGraph("连接已更新。");
+                PersistGraph(L("WorkflowEditor.Status.ConnectionUpdated", "连接已更新。"));
             }
 
             ClearPendingConnection();
@@ -315,8 +320,8 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
             if (!_nodes.Any(node => node.IsAgentNode))
             {
                 StatusMessage = HasAvailableAgents
-                    ? "代理目录已刷新。"
-                    : "当前没有可用代理配置。请先在“代理配置”页面创建代理。";
+                    ? L("WorkflowEditor.Status.AgentCatalogRefreshed", "代理目录已刷新。")
+                    : L("WorkflowEditor.AgentSummary.Empty", "当前没有可用代理配置。请先在“代理配置”页面创建代理。");
                 return;
             }
 
@@ -327,7 +332,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
                 RefreshAllConnectionPaths();
             }
 
-            PersistGraph("代理节点已根据代理配置同步。");
+            PersistGraph(L("WorkflowEditor.Status.AgentNodesSynced", "代理节点已根据代理配置同步。"));
         }
 
         private void LoadAgents()
@@ -342,7 +347,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
             }
             catch (Exception ex)
             {
-                StatusMessage = $"读取代理配置失败：{ex.Message}";
+                StatusMessage = LF("WorkflowEditor.Status.AgentConfigurationLoadFailedFormat", "读取代理配置失败：{0}", ex.Message);
                 definitions = Array.Empty<AgentDefinition>();
             }
 
@@ -377,7 +382,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
             {
                 _availableAgents.Add(new SessionFlowAgentOption
                 {
-                    DisplayName = "暂无可用代理配置",
+                    DisplayName = L("WorkflowEditor.AgentOption.None", "暂无可用代理配置"),
                     CanCreate = false
                 });
             }
@@ -425,7 +430,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
         {
             if (option?.CanCreate != true)
             {
-                StatusMessage = "当前没有可用代理配置。";
+                StatusMessage = L("WorkflowEditor.Status.NoAvailableAgents", "当前没有可用代理配置。");
                 return;
             }
 
@@ -451,7 +456,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
 
             Nodes.Add(node);
             SelectNode(node);
-            PersistGraph($"已新增代理节点：{node.Title}。");
+            PersistGraph(LF("WorkflowEditor.Status.AgentNodeAddedFormat", "已新增代理节点：{0}。", node.Title));
         }
 
         private void AddLogicNode(SessionFlowNodeKind kind)
@@ -463,11 +468,11 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
                 Kind = kind,
                 Title = kind switch
                 {
-                    SessionFlowNodeKind.LogicAnd => "与",
-                    SessionFlowNodeKind.LogicOr => "或",
-                    SessionFlowNodeKind.LogicXor => "异或",
-                    SessionFlowNodeKind.LogicNot => "非",
-                    _ => "逻辑"
+                    SessionFlowNodeKind.LogicAnd => L("WorkflowEditor.Node.LogicAnd", "与"),
+                    SessionFlowNodeKind.LogicOr => L("WorkflowEditor.Node.LogicOr", "或"),
+                    SessionFlowNodeKind.LogicXor => L("WorkflowEditor.Node.LogicXor", "异或"),
+                    SessionFlowNodeKind.LogicNot => L("WorkflowEditor.Node.LogicNot", "非"),
+                    _ => L("WorkflowEditor.Node.Logic", "逻辑")
                 },
                 Width = 220,
                 X = x,
@@ -476,19 +481,19 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
 
             if (kind == SessionFlowNodeKind.LogicNot)
             {
-                node.InputPorts.Add(CreateBooleanXmlInput("in-a", "输入"));
+                node.InputPorts.Add(CreateBooleanXmlInput("in-a", L("WorkflowEditor.Port.Input", "输入")));
             }
             else
             {
-                node.InputPorts.Add(CreateBooleanXmlInput("in-a", "输入A"));
-                node.InputPorts.Add(CreateBooleanXmlInput("in-b", "输入B"));
+                node.InputPorts.Add(CreateBooleanXmlInput("in-a", L("WorkflowEditor.Port.InputA", "输入A")));
+                node.InputPorts.Add(CreateBooleanXmlInput("in-b", L("WorkflowEditor.Port.InputB", "输入B")));
             }
 
-            node.OutputPorts.Add(CreatePort("out-result", "结果", SessionFlowPortDirection.Output, SessionFlowPortType.XmlField, isTransparentOutput: true));
+            node.OutputPorts.Add(CreatePort("out-result", L("WorkflowEditor.Port.Result", "结果"), SessionFlowPortDirection.Output, SessionFlowPortType.XmlField, isTransparentOutput: true));
 
             Nodes.Add(node);
             SelectNode(node);
-            PersistGraph($"已新增逻辑节点：{node.Title}。");
+            PersistGraph(LF("WorkflowEditor.Status.LogicNodeAddedFormat", "已新增逻辑节点：{0}。", node.Title));
         }
 
         private void AddLogicExecutionNode()
@@ -498,17 +503,17 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
             {
                 Id = Guid.NewGuid().ToString("N"),
                 Kind = SessionFlowNodeKind.LogicExecution,
-                Title = "逻辑执行",
+                Title = L("WorkflowEditor.Node.LogicExecution", "逻辑执行"),
                 Width = 260,
                 X = x,
                 Y = y
             };
 
-            node.InputPorts.Add(CreateBooleanXmlInput("condition", "条件(Boolean)"));
+            node.InputPorts.Add(CreateBooleanXmlInput("condition", L("WorkflowEditor.Port.ConditionBoolean", "条件(Boolean)")));
 
             Nodes.Add(node);
             SelectNode(node);
-            PersistGraph("已新增逻辑执行节点。");
+            PersistGraph(L("WorkflowEditor.Status.LogicExecutionNodeAdded", "已新增逻辑执行节点。"));
         }
 
         private void AddNextLogicExecutionNode()
@@ -518,18 +523,18 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
             {
                 Id = Guid.NewGuid().ToString("N"),
                 Kind = SessionFlowNodeKind.NextLogicExecution,
-                Title = "仅下一个逻辑执行",
+                Title = L("WorkflowEditor.Node.NextLogicExecution", "仅下一个逻辑执行"),
                 Width = 280,
                 X = x,
                 Y = y
             };
 
-            node.InputPorts.Add(CreateBooleanXmlInput("condition", "条件(Boolean)"));
+            node.InputPorts.Add(CreateBooleanXmlInput("condition", L("WorkflowEditor.Port.ConditionBoolean", "条件(Boolean)")));
             EnsureSmartFlexibleInput(node);
 
             Nodes.Add(node);
             SelectNode(node);
-            PersistGraph("已新增仅下一个逻辑执行节点。");
+            PersistGraph(L("WorkflowEditor.Status.NextLogicExecutionNodeAdded", "已新增仅下一个逻辑执行节点。"));
         }
 
         private void AddExecutionTransparentInput(SessionFlowPortType portType)
@@ -541,12 +546,14 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
 
             var pairIndex = SelectedNode.InputPorts.Count(port => !port.IsBooleanCondition) + 1;
             var pairKey = $"pair-{Guid.NewGuid():N}";
-            var suffix = portType == SessionFlowPortType.XmlField ? "XML" : "自然语言";
+            var suffix = portType == SessionFlowPortType.XmlField
+                ? L("WorkflowEditor.PortType.Xml", "XML")
+                : L("WorkflowEditor.PortType.NaturalLanguage", "自然语言");
 
             SelectedNode.InputPorts.Add(new SessionFlowPortModel
             {
                 Id = $"input-{Guid.NewGuid():N}",
-                Name = $"{suffix}输入 {pairIndex}",
+                Name = LF("WorkflowEditor.Port.TypedInputFormat", "{0}输入 {1}", suffix, pairIndex),
                 Direction = SessionFlowPortDirection.Input,
                 PortType = portType,
                 PairKey = pairKey
@@ -555,7 +562,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
             SelectedNode.OutputPorts.Add(new SessionFlowPortModel
             {
                 Id = $"output-{Guid.NewGuid():N}",
-                Name = $"{suffix}输出 {pairIndex}",
+                Name = LF("WorkflowEditor.Port.TypedOutputFormat", "{0}输出 {1}", suffix, pairIndex),
                 Direction = SessionFlowPortDirection.Output,
                 PortType = portType,
                 PairKey = pairKey,
@@ -563,7 +570,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
             });
 
             RefreshConnectionPathsForNode(SelectedNode);
-            PersistGraph("逻辑执行节点端口已更新。");
+            PersistGraph(L("WorkflowEditor.Status.LogicExecutionPortsUpdated", "逻辑执行节点端口已更新。"));
         }
 
         private void DeleteSelectedNode()
@@ -585,7 +592,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
 
             _nodes.Remove(nodeToDelete);
             SelectNode(null);
-            PersistGraph("节点已删除。");
+            PersistGraph(L("WorkflowEditor.Status.NodeDeleted", "节点已删除。"));
         }
 
         private void ClearSelection()
@@ -725,7 +732,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
                 return;
             }
 
-            PersistGraph("会话流已保存。");
+            PersistGraph(L("WorkflowEditor.Status.Saved", "会话流已保存。"));
         }
 
         private void OnPortPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -742,7 +749,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
 
             SanitizeConnections();
             RefreshAllConnectionPaths();
-            PersistGraph("端口配置已保存。");
+            PersistGraph(L("WorkflowEditor.Status.PortConfigurationSaved", "端口配置已保存。"));
         }
 
         private void EnsureMandatoryEndpointNodes()
@@ -754,7 +761,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
                 {
                     Id = Guid.NewGuid().ToString("N"),
                     Kind = SessionFlowNodeKind.UserInput,
-                    Title = "用户输入",
+                    Title = L("WorkflowEditor.Node.UserInput", "用户输入"),
                     Width = 220,
                     X = 120,
                     Y = 220,
@@ -764,13 +771,13 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
             }
 
             userInputNode.IsFixed = true;
-            userInputNode.Title = "用户输入";
+            userInputNode.Title = L("WorkflowEditor.Node.UserInput", "用户输入");
             ApplyPortLayout(
                 userInputNode,
                 Array.Empty<PortTemplate>(),
                 new[]
                 {
-                    new PortTemplate("output-user-text", "自然语言输出", SessionFlowPortType.NaturalLanguage)
+                    new PortTemplate("output-user-text", L("WorkflowEditor.Port.NaturalLanguageOutput", "自然语言输出"), SessionFlowPortType.NaturalLanguage)
                 });
 
             var returnNode = _nodes.FirstOrDefault(node => node.Kind == SessionFlowNodeKind.Return);
@@ -780,7 +787,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
                 {
                     Id = Guid.NewGuid().ToString("N"),
                     Kind = SessionFlowNodeKind.Return,
-                    Title = "返回",
+                    Title = L("WorkflowEditor.Node.Return", "返回"),
                     Width = 220,
                     X = userInputNode.X + userInputNode.Width + DefaultEndpointNodeGap,
                     Y = 260,
@@ -790,13 +797,13 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
             }
 
             returnNode.IsFixed = true;
-            returnNode.Title = "返回";
+            returnNode.Title = L("WorkflowEditor.Node.Return", "返回");
             ApplyPortLayout(
                 returnNode,
                 new[]
                 {
-                    new PortTemplate("input-return-text", "自然语言输入", SessionFlowPortType.NaturalLanguage),
-                    new PortTemplate("input-return-xml", "XML字段输入", SessionFlowPortType.XmlField)
+                    new PortTemplate("input-return-text", L("WorkflowEditor.Port.NaturalLanguageInput", "自然语言输入"), SessionFlowPortType.NaturalLanguage),
+                    new PortTemplate("input-return-xml", L("WorkflowEditor.Port.XmlFieldInput", "XML字段输入"), SessionFlowPortType.XmlField)
                 },
                 Array.Empty<PortTemplate>());
         }
@@ -813,11 +820,11 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
                             node,
                             new[]
                             {
-                                new PortTemplate("agent-input", "自然语言输入", SessionFlowPortType.NaturalLanguage)
+                                new PortTemplate("agent-input", L("WorkflowEditor.Port.NaturalLanguageInput", "自然语言输入"), SessionFlowPortType.NaturalLanguage)
                             },
                             new[]
                             {
-                                new PortTemplate("agent-output", "自然语言输出", SessionFlowPortType.NaturalLanguage)
+                                new PortTemplate("agent-output", L("WorkflowEditor.Port.NaturalLanguageOutput", "自然语言输出"), SessionFlowPortType.NaturalLanguage)
                             });
                     }
 
@@ -836,8 +843,8 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
             {
                 ApplyPortLayout(
                     node,
-                    CreateStructuredXmlPortTemplates(option.InputFieldPaths, "agent-input-xml", "XML输入"),
-                    CreateStructuredXmlPortTemplates(option.OutputFieldPaths, "agent-output-xml", "XML输出"));
+                    CreateStructuredXmlPortTemplates(option.InputFieldPaths, "agent-input-xml", L("WorkflowEditor.Port.XmlInput", "XML输入")),
+                    CreateStructuredXmlPortTemplates(option.OutputFieldPaths, "agent-output-xml", L("WorkflowEditor.Port.XmlOutput", "XML输出")));
                 return;
             }
 
@@ -999,7 +1006,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
             node.InputPorts.Add(new SessionFlowPortModel
             {
                 Id = $"smart-input-{Guid.NewGuid():N}",
-                Name = "智能输入",
+                Name = L("WorkflowEditor.Port.SmartInput", "智能输入"),
                 Direction = SessionFlowPortDirection.Input,
                 IsFlexiblePlaceholder = true,
                 PortType = SessionFlowPortType.NaturalLanguage
@@ -1014,13 +1021,13 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
         {
             if (sourcePort.Direction != SessionFlowPortDirection.Output)
             {
-                StatusMessage = "连接起点必须是输出端口。";
+                StatusMessage = L("WorkflowEditor.Status.SourceMustBeOutput", "连接起点必须是输出端口。");
                 return false;
             }
 
             if (targetPort.Direction != SessionFlowPortDirection.Input)
             {
-                StatusMessage = "连接目标必须是输入端口。";
+                StatusMessage = L("WorkflowEditor.Status.TargetMustBeInput", "连接目标必须是输入端口。");
                 return false;
             }
 
@@ -1031,7 +1038,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
 
             if (sourcePort.PortType != targetPort.PortType)
             {
-                StatusMessage = $"端口类型不匹配：{sourcePort.PortTypeDisplayText} 无法连接到 {targetPort.PortTypeDisplayText}。";
+                StatusMessage = LF("WorkflowEditor.Status.PortTypeMismatchFormat", "端口类型不匹配：{0} 无法连接到 {1}。", sourcePort.PortTypeDisplayText, targetPort.PortTypeDisplayText);
                 return false;
             }
 
@@ -1051,7 +1058,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
                 connection.TargetPortId == targetPort.Id);
             if (exists)
             {
-                StatusMessage = "该连接已存在。";
+                StatusMessage = L("WorkflowEditor.Status.ConnectionAlreadyExists", "该连接已存在。");
                 return false;
             }
 
@@ -1066,7 +1073,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
 
             _connections.Add(connectionModel);
             RefreshConnectionPath(connectionModel);
-            StatusMessage = $"已连接：{sourceNode.Title} -> {targetNode.Title}";
+            StatusMessage = LF("WorkflowEditor.Status.ConnectedFormat", "已连接：{0} -> {1}", sourceNode.Title, targetNode.Title);
             return true;
         }
 
@@ -1079,17 +1086,19 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
 
             var index = node.InputPorts.Count(port => !port.IsBooleanCondition && !port.IsFlexiblePlaceholder) + 1;
             var pairKey = $"smart-pair-{Guid.NewGuid():N}";
-            var labelPrefix = incomingPortType == SessionFlowPortType.XmlField ? "XML" : "自然语言";
+            var labelPrefix = incomingPortType == SessionFlowPortType.XmlField
+                ? L("WorkflowEditor.PortType.Xml", "XML")
+                : L("WorkflowEditor.PortType.NaturalLanguage", "自然语言");
 
             smartPort.IsFlexiblePlaceholder = false;
             smartPort.PortType = incomingPortType;
-            smartPort.Name = $"{labelPrefix}输入 {index}";
+            smartPort.Name = LF("WorkflowEditor.Port.TypedInputFormat", "{0}输入 {1}", labelPrefix, index);
             smartPort.PairKey = pairKey;
 
             node.OutputPorts.Add(new SessionFlowPortModel
             {
                 Id = $"smart-output-{Guid.NewGuid():N}",
-                Name = $"{labelPrefix}输出 {index}",
+                Name = LF("WorkflowEditor.Port.TypedOutputFormat", "{0}输出 {1}", labelPrefix, index),
                 Direction = SessionFlowPortDirection.Output,
                 PortType = incomingPortType,
                 PairKey = pairKey,
@@ -1358,7 +1367,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
 
             if (_currentNodeGraph == null)
             {
-                StatusMessage = "当前没有打开的节点图。";
+                StatusMessage = L("WorkflowEditor.Graph.NotOpen", "当前没有打开的节点图。");
                 return;
             }
 
@@ -1386,7 +1395,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
             }
             catch (Exception ex)
             {
-                StatusMessage = $"保存会话流失败：{ex.Message}";
+                StatusMessage = LF("WorkflowEditor.Status.SaveFailedFormat", "保存会话流失败：{0}", ex.Message);
             }
         }
 
@@ -1450,6 +1459,36 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
         {
             _suspendPersistenceCounter++;
             return new DelegateDisposable(() => _suspendPersistenceCounter--);
+        }
+
+        private void RefreshLocalizedText()
+        {
+            OnPropertyChanged(nameof(Title));
+            OnPropertyChanged(nameof(Description));
+            OnPropertyChanged(nameof(Hint));
+            OnPropertyChanged(nameof(PersistenceFilePath));
+            OnPropertyChanged(nameof(AvailableAgentSummaryText));
+            OnPropertyChanged(nameof(InspectorTitle));
+            OnPropertyChanged(nameof(SelectedNodeKindHint));
+            OnPropertyChanged(nameof(PendingConnectionText));
+            OnPropertyChanged(nameof(CurrentNodeGraphName));
+            OnPropertyChanged(nameof(CurrentNodeGraphHeaderText));
+            OnPropertyChanged(nameof(NodeGraphLibrarySummaryText));
+
+            foreach (var item in NodeGraphs)
+            {
+                item.RefreshLocalizedText();
+            }
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallback, params object[] args)
+        {
+            return string.Format(L(resourceKey, fallback), args);
         }
     }
 }

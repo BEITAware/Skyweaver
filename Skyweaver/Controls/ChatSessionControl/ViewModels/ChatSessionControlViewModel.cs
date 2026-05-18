@@ -13,6 +13,7 @@ using Skyweaver.Models.ChatSession;
 using Skyweaver.Services.AgentLoop;
 using Skyweaver.Services.ChatSession;
 using Skyweaver.Services;
+using Skyweaver.Services.Localization;
 using Skyweaver.Windows;
 
 namespace Skyweaver.Controls.ChatSessionControl.ViewModels
@@ -36,7 +37,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         private string _draftMessageText = string.Empty;
         private ChatMessageModel? _selectedMessage;
         private bool _isExecutionActive;
-        private string _executionStatusText = "就绪";
+        private string _executionStatusText = L("ChatSessionControl.Status.Ready", "就绪");
         private bool _suppressPersistence;
         private DateTime _lastStreamingProjectionRefreshUtc = DateTime.MinValue;
         private CancellationTokenSource? _executionCancellationSource;
@@ -44,8 +45,8 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         private static readonly TimeSpan StreamingProjectionRefreshInterval = TimeSpan.FromMilliseconds(80);
 
         private double _contextWindowUsageRatio;
-        private string _contextWindowUsageText = "正在读取上下文窗口。";
-        private string _contextWindowStatusText = "上下文 --";
+        private string _contextWindowUsageText = L("ChatSessionControl.ContextWindow.Reading", "正在读取上下文窗口。");
+        private string _contextWindowStatusText = L("ChatSessionControl.ContextWindow.StatusUnavailable", "上下文 --");
 
         public ObservableCollection<ChatMessageModel> Messages { get; } = new();
 
@@ -57,13 +58,17 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
         public bool HasBoundSessionFlow => _sessionModel?.HasBoundFlow == true;
 
-        public string BoundSessionFlowName => _sessionModel?.BoundFlowDisplayName ?? "未绑定会话流";
+        public string BoundSessionFlowName => _sessionModel?.BoundFlowDisplayName ?? L("ChatSession.BoundFlow.Unbound", "未绑定会话流");
+
+        public string BoundSessionFlowHeaderText => LF("ChatSessionControl.BoundFlow.HeaderFormat", "会话流：{0}", BoundSessionFlowName);
 
         public string BoundSessionFlowSummary => HasBoundSessionFlow
-            ? $"当前会话流：{BoundSessionFlowName}"
-            : "未绑定会话流。";
+            ? LF("ChatSessionControl.BoundFlow.SummaryFormat", "当前会话流：{0}", BoundSessionFlowName)
+            : L("ChatSessionControl.BoundFlow.UnboundSummary", "未绑定会话流。");
 
         public string SessionFlowValidationSummary => _sessionFlowValidationSummary;
+
+        public string MessageCountText => LF("ChatSessionControl.MessageCountFormat", "当前消息 {0} 条", Messages.Count);
 
         public double ContextWindowUsageRatio
         {
@@ -143,10 +148,12 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         }
 
         public string ComposerHintText => IsExecutionActive
-            ? "当前轮次正在运行。"
-            : "按 Enter 发送；Ctrl+Enter 或 Shift+Enter 换行。";
+            ? L("ChatSessionControl.Composer.Hint.Running", "当前轮次正在运行。")
+            : L("ChatSessionControl.Composer.Hint.Ready", "按 Enter 发送；Ctrl+Enter 或 Shift+Enter 换行。");
 
-        public string ComposerPrimaryButtonText => IsExecutionActive ? "停止" : "发送";
+        public string ComposerPrimaryButtonText => IsExecutionActive
+            ? L("ChatSessionControl.Stop", "停止")
+            : L("ChatSessionControl.Send", "发送");
 
         public ICommand ComposerPrimaryCommand => IsExecutionActive ? CancelExecutionCommand : SendMessageCommand;
 
@@ -185,7 +192,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             ChatSessionRepository? chatSessionRepository = null,
             ChatSessionRuntimeService? runtimeService = null)
         {
-            SessionTitle = string.IsNullOrWhiteSpace(sessionTitle) ? "鑱婂ぉ浼氳瘽" : sessionTitle;
+            SessionTitle = string.IsNullOrWhiteSpace(sessionTitle) ? L("ChatSessionControl.SessionTitleFallback", "聊天会话") : sessionTitle;
             SessionSubtitle = string.IsNullOrWhiteSpace(sessionSubtitle) ? null : sessionSubtitle;
             _sessionModel = sessionModel;
             _chatSessionRepository = chatSessionRepository;
@@ -233,7 +240,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             }
             else
             {
-                ApplyUnavailableContextWindowStatus("此聊天视图未绑定到 ChatSessionModel。");
+                ApplyUnavailableContextWindowStatus(L("ChatSessionControl.Error.UnboundModel", "此聊天视图未绑定到 ChatSessionModel。"));
             }
         }
 
@@ -248,13 +255,17 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
             if (_sessionModel == null)
             {
-                AddSystemStatusMessage("此聊天视图未绑定到 ChatSessionModel。", "运行时不可用");
+                AddSystemStatusMessage(
+                    L("ChatSessionControl.Error.UnboundModel", "此聊天视图未绑定到 ChatSessionModel。"),
+                    L("ChatSessionControl.Status.RuntimeUnavailable", "运行时不可用"));
                 return;
             }
 
             if (_chatSessionRepository == null)
             {
-                AddSystemStatusMessage("此聊天视图未绑定到 ChatSessionRepository。", "运行时不可用");
+                AddSystemStatusMessage(
+                    L("ChatSessionControl.Error.UnboundRepository", "此聊天视图未绑定到 ChatSessionRepository。"),
+                    L("ChatSessionControl.Status.RuntimeUnavailable", "运行时不可用"));
                 return;
             }
 
@@ -274,7 +285,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             _executionCancellationSource?.Dispose();
             _executionCancellationSource = new CancellationTokenSource();
             IsExecutionActive = true;
-            ExecutionStatusText = $"正在运行：{BoundSessionFlowName}";
+            ExecutionStatusText = LF("ChatSessionControl.Status.RunningFlowFormat", "正在运行：{0}", BoundSessionFlowName);
             await Task.Yield();
 
             ChatSessionRuntimeResult? runtimeResult = null;
@@ -298,7 +309,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                     FailureReason = ex.Message
                 };
 
-                AddSystemStatusMessage(ex.Message, "执行失败");
+                AddSystemStatusMessage(ex.Message, L("ChatSessionControl.Status.ExecutionFailed", "执行失败"));
             }
             finally
             {
@@ -308,9 +319,9 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
                 ExecutionStatusText = runtimeResult switch
                 {
-                    { IsCompleted: true } => "就绪",
-                    { IsCancelled: true } => "已取消",
-                    _ => "失败"
+                    { IsCompleted: true } => L("ChatSessionControl.Status.Ready", "就绪"),
+                    { IsCancelled: true } => L("ChatSessionControl.Status.Cancelled", "已取消"),
+                    _ => L("ChatSessionControl.Status.Failed", "失败")
                 };
 
                 RefreshMessagesFromTranscript();
@@ -326,7 +337,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
             _runtimeService.CancelActiveExecution(_sessionModel?.SessionId);
             _executionCancellationSource?.Cancel();
-            ExecutionStatusText = "正在取消当前执行...";
+            ExecutionStatusText = L("ChatSessionControl.Status.Cancelling", "正在取消当前执行...");
         }
 
         public bool AddPastedImage(BitmapSource? image)
@@ -338,7 +349,9 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
             if (_sessionModel == null)
             {
-                AddSystemStatusMessage("无法保存粘贴的图片，因为当前视图未绑定到 ChatSessionModel。", "图片粘贴失败");
+                AddSystemStatusMessage(
+                    L("ChatSessionControl.Error.PastedImageUnboundModel", "无法保存粘贴的图片，因为当前视图未绑定到 ChatSessionModel。"),
+                    L("ChatSessionControl.Status.PasteImageFailed", "图片粘贴失败"));
                 return false;
             }
 
@@ -349,7 +362,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             }
             catch (Exception ex)
             {
-                AddSystemStatusMessage(ex.Message, "图片粘贴失败");
+                AddSystemStatusMessage(ex.Message, L("ChatSessionControl.Status.PasteImageFailed", "图片粘贴失败"));
                 return false;
             }
         }
@@ -366,7 +379,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         {
             var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
-                Filter = "图像文件|*.png;*.jpg;*.jpeg;*.bmp;*.gif|所有文件|*.*",
+                Filter = L("ChatSessionControl.Dialog.ImageFilter", "图像文件|*.png;*.jpg;*.jpeg;*.bmp;*.gif|所有文件|*.*"),
                 Multiselect = true
             };
 
@@ -383,7 +396,9 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    AddSystemStatusMessage($"无法加载图片 {fileName}: {ex.Message}", "添加图片失败");
+                    AddSystemStatusMessage(
+                        LF("ChatSessionControl.Error.LoadImageFailedFormat", "无法加载图片 {0}: {1}", fileName, ex.Message),
+                        L("ChatSessionControl.Status.AddImageFailed", "添加图片失败"));
                 }
             }
         }
@@ -392,13 +407,15 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         {
             if (_sessionModel == null)
             {
-                AddSystemStatusMessage("此聊天视图未绑定到 ChatSessionModel。", "语音不可用");
+                AddSystemStatusMessage(
+                    L("ChatSessionControl.Error.UnboundModel", "此聊天视图未绑定到 ChatSessionModel。"),
+                    L("ChatSessionControl.Status.AudioUnavailable", "语音不可用"));
                 return;
             }
 
             var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
-                Filter = "Audio Files|*.wav;*.mp3;*.m4a;*.ogg;*.flac|All Files|*.*",
+                Filter = L("ChatSessionControl.Dialog.AudioFilter", "Audio Files|*.wav;*.mp3;*.m4a;*.ogg;*.flac|All Files|*.*"),
                 Multiselect = true
             };
 
@@ -415,7 +432,9 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    AddSystemStatusMessage($"无法添加音频文件 {fileName}: {ex.Message}", "添加音频失败");
+                    AddSystemStatusMessage(
+                        LF("ChatSessionControl.Error.AddAudioFailedFormat", "无法添加音频文件 {0}: {1}", fileName, ex.Message),
+                        L("ChatSessionControl.Status.AddAudioFailed", "添加音频失败"));
                 }
             }
         }
@@ -437,7 +456,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             var errorMessage = imageError ?? textError;
             if (!string.IsNullOrWhiteSpace(errorMessage))
             {
-                AddSystemStatusMessage(errorMessage, "读取剪贴板失败");
+                AddSystemStatusMessage(errorMessage, L("ChatSessionControl.Status.ReadClipboardFailed", "读取剪贴板失败"));
             }
         }
 
@@ -461,18 +480,18 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         {
             ExecutionStatusText = runtimeEvent.Kind switch
             {
-                ChatSessionRuntimeEventKind.ExecutionStarted => $"正在运行：{runtimeEvent.FlowName}",
-                ChatSessionRuntimeEventKind.NodeStarted => $"正在运行节点：{runtimeEvent.NodeTitle}",
-                ChatSessionRuntimeEventKind.NodeCompleted => $"节点已完成：{runtimeEvent.NodeTitle}",
+                ChatSessionRuntimeEventKind.ExecutionStarted => LF("ChatSessionControl.Status.RunningFlowFormat", "正在运行：{0}", runtimeEvent.FlowName),
+                ChatSessionRuntimeEventKind.NodeStarted => LF("ChatSessionControl.Status.NodeStartedFormat", "正在运行节点：{0}", runtimeEvent.NodeTitle),
+                ChatSessionRuntimeEventKind.NodeCompleted => LF("ChatSessionControl.Status.NodeCompletedFormat", "节点已完成：{0}", runtimeEvent.NodeTitle),
                 ChatSessionRuntimeEventKind.AgentIterationStarted => runtimeEvent.IterationNumber is int started
-                    ? $"代理 {runtimeEvent.NodeTitle} 迭代 {started}"
-                    : $"代理 {runtimeEvent.NodeTitle} 已启动",
+                    ? LF("ChatSessionControl.Status.AgentIterationStartedFormat", "代理 {0} 迭代 {1}", runtimeEvent.NodeTitle, started)
+                    : LF("ChatSessionControl.Status.AgentStartedFormat", "代理 {0} 已启动", runtimeEvent.NodeTitle),
                 ChatSessionRuntimeEventKind.AgentIterationCompleted => runtimeEvent.IterationNumber is int completed
-                    ? $"代理 {runtimeEvent.NodeTitle} 已完成迭代 {completed}"
-                    : $"代理 {runtimeEvent.NodeTitle} 已完成",
-                ChatSessionRuntimeEventKind.ExecutionCompleted => "执行已完成",
-                ChatSessionRuntimeEventKind.ExecutionFailed => "执行失败",
-                ChatSessionRuntimeEventKind.ExecutionCancelled => "执行已取消",
+                    ? LF("ChatSessionControl.Status.AgentIterationCompletedFormat", "代理 {0} 已完成迭代 {1}", runtimeEvent.NodeTitle, completed)
+                    : LF("ChatSessionControl.Status.AgentCompletedFormat", "代理 {0} 已完成", runtimeEvent.NodeTitle),
+                ChatSessionRuntimeEventKind.ExecutionCompleted => L("ChatSessionControl.Status.ExecutionCompleted", "执行已完成"),
+                ChatSessionRuntimeEventKind.ExecutionFailed => L("ChatSessionControl.Status.ExecutionFailed", "执行失败"),
+                ChatSessionRuntimeEventKind.ExecutionCancelled => L("ChatSessionControl.Status.ExecutionCancelled", "执行已取消"),
                 ChatSessionRuntimeEventKind.ToolProgressUpdated when !string.IsNullOrWhiteSpace(runtimeEvent.ToolProgress?.StatusText) =>
                     runtimeEvent.ToolProgress!.StatusText,
                 _ => ExecutionStatusText
@@ -518,8 +537,8 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             var dialog = new ToolConfirmationDialog(new ToolConfirmationDialogModel
             {
                 ToolName = request.Invocation.ToolName,
-                PromptText = $"代理 {request.Agent.DisplayNameOrFallback} 请求执行下面的工具调用。确认后才会继续执行。",
-                MetadataText = $"工具：{request.Invocation.ToolName}    迭代：{request.IterationNumber}    调用序号：{toolCallIndex}",
+                PromptText = LF("ChatSessionControl.ToolConfirmation.PromptFormat", "代理 {0} 请求执行下面的工具调用。确认后才会继续执行。", request.Agent.DisplayNameOrFallback),
+                MetadataText = LF("ChatSessionControl.ToolConfirmation.MetadataFormat", "工具：{0}    迭代：{1}    调用序号：{2}", request.Invocation.ToolName, request.IterationNumber, toolCallIndex),
                 InvocationXml = request.Invocation.InvocationXml,
                 InvocationPreview = previewHandle.View
             })
@@ -529,7 +548,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
             return dialog.ShowDialog() == true
                 ? AgentToolConfirmationResult.Approve()
-                : AgentToolConfirmationResult.Reject("用户拒绝了此工具调用。");
+                : AgentToolConfirmationResult.Reject(L("ChatSessionControl.ToolConfirmation.Rejected", "用户拒绝了此工具调用。"));
         }
 
         private void RemoveSelectedMessage()
@@ -552,8 +571,8 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
             MessageBox.Show(
                 Application.Current?.MainWindow,
-                errorMessage ?? "无法写入系统剪贴板。",
-                "复制失败",
+                errorMessage ?? L("ChatSessionControl.Error.WriteClipboardFailed", "无法写入系统剪贴板。"),
+                L("ChatSessionControl.Status.CopyFailed", "复制失败"),
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
         }
@@ -567,8 +586,8 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
             MessageBox.Show(
                 Application.Current?.MainWindow,
-                "消息编辑功能尚未实现，这里先保留入口位。",
-                "编辑消息",
+                L("ChatSessionControl.Edit.NotImplemented", "消息编辑功能尚未实现，这里先保留入口位。"),
+                L("ChatSessionControl.ContextMenu.Edit", "编辑"),
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
         }
@@ -640,6 +659,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         private void OnMessagesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             OnPropertyChanged(nameof(IsEmpty));
+            OnPropertyChanged(nameof(MessageCountText));
             CommandManager.InvalidateRequerySuggested();
         }
 
@@ -647,7 +667,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         {
             if (_sessionModel == null)
             {
-                ApplyUnavailableContextWindowStatus("此聊天视图未绑定到 ChatSessionModel。");
+                ApplyUnavailableContextWindowStatus(L("ChatSessionControl.Error.UnboundModel", "此聊天视图未绑定到 ChatSessionModel。"));
                 return;
             }
 
@@ -705,7 +725,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         {
             if (_sessionModel == null)
             {
-                ApplyUnavailableContextWindowStatus("此聊天视图未绑定到 ChatSessionModel。");
+                ApplyUnavailableContextWindowStatus(L("ChatSessionControl.Error.UnboundModel", "此聊天视图未绑定到 ChatSessionModel。"));
                 return;
             }
 
@@ -725,11 +745,16 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
             if (!snapshot.IsAvailable)
             {
-                ApplyUnavailableContextWindowStatus(snapshot.Message ?? "上下文窗口暂不可用。");
+                ApplyUnavailableContextWindowStatus(snapshot.Message ?? L("ChatSessionControl.ContextWindow.Unavailable", "上下文窗口暂不可用。"));
                 return;
             }
 
-            var detail = $"估算 {FormatTokens(snapshot.EstimatedTokenCount)} / {FormatTokens(snapshot.ContextWindowTokens)} Tokens ({FormatPercent(snapshot.UsageRatio)})";
+            var detail = LF(
+                "ChatSessionControl.ContextWindow.EstimatedFormat",
+                "估算 {0} / {1} Tokens ({2})",
+                FormatTokens(snapshot.EstimatedTokenCount),
+                FormatTokens(snapshot.ContextWindowTokens),
+                FormatPercent(snapshot.UsageRatio));
             var bottleneck = BuildContextWindowBottleneckText(snapshot.AgentName, snapshot.ModelName);
             if (bottleneck.Length > 0)
             {
@@ -756,12 +781,17 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                 ? contextCompression.EstimatedTokenCountAfterCompression
                 : contextCompression.EstimatedTokenCountBeforeCompression;
             var ratio = usedTokens / (double)contextCompression.ContextWindowTokens;
-            var detail = $"运行时 {FormatTokens(usedTokens)} / {FormatTokens(contextCompression.ContextWindowTokens)} Tokens ({FormatPercent(ratio)})";
+            var detail = LF(
+                "ChatSessionControl.ContextWindow.RuntimeFormat",
+                "运行时 {0} / {1} Tokens ({2})",
+                FormatTokens(usedTokens),
+                FormatTokens(contextCompression.ContextWindowTokens),
+                FormatPercent(ratio));
             if (contextCompression.EstimatedTokenCountBeforeCompression > 0 &&
                 contextCompression.EstimatedTokenCountAfterCompression > 0)
             {
                 detail += Environment.NewLine +
-                          $"压缩前 {FormatTokens(contextCompression.EstimatedTokenCountBeforeCompression)} Tokens";
+                          LF("ChatSessionControl.ContextWindow.BeforeCompressionFormat", "压缩前 {0} Tokens", FormatTokens(contextCompression.EstimatedTokenCountBeforeCompression));
             }
 
             ApplyContextWindowStatus(
@@ -782,12 +812,21 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
             var totalTokens = tokenUsage.EstimatedTotalTokenCount;
             var ratio = totalTokens / (double)tokenUsage.ContextWindowTokens;
-            var detail = $"Streaming estimate {FormatTokens(totalTokens)} / {FormatTokens(tokenUsage.ContextWindowTokens)} Tokens ({FormatPercent(ratio)})";
+            var detail = LF(
+                "ChatSessionControl.ContextWindow.StreamingEstimateFormat",
+                "Streaming estimate {0} / {1} Tokens ({2})",
+                FormatTokens(totalTokens),
+                FormatTokens(tokenUsage.ContextWindowTokens),
+                FormatPercent(ratio));
             detail += Environment.NewLine +
-                      $"Input {FormatTokens(tokenUsage.EstimatedInputTokenCount)} / Output {FormatTokens(tokenUsage.EstimatedOutputTokenCount)} Tokens";
+                      LF(
+                          "ChatSessionControl.ContextWindow.InputOutputFormat",
+                          "Input {0} / Output {1} Tokens",
+                          FormatTokens(tokenUsage.EstimatedInputTokenCount),
+                          FormatTokens(tokenUsage.EstimatedOutputTokenCount));
             if (!string.IsNullOrWhiteSpace(tokenUsage.ModelId))
             {
-                detail += Environment.NewLine + $"Model: {tokenUsage.ModelId}";
+                detail += Environment.NewLine + LF("ChatSessionControl.ContextWindow.ModelFormat", "Model: {0}", tokenUsage.ModelId);
             }
 
             ApplyContextWindowStatus(
@@ -806,18 +845,23 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             var boundedRatio = Math.Clamp(usageRatio, 0d, 1d);
             ContextWindowUsageRatio = boundedRatio;
             ContextWindowUsageText = string.IsNullOrWhiteSpace(usageText)
-                ? $"{FormatTokens(usedTokens)} / {FormatTokens(contextWindowTokens)} Tokens ({FormatPercent(boundedRatio)})"
+                ? LF(
+                    "ChatSessionControl.ContextWindow.DefaultUsageFormat",
+                    "{0} / {1} Tokens ({2})",
+                    FormatTokens(usedTokens),
+                    FormatTokens(contextWindowTokens),
+                    FormatPercent(boundedRatio))
                 : usageText;
-            ContextWindowStatusText = $"上下文 {FormatPercent(boundedRatio)}";
+            ContextWindowStatusText = LF("ChatSessionControl.ContextWindow.StatusFormat", "上下文 {0}", FormatPercent(boundedRatio));
         }
 
         private void ApplyUnavailableContextWindowStatus(string message)
         {
             ContextWindowUsageRatio = 0d;
             ContextWindowUsageText = string.IsNullOrWhiteSpace(message)
-                ? "上下文窗口暂不可用。"
+                ? L("ChatSessionControl.ContextWindow.Unavailable", "上下文窗口暂不可用。")
                 : message.Trim();
-            ContextWindowStatusText = "上下文 --";
+            ContextWindowStatusText = L("ChatSessionControl.ContextWindow.StatusUnavailable", "上下文 --");
         }
 
         private static string BuildContextWindowBottleneckText(string? agentName, string? modelName)
@@ -831,15 +875,15 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
             if (normalizedAgentName.Length == 0)
             {
-                return $"模型：{normalizedModelName}";
+                return LF("ChatSessionControl.ContextWindow.ModelBottleneckFormat", "模型：{0}", normalizedModelName);
             }
 
             if (normalizedModelName.Length == 0)
             {
-                return $"瓶颈代理：{normalizedAgentName}";
+                return LF("ChatSessionControl.ContextWindow.AgentBottleneckFormat", "瓶颈代理：{0}", normalizedAgentName);
             }
 
-            return $"瓶颈代理：{normalizedAgentName} / {normalizedModelName}";
+            return LF("ChatSessionControl.ContextWindow.AgentModelBottleneckFormat", "瓶颈代理：{0} / {1}", normalizedAgentName, normalizedModelName);
         }
 
         private static string FormatTokens(int tokens)
@@ -1050,9 +1094,9 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         {
             return role switch
             {
-                ChatMessageRole.Assistant => "Skyweaver 鍔╂墜",
-                ChatMessageRole.System => "绯荤粺",
-                _ => "鐢ㄦ埛"
+                ChatMessageRole.Assistant => L("ChatSessionControl.DisplayName.Assistant", "Skyweaver 助手"),
+                ChatMessageRole.System => L("ChatSessionControl.DisplayName.System", "系统"),
+                _ => L("ChatSessionControl.DisplayName.User", "用户")
             };
         }
 
@@ -1070,18 +1114,29 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         {
             if (sessionModel?.HasBoundFlow != true)
             {
-                return "未绑定会话流。";
+                return L("ChatSessionControl.BoundFlow.UnboundSummary", "未绑定会话流。");
             }
 
             var compilationResult = _flowBindingService.CompileBinding(sessionModel.FlowBinding);
             if (compilationResult.IsSuccess)
             {
-                return "绑定的会话流已通过运行时验证。";
+                return L("ChatSessionControl.BoundFlow.ValidationSucceeded", "绑定的会话流已通过运行时验证。");
             }
 
             return compilationResult.Errors.FirstOrDefault()?.Message
                 ?? compilationResult.Issues.FirstOrDefault()?.Message
-                ?? "绑定的会话流未通过运行时验证。";
+                ?? L("ChatSessionControl.BoundFlow.ValidationFailed", "绑定的会话流未通过运行时验证。");
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
+        {
+            var format = L(resourceKey, fallbackFormat);
+            return string.Format(format, args);
         }
     }
 }

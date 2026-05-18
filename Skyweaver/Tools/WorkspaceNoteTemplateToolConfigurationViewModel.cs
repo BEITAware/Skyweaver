@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Tools
 {
@@ -114,8 +115,8 @@ namespace Skyweaver.Tools
                 var settings = ToSettings();
                 var tags = settings.GetDefaultTags();
                 return tags.Count == 0
-                    ? "留空时会回退到 memo。"
-                    : $"将作为 Tags 参数默认值：{string.Join(", ", tags)}";
+                    ? L("WorkspaceNoteTemplate.DefaultTagsHint.Empty", "留空时会回退到 memo。")
+                    : LF("WorkspaceNoteTemplate.DefaultTagsHint.Format", "将作为 Tags 参数默认值：{0}", string.Join(", ", tags));
             }
         }
 
@@ -128,12 +129,12 @@ namespace Skyweaver.Tools
 
                 var lines = new List<string>
                 {
-                    $"预设：{preset.DisplayName}",
+                    LF("WorkspaceNoteTemplate.Preview.PresetFormat", "预设：{0}", preset.DisplayName),
                     IncludeContextMetadata
-                        ? "会附带 Workspace / Session 上下文行。"
-                        : "不会附带 Workspace / Session 上下文行。",
-                    $"默认标签：{settings.DescribeDefaultTags()}",
-                    "摘要占位行："
+                        ? L("WorkspaceNoteTemplate.Preview.ContextMetadataIncluded", "会附带 Workspace / Session 上下文行。")
+                        : L("WorkspaceNoteTemplate.Preview.ContextMetadataExcluded", "不会附带 Workspace / Session 上下文行。"),
+                    LF("WorkspaceNoteTemplate.Preview.DefaultTagsFormat", "默认标签：{0}", settings.DescribeDefaultTags()),
+                    L("WorkspaceNoteTemplate.Preview.SummaryHeader", "摘要占位行：")
                 };
 
                 lines.AddRange(settings.BuildSummaryPrompts().Select(item => $"- {item}"));
@@ -155,6 +156,17 @@ namespace Skyweaver.Tools
         private void NotifyConfigurationChanged()
         {
             _notifyConfigurationChanged();
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
+        {
+            var format = L(resourceKey, fallbackFormat);
+            return string.Format(format, args);
         }
     }
 }

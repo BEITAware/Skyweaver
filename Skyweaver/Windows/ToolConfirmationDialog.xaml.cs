@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Xml.Linq;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Windows
 {
@@ -26,8 +27,8 @@ namespace Skyweaver.Windows
             InitializeComponent();
 
             Title = string.IsNullOrWhiteSpace(model.ToolName)
-                ? "工具调用确认"
-                : $"工具调用确认 - {model.ToolName}";
+                ? L("ToolConfirmation.Title", "工具调用确认")
+                : string.Format(L("ToolConfirmation.TitleWithToolFormat", "工具调用确认 - {0}"), model.ToolName);
 
             PromptTextBlock.Text = model.PromptText ?? string.Empty;
             MetadataTextBlock.Text = model.MetadataText ?? string.Empty;
@@ -70,6 +71,11 @@ namespace Skyweaver.Windows
             {
                 return normalizedInvocationXml;
             }
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
 }

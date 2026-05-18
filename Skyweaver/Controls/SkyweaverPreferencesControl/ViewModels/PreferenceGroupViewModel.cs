@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Skyweaver.Controls.SkyweaverPreferencesControl.Models;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels
 {
@@ -13,6 +14,7 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels
         {
             Group = group;
             _isExpanded = group.IsExpanded;
+            LocalizationRuntime.Instance.LanguageChanged += (_, _) => OnPropertyChanged(nameof(DisplayName));
 
             Pages = new ObservableCollection<SelectablePreferencePageViewModel>(
                 group.Pages.Select(page => new SelectablePreferencePageViewModel(page)));
@@ -47,7 +49,7 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels
 
         public string Id => Group.Id;
 
-        public string DisplayName => Group.DisplayName;
+        public string DisplayName => LocalizationRuntime.Instance.GetString(Group.DisplayNameResourceKey, Group.DisplayName);
 
         public ObservableCollection<SelectablePreferencePageViewModel> Pages { get; }
 

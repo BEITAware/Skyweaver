@@ -96,7 +96,7 @@
                     <StackPanel Grid.Row="0"
                                 Grid.Column="0"
                                 Margin="0,0,12,12">
-                        <TextBlock Text="显示名称"
+                        <TextBlock Text="{DynamicResource Common.DisplayName}"
                                    FontWeight="SemiBold"/>
                         <TextBox Margin="0,6,0,0"
                                  Text="{Binding DisplayName, UpdateSourceTrigger=LostFocus}"/>
@@ -105,7 +105,7 @@
                     <StackPanel Grid.Row="0"
                                 Grid.Column="1"
                                 Margin="0,0,0,12">
-                        <TextBlock Text="接口类型"
+                        <TextBlock Text="{DynamicResource Common.InterfaceType}"
                                    FontWeight="SemiBold"/>
                         <ComboBox Margin="0,6,0,0"
                                   ItemsSource="{Binding DataContext.AvailableInterfaceTypes, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -115,7 +115,7 @@
                     <StackPanel Grid.Row="1"
                                 Grid.Column="0"
                                 Margin="0,0,12,0">
-                        <TextBlock Text="向量维度"
+                        <TextBlock Text="{DynamicResource EmbeddingModelConfiguration.Dimensions}"
                                    FontWeight="SemiBold"/>
                         <TextBox Margin="0,6,0,0"
                                  Text="{Binding Dimensions, UpdateSourceTrigger=PropertyChanged}"/>
@@ -123,7 +123,7 @@
 
                     <StackPanel Grid.Row="1"
                                 Grid.Column="1">
-                        <TextBlock Text="最大输入 Token"
+                        <TextBlock Text="{DynamicResource EmbeddingModelConfiguration.MaxInputTokens}"
                                    FontWeight="SemiBold"/>
                         <TextBox Margin="0,6,0,0"
                                  Text="{Binding MaxInputTokens, UpdateSourceTrigger=PropertyChanged}"/>
@@ -134,13 +134,13 @@
                            Margin="0,0,0,12">
                     <CheckBox Margin="0,0,18,0"
                               IsChecked="{Binding Normalize, UpdateSourceTrigger=PropertyChanged}"
-                              Content="归一化向量"/>
+                              Content="{DynamicResource EmbeddingModelConfiguration.Normalize}"/>
                     <CheckBox Margin="0,0,18,0"
                               IsChecked="{Binding SupportsMultimodalEmbedding, UpdateSourceTrigger=PropertyChanged}"
-                              Content="支持多模态嵌入"/>
+                              Content="{DynamicResource EmbeddingModelConfiguration.SupportsMultimodal}"/>
                     <CheckBox IsEnabled="{Binding SupportsMultimodalEmbedding}"
                               IsChecked="{Binding IncludeBinaryDataInTextProjection, UpdateSourceTrigger=PropertyChanged}"
-                              Content="在保留内容投影中包含二进制数据"/>
+                              Content="{DynamicResource EmbeddingModelConfiguration.IncludeBinaryProjection}"/>
                 </WrapPanel>
 
                 <TextBlock Grid.Row="2"
@@ -166,13 +166,13 @@
                             Width="96"
                             Height="32"
                             Command="{Binding TestCommand}"
-                            Content="测试模型"/>
+                            Content="{DynamicResource LanguageModelConfiguration.TestModel}"/>
 
                     <Button Grid.Column="2"
                             Width="96"
                             Height="32"
                             Command="{Binding CancelTestCommand}"
-                            Content="中止测试"/>
+                            Content="{DynamicResource LanguageModelConfiguration.CancelTest}"/>
 
                     <TextBox Grid.Column="4"
                              MinHeight="72"
@@ -200,7 +200,7 @@
                 <StackPanel Grid.Row="0"
                             Grid.Column="0"
                             Margin="0,0,12,12">
-                    <TextBlock Text="模型 ID"
+                    <TextBlock Text="{DynamicResource Common.ModelId}"
                                FontWeight="SemiBold"/>
                     <TextBox Margin="0,6,0,0"
                              Text="{Binding ModelId, UpdateSourceTrigger=LostFocus}"/>
@@ -209,7 +209,7 @@
                 <StackPanel Grid.Row="0"
                             Grid.Column="1"
                             Margin="0,0,0,12">
-                    <TextBlock Text="API Key"
+                    <TextBlock Text="{DynamicResource Common.ApiKey}"
                                FontWeight="SemiBold"/>
                     <TextBox Margin="0,6,0,0"
                              Text="{Binding ApiKey, UpdateSourceTrigger=LostFocus}"/>
@@ -218,7 +218,7 @@
                 <StackPanel Grid.Row="1"
                             Grid.Column="0"
                             Margin="0,0,12,0">
-                    <TextBlock Text="Base URL"
+                    <TextBlock Text="{DynamicResource Common.BaseUrl}"
                                FontWeight="SemiBold"/>
                     <TextBox Margin="0,6,0,0"
                              Text="{Binding BaseUrl, UpdateSourceTrigger=LostFocus}"/>
@@ -226,7 +226,7 @@
 
                 <StackPanel Grid.Row="1"
                             Grid.Column="1">
-                    <TextBlock Text="User"
+                    <TextBlock Text="{DynamicResource Common.User}"
                                FontWeight="SemiBold"/>
                     <TextBox Margin="0,6,0,0"
                              Text="{Binding User, UpdateSourceTrigger=LostFocus}"/>
@@ -249,7 +249,7 @@
                 <StackPanel Grid.Row="0"
                             Grid.Column="0"
                             Margin="0,0,12,12">
-                    <TextBlock Text="模型 ID"
+                    <TextBlock Text="{DynamicResource Common.ModelId}"
                                FontWeight="SemiBold"/>
                     <TextBox Margin="0,6,0,0"
                              Text="{Binding ModelId, UpdateSourceTrigger=LostFocus}"/>
@@ -258,7 +258,7 @@
                 <StackPanel Grid.Row="0"
                             Grid.Column="1"
                             Margin="0,0,0,12">
-                    <TextBlock Text="API Key"
+                    <TextBlock Text="{DynamicResource Common.ApiKey}"
                                FontWeight="SemiBold"/>
                     <TextBox Margin="0,6,0,0"
                              Text="{Binding ApiKey, UpdateSourceTrigger=LostFocus}"/>
@@ -267,7 +267,7 @@
                 <StackPanel Grid.Row="1"
                             Grid.Column="0"
                             Margin="0,0,12,12">
-                    <TextBlock Text="Base URL"
+                    <TextBlock Text="{DynamicResource Common.BaseUrl}"
                                FontWeight="SemiBold"/>
                     <TextBox Margin="0,6,0,0"
                              Text="{Binding BaseUrl, UpdateSourceTrigger=LostFocus}"/>
@@ -277,7 +277,7 @@
                             Grid.Column="1"
                             Margin="0,0,0,12">
                     <CheckBox IsChecked="{Binding UseTaskType, UpdateSourceTrigger=PropertyChanged}"
-                              Content="传入 Task Type"/>
+                              Content="{DynamicResource EmbeddingModelConfiguration.SendTaskType}"/>
                     <ComboBox Margin="0,6,0,0"
                               IsEnabled="{Binding UseTaskType}"
                               ItemsSource="{Binding SupportedTaskTypes}"
@@ -288,7 +288,7 @@
                           Grid.Column="0"
                           Grid.ColumnSpan="2"
                           IsChecked="{Binding SendInlineData, UpdateSourceTrigger=PropertyChanged}"
-                          Content="向 Google 请求发送 inlineData"/>
+                          Content="{DynamicResource EmbeddingModelConfiguration.SendInlineData}"/>
             </Grid>
         </DataTemplate>
     </UserControl.Resources>
@@ -325,7 +325,7 @@
                                Margin="0,0,12,0">
                         <TextBlock DockPanel.Dock="Top"
                                    Margin="0,0,0,10"
-                                   Text="嵌入模型列表"
+                                   Text="{DynamicResource EmbeddingModelConfiguration.ListTitle}"
                                    FontSize="14"
                                    FontWeight="SemiBold"/>
                         <Grid DockPanel.Dock="Top"
@@ -339,13 +339,13 @@
                             </Grid.ColumnDefinitions>
                             <Button Grid.Column="0"
                                     Command="{Binding AddEmbeddingModelCommand}"
-                                    Content="新增"/>
+                                    Content="{DynamicResource Common.Add}"/>
                             <Button Grid.Column="2"
                                     Command="{Binding DuplicateEmbeddingModelCommand}"
-                                    Content="复制"/>
+                                    Content="{DynamicResource Common.Duplicate}"/>
                             <Button Grid.Column="4"
                                     Command="{Binding RemoveEmbeddingModelCommand}"
-                                    Content="删除"/>
+                                    Content="{DynamicResource Common.Delete}"/>
                         </Grid>
 
                         <Border CornerRadius="2"
@@ -398,27 +398,27 @@
                                                 <Border Style="{StaticResource CapsuleBorderStyle}">
                                                     <TextBlock VerticalAlignment="Center"
                                                                FontSize="11"
-                                                               Text="{Binding SummaryModelId, StringFormat=模型 ID: {0}}"/>
+                                                               Text="{Binding SummaryModelIdText}"/>
                                                 </Border>
                                                 <Border Style="{StaticResource CapsuleBorderStyle}">
                                                     <TextBlock VerticalAlignment="Center"
                                                                FontSize="11"
-                                                               Text="{Binding InterfaceType, StringFormat=接口: {0}}"/>
+                                                               Text="{Binding InterfaceTypeText}"/>
                                                 </Border>
                                                 <Border Style="{StaticResource CapsuleBorderStyle}">
                                                     <TextBlock VerticalAlignment="Center"
                                                                FontSize="11"
-                                                               Text="{Binding DimensionsText, StringFormat=维度: {0}}"/>
+                                                               Text="{Binding DimensionsSummaryText}"/>
                                                 </Border>
                                                 <Border Style="{StaticResource CapsuleBorderStyle}">
                                                     <TextBlock VerticalAlignment="Center"
                                                                FontSize="11"
-                                                               Text="{Binding MultimodalEmbeddingSupportText, StringFormat=多模态: {0}}"/>
+                                                               Text="{Binding MultimodalEmbeddingSupportSummaryText}"/>
                                                 </Border>
                                                 <Border Style="{StaticResource CapsuleBorderStyle}">
                                                     <TextBlock VerticalAlignment="Center"
                                                                FontSize="11"
-                                                               Text="{Binding ConfigurationStatusText, StringFormat=状态: {0}}"/>
+                                                               Text="{Binding ConfigurationStatusSummaryText}"/>
                                                 </Border>
                                             </WrapPanel>
                                         </StackPanel>
@@ -436,7 +436,7 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Margin="0,0,0,10"
-                                   Text="嵌入模型配置"
+                                   Text="{DynamicResource EmbeddingModelConfiguration.EditorTitle}"
                                    FontSize="14"
                                    FontWeight="SemiBold"/>
 
@@ -445,7 +445,7 @@
                             <Grid>
                                 <ContentControl Content="{Binding SelectedEmbeddingModel}"
                                                 ContentTemplate="{StaticResource EmbeddingModelEditorTemplate}"/>
-                                <TextBlock Text="从左侧选择一个嵌入模型后，在这里统一编辑它的配置。"
+                                <TextBlock Text="{DynamicResource EmbeddingModelConfiguration.EmptySelection}"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center">
                                     <TextBlock.Style>
@@ -469,7 +469,7 @@
                             Width="120"
                             Margin="12,0,0,0"
                             Command="{Binding OpenConfigurationDirectoryCommand}"
-                            Content="打开目录"/>
+                            Content="{DynamicResource Common.OpenDirectory}"/>
                     <TextBlock VerticalAlignment="Center"
                                Text="{Binding EmbeddingModelConfigurationFilePath}"
                                TextTrimming="CharacterEllipsis"/>

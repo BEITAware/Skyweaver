@@ -3,6 +3,7 @@ using Skyweaver.Controls.AgentConfigurationControl.Models;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
 using Skyweaver.Controls.WorkflowEditorControl.Models;
 using Skyweaver.Services.AgentLoop;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.WorkflowEditorControl.Services
 {
@@ -303,13 +304,13 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
 
             if (wholeDocumentBindings.Length > 1)
             {
-                var portNames = string.Join("、", wholeDocumentBindings.Select(binding => binding.Port.Name));
-                return $"同一个结构化输入只能有一个整文档 XML 入口，当前冲突端口：{portNames}。";
+                var portNames = string.Join(L("Common.ListSeparator.IdeographicComma", "、"), wholeDocumentBindings.Select(binding => binding.Port.Name));
+                return LF("SessionFlowPayloadRouter.Validation.MultipleWholeDocumentPortsFormat", "同一个结构化输入只能有一个整文档 XML 入口，当前冲突端口：{0}。", portNames);
             }
 
             if (wholeDocumentBindings.Length == 1 && bindings.Count > 1)
             {
-                return $"端口“{wholeDocumentBindings[0].Port.Name}”已声明接收整文档 XML，不能再与其他 XML 字段端口同时组装同一个输入。";
+                return LF("SessionFlowPayloadRouter.Validation.WholeDocumentPortConflictFormat", "端口“{0}”已声明接收整文档 XML，不能再与其他 XML 字段端口同时组装同一个输入。", wholeDocumentBindings[0].Port.Name);
             }
 
             var normalizedPaths = new List<(string DisplayPath, IReadOnlyList<string> Segments)>();
@@ -323,14 +324,14 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
                 var segments = SplitPath(binding.Port.Name, rootElementName);
                 if (segments.Count == 0)
                 {
-                    return $"端口“{binding.Port.Name}”不是有效的 XML 字段路径。";
+                    return LF("SessionFlowPayloadRouter.Validation.InvalidXmlFieldPathFormat", "端口“{0}”不是有效的 XML 字段路径。", binding.Port.Name);
                 }
 
                 foreach (var existing in normalizedPaths)
                 {
                     if (IsPrefix(existing.Segments, segments) || IsPrefix(segments, existing.Segments))
                     {
-                        return $"XML 输入字段路径“{binding.Port.Name}”与“{existing.DisplayPath}”存在父子覆盖关系，当前基础设施不允许将两者同时组装到同一个输入文档。";
+                        return LF("SessionFlowPayloadRouter.Validation.ParentChildPathConflictFormat", "XML 输入字段路径“{0}”与“{1}”存在父子覆盖关系，当前基础设施不允许将两者同时组装到同一个输入文档。", binding.Port.Name, existing.DisplayPath);
                     }
                 }
 
@@ -499,7 +500,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
                 document = XDocument.Parse(xmlText, LoadOptions.PreserveWhitespace);
                 if (document.Root == null)
                 {
-                    errorMessage = "结构化载荷缺少根节点。";
+                    errorMessage = L("SessionFlowPayloadRouter.Validation.MissingRoot", "结构化载荷缺少根节点。");
                     return false;
                 }
 
@@ -507,9 +508,19 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
             }
             catch (Exception ex)
             {
-                errorMessage = $"结构化载荷解析失败：{ex.Message}";
+                errorMessage = LF("SessionFlowPayloadRouter.Validation.ParseFailedFormat", "结构化载荷解析失败：{0}", ex.Message);
                 return false;
             }
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
+        {
+            return string.Format(L(resourceKey, fallbackFormat), args);
         }
     }
 }

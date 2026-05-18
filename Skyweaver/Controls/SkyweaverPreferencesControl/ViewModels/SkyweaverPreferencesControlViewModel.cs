@@ -9,6 +9,7 @@ using Skyweaver.Controls.SkyweaverPreferencesControl.Models;
 using Skyweaver.Controls.SkyweaverPreferencesControl.Services;
 using Skyweaver.Infrastructure.Mvvm;
 using Skyweaver.Panels.MultiFunctionArea.ViewModels;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels
 {
@@ -77,13 +78,15 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels
             OpenWorkflowEditorCommand = new RelayCommand(
                 () => OpenTab(MultiFunctionAreaPanelViewModel.TabTypes.WorkflowEditor),
                 CanOpenExternalPanel);
+
+            LocalizationRuntime.Instance.LanguageChanged += (_, _) => RefreshLocalizedText();
         }
 
-        public string Title { get; } = "Skyweaver 首选项";
+        public string Title => LocalizationRuntime.Instance.GetString("Preferences.Welcome.Title", "Skyweaver 首选项");
 
-        public string Description { get; } = "从左侧栏目中选择要查看的配置项。";
+        public string Description => LocalizationRuntime.Instance.GetString("Preferences.Welcome.Description", "从左侧栏目中选择要查看的配置项。");
 
-        public string Hint { get; } = "目前已提供文件系统、呈现界面与上下文管理相关配置。";
+        public string Hint => LocalizationRuntime.Instance.GetString("Preferences.Welcome.Hint", "目前已提供文件系统、呈现界面与上下文管理相关配置。");
 
         public ObservableCollection<PreferenceGroupViewModel> Groups { get; }
 
@@ -150,7 +153,7 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels
                 return;
             }
 
-            CurrentPageName = pageInfo.DisplayName;
+            CurrentPageName = GetLocalizedPageName(pageInfo);
 
             if (_viewCache.TryGetValue(pageId, out var cachedView))
             {
@@ -204,6 +207,23 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels
         private void OpenTab(string typeKey)
         {
             _openTabByType?.Invoke(typeKey);
+        }
+
+        private void RefreshLocalizedText()
+        {
+            OnPropertyChanged(nameof(Title));
+            OnPropertyChanged(nameof(Description));
+            OnPropertyChanged(nameof(Hint));
+
+            if (_selectedPageViewModel != null)
+            {
+                CurrentPageName = GetLocalizedPageName(_selectedPageViewModel.PageInfo);
+            }
+        }
+
+        private static string GetLocalizedPageName(PreferencePageInfo pageInfo)
+        {
+            return LocalizationRuntime.Instance.GetString(pageInfo.DisplayNameResourceKey, pageInfo.DisplayName);
         }
     }
 }

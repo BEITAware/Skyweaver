@@ -1,4 +1,5 @@
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.AgentConfigurationControl.Models
 {
@@ -53,9 +54,19 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Models
         }
 
         public string GlobalAvailabilityText => IsMissing
-            ? "当前工具发现结果中缺失"
+            ? L("AgentConfiguration.GlobalAvailability.Missing", "当前工具发现结果中缺失")
             : IsGloballyEnabled
-                ? "全局：已启用"
-                : "全局：已禁用";
+                ? L("AgentConfiguration.GlobalAvailability.Enabled", "全局：已启用")
+                : L("AgentConfiguration.GlobalAvailability.Disabled", "全局：已禁用");
+
+        public void RefreshLocalizedText()
+        {
+            OnPropertyChanged(nameof(GlobalAvailabilityText));
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
     }
 }

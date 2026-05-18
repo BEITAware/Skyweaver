@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.AgentConfigurationControl.Models
 {
@@ -142,11 +143,17 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Models
 
         public string AvatarPreviewPath => string.IsNullOrWhiteSpace(AvatarPath) ? DefaultAvatarPath : AvatarPath;
 
-        public string DisplayNameOrFallback => string.IsNullOrWhiteSpace(DisplayName) ? "（未命名代理）" : DisplayName;
+        public string DisplayNameOrFallback => string.IsNullOrWhiteSpace(DisplayName)
+            ? L("AgentConfiguration.DisplayNameFallback", "（未命名代理）")
+            : DisplayName;
 
-        public string AgentIdOrFallback => string.IsNullOrWhiteSpace(AgentId) ? "（缺少 ID）" : AgentId;
+        public string AgentIdOrFallback => string.IsNullOrWhiteSpace(AgentId)
+            ? L("AgentConfiguration.AgentIdFallback", "（缺少 ID）")
+            : AgentId;
 
-        public string StructuredModeText => IsStructuredXmlIO ? "结构化 XML" : "自然语言";
+        public string StructuredModeText => IsStructuredXmlIO
+            ? L("AgentConfiguration.StructuredMode.Xml", "结构化 XML")
+            : L("AgentConfiguration.StructuredMode.NaturalLanguage", "自然语言");
 
         public bool CanRunAsMainAgent => RuntimeRole is AgentRuntimeRole.MainOnly or AgentRuntimeRole.MainAndSubAgent;
 
@@ -154,10 +161,23 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Models
 
         public string RuntimeRoleText => RuntimeRole switch
         {
-            AgentRuntimeRole.SubAgentOnly => "仅子代理",
-            AgentRuntimeRole.MainAndSubAgent => "主/子代理",
-            _ => "仅主代理"
+            AgentRuntimeRole.SubAgentOnly => L("AgentConfiguration.RuntimeRoleText.SubOnly", "仅子代理"),
+            AgentRuntimeRole.MainAndSubAgent => L("AgentConfiguration.RuntimeRoleText.MainAndSub", "主/子代理"),
+            _ => L("AgentConfiguration.RuntimeRoleText.MainOnly", "仅主代理")
         };
+
+        public void RefreshLocalizedText()
+        {
+            OnPropertyChanged(nameof(DisplayNameOrFallback));
+            OnPropertyChanged(nameof(AgentIdOrFallback));
+            OnPropertyChanged(nameof(StructuredModeText));
+            OnPropertyChanged(nameof(RuntimeRoleText));
+
+            foreach (var permission in ToolPermissions)
+            {
+                permission.RefreshLocalizedText();
+            }
+        }
 
         public AgentDefinition DeepClone()
         {
@@ -208,6 +228,11 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Models
             }
 
             return clone;
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
 }

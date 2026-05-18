@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.WorkflowEditorControl.Models
 {
@@ -124,19 +125,19 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Models
 
         public string NodeKindDisplayText => Kind switch
         {
-            SessionFlowNodeKind.UserInput => "输入输出",
-            SessionFlowNodeKind.Return => "输入输出",
-            SessionFlowNodeKind.Agent => "代理",
-            SessionFlowNodeKind.LogicAnd => "逻辑",
-            SessionFlowNodeKind.LogicOr => "逻辑",
-            SessionFlowNodeKind.LogicXor => "逻辑",
-            SessionFlowNodeKind.LogicNot => "逻辑",
-            SessionFlowNodeKind.LogicExecution => "逻辑执行",
-            SessionFlowNodeKind.NextLogicExecution => "仅下一个逻辑执行",
-            _ => "节点"
+            SessionFlowNodeKind.UserInput => L("WorkflowEditor.NodeKind.InputOutput", "输入输出"),
+            SessionFlowNodeKind.Return => L("WorkflowEditor.NodeKind.InputOutput", "输入输出"),
+            SessionFlowNodeKind.Agent => L("WorkflowEditor.NodeKind.Agent", "代理"),
+            SessionFlowNodeKind.LogicAnd => L("WorkflowEditor.NodeKind.Logic", "逻辑"),
+            SessionFlowNodeKind.LogicOr => L("WorkflowEditor.NodeKind.Logic", "逻辑"),
+            SessionFlowNodeKind.LogicXor => L("WorkflowEditor.NodeKind.Logic", "逻辑"),
+            SessionFlowNodeKind.LogicNot => L("WorkflowEditor.NodeKind.Logic", "逻辑"),
+            SessionFlowNodeKind.LogicExecution => L("WorkflowEditor.NodeKind.LogicExecution", "逻辑执行"),
+            SessionFlowNodeKind.NextLogicExecution => L("WorkflowEditor.NodeKind.NextLogicExecution", "仅下一个逻辑执行"),
+            _ => L("WorkflowEditor.NodeKind.Node", "节点")
         };
 
-        public string PortSummaryText => $"输入 {InputPorts.Count} · 输出 {OutputPorts.Count}";
+        public string PortSummaryText => LF("WorkflowEditor.PortSummaryFormat", "输入 {0} · 输出 {1}", InputPorts.Count, OutputPorts.Count);
 
         public SessionFlowNodeModel DeepClone()
         {
@@ -166,6 +167,17 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Models
             }
 
             return clone;
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
+        {
+            var format = L(resourceKey, fallbackFormat);
+            return string.Format(format, args);
         }
     }
 }

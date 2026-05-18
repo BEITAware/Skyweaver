@@ -7,6 +7,7 @@ using Skyweaver.Commands;
 using Skyweaver.Controls.EmbeddingModelConfigurationControl.Models;
 using Skyweaver.Controls.EmbeddingModelConfigurationControl.Services;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.EmbeddingModelConfigurationControl.ViewModels
 {
@@ -30,21 +31,27 @@ namespace Skyweaver.Controls.EmbeddingModelConfigurationControl.ViewModels
             OpenConfigurationDirectoryCommand = new RelayCommand(OpenConfigurationDirectory);
 
             EmbeddingModels.CollectionChanged += OnEmbeddingModelsCollectionChanged;
+            LocalizationRuntime.Instance.LanguageChanged += (_, _) => RefreshLocalizedText();
 
             Load();
         }
 
-        public string Title { get; } = "嵌入模型配置";
+        public string Title => L("EmbeddingModelConfiguration.Title", "嵌入模型配置");
 
-        public string Description { get; } = "配置向量嵌入模型连接信息，并用于 AerialCity 检索与嵌入调用。";
+        public string Description => L(
+            "EmbeddingModelConfiguration.Description",
+            "配置向量嵌入模型连接信息，并用于 AerialCity 检索与嵌入调用。");
 
         public ObservableCollection<EmbeddingModelDefinition> EmbeddingModels { get; } = new();
 
         public IReadOnlyList<string> AvailableInterfaceTypes => EmbeddingModelDefinition.AvailableInterfaceTypes;
 
         public string InterfaceSettingsSectionTitle => SelectedEmbeddingModel == null
-            ? "接口配置"
-            : $"{SelectedEmbeddingModel.InterfaceType} 接口配置";
+            ? L("EmbeddingModelConfiguration.InterfaceSettings.Default", "接口配置")
+            : LF(
+                "EmbeddingModelConfiguration.InterfaceSettings.Format",
+                "{0} 接口配置",
+                SelectedEmbeddingModel.InterfaceType);
 
         public string EmbeddingModelConfigurationFilePath => _embeddingModelRepository.ConfigurationFilePath;
 
@@ -93,7 +100,7 @@ namespace Skyweaver.Controls.EmbeddingModelConfigurationControl.ViewModels
         {
             var model = new EmbeddingModelDefinition
             {
-                DisplayName = $"嵌入模型 {EmbeddingModels.Count + 1}",
+                DisplayName = LF("EmbeddingModelConfiguration.NewModelNameFormat", "嵌入模型 {0}", EmbeddingModels.Count + 1),
                 InterfaceType = EmbeddingModelInterfaceCatalog.DefaultInterfaceType
             };
 
@@ -211,7 +218,7 @@ namespace Skyweaver.Controls.EmbeddingModelConfigurationControl.ViewModels
             {
                 if (SelectedEmbeddingModel != null)
                 {
-                    SelectedEmbeddingModel.TestResponse = $"保存失败：{ex.Message}";
+                    SelectedEmbeddingModel.TestResponse = LF("EmbeddingModelConfiguration.Status.SaveFailedFormat", "保存失败：{0}", ex.Message);
                 }
             }
         }
@@ -223,7 +230,7 @@ namespace Skyweaver.Controls.EmbeddingModelConfigurationControl.ViewModels
 
             model.IsTesting = true;
             model.CanCancelTest = true;
-            model.TestResponse = "正在生成测试嵌入...";
+            model.TestResponse = L("EmbeddingModelConfiguration.Status.GeneratingTestEmbedding", "正在生成测试嵌入...");
 
             try
             {
@@ -233,11 +240,11 @@ namespace Skyweaver.Controls.EmbeddingModelConfigurationControl.ViewModels
             }
             catch (OperationCanceledException)
             {
-                model.TestResponse = "测试已中止。";
+                model.TestResponse = L("EmbeddingModelConfiguration.Status.TestCanceled", "测试已中止。");
             }
             catch (Exception ex)
             {
-                model.TestResponse = $"测试失败：{ex.Message}";
+                model.TestResponse = LF("EmbeddingModelConfiguration.Status.TestFailedFormat", "测试失败：{0}", ex.Message);
             }
             finally
             {
@@ -320,8 +327,10 @@ namespace Skyweaver.Controls.EmbeddingModelConfigurationControl.ViewModels
 
         private static string BuildDuplicatedDisplayName(string? displayName)
         {
-            var normalizedName = string.IsNullOrWhiteSpace(displayName) ? "嵌入模型" : displayName.Trim();
-            return $"{normalizedName} - 副本";
+            var normalizedName = string.IsNullOrWhiteSpace(displayName)
+                ? L("EmbeddingModelConfiguration.DefaultModelName", "嵌入模型")
+                : displayName.Trim();
+            return LF("LanguageModelConfiguration.DuplicateSuffixFormat", "{0} - 副本", normalizedName);
         }
 
         private static void ApplySuggestedDefaults(EmbeddingModelDefinition model)
@@ -337,6 +346,28 @@ namespace Skyweaver.Controls.EmbeddingModelConfigurationControl.ViewModels
                     google.TaskType = "RETRIEVAL_DOCUMENT";
                     break;
             }
+        }
+
+        private void RefreshLocalizedText()
+        {
+            OnPropertyChanged(nameof(Title));
+            OnPropertyChanged(nameof(Description));
+            OnPropertyChanged(nameof(InterfaceSettingsSectionTitle));
+
+            foreach (var model in EmbeddingModels)
+            {
+                model.RefreshLocalizedText();
+            }
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallback, params object[] args)
+        {
+            return string.Format(L(resourceKey, fallback), args);
         }
     }
 }

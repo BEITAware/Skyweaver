@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.ChatSessionControl.Models
 {
@@ -43,7 +45,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
             }
         }
 
-        public string TimestampText => Timestamp.ToString("HH:mm");
+        public string TimestampText => Timestamp.ToString(L("ChatMessage.TimestampFormat", "HH:mm"), CultureInfo.CurrentCulture);
 
         public ObservableCollection<ChatMessagePartModel> Parts { get; } = new();
 
@@ -68,6 +70,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
             _avatarPath = avatarPath;
             _timestamp = timestamp;
             _sourceEntryId = string.IsNullOrWhiteSpace(sourceEntryId) ? null : sourceEntryId.Trim();
+            LocalizationRuntime.Instance.LanguageChanged += (_, _) => OnPropertyChanged(nameof(TimestampText));
             if (_sourceEntryId != null)
             {
                 SourceEntryIds.Add(_sourceEntryId);
@@ -82,6 +85,11 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
             {
                 Parts.Add(part);
             }
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
 }

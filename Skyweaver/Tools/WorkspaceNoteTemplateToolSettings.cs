@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using System.Xml.Linq;
+using Skyweaver.Services.Localization;
 using Skyweaver.Services.SkyweaverTools;
 
 namespace Skyweaver.Tools
@@ -14,21 +15,34 @@ namespace Skyweaver.Tools
             IReadOnlyList<string> summaryPrompts)
         {
             Key = (key ?? string.Empty).Trim();
-            DisplayName = (displayName ?? string.Empty).Trim();
-            Description = (description ?? string.Empty).Trim();
+            DisplayNameFallback = (displayName ?? string.Empty).Trim();
+            DescriptionFallback = (description ?? string.Empty).Trim();
             DefaultPriority = defaultPriority;
-            SummaryPrompts = summaryPrompts?.ToArray() ?? Array.Empty<string>();
+            SummaryPromptFallbacks = summaryPrompts?.ToArray() ?? Array.Empty<string>();
         }
 
         public string Key { get; }
 
-        public string DisplayName { get; }
+        private string DisplayNameFallback { get; }
 
-        public string Description { get; }
+        public string DisplayName => L($"WorkspaceNoteTemplate.Preset.{Key}.DisplayName", DisplayNameFallback);
+
+        private string DescriptionFallback { get; }
+
+        public string Description => L($"WorkspaceNoteTemplate.Preset.{Key}.Description", DescriptionFallback);
 
         public int DefaultPriority { get; }
 
-        public IReadOnlyList<string> SummaryPrompts { get; }
+        private IReadOnlyList<string> SummaryPromptFallbacks { get; }
+
+        public IReadOnlyList<string> SummaryPrompts => SummaryPromptFallbacks
+            .Select((fallback, index) => L($"WorkspaceNoteTemplate.Preset.{Key}.SummaryPrompt.{index + 1}", fallback))
+            .ToArray();
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
     }
 
     public sealed class WorkspaceNoteTemplateToolSettings
@@ -117,7 +131,11 @@ namespace Skyweaver.Tools
 
             while (prompts.Count < targetCount)
             {
-                prompts.Add($"Capture additional {preset.DisplayName.ToLowerInvariant()} detail {prompts.Count + 1} here");
+                prompts.Add(LF(
+                    "WorkspaceNoteTemplate.Preset.AdditionalSummaryPromptFormat",
+                    "Capture additional {0} detail {1} here",
+                    preset.DisplayName.ToLowerInvariant(),
+                    prompts.Count + 1));
             }
 
             return prompts;
@@ -179,6 +197,17 @@ namespace Skyweaver.Tools
         private static int ParseInt(string? value, int fallback)
         {
             return int.TryParse(value, out var parsed) ? parsed : fallback;
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
+        {
+            var format = L(resourceKey, fallbackFormat);
+            return string.Format(format, args);
         }
     }
 }

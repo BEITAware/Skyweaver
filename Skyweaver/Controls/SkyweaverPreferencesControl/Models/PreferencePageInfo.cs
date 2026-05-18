@@ -8,6 +8,8 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.Models
 
         public string DisplayName { get; init; } = string.Empty;
 
+        public string DisplayNameResourceKey { get; init; } = string.Empty;
+
         public Type? ViewType { get; init; }
 
         public Type? ViewModelType { get; init; }

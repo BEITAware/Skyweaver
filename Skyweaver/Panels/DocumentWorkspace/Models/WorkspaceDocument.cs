@@ -1,10 +1,13 @@
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Panels.DocumentWorkspace.Models
 {
     public sealed class WorkspaceDocument : ObservableObject
     {
         public const string DefaultIconPath = "pack://application:,,,/Resources/image.png";
+
+        public static string DefaultPlaceholderText => L("DocumentWorkspace.Placeholder.Default", "Document content here...");
 
         public string Id { get; } = Guid.NewGuid().ToString();
 
@@ -13,7 +16,7 @@ namespace Skyweaver.Panels.DocumentWorkspace.Models
         private string _title = string.Empty;
         private string _subtitle = string.Empty;
         private string _iconPath = DefaultIconPath;
-        private string _placeholderText = "Document content here...";
+        private string _placeholderText = DefaultPlaceholderText;
         private object? _contentViewModel;
         private int? _instanceNumber;
         private string _displayTitle = string.Empty;
@@ -73,6 +76,11 @@ namespace Skyweaver.Panels.DocumentWorkspace.Models
         {
             get => _contentViewModel;
             set => SetProperty(ref _contentViewModel, value);
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
 }

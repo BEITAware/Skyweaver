@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.IO;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.WorkflowEditorControl.Models
 {
@@ -68,14 +69,14 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Models
             : Path.GetFileName(FilePath);
 
         public string ModifiedText => UpdatedAtUtc == default
-            ? "未记录修改时间"
-            : $"修改于 {UpdatedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)}";
+            ? L("WorkflowEditor.GraphItem.ModifiedTimeMissing", "未记录修改时间")
+            : LF("WorkflowEditor.GraphItem.ModifiedTimeFormat", "修改于 {0}", FormatTimestamp(UpdatedAtUtc));
 
         public string CreatedText => CreatedAtUtc == default
-            ? "未记录创建时间"
-            : $"创建于 {CreatedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)}";
+            ? L("WorkflowEditor.GraphItem.CreatedTimeMissing", "未记录创建时间")
+            : LF("WorkflowEditor.GraphItem.CreatedTimeFormat", "创建于 {0}", FormatTimestamp(CreatedAtUtc));
 
-        public string GraphSummaryText => $"节点 {NodeCount} · 连线 {ConnectionCount}";
+        public string GraphSummaryText => LF("WorkflowEditor.GraphItem.SummaryFormat", "节点 {0} · 连线 {1}", NodeCount, ConnectionCount);
 
         public void ApplyDocument(SessionFlowGraphDocumentModel document)
         {
@@ -106,6 +107,27 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Models
             OnPropertyChanged(nameof(ModifiedText));
             OnPropertyChanged(nameof(CreatedText));
             OnPropertyChanged(nameof(GraphSummaryText));
+        }
+
+        public void RefreshLocalizedText()
+        {
+            RaiseComputedProperties();
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string FormatTimestamp(DateTime utcDateTime)
+        {
+            var format = L("WorkflowEditor.GraphItem.TimestampFormat", "yyyy-MM-dd HH:mm");
+            return utcDateTime.ToLocalTime().ToString(format, CultureInfo.CurrentCulture);
+        }
+
+        private static string LF(string resourceKey, string fallback, params object[] args)
+        {
+            return string.Format(L(resourceKey, fallback), args);
         }
     }
 }

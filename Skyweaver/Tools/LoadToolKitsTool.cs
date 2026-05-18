@@ -2,6 +2,7 @@ using System.Text;
 using System.Windows;
 using Newtonsoft.Json.Linq;
 using Skyweaver.Controls.ChatSessionControl.Views;
+using Skyweaver.Services.Localization;
 using Skyweaver.Services.SkyweaverTools;
 
 namespace Skyweaver.Tools
@@ -12,21 +13,6 @@ namespace Skyweaver.Tools
 
         private readonly SkyweaverToolKitService _toolKitService;
         private readonly SkyweaverPromptToolCatalogService _promptToolCatalogService;
-
-        private static readonly SkyweaverToolDefinition s_definition = new(
-            ToolName,
-            "加载若干个工具集，并让这些工具集中的工具在后续代理迭代中可调用。",
-            "GuideBot",
-            [
-                new SkyweaverToolParameterDefinition(
-                    "ToolKits",
-                    "要加载的工具集名称 JSON 数组。例如：[\"文件工具\", \"笔记工具\"]。",
-                    SkyweaverToolParameterType.Json,
-                    isRequired: true)
-            ],
-            isSystemTool: false,
-            canBelongToToolKit: false,
-            defaultAgentPermission: SkyweaverToolDefaultAgentPermission.Allow);
 
         public LoadToolKitsTool()
             : this(new SkyweaverToolKitService(), new SkyweaverPromptToolCatalogService())
@@ -41,7 +27,7 @@ namespace Skyweaver.Tools
             _promptToolCatalogService = promptToolCatalogService ?? throw new ArgumentNullException(nameof(promptToolCatalogService));
         }
 
-        public SkyweaverToolDefinition Definition => s_definition;
+        public SkyweaverToolDefinition Definition => CreateDefinition();
 
         public string GetPromptDescription(SkyweaverToolPromptDescriptionContext context)
         {
@@ -55,10 +41,10 @@ namespace Skyweaver.Tools
 
             if (availableToolKitNames.Length == 0)
             {
-                return "加载若干个工具集，并让这些工具集中的工具从后续代理迭代开始可调用。当前没有可用工具集。";
+                return L("LoadToolKits.PromptDescription.Empty", "加载若干个工具集，并让这些工具集中的工具从后续代理迭代开始可调用。当前没有可用工具集。");
             }
 
-            return $"加载若干个工具集，并让这些工具集中的工具从后续代理迭代开始可调用。当前可用工具集：{string.Join("、", availableToolKitNames)}。调用回填会附带新增工具及其说明。";
+            return LF("LoadToolKits.PromptDescription.Format", "加载若干个工具集，并让这些工具集中的工具从后续代理迭代开始可调用。当前可用工具集：{0}。调用回填会附带新增工具及其说明。", string.Join(L("Common.ListSeparator.IdeographicComma", "、"), availableToolKitNames));
         }
 
         public FrameworkElement? CreateInvocationPresentation(SkyweaverToolInvocationPresentationContext context)
@@ -68,7 +54,7 @@ namespace Skyweaver.Tools
             return ToolInvocationCardFactory.Create(
                 context,
                 [
-                    new ToolInvocationCardFieldDefinition("工具集", "ToolKits", "填写工具集名称 JSON 数组")
+                    new ToolInvocationCardFieldDefinition(L("LoadToolKits.InvocationField.ToolKits", "工具集"), "ToolKits", L("LoadToolKits.InvocationField.ToolKits.Placeholder", "填写工具集名称 JSON 数组"))
                 ]);
         }
 
@@ -83,7 +69,7 @@ namespace Skyweaver.Tools
             if (requestedNames.Count == 0)
             {
                 return Task.FromResult(SkyweaverToolResult.Failure(
-                    "LoadToolKits 需要至少一个工具集名称。",
+                    L("LoadToolKits.Error.NoToolKitsRequested", "LoadToolKits 需要至少一个工具集名称。"),
                     new Dictionary<string, object?>
                     {
                         ["requestedToolKits"] = new JArray()
@@ -169,39 +155,39 @@ namespace Skyweaver.Tools
 
             if (loadedToolKits.Count > 0)
             {
-                builder.AppendLine($"已加载 {loadedToolKits.Count} 个工具集：{string.Join("、", loadedToolKits.Select(GetToolKitDisplayName))}");
+                builder.AppendLine(LF("LoadToolKits.Result.LoadedFormat", "已加载 {0} 个工具集：{1}", loadedToolKits.Count, string.Join(L("Common.ListSeparator.IdeographicComma", "、"), loadedToolKits.Select(GetToolKitDisplayName))));
 
                 if (callableTools.Count > 0)
                 {
-                    builder.AppendLine("从下一次代理迭代开始可调用的工具：");
+                    builder.AppendLine(L("LoadToolKits.Result.CallableHeader", "从下一次代理迭代开始可调用的工具："));
                     SkyweaverToolPromptSupport.AppendToolListing(builder, callableTools);
                 }
                 else
                 {
-                    builder.AppendLine("这些工具集当前没有为该代理新增任何可调用工具。");
+                    builder.AppendLine(L("LoadToolKits.Result.NoCallableTools", "这些工具集当前没有为该代理新增任何可调用工具。"));
                 }
             }
             else
             {
-                builder.AppendLine("未能加载任何工具集。");
+                builder.AppendLine(L("LoadToolKits.Result.NoneLoaded", "未能加载任何工具集。"));
             }
 
             if (skippedToolNames.Count > 0)
             {
                 builder.AppendLine();
-                builder.AppendLine("以下工具集成员未加入可调用列表：");
+                builder.AppendLine(L("LoadToolKits.Result.SkippedHeader", "以下工具集成员未加入可调用列表："));
                 foreach (var toolName in skippedToolNames)
                 {
                     builder.AppendLine($"- {toolName}");
                 }
 
-                builder.AppendLine("这些工具通常是因为已被禁用、当前代理没有权限，或运行时不支持所需的 Host 确认。");
+                builder.AppendLine(L("LoadToolKits.Result.SkippedReason", "这些工具通常是因为已被禁用、当前代理没有权限，或运行时不支持所需的 Host 确认。"));
             }
 
             if (missingToolKitNames.Count > 0)
             {
                 builder.AppendLine();
-                builder.AppendLine("未找到的工具集：");
+                builder.AppendLine(L("LoadToolKits.Result.MissingHeader", "未找到的工具集："));
                 foreach (var toolKitName in missingToolKitNames)
                 {
                     builder.AppendLine($"- {toolKitName}");
@@ -211,7 +197,7 @@ namespace Skyweaver.Tools
             if (ambiguousToolKitNames.Count > 0)
             {
                 builder.AppendLine();
-                builder.AppendLine("名称不唯一、无法确定的工具集：");
+                builder.AppendLine(L("LoadToolKits.Result.AmbiguousHeader", "名称不唯一、无法确定的工具集："));
                 foreach (var toolKitName in ambiguousToolKitNames)
                 {
                     builder.AppendLine($"- {toolKitName}");
@@ -226,6 +212,35 @@ namespace Skyweaver.Tools
             return string.IsNullOrWhiteSpace(toolKit.Name)
                 ? toolKit.DisplayNameOrFallback
                 : toolKit.Name.Trim();
+        }
+
+        private static SkyweaverToolDefinition CreateDefinition()
+        {
+            return new SkyweaverToolDefinition(
+                ToolName,
+                L("LoadToolKits.Description", "加载若干个工具集，并让这些工具集中的工具在后续代理迭代中可调用。"),
+                "GuideBot",
+                [
+                    new SkyweaverToolParameterDefinition(
+                        "ToolKits",
+                        L("LoadToolKits.Parameter.ToolKits.Description", "要加载的工具集名称 JSON 数组。例如：[\"文件工具\", \"笔记工具\"]。"),
+                        SkyweaverToolParameterType.Json,
+                        isRequired: true)
+                ],
+                isSystemTool: false,
+                canBelongToToolKit: false,
+                defaultAgentPermission: SkyweaverToolDefaultAgentPermission.Allow);
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
+        {
+            var format = L(resourceKey, fallbackFormat);
+            return string.Format(format, args);
         }
     }
 }

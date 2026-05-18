@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media.Imaging;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Services
 {
@@ -131,25 +132,35 @@ namespace Skyweaver.Services
         {
             if (exception == null)
             {
-                return "Unable to access the system clipboard.";
+                return L("Clipboard.Error.UnableToAccess", "Unable to access the system clipboard.");
             }
 
             if (exception is ExternalException)
             {
-                return "The system clipboard is currently in use by another application. Please try again.";
+                return L("Clipboard.Error.InUse", "The system clipboard is currently in use by another application. Please try again.");
             }
 
             if (exception is COMException)
             {
-                return "The system clipboard is temporarily unavailable. Please try again.";
+                return L("Clipboard.Error.TemporarilyUnavailable", "The system clipboard is temporarily unavailable. Please try again.");
             }
 
             if (exception is ThreadStateException)
             {
-                return "The current thread cannot access the system clipboard.";
+                return L("Clipboard.Error.ThreadCannotAccess", "The current thread cannot access the system clipboard.");
             }
 
-            return $"Unable to access the system clipboard: {exception.Message}";
+            return LF("Clipboard.Error.UnableToAccessFormat", "Unable to access the system clipboard: {0}", exception.Message);
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
+        {
+            return string.Format(L(resourceKey, fallbackFormat), args);
         }
     }
 }

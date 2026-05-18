@@ -44,7 +44,7 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="16,10,16,20">
-            <TextBlock Text="聊天会话"
+            <TextBlock Text="{DynamicResource ChatSession.Page.Title}"
                        Style="{StaticResource PreferenceSectionTitleStyle}"/>
 
             <Grid Margin="0,12,0,0">
@@ -62,12 +62,12 @@
 
                 <TextBlock Grid.Row="0"
                            Grid.Column="0"
-                           Text="默认折叠思维链"
+                           Text="{DynamicResource ChatSession.CollapseReasoning.Label}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <CheckBox Grid.Row="0"
                           Grid.Column="1"
                           IsChecked="{Binding CollapseReasoningByDefault, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                          Content="新出现的可折叠思维链默认以折叠状态显示。"/>
+                          Content="{DynamicResource ChatSession.CollapseReasoning.Content}"/>
 
                 <TextBlock Grid.Row="2"
                            Grid.Column="1"
@@ -76,7 +76,7 @@
 
                 <TextBlock Grid.Row="4"
                            Grid.Column="1"
-                           Text="仅对可折叠的思维链卡片生效；已经被正文样式直接显示的内容不受影响。"
+                           Text="{DynamicResource ChatSession.CollapseReasoning.Hint}"
                            Style="{StaticResource PreferenceMetaStyle}"/>
             </Grid>
 
@@ -85,7 +85,7 @@
                     Background="#30FFFFFF"/>
 
             <TextBlock Margin="0,18,0,0"
-                       Text="配置状态"
+                       Text="{DynamicResource Common.ConfigurationStatus}"
                        Style="{StaticResource PreferenceSectionTitleStyle}"/>
 
             <Grid Margin="0,12,0,0">
@@ -101,7 +101,7 @@
 
                 <TextBlock Grid.Row="0"
                            Grid.Column="0"
-                           Text="配置文件"
+                           Text="{DynamicResource Common.ConfigurationFile}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <TextBlock Grid.Row="0"
                            Grid.Column="1"
@@ -110,7 +110,7 @@
 
                 <TextBlock Grid.Row="2"
                            Grid.Column="0"
-                           Text="最近状态"
+                           Text="{DynamicResource Common.RecentStatus}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <TextBlock Grid.Row="2"
                            Grid.Column="1"
@@ -121,7 +121,7 @@
             <StackPanel Margin="0,16,0,0"
                         Orientation="Horizontal">
                 <Button MinWidth="132"
-                        Content="打开配置目录"
+                        Content="{DynamicResource Common.OpenConfigurationDirectory}"
                         Command="{Binding OpenConfigurationDirectoryCommand}"/>
             </StackPanel>
 
@@ -130,17 +130,17 @@
                     Background="#30FFFFFF"/>
 
             <TextBlock Margin="0,18,0,0"
-                       Text="说明"
+                       Text="{DynamicResource Common.Instructions}"
                        Style="{StaticResource PreferenceSectionTitleStyle}"/>
 
             <TextBlock Margin="0,12,0,0"
-                       Text="1. 此设置会立即写入当前配置文件目录中的 PresentationUI.xml。"
+                       Text="{DynamicResource ChatSession.Instruction.1}"
                        Style="{StaticResource PreferenceMetaStyle}"/>
             <TextBlock Margin="0,6,0,0"
-                       Text="2. 此设置决定后续新出现的可折叠思维链，进入界面时默认是展开还是折叠。"
+                       Text="{DynamicResource ChatSession.Instruction.2}"
                        Style="{StaticResource PreferenceMetaStyle}"/>
             <TextBlock Margin="0,6,0,0"
-                       Text="3. 用户在当前聊天视图里手动展开或收起后的状态，不会在流式刷新时被强制重置。"
+                       Text="{DynamicResource ChatSession.Instruction.3}"
                        Style="{StaticResource PreferenceMetaStyle}"/>
         </StackPanel>
     </ScrollViewer>

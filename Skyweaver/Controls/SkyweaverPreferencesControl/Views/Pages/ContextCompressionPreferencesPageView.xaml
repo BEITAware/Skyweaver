@@ -44,7 +44,7 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="16,10,16,20">
-            <TextBlock Text="压缩"
+            <TextBlock Text="{DynamicResource ContextCompression.Page.Title}"
                        Style="{StaticResource PreferenceSectionTitleStyle}"/>
 
             <Grid Margin="0,12,0,0">
@@ -73,7 +73,7 @@
                 <CheckBox Grid.Row="0"
                           Grid.Column="1"
                           IsChecked="{Binding MinCompactionEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                          Content="上下文接近上限时，后台压缩过时工具调用。"/>
+                          Content="{DynamicResource ContextCompression.MinCompaction.Content}"/>
 
                 <TextBlock Grid.Row="2"
                            Grid.Column="1"
@@ -87,9 +87,9 @@
                 <StackPanel Grid.Row="4"
                             Grid.Column="1">
                     <CheckBox IsChecked="{Binding MaxCompactionEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                              Content="启用 MaxCompaction"/>
+                              Content="{DynamicResource ContextCompression.MaxCompaction.Content}"/>
                     <TextBlock Margin="0,6,0,0"
-                               Text="上下文窗口达到上限且 MinCompaction 无法工作时，使用全量的压缩方法压缩会话上下文。"
+                               Text="{DynamicResource ContextCompression.MaxCompaction.Hint}"
                                Style="{StaticResource PreferenceMetaStyle}"/>
                 </StackPanel>
 
@@ -100,9 +100,9 @@
                 <StackPanel Grid.Row="6"
                             Grid.Column="1">
                     <CheckBox IsChecked="{Binding LifeCycleEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                              Content="启用 LifeCycle"/>
+                              Content="{DynamicResource ContextCompression.LifeCycle.Content}"/>
                     <TextBlock Margin="0,6,0,0"
-                               Text="特定工具调用结果将获得生命周期限制。在一定会话轮数后，这些工具调用结果会在上下文中被自动失效落盘。代理可以取回这些工具调用结果。一旦取回，LifeCycle 对此失效。"
+                               Text="{DynamicResource ContextCompression.LifeCycle.Hint}"
                                Style="{StaticResource PreferenceMetaStyle}"/>
                 </StackPanel>
 
@@ -130,7 +130,7 @@
 
                     <TextBlock Grid.Row="0"
                                Grid.Column="0"
-                               Text="LifeCycle 比率"
+                               Text="{DynamicResource ContextCompression.LifeCycleRatio.Label}"
                                Style="{StaticResource PreferenceLabelStyle}"/>
                     <Grid Grid.Row="0"
                           Grid.Column="1">
@@ -154,20 +154,20 @@
 
                     <TextBlock Grid.Row="2"
                                Grid.Column="1"
-                               Text="调整 LifeCycle 实际运作时的生命周期长度。结果向上取整。"
+                               Text="{DynamicResource ContextCompression.LifeCycleRatio.Hint}"
                                Style="{StaticResource PreferenceMetaStyle}"/>
                 </Grid>
 
                 <TextBlock Grid.Row="10"
                            Grid.Column="0"
-                           Text="RNN 优化"
+                           Text="{DynamicResource ContextCompression.RnnOptimization.Label}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <StackPanel Grid.Row="10"
                             Grid.Column="1">
                     <CheckBox IsChecked="{Binding RnnOptimizedCompactionEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                              Content="启用循环神经网络优化的压缩"/>
+                              Content="{DynamicResource ContextCompression.RnnOptimization.Content}"/>
                     <TextBlock Margin="0,6,0,0"
-                               Text="仅限于 RWKV、Manba 等 RNN 语言模型启用。如果启用，上下文限制会被移除，更重要的结果和内容会被移动到更新的位置，以保证它们时刻对线性注意力产生更大影响。需开启外推以获得无限上下文。"
+                               Text="{DynamicResource ContextCompression.RnnOptimization.Hint}"
                                Style="{StaticResource PreferenceMetaStyle}"/>
                 </StackPanel>
             </Grid>
@@ -177,7 +177,7 @@
                     Background="#30FFFFFF"/>
 
             <TextBlock Margin="0,18,0,0"
-                       Text="配置状态"
+                       Text="{DynamicResource Common.ConfigurationStatus}"
                        Style="{StaticResource PreferenceSectionTitleStyle}"/>
 
             <Grid Margin="0,12,0,0">
@@ -193,7 +193,7 @@
 
                 <TextBlock Grid.Row="0"
                            Grid.Column="0"
-                           Text="配置文件"
+                           Text="{DynamicResource Common.ConfigurationFile}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <TextBlock Grid.Row="0"
                            Grid.Column="1"
@@ -202,7 +202,7 @@
 
                 <TextBlock Grid.Row="2"
                            Grid.Column="0"
-                           Text="最近状态"
+                           Text="{DynamicResource Common.RecentStatus}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <TextBlock Grid.Row="2"
                            Grid.Column="1"
@@ -213,7 +213,7 @@
             <StackPanel Margin="0,16,0,0"
                         Orientation="Horizontal">
                 <Button MinWidth="132"
-                        Content="打开配置目录"
+                        Content="{DynamicResource Common.OpenConfigurationDirectory}"
                         Command="{Binding OpenConfigurationDirectoryCommand}"/>
             </StackPanel>
 
@@ -222,14 +222,14 @@
                     Background="#30FFFFFF"/>
 
             <TextBlock Margin="0,18,0,0"
-                       Text="说明"
+                       Text="{DynamicResource Common.Instructions}"
                        Style="{StaticResource PreferenceSectionTitleStyle}"/>
 
             <TextBlock Margin="0,12,0,0"
-                       Text="1. 此页设置会立即写入当前配置文件目录中的 ContextManagement.xml。"
+                       Text="{DynamicResource ContextCompression.Instruction.1}"
                        Style="{StaticResource PreferenceMetaStyle}"/>
             <TextBlock Margin="0,6,0,0"
-                       Text="2. 除 MinCompaction 外，当前选项只负责持久化配置，运行时行为尚未接入。"
+                       Text="{DynamicResource ContextCompression.Instruction.2}"
                        Style="{StaticResource PreferenceMetaStyle}"/>
         </StackPanel>
     </ScrollViewer>

@@ -3,6 +3,7 @@ using Skyweaver.Services.ChatSession;
 using Skyweaver.Panels.DocumentWorkspace.Contracts;
 using Skyweaver.Panels.DocumentWorkspace.Models;
 using Skyweaver.Panels.SessionList.Models;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.ViewModels
 {
@@ -28,8 +29,19 @@ namespace Skyweaver.ViewModels
                 Subtitle = session.TimeLabel,
                 IconPath = session.IconPath,
                 ContentViewModel = new ChatSessionControlViewModel(session.Title, session.TimeLabel, sessionModel, _chatSessionRepository),
-                PlaceholderText = $"Session '{session.Title}' content will appear here."
+                PlaceholderText = LF("SessionWorkspace.PlaceholderFormat", "Session '{0}' content will appear here.", session.Title)
             });
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
+        {
+            var format = L(resourceKey, fallbackFormat);
+            return string.Format(format, args);
         }
     }
 }

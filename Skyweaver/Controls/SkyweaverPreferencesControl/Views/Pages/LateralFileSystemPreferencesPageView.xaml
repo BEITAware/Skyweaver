@@ -44,7 +44,7 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="16,10,16,20">
-            <TextBlock Text="基础配置"
+            <TextBlock Text="{DynamicResource LateralFileSystem.Section.Basic}"
                        Style="{StaticResource PreferenceSectionTitleStyle}"/>
 
             <Grid Margin="0,12,0,0">
@@ -63,17 +63,17 @@
 
                 <TextBlock Grid.Row="0"
                            Grid.Column="0"
-                           Text="启用侧向文件系统"
+                           Text="{DynamicResource LateralFileSystem.Enabled.Label}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <CheckBox Grid.Row="0"
                           Grid.Column="1"
                           Grid.ColumnSpan="2"
                           IsChecked="{Binding IsEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                          Content="允许创建、维护和激活侧向文件系统虚拟化根。"/>
+                          Content="{DynamicResource LateralFileSystem.Enabled.Content}"/>
 
                 <TextBlock Grid.Row="2"
                            Grid.Column="0"
-                           Text="工作根目录"
+                           Text="{DynamicResource LateralFileSystem.WorkingRoot.Label}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <TextBox Grid.Row="2"
                          Grid.Column="1"
@@ -82,7 +82,7 @@
                 <Button Grid.Row="2"
                         Grid.Column="2"
                         MinWidth="96"
-                        Content="浏览..."
+                        Content="{DynamicResource Common.BrowseEllipsis}"
                         Command="{Binding BrowseWorkingRootDirectoryCommand}"/>
 
                 <TextBlock Grid.Row="4"
@@ -97,7 +97,7 @@
                     Background="#30FFFFFF"/>
 
             <TextBlock Margin="0,18,0,0"
-                       Text="环境状态"
+                       Text="{DynamicResource LateralFileSystem.Section.Environment}"
                        Style="{StaticResource PreferenceSectionTitleStyle}"/>
 
             <Grid Margin="0,12,0,0">
@@ -115,7 +115,7 @@
 
                 <TextBlock Grid.Row="0"
                            Grid.Column="0"
-                           Text="虚拟化后端"
+                           Text="{DynamicResource LateralFileSystem.Backend.Label}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <TextBlock Grid.Row="0"
                            Grid.Column="1"
@@ -124,7 +124,7 @@
 
                 <TextBlock Grid.Row="2"
                            Grid.Column="0"
-                           Text="配置文件"
+                           Text="{DynamicResource Common.ConfigurationFile}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <TextBlock Grid.Row="2"
                            Grid.Column="1"
@@ -133,7 +133,7 @@
 
                 <TextBlock Grid.Row="4"
                            Grid.Column="0"
-                           Text="最近状态"
+                           Text="{DynamicResource Common.RecentStatus}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <TextBlock Grid.Row="4"
                            Grid.Column="1"
@@ -144,7 +144,7 @@
             <StackPanel Margin="0,16,0,0"
                         Orientation="Horizontal">
                 <Button MinWidth="132"
-                        Content="打开配置目录"
+                        Content="{DynamicResource Common.OpenConfigurationDirectory}"
                         Command="{Binding OpenConfigurationDirectoryCommand}"/>
             </StackPanel>
 
@@ -153,17 +153,17 @@
                     Background="#30FFFFFF"/>
 
             <TextBlock Margin="0,18,0,0"
-                       Text="约束说明"
+                       Text="{DynamicResource LateralFileSystem.Section.Constraints}"
                        Style="{StaticResource PreferenceSectionTitleStyle}"/>
 
             <TextBlock Margin="0,12,0,0"
-                       Text="1. 所有虚拟化根都必须位于工作根目录之下。"
+                       Text="{DynamicResource LateralFileSystem.Instruction.1}"
                        Style="{StaticResource PreferenceMetaStyle}"/>
             <TextBlock Margin="0,6,0,0"
-                       Text="2. LateralFileSystemTree.xml 不在配置阶段创建，只会在创建首个侧向文件系统节点时由后端自动生成。"
+                       Text="{DynamicResource LateralFileSystem.Instruction.2}"
                        Style="{StaticResource PreferenceMetaStyle}"/>
             <TextBlock Margin="0,6,0,0"
-                       Text="3. 此页中的启用状态和工作根目录会在变更后立即写入配置文件。"
+                       Text="{DynamicResource LateralFileSystem.Instruction.3}"
                        Style="{StaticResource PreferenceMetaStyle}"/>
         </StackPanel>
     </ScrollViewer>

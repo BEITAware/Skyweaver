@@ -8,6 +8,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Xml.Linq;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 using Skyweaver.Services.SkyweaverTools;
 
 namespace Skyweaver.Tools
@@ -325,7 +326,7 @@ namespace Skyweaver.Tools
 
             panel.Children.Add(new TextBlock
             {
-                Text = "Permission",
+                Text = LocalizationRuntime.Instance.GetString("ToolConfiguration.Permission", "Permission"),
                 FontSize = 13,
                 FontWeight = FontWeights.SemiBold,
                 Margin = new Thickness(0, 0, 0, 8)

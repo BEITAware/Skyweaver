@@ -92,21 +92,21 @@
 
                     <StackPanel Grid.Column="0"
                                 Margin="0,0,12,0">
-                        <TextBlock Text="显示名称" FontWeight="SemiBold"/>
+                        <TextBlock Text="{DynamicResource Common.DisplayName}" FontWeight="SemiBold"/>
                         <TextBox Margin="0,6,0,0"
                                  Text="{Binding DisplayName, UpdateSourceTrigger=LostFocus}"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="1"
                                 Margin="0,0,12,0">
-                        <TextBlock Text="接口类型" FontWeight="SemiBold"/>
+                        <TextBlock Text="{DynamicResource Common.InterfaceType}" FontWeight="SemiBold"/>
                         <ComboBox Margin="0,6,0,0"
                                   ItemsSource="{Binding DataContext.AvailableInterfaceTypes, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                   SelectedItem="{Binding InterfaceType, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="上下文窗口 Token" FontWeight="SemiBold"/>
+                        <TextBlock Text="{DynamicResource LanguageModelConfiguration.ContextWindowTokens}" FontWeight="SemiBold"/>
                         <TextBox Margin="0,6,0,0"
                                  Text="{Binding ContextWindowTokens, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
@@ -135,13 +135,13 @@
                             Width="96"
                             Height="32"
                             Command="{Binding TestCommand}"
-                            Content="测试模型"/>
+                            Content="{DynamicResource LanguageModelConfiguration.TestModel}"/>
 
                     <Button Grid.Column="2"
                             Width="96"
                             Height="32"
                             Command="{Binding CancelTestCommand}"
-                            Content="中止测试"/>
+                            Content="{DynamicResource LanguageModelConfiguration.CancelTest}"/>
 
                     <TextBox Grid.Column="4"
                               MinHeight="72"
@@ -172,7 +172,7 @@
                 <StackPanel Grid.Row="0"
                             Grid.Column="0"
                             Margin="0,0,12,12">
-                    <TextBlock Text="模型 ID" FontWeight="SemiBold"/>
+                    <TextBlock Text="{DynamicResource Common.ModelId}" FontWeight="SemiBold"/>
                     <TextBox Margin="0,6,0,0"
                              Text="{Binding ModelId, UpdateSourceTrigger=LostFocus}"/>
                 </StackPanel>
@@ -180,7 +180,7 @@
                 <StackPanel Grid.Row="0"
                             Grid.Column="1"
                             Margin="0,0,12,12">
-                    <TextBlock Text="API Key" FontWeight="SemiBold"/>
+                    <TextBlock Text="{DynamicResource Common.ApiKey}" FontWeight="SemiBold"/>
                     <TextBox Margin="0,6,0,0"
                              Text="{Binding ApiKey, UpdateSourceTrigger=LostFocus}"/>
                 </StackPanel>
@@ -188,7 +188,7 @@
                 <StackPanel Grid.Row="1"
                             Grid.Column="0"
                             Margin="0,0,12,12">
-                    <TextBlock Text="Base URL" FontWeight="SemiBold"/>
+                    <TextBlock Text="{DynamicResource Common.BaseUrl}" FontWeight="SemiBold"/>
                     <TextBox Margin="0,6,0,0"
                              Text="{Binding BaseUrl, UpdateSourceTrigger=LostFocus}"/>
                 </StackPanel>
@@ -197,7 +197,7 @@
                             Grid.Column="1"
                             Margin="0,0,12,12">
                     <CheckBox IsChecked="{Binding UseTemperature, UpdateSourceTrigger=PropertyChanged}"
-                              Content="传入 Temperature"/>
+                              Content="{DynamicResource LanguageModelConfiguration.SendTemperature}"/>
                     <TextBox Margin="0,6,0,0"
                              IsEnabled="{Binding UseTemperature}"
                              Text="{Binding Temperature, UpdateSourceTrigger=PropertyChanged}"/>
@@ -207,7 +207,7 @@
                             Grid.Column="0"
                             Margin="0,0,0,12">
                     <CheckBox IsChecked="{Binding UseTopP, UpdateSourceTrigger=PropertyChanged}"
-                              Content="传入 Top_P"/>
+                              Content="{DynamicResource LanguageModelConfiguration.SendTopPUnderscore}"/>
                     <TextBox Margin="0,6,0,0"
                              IsEnabled="{Binding UseTopP}"
                              Text="{Binding TopP, UpdateSourceTrigger=PropertyChanged}"/>
@@ -217,7 +217,7 @@
                             Grid.Column="1"
                             Margin="0,0,12,12">
                     <CheckBox IsChecked="{Binding UseMaxOutputTokens, UpdateSourceTrigger=PropertyChanged}"
-                              Content="限制输出 Token"/>
+                              Content="{DynamicResource LanguageModelConfiguration.LimitOutputTokens}"/>
                     <TextBox Margin="0,6,0,0"
                              IsEnabled="{Binding UseMaxOutputTokens}"
                              Text="{Binding MaxOutputTokens, UpdateSourceTrigger=PropertyChanged}"/>
@@ -227,7 +227,7 @@
                             Grid.Column="0"
                             Margin="0,0,12,12">
                     <CheckBox IsChecked="{Binding UsePresencePenalty, UpdateSourceTrigger=PropertyChanged}"
-                              Content="传入 PresencePenalty"/>
+                              Content="{DynamicResource LanguageModelConfiguration.SendPresencePenalty}"/>
                     <TextBox Margin="0,6,0,0"
                              IsEnabled="{Binding UsePresencePenalty}"
                              Text="{Binding PresencePenalty, UpdateSourceTrigger=PropertyChanged}"/>
@@ -237,7 +237,7 @@
                             Grid.Column="1"
                             Margin="0,0,12,12">
                     <CheckBox IsChecked="{Binding UseFrequencyPenalty, UpdateSourceTrigger=PropertyChanged}"
-                              Content="传入 FrequencyPenalty"/>
+                              Content="{DynamicResource LanguageModelConfiguration.SendFrequencyPenalty}"/>
                     <TextBox Margin="0,6,0,0"
                              IsEnabled="{Binding UseFrequencyPenalty}"
                              Text="{Binding FrequencyPenalty, UpdateSourceTrigger=PropertyChanged}"/>
@@ -247,7 +247,7 @@
                             Grid.Column="0"
                             Margin="0,0,12,12">
                     <CheckBox IsChecked="{Binding UseSeed, UpdateSourceTrigger=PropertyChanged}"
-                              Content="固定 Seed"/>
+                              Content="{DynamicResource LanguageModelConfiguration.FixedSeed}"/>
                     <TextBox Margin="0,6,0,0"
                              IsEnabled="{Binding UseSeed}"
                              Text="{Binding Seed, UpdateSourceTrigger=PropertyChanged}"/>
@@ -257,7 +257,7 @@
                             Grid.Column="1"
                             Margin="0,0,12,12">
                     <CheckBox IsChecked="{Binding UseReasoningEffort, UpdateSourceTrigger=PropertyChanged}"
-                              Content="思考强度"/>
+                              Content="{DynamicResource LanguageModelConfiguration.ReasoningEffort}"/>
                     <ComboBox Margin="0,6,0,0"
                               IsEnabled="{Binding UseReasoningEffort}"
                               ItemsSource="{Binding SupportedReasoningEfforts}"
@@ -284,7 +284,7 @@
                 <StackPanel Grid.Row="0"
                             Grid.Column="0"
                             Margin="0,0,12,12">
-                    <TextBlock Text="模型 ID" FontWeight="SemiBold"/>
+                    <TextBlock Text="{DynamicResource Common.ModelId}" FontWeight="SemiBold"/>
                     <TextBox Margin="0,6,0,0"
                              Text="{Binding ModelId, UpdateSourceTrigger=LostFocus}"/>
                 </StackPanel>
@@ -292,7 +292,7 @@
                 <StackPanel Grid.Row="0"
                             Grid.Column="1"
                             Margin="0,0,12,12">
-                    <TextBlock Text="API Key" FontWeight="SemiBold"/>
+                    <TextBlock Text="{DynamicResource Common.ApiKey}" FontWeight="SemiBold"/>
                     <TextBox Margin="0,6,0,0"
                              Text="{Binding ApiKey, UpdateSourceTrigger=LostFocus}"/>
                 </StackPanel>
@@ -300,7 +300,7 @@
                 <StackPanel Grid.Row="1"
                             Grid.Column="0"
                             Margin="0,0,12,12">
-                    <TextBlock Text="Base URL" FontWeight="SemiBold"/>
+                    <TextBlock Text="{DynamicResource Common.BaseUrl}" FontWeight="SemiBold"/>
                     <TextBox Margin="0,6,0,0"
                              Text="{Binding BaseUrl, UpdateSourceTrigger=LostFocus}"/>
                 </StackPanel>
@@ -309,7 +309,7 @@
                             Grid.Column="1"
                             Margin="0,0,12,12">
                     <CheckBox IsChecked="{Binding UseTemperature, UpdateSourceTrigger=PropertyChanged}"
-                              Content="传入 Temperature"/>
+                              Content="{DynamicResource LanguageModelConfiguration.SendTemperature}"/>
                     <TextBox Margin="0,6,0,0"
                              IsEnabled="{Binding UseTemperature}"
                              Text="{Binding Temperature, UpdateSourceTrigger=PropertyChanged}"/>
@@ -319,7 +319,7 @@
                             Grid.Column="0"
                             Margin="0,0,12,12">
                     <CheckBox IsChecked="{Binding UseTopP, UpdateSourceTrigger=PropertyChanged}"
-                              Content="传入 Top P"/>
+                              Content="{DynamicResource LanguageModelConfiguration.SendTopP}"/>
                     <TextBox Margin="0,6,0,0"
                              IsEnabled="{Binding UseTopP}"
                              Text="{Binding TopP, UpdateSourceTrigger=PropertyChanged}"/>
@@ -329,7 +329,7 @@
                             Grid.Column="1"
                             Margin="0,0,12,12">
                     <CheckBox IsChecked="{Binding UseMaxOutputTokens, UpdateSourceTrigger=PropertyChanged}"
-                              Content="限制输出 Token"/>
+                              Content="{DynamicResource LanguageModelConfiguration.LimitOutputTokens}"/>
                     <TextBox Margin="0,6,0,0"
                              IsEnabled="{Binding UseMaxOutputTokens}"
                              Text="{Binding MaxOutputTokens, UpdateSourceTrigger=PropertyChanged}"/>
@@ -339,14 +339,14 @@
                             Grid.Column="0"
                             Margin="0,0,12,12">
                     <CheckBox IsChecked="{Binding IncludeThoughts, UpdateSourceTrigger=PropertyChanged}"
-                              Content="包含思维链"/>
+                              Content="{DynamicResource LanguageModelConfiguration.IncludeThoughts}"/>
                 </StackPanel>
 
                 <StackPanel Grid.Row="3"
                             Grid.Column="1"
                             Margin="0,0,12,12">
                     <CheckBox IsChecked="{Binding UseThinkingLevel, UpdateSourceTrigger=PropertyChanged}"
-                              Content="传入 Thinking Level"/>
+                              Content="{DynamicResource LanguageModelConfiguration.SendThinkingLevel}"/>
                     <ComboBox Margin="0,6,0,0"
                               IsEnabled="{Binding UseThinkingLevel}"
                               ItemsSource="{Binding SupportedThinkingLevels}"
@@ -357,7 +357,7 @@
                             Grid.Column="0"
                             Margin="0,0,12,12">
                     <CheckBox IsChecked="{Binding UseThinkingBudget, UpdateSourceTrigger=PropertyChanged}"
-                              Content="传入 Thinking Budget"/>
+                              Content="{DynamicResource LanguageModelConfiguration.SendThinkingBudget}"/>
                     <TextBox Margin="0,6,0,0"
                              IsEnabled="{Binding UseThinkingBudget}"
                              Text="{Binding ThinkingBudget, UpdateSourceTrigger=PropertyChanged}"/>
@@ -398,7 +398,7 @@
                                Margin="0,0,12,0">
                         <TextBlock DockPanel.Dock="Top"
                                    Margin="0,0,0,10"
-                                   Text="语言模型列表"
+                                   Text="{DynamicResource LanguageModelConfiguration.ListTitle}"
                                    FontSize="14"
                                    FontWeight="SemiBold"/>
                         <Grid DockPanel.Dock="Top"
@@ -412,13 +412,13 @@
                             </Grid.ColumnDefinitions>
                             <Button Grid.Column="0"
                                     Command="{Binding AddLanguageModelCommand}"
-                                    Content="新增语言模型"/>
+                                    Content="{DynamicResource LanguageModelConfiguration.AddModel}"/>
                             <Button Grid.Column="2"
                                     Command="{Binding DuplicateLanguageModelCommand}"
-                                    Content="复制所选模型"/>
+                                    Content="{DynamicResource LanguageModelConfiguration.DuplicateSelectedModel}"/>
                             <Button Grid.Column="4"
                                     Command="{Binding RemoveLanguageModelCommand}"
-                                    Content="删除所选模型"/>
+                                    Content="{DynamicResource LanguageModelConfiguration.RemoveSelectedModel}"/>
                         </Grid>
 
                         <Border CornerRadius="2"
@@ -470,22 +470,22 @@
                                                     <Border Style="{StaticResource CapsuleBorderStyle}">
                                                         <TextBlock VerticalAlignment="Center"
                                                                    FontSize="11"
-                                                                   Text="{Binding SummaryModelId, StringFormat=模型 ID: {0}}"/>
+                                                                   Text="{Binding SummaryModelIdText}"/>
                                                     </Border>
                                                     <Border Style="{StaticResource CapsuleBorderStyle}">
                                                         <TextBlock VerticalAlignment="Center"
                                                                    FontSize="11"
-                                                                   Text="{Binding InterfaceType, StringFormat=接口: {0}}"/>
+                                                                   Text="{Binding InterfaceTypeText}"/>
                                                     </Border>
                                                     <Border Style="{StaticResource CapsuleBorderStyle}">
                                                         <TextBlock VerticalAlignment="Center"
                                                                    FontSize="11"
-                                                                   Text="{Binding ContextWindowText, StringFormat=上下文: {0}}"/>
+                                                                   Text="{Binding ContextWindowSummaryText}"/>
                                                     </Border>
                                                     <Border Style="{StaticResource CapsuleBorderStyle}">
                                                         <TextBlock VerticalAlignment="Center"
                                                                    FontSize="11"
-                                                                   Text="{Binding ConfigurationStatusText, StringFormat=状态: {0}}"/>
+                                                                   Text="{Binding ConfigurationStatusSummaryText}"/>
                                                     </Border>
                                                 </WrapPanel>
                                             </StackPanel>
@@ -503,7 +503,7 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Margin="0,0,0,10"
-                                   Text="语言模型配置"
+                                   Text="{DynamicResource LanguageModelConfiguration.EditorTitle}"
                                    FontSize="14"
                                    FontWeight="SemiBold"/>
 
@@ -512,7 +512,7 @@
                             <Grid>
                                 <ContentControl Content="{Binding SelectedLanguageModel}"
                                                 ContentTemplate="{StaticResource LanguageModelEditorTemplate}"/>
-                                <TextBlock Text="从左侧选择一个语言模型后，在这里统一编辑它的配置。"
+                                <TextBlock Text="{DynamicResource LanguageModelConfiguration.EmptySelection}"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center"
                                            Visibility="Collapsed">
@@ -533,18 +533,18 @@
                 </Grid>
 
                 <GroupBox Grid.Row="2"
-                          Header="功能层级列表">
+                          Header="{DynamicResource LanguageModelConfiguration.CapabilityLayers.Title}">
                     <DockPanel Margin="10">
                         <StackPanel DockPanel.Dock="Top"
                                     Orientation="Horizontal"
                                     Margin="0,0,0,10">
                             <Button Width="120"
                                     Command="{Binding AddCapabilityLayerCommand}"
-                                    Content="新增功能层级"/>
+                                    Content="{DynamicResource LanguageModelConfiguration.CapabilityLayers.Add}"/>
                             <Button Width="120"
                                     Margin="8,0,0,0"
                                     Command="{Binding RemoveCapabilityLayerCommand}"
-                                    Content="删除所选层级"/>
+                                    Content="{DynamicResource LanguageModelConfiguration.CapabilityLayers.RemoveSelected}"/>
                         </StackPanel>
 
                         <ListView ItemsSource="{Binding CapabilityLayers}"
@@ -559,7 +559,7 @@
                                                         Margin="0,0,0,8">
                                                 <TextBlock Width="72"
                                                            VerticalAlignment="Center"
-                                                           Text="层级名称"
+                                                           Text="{DynamicResource LanguageModelConfiguration.CapabilityLayers.LayerName}"
                                                            FontWeight="SemiBold"/>
                                                 <TextBox MinWidth="240"
                                                          IsEnabled="{Binding CanRename}"
@@ -571,13 +571,13 @@
                                                         BorderBrush="#4496FCFF"
                                                         BorderThickness="1"
                                                         Visibility="{Binding IsBuiltIn, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                    <TextBlock Text="内置" FontSize="11"/>
+                                                    <TextBlock Text="{DynamicResource Common.BuiltIn}" FontSize="11"/>
                                                 </Border>
                                                 <Button Width="140"
                                                         Margin="10,0,0,0"
                                                         Command="{Binding DataContext.AddCapabilityLayerEntryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
-                                                        Content="添加语言模型"/>
+                                                        Content="{DynamicResource LanguageModelConfiguration.CapabilityLayers.AddLanguageModel}"/>
                                             </StackPanel>
 
                                             <TextBlock Margin="0,0,0,8"
@@ -608,19 +608,19 @@
                                                                         Margin="8,0,0,0"
                                                                         Command="{Binding DataContext.MoveCapabilityLayerEntryUpCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                         CommandParameter="{Binding}"
-                                                                        Content="上移"/>
+                                                                        Content="{DynamicResource Common.MoveUp}"/>
                                                                 <Button Grid.Column="2"
                                                                         Width="60"
                                                                         Margin="8,0,0,0"
                                                                         Command="{Binding DataContext.MoveCapabilityLayerEntryDownCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                         CommandParameter="{Binding}"
-                                                                        Content="下移"/>
+                                                                        Content="{DynamicResource Common.MoveDown}"/>
                                                                 <Button Grid.Column="3"
                                                                         Width="60"
                                                                         Margin="8,0,0,0"
                                                                         Command="{Binding DataContext.RemoveCapabilityLayerEntryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                         CommandParameter="{Binding}"
-                                                                        Content="删除"/>
+                                                                        Content="{DynamicResource Common.Delete}"/>
                                                             </Grid>
                                                         </Border>
                                                     </DataTemplate>

@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Models;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
 {
@@ -78,7 +79,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             if (!response.IsSuccessStatusCode)
             {
                 throw new InvalidOperationException(
-                    $"Google countTokens request failed with status {(int)response.StatusCode} ({response.ReasonPhrase}). {TryExtractErrorMessage(responsePayload)}");
+                    LF("GoogleLanguageModel.Error.CountTokensFailedFormat", "Google countTokens request failed with status {0} ({1}). {2}", (int)response.StatusCode, response.ReasonPhrase, TryExtractErrorMessage(responsePayload)));
             }
 
             using var document = JsonDocument.Parse(responsePayload);
@@ -89,7 +90,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 return totalTokens;
             }
 
-            throw new InvalidOperationException("Google countTokens response did not include totalTokens.");
+            throw new InvalidOperationException(L("GoogleLanguageModel.Error.TotalTokensMissing", "Google countTokens response did not include totalTokens."));
         }
 
         public async IAsyncEnumerable<LanguageModelStreamingChatUpdate> GetStreamingResponseAsync(
@@ -768,14 +769,14 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             var payload = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             var errorMessage = TryExtractErrorMessage(payload);
             throw new InvalidOperationException(
-                $"Google API request failed with status {(int)response.StatusCode} ({response.ReasonPhrase}). {errorMessage}");
+                LF("GoogleLanguageModel.Error.RequestFailedFormat", "Google API request failed with status {0} ({1}). {2}", (int)response.StatusCode, response.ReasonPhrase, errorMessage));
         }
 
         private static string TryExtractErrorMessage(string payload)
         {
             if (string.IsNullOrWhiteSpace(payload))
             {
-                return "No error payload was returned.";
+                return L("GoogleLanguageModel.Error.NoErrorPayload", "No error payload was returned.");
             }
 
             try
@@ -794,7 +795,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             {
             }
 
-            return TruncateText(payload.Trim(), 512) ?? "Unknown Google API error.";
+            return TruncateText(payload.Trim(), 512) ?? L("GoogleLanguageModel.Error.Unknown", "Unknown Google API error.");
         }
 
         private static bool TryGetHeaderValue(HttpResponseMessage response, string headerName, out string headerValue)
@@ -1093,6 +1094,16 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             }
 
             return value[..maxLength] + "...";
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
+        {
+            return string.Format(L(resourceKey, fallbackFormat), args);
         }
 
         private sealed class InlinePayloadBudget

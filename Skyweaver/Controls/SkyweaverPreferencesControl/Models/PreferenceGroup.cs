@@ -8,6 +8,7 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.Models
     {
         private string _id = string.Empty;
         private string _displayName = string.Empty;
+        private string _displayNameResourceKey = string.Empty;
         private bool _isExpanded = true;
 
         public string Id
@@ -36,6 +37,21 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.Models
                 }
 
                 _displayName = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string DisplayNameResourceKey
+        {
+            get => _displayNameResourceKey;
+            set
+            {
+                if (_displayNameResourceKey == value)
+                {
+                    return;
+                }
+
+                _displayNameResourceKey = value;
                 OnPropertyChanged();
             }
         }

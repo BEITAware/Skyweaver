@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using Skyweaver.Infrastructure.Mvvm;
 using Skyweaver.Models.LateralFileSystem;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
 {
@@ -58,7 +59,7 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
             set => SetProperty(ref _isSelected, value);
         }
 
-        private static LateralFileSystemFileTreeNodeViewModel LoadingPlaceholder => new("加载中...");
+        private static LateralFileSystemFileTreeNodeViewModel LoadingPlaceholder => new(L("Common.LoadingEllipsis", "加载中..."));
 
         private LateralFileSystemFileTreeNodeViewModel(string name)
         {
@@ -105,7 +106,7 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
             catch (Exception ex)
             {
                 Children.Clear();
-                Children.Add(new LateralFileSystemFileTreeNodeViewModel($"加载失败: {ex.Message}"));
+                Children.Add(new LateralFileSystemFileTreeNodeViewModel(LF("Common.LoadFailedFormat", "加载失败: {0}", ex.Message)));
                 _hasLoaded = true;
             }
             finally
@@ -122,37 +123,45 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
                 return stateText;
             }
 
-            return $"逻辑 {FormatBytes(entry.LogicalSizeBytes)}  ·  实体 {FormatBytes(entry.HydratedSizeBytes)}  ·  {stateText}";
+            return LF("LateralFileSystemTree.FileNode.DetailFormat", "逻辑 {0}  ·  实体 {1}  ·  {2}", FormatBytes(entry.LogicalSizeBytes), FormatBytes(entry.HydratedSizeBytes), stateText);
         }
 
         private static string FormatState(LateralFileSystemOnDiskState state, bool isDirectory)
         {
             if (state.HasFlag(LateralFileSystemOnDiskState.Full))
             {
-                return isDirectory ? "完整目录" : "完整文件";
+                return isDirectory
+                    ? L("LateralFileSystemTree.FileNode.State.FullDirectory", "完整目录")
+                    : L("LateralFileSystemTree.FileNode.State.FullFile", "完整文件");
             }
 
             if (state.HasFlag(LateralFileSystemOnDiskState.HydratedPlaceholder))
             {
-                return isDirectory ? "已 Hydrate 的目录占位符" : "已 Hydrate 的文件占位符";
+                return isDirectory
+                    ? L("LateralFileSystemTree.FileNode.State.HydratedDirectoryPlaceholder", "已 Hydrate 的目录占位符")
+                    : L("LateralFileSystemTree.FileNode.State.HydratedFilePlaceholder", "已 Hydrate 的文件占位符");
             }
 
             if (state.HasFlag(LateralFileSystemOnDiskState.Placeholder))
             {
-                return isDirectory ? "目录占位符" : "文件占位符";
+                return isDirectory
+                    ? L("LateralFileSystemTree.FileNode.State.DirectoryPlaceholder", "目录占位符")
+                    : L("LateralFileSystemTree.FileNode.State.FilePlaceholder", "文件占位符");
             }
 
             if (state.HasFlag(LateralFileSystemOnDiskState.Tombstone))
             {
-                return "Tombstone";
+                return L("LateralFileSystemTree.FileNode.State.Tombstone", "Tombstone");
             }
 
             if (state.HasFlag(LateralFileSystemOnDiskState.Unknown))
             {
-                return "状态未知";
+                return L("LateralFileSystemTree.FileNode.State.Unknown", "状态未知");
             }
 
-            return isDirectory ? "目录" : "文件";
+            return isDirectory
+                ? L("LateralFileSystemTree.FileNode.State.Directory", "目录")
+                : L("LateralFileSystemTree.FileNode.State.File", "文件");
         }
 
         private static string FormatBytes(long value)
@@ -170,6 +179,16 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
             return unitIndex == 0
                 ? $"{size:0} {units[unitIndex]}"
                 : $"{size:0.##} {units[unitIndex]}";
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallback, params object[] args)
+        {
+            return string.Format(L(resourceKey, fallback), args);
         }
     }
 }

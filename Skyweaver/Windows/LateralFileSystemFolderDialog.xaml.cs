@@ -1,6 +1,7 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Forms;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Windows
 {
@@ -28,7 +29,7 @@ namespace Skyweaver.Windows
 
             if (!string.IsNullOrWhiteSpace(inheritedFromName))
             {
-                ParentHintTextBlock.Text = $"继承来源：{inheritedFromName}";
+                ParentHintTextBlock.Text = string.Format(L("LateralFolder.ParentHintFormat", "继承来源：{0}"), inheritedFromName);
                 ParentHintTextBlock.Visibility = Visibility.Visible;
             }
 
@@ -54,7 +55,7 @@ namespace Skyweaver.Windows
         {
             using var dialog = new FolderBrowserDialog
             {
-                Description = "选择被投影的源文件夹",
+                Description = L("LateralFolder.Browse.SourceFolder", "选择被投影的源文件夹"),
                 SelectedPath = Directory.Exists(SourceFolderPath)
                     ? SourceFolderPath
                     : Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
@@ -71,7 +72,7 @@ namespace Skyweaver.Windows
         {
             if (string.IsNullOrWhiteSpace(FolderDisplayName))
             {
-                System.Windows.MessageBox.Show(this, "请输入侧向文件夹的显示名称。", Title, MessageBoxButton.OK, MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show(this, L("LateralFolder.Validation.DisplayNameRequired", "请输入侧向文件夹的显示名称。"), Title, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -83,17 +84,22 @@ namespace Skyweaver.Windows
 
             if (string.IsNullOrWhiteSpace(SourceFolderPath))
             {
-                System.Windows.MessageBox.Show(this, "请选择被投影的源文件夹。", Title, MessageBoxButton.OK, MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show(this, L("LateralFolder.Validation.SourceFolderRequired", "请选择被投影的源文件夹。"), Title, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             if (!Directory.Exists(SourceFolderPath))
             {
-                System.Windows.MessageBox.Show(this, "所选的源文件夹不存在。", Title, MessageBoxButton.OK, MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show(this, L("LateralFolder.Validation.SourceFolderMissing", "所选的源文件夹不存在。"), Title, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             DialogResult = true;
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
 }

@@ -25,6 +25,7 @@ using Skyweaver.Infrastructure.Mvvm;
 using Skyweaver.Panels.DocumentWorkspace.Models;
 using Skyweaver.Panels.DocumentWorkspace.ViewModels;
 using Skyweaver.Panels.MultiFunctionArea.Models;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
 {
@@ -63,6 +64,7 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
 
             AvailableTabDefinitions = CreateDefinitions();
             _definitions = AvailableTabDefinitions.ToDictionary(definition => definition.TypeKey, definition => definition);
+            LocalizationRuntime.Instance.LanguageChanged += (_, _) => RefreshLocalizedText();
         }
 
         public WorkspaceDocument CreateTab(WorkspaceTabOptions options)
@@ -99,8 +101,10 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
                 new()
                 {
                     TypeKey = TabTypes.SkyweaverPreferences,
-                    Title = "Skyweaver首选项",
-                    Description = "管理 Skyweaver 的全局偏好设置、外观和默认行为。",
+                    TitleResourceKey = "Tabs.SkyweaverPreferences.Title",
+                    Title = L("Tabs.SkyweaverPreferences.Title", "Skyweaver首选项"),
+                    DescriptionResourceKey = "Tabs.SkyweaverPreferences.Description",
+                    Description = L("Tabs.SkyweaverPreferences.Description", "管理 Skyweaver 的全局偏好设置、外观和默认行为。"),
                     IconPath = "pack://application:,,,/Resources/Setup.png",
                     MaxCount = 1,
                     ContentFactory = _ => CreateSkyweaverPreferencesView()
@@ -108,8 +112,10 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
                 new()
                 {
                     TypeKey = TabTypes.WorkflowEditor,
-                    Title = "会话流编辑器",
-                    Description = "在全视图区域中编辑会话流、节点连接与流程状态。",
+                    TitleResourceKey = "Tabs.WorkflowEditor.Title",
+                    Title = L("Tabs.WorkflowEditor.Title", "会话流编辑器"),
+                    DescriptionResourceKey = "Tabs.WorkflowEditor.Description",
+                    Description = L("Tabs.WorkflowEditor.Description", "在全视图区域中编辑会话流、节点连接与流程状态。"),
                     IconPath = "pack://application:,,,/Resources/Nodegraph.png",
                     MaxCount = 1,
                     ContentFactory = CreateWorkflowEditorView
@@ -117,8 +123,10 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
                 new()
                 {
                     TypeKey = TabTypes.FileManager,
-                    Title = "文件管理器",
-                    Description = "浏览、筛选和操作当前工程或素材目录中的文件。",
+                    TitleResourceKey = "Tabs.FileManager.Title",
+                    Title = L("Tabs.FileManager.Title", "文件管理器"),
+                    DescriptionResourceKey = "Tabs.FileManager.Description",
+                    Description = L("Tabs.FileManager.Description", "浏览、筛选和操作当前工程或素材目录中的文件。"),
                     IconPath = "pack://application:,,,/Resources/WorkFolder.png",
                     MaxCount = 3,
                     ContentFactory = CreateFileManagerView
@@ -126,8 +134,10 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
                 new()
                 {
                     TypeKey = TabTypes.LateralFileSystemTree,
-                    Title = "侧向文件系统树",
-                    Description = "显示紧凑的目录树，适合作为导航或辅助浏览面板。",
+                    TitleResourceKey = "Tabs.LateralFileSystemTree.Title",
+                    Title = L("Tabs.LateralFileSystemTree.Title", "侧向文件系统树"),
+                    DescriptionResourceKey = "Tabs.LateralFileSystemTree.Description",
+                    Description = L("Tabs.LateralFileSystemTree.Description", "显示紧凑的目录树，适合作为导航或辅助浏览面板。"),
                     IconPath = "pack://application:,,,/Resources/ResourcesLibrary.png",
                     MaxCount = 2,
                     ContentFactory = CreateLateralFileSystemTreeView
@@ -135,8 +145,10 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
                 new()
                 {
                     TypeKey = TabTypes.LanguageModelConfiguration,
-                    Title = "语言模型配置",
-                    Description = "配置模型来源、默认参数、上下文策略与调用预设。",
+                    TitleResourceKey = "Tabs.LanguageModelConfiguration.Title",
+                    Title = L("Tabs.LanguageModelConfiguration.Title", "语言模型配置"),
+                    DescriptionResourceKey = "Tabs.LanguageModelConfiguration.Description",
+                    Description = L("Tabs.LanguageModelConfiguration.Description", "配置模型来源、默认参数、上下文策略与调用预设。"),
                     IconPath = "pack://application:,,,/Resources/Setup.png",
                     MaxCount = 1,
                     ContentFactory = _ => CreateLanguageModelConfigurationView()
@@ -144,8 +156,10 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
                 new()
                 {
                     TypeKey = TabTypes.EmbeddingModelConfiguration,
-                    Title = "嵌入模型配置",
-                    Description = "配置向量嵌入模型来源、维度、调用参数与连通性测试。",
+                    TitleResourceKey = "Tabs.EmbeddingModelConfiguration.Title",
+                    Title = L("Tabs.EmbeddingModelConfiguration.Title", "嵌入模型配置"),
+                    DescriptionResourceKey = "Tabs.EmbeddingModelConfiguration.Description",
+                    Description = L("Tabs.EmbeddingModelConfiguration.Description", "配置向量嵌入模型来源、维度、调用参数与连通性测试。"),
                     IconPath = "pack://application:,,,/Resources/Setup.png",
                     MaxCount = 1,
                     ContentFactory = _ => CreateEmbeddingModelConfigurationView()
@@ -153,8 +167,10 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
                 new()
                 {
                     TypeKey = TabTypes.ToolConfiguration,
-                    Title = "工具配置",
-                    Description = "配置工具清单、启用状态、参数模板与运行策略。",
+                    TitleResourceKey = "Tabs.ToolConfiguration.Title",
+                    Title = L("Tabs.ToolConfiguration.Title", "工具配置"),
+                    DescriptionResourceKey = "Tabs.ToolConfiguration.Description",
+                    Description = L("Tabs.ToolConfiguration.Description", "配置工具清单、启用状态、参数模板与运行策略。"),
                     IconPath = "pack://application:,,,/Resources/WorkFolder.png",
                     MaxCount = 1,
                     ContentFactory = _ => CreateToolConfigurationView()
@@ -162,8 +178,10 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
                 new()
                 {
                     TypeKey = TabTypes.AgentConfiguration,
-                    Title = "代理配置",
-                    Description = "配置代理身份、职责、模型绑定与工具权限。",
+                    TitleResourceKey = "Tabs.AgentConfiguration.Title",
+                    Title = L("Tabs.AgentConfiguration.Title", "代理配置"),
+                    DescriptionResourceKey = "Tabs.AgentConfiguration.Description",
+                    Description = L("Tabs.AgentConfiguration.Description", "配置代理身份、职责、模型绑定与工具权限。"),
                     IconPath = "pack://application:,,,/Resources/GuideBot.png",
                     MaxCount = 1,
                     ContentFactory = _ => CreateAgentConfigurationView()
@@ -171,8 +189,10 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
                 new()
                 {
                     TypeKey = TabTypes.TextEditor,
-                    Title = "文本编辑器",
-                    Description = "用于脚本、提示词或配置文件编辑的文本工作页。",
+                    TitleResourceKey = "Tabs.TextEditor.Title",
+                    Title = L("Tabs.TextEditor.Title", "文本编辑器"),
+                    DescriptionResourceKey = "Tabs.TextEditor.Description",
+                    Description = L("Tabs.TextEditor.Description", "用于脚本、提示词或配置文件编辑的文本工作页。"),
                     IconPath = "pack://application:,,,/Resources/Script.png",
                     MaxCount = 5,
                     ContentFactory = CreateTextEditorView
@@ -180,8 +200,10 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
                 new()
                 {
                     TypeKey = TabTypes.AgentWizard,
-                    Title = "创建代理向导",
-                    Description = "通过分步向导快速配置新的代理、职责和行为模板。",
+                    TitleResourceKey = "Tabs.AgentWizard.Title",
+                    Title = L("Tabs.AgentWizard.Title", "创建代理向导"),
+                    DescriptionResourceKey = "Tabs.AgentWizard.Description",
+                    Description = L("Tabs.AgentWizard.Description", "通过分步向导快速配置新的代理、职责和行为模板。"),
                     IconPath = "pack://application:,,,/Resources/GuideBot.png",
                     MaxCount = 1,
                     ContentFactory = _ => CreateAgentWizardView()
@@ -230,7 +252,7 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
                 Subtitle = definition.Description,
                 IconPath = definition.IconPath,
                 ContentViewModel = definition.ContentFactory(instanceNumber),
-                PlaceholderText = $"Tab '{definition.Title}' has no content yet.",
+                PlaceholderText = string.Format(L("Tabs.Placeholder.NoContentFormat", "Tab '{0}' has no content yet."), definition.Title),
                 TabTypeKey = typeKey,
                 InstanceNumber = instanceNumber
             });
@@ -274,6 +296,33 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
         private void HandleDocumentClosed(WorkspaceDocument document)
         {
             RefreshTypeNumbering(document.TabTypeKey);
+        }
+
+        private void RefreshLocalizedText()
+        {
+            foreach (var definition in AvailableTabDefinitions)
+            {
+                definition.Title = L(definition.TitleResourceKey, definition.Title);
+                definition.Description = L(definition.DescriptionResourceKey, definition.Description);
+            }
+
+            foreach (var tab in OpenedTabs)
+            {
+                if (!_definitions.TryGetValue(tab.TabTypeKey, out var definition))
+                {
+                    continue;
+                }
+
+                tab.Title = definition.Title;
+                tab.Subtitle = definition.Description;
+                tab.PlaceholderText = string.Format(L("Tabs.Placeholder.NoContentFormat", "Tab '{0}' has no content yet."), definition.Title);
+                RefreshTypeNumbering(tab.TabTypeKey);
+            }
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
 
         private SkyweaverPreferencesControl CreateSkyweaverPreferencesView()

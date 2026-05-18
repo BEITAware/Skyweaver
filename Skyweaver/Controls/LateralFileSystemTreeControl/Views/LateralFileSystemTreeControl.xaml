@@ -411,7 +411,7 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel>
-                                <TextBlock Text="工作根目录"
+                                <TextBlock Text="{DynamicResource LateralFileSystemTree.WorkingRoot}"
                                            Style="{StaticResource AeroTextBlockStyle}"
                                            Foreground="#E0FFFFFF"/>
                                 <TextBlock Margin="0,4,0,0"
@@ -426,7 +426,7 @@
                                     Height="32"
                                     Style="{StaticResource AeroButtonStyle}"
                                     Command="{Binding RefreshTreeCommand}"
-                                    Content="刷新树"/>
+                                    Content="{DynamicResource LateralFileSystemTree.RefreshTree}"/>
                         </Grid>
                     </Border>
                 </Grid>
@@ -438,7 +438,7 @@
                             Padding="10,0"
                             Margin="0,0,0,8"
                             CornerRadius="2">
-                        <TextBlock Text="侧向文件夹详情"
+                        <TextBlock Text="{DynamicResource LateralFileSystemTree.FolderDetails}"
                                    Style="{StaticResource AeroParameterPanelHeaderTextStyle}"
                                    FontSize="13"
                                    VerticalAlignment="Center"/>
@@ -454,28 +454,28 @@
                                     HorizontalAlignment="Center"
                                     Style="{StaticResource AeroButtonStyle}"
                                     Command="{Binding CreateProjectionFolderCommand}"
-                                    Content="新建侧向文件夹"/>
+                                    Content="{DynamicResource LateralFileSystemTree.CreateProjectionFolder}"/>
                             <Button Width="220"
                                     Height="34"
                                     Margin="0,8,0,0"
                                     HorizontalAlignment="Center"
                                     Style="{StaticResource AeroButtonStyle}"
                                     Command="{Binding CreateInheritanceFolderCommand}"
-                                    Content="继承侧向文件夹"/>
+                                    Content="{DynamicResource LateralFileSystemTree.CreateInheritanceFolder}"/>
                             <Button Width="220"
                                     Height="34"
                                     Margin="0,8,0,0"
                                     HorizontalAlignment="Center"
                                     Style="{StaticResource AeroButtonStyle}"
                                     Command="{Binding MergeFolderCommand}"
-                                    Content="合并回源文件夹"/>
+                                    Content="{DynamicResource LateralFileSystemTree.MergeFolder}"/>
                             <Button Width="220"
                                     Height="34"
                                     Margin="0,8,0,0"
                                     HorizontalAlignment="Center"
                                     Style="{StaticResource AeroButtonStyle}"
                                     Command="{Binding DeleteFolderCommand}"
-                                    Content="删除侧向文件夹"/>
+                                    Content="{DynamicResource LateralFileSystemTree.DeleteFolder}"/>
                         </StackPanel>
                     </Border>
 
@@ -497,7 +497,7 @@
                                         BorderThickness="1"
                                         Background="#16000000">
                                     <StackPanel>
-                                        <TextBlock Text="连接状态"
+                                        <TextBlock Text="{DynamicResource LateralFileSystemTree.ConnectionStatus}"
                                                    Style="{StaticResource AeroTextBlockStyle}"
                                                    FontWeight="SemiBold"
                                                    Foreground="#F0FFFFFF"/>
@@ -549,7 +549,7 @@
                                                     BorderThickness="1"
                                                     Background="#18000000">
                                                 <StackPanel>
-                                                    <TextBlock Text="真实体积"
+                                                    <TextBlock Text="{DynamicResource LateralFileSystemTree.HydratedSize}"
                                                                Style="{StaticResource AeroTextBlockStyle}"
                                                                Foreground="#D8FFFFFF"/>
                                                     <TextBlock Margin="0,8,0,0"
@@ -578,24 +578,24 @@
                                                                Foreground="White"
                                                                FontSize="14"/>
                                                     <TextBlock Margin="0,8,0,0"
-                                                               Text="{Binding SelectedNode.Kind, StringFormat=类型：{0}}"
+                                                               Text="{Binding SelectedNodeKindText}"
                                                                Style="{StaticResource AeroTextBlockStyle}"
                                                                Foreground="#D8FFFFFF"/>
                                                     <TextBlock Margin="0,4,0,0"
-                                                               Text="{Binding SelectedNode.Owner, StringFormat=所有者：{0}}"
+                                                               Text="{Binding SelectedNodeOwnerText}"
                                                                Style="{StaticResource AeroTextBlockStyle}"
                                                                Foreground="#D8FFFFFF"/>
                                                     <TextBlock Margin="0,4,0,0"
-                                                               Text="{Binding SelectedNodeParentName, StringFormat=继承来源：{0}}"
+                                                               Text="{Binding SelectedNodeParentText}"
                                                                Style="{StaticResource AeroTextBlockStyle}"
                                                                Foreground="#D8FFFFFF"/>
                                                     <TextBlock Margin="0,8,0,0"
-                                                               Text="{Binding SelectedNode.VirtualRootPath, StringFormat=虚拟根：{0}}"
+                                                               Text="{Binding SelectedNodeVirtualRootText}"
                                                                Style="{StaticResource AeroTextBlockStyle}"
                                                                Foreground="#A8FFFFFF"
                                                                TextWrapping="Wrap"/>
                                                     <TextBlock Margin="0,4,0,0"
-                                                               Text="{Binding SelectedNode.ProjectionSourcePath, StringFormat=投影源：{0}, TargetNullValue=投影源：未设置}"
+                                                               Text="{Binding SelectedNodeProjectionSourceText}"
                                                                Style="{StaticResource AeroTextBlockStyle}"
                                                                Foreground="#A8FFFFFF"
                                                                TextWrapping="Wrap"/>
@@ -611,7 +611,7 @@
 
                                         <DockPanel Margin="0,16,0,0">
                                             <TextBlock DockPanel.Dock="Left"
-                                                       Text="文件资源树"
+                                                       Text="{DynamicResource LateralFileSystemTree.FileResourceTree}"
                                                        Style="{StaticResource AeroTextBlockStyle}"
                                                        FontWeight="SemiBold"
                                                        Foreground="White"
@@ -621,18 +621,18 @@
                                                         Height="30"
                                                         Style="{StaticResource AeroButtonStyle}"
                                                         Command="{Binding RefreshSelectedNodeFilesCommand}"
-                                                        ToolTip="手动刷新文件树并统计真实体积"
-                                                        Content="刷新文件视图"/>
+                                                        ToolTip="{DynamicResource LateralFileSystemTree.RefreshFileView.ToolTip}"
+                                                        Content="{DynamicResource LateralFileSystemTree.RefreshFileView}"/>
                                                 <Button MinWidth="126"
                                                         Height="30"
                                                         Margin="0,8,0,0"
                                                         Style="{StaticResource AeroButtonStyle}"
-                                                        Content="解除占用"/>
+                                                        Content="{DynamicResource LateralFileSystemTree.ReleaseLock}"/>
                                             </StackPanel>
                                         </DockPanel>
 
                                         <TextBlock Margin="0,12,0,0"
-                                                   Text="正在统计真实体积并载入文件树…"
+                                                   Text="{DynamicResource LateralFileSystemTree.LoadingFileTree}"
                                                    Style="{StaticResource AeroTextBlockStyle}"
                                                    Foreground="#A8FFFFFF"
                                                    Visibility="{Binding IsLoadingSelectedNodeInspector, Converter={StaticResource BooleanToVisibilityConverter}}"/>

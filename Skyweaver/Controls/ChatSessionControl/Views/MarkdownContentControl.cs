@@ -6,6 +6,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.ChatSessionControl.Views
 {
@@ -328,7 +329,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                 var headerText = block.Columns[columnIndex].Header;
                 if (string.IsNullOrWhiteSpace(headerText))
                 {
-                    headerText = $"Column {columnIndex + 1}";
+                    headerText = LF("Markdown.Table.ColumnFallbackFormat", "Column {0}", columnIndex + 1);
                 }
 
                 var column = new DataGridTextColumn
@@ -545,6 +546,16 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             style.Setters.Add(new Setter(TextBlock.TextWrappingProperty, TextWrapping.Wrap));
             style.Setters.Add(new Setter(TextBlock.VerticalAlignmentProperty, VerticalAlignment.Center));
             return style;
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
+        {
+            return string.Format(L(resourceKey, fallbackFormat), args);
         }
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Panels.FileExplorer.Models
 {
@@ -46,7 +47,7 @@ namespace Skyweaver.Panels.FileExplorer.Models
 
             if (IsDirectory)
             {
-                Children.Add(new FileTreeNode(string.Empty, false) { Name = "Loading..." });
+                Children.Add(new FileTreeNode(string.Empty, false) { Name = L("FileExplorer.Loading", "Loading...") });
             }
         }
 
@@ -84,11 +85,16 @@ namespace Skyweaver.Panels.FileExplorer.Models
         {
             if (string.IsNullOrEmpty(path))
             {
-                return "Unknown";
+                return L("FileExplorer.Unknown", "Unknown");
             }
 
             var fileName = System.IO.Path.GetFileName(path);
             return string.IsNullOrEmpty(fileName) ? path : fileName;
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
 }

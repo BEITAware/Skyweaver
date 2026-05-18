@@ -7,35 +7,31 @@ using System.Xml;
 using System.Xml.Linq;
 using Skyweaver.Commands;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 using Skyweaver.Services.SkyweaverTools;
 
 namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
 {
     public sealed class ToolConfigurationControlViewModel : ObservableObject
     {
-        public sealed class ToolParameterItemViewModel
+        public sealed class ToolParameterItemViewModel : ObservableObject
         {
+            private readonly string _description;
+
             public ToolParameterItemViewModel(SkyweaverToolParameterDefinition definition)
             {
                 Name = definition.Name;
-                Description = string.IsNullOrWhiteSpace(definition.Description)
-                    ? "未提供参数说明。"
-                    : definition.Description;
+                _description = definition.Description?.Trim() ?? string.Empty;
                 ParameterType = definition.ParameterType;
                 IsRequired = definition.IsRequired;
                 DefaultValue = definition.DefaultValue;
-                TypeDisplayName = GetTypeDisplayName(definition.ParameterType);
-                RequirementText = definition.IsRequired ? "必填" : "可选";
-                DefaultValueText = string.IsNullOrWhiteSpace(definition.DefaultValue)
-                    ? "无默认值"
-                    : $"默认值：{definition.DefaultValue}";
-                ConversionHint = GetConversionHint(definition.ParameterType);
-                ExampleRawValue = GetExampleRawValue(definition);
             }
 
             public string Name { get; }
 
-            public string Description { get; }
+            public string Description => string.IsNullOrWhiteSpace(_description)
+                ? L("ToolConfiguration.Parameter.NoDescription", "未提供参数说明。")
+                : _description;
 
             public SkyweaverToolParameterType ParameterType { get; }
 
@@ -43,25 +39,42 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
 
             public string? DefaultValue { get; }
 
-            public string TypeDisplayName { get; }
+            public string TypeDisplayName => GetTypeDisplayName(ParameterType);
 
-            public string RequirementText { get; }
+            public string RequirementText => IsRequired
+                ? L("ToolConfiguration.Parameter.Required", "必填")
+                : L("ToolConfiguration.Parameter.Optional", "可选");
 
-            public string DefaultValueText { get; }
+            public string DefaultValueText => string.IsNullOrWhiteSpace(DefaultValue)
+                ? L("ToolConfiguration.Parameter.NoDefaultValue", "无默认值")
+                : LF("Common.DefaultValueFormat", "默认值：{0}", DefaultValue!);
 
-            public string ConversionHint { get; }
+            public string ConversionHint => GetConversionHint(ParameterType);
 
-            public string ExampleRawValue { get; }
+            public string ExampleRawValue => GetExampleRawValue();
+
+            public string ExampleRawValueText => LF("Common.ExampleFormat", "示例：{0}", ExampleRawValue);
+
+            public void RefreshLocalizedText()
+            {
+                OnPropertyChanged(nameof(Description));
+                OnPropertyChanged(nameof(TypeDisplayName));
+                OnPropertyChanged(nameof(RequirementText));
+                OnPropertyChanged(nameof(DefaultValueText));
+                OnPropertyChanged(nameof(ConversionHint));
+                OnPropertyChanged(nameof(ExampleRawValue));
+                OnPropertyChanged(nameof(ExampleRawValueText));
+            }
 
             private static string GetTypeDisplayName(SkyweaverToolParameterType parameterType)
             {
                 return parameterType switch
                 {
-                    SkyweaverToolParameterType.Boolean => "布尔",
-                    SkyweaverToolParameterType.Integer => "整数",
-                    SkyweaverToolParameterType.Number => "数字",
-                    SkyweaverToolParameterType.Json => "JSON",
-                    _ => "字符串"
+                    SkyweaverToolParameterType.Boolean => L("ToolConfiguration.Parameter.Type.Boolean", "布尔"),
+                    SkyweaverToolParameterType.Integer => L("ToolConfiguration.Parameter.Type.Integer", "整数"),
+                    SkyweaverToolParameterType.Number => L("ToolConfiguration.Parameter.Type.Number", "数字"),
+                    SkyweaverToolParameterType.Json => L("ToolConfiguration.Parameter.Type.Json", "JSON"),
+                    _ => L("ToolConfiguration.Parameter.Type.String", "字符串")
                 };
             }
 
@@ -69,28 +82,28 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
             {
                 return parameterType switch
                 {
-                    SkyweaverToolParameterType.Boolean => "调用参数会先按字符串接收，再规范化为 true/false、1/0、yes/no 或 on/off。",
-                    SkyweaverToolParameterType.Integer => "调用参数会先按字符串接收，再解析为整数。",
-                    SkyweaverToolParameterType.Number => "调用参数会先按字符串接收，再解析为小数。",
-                    SkyweaverToolParameterType.Json => "调用参数会先按字符串接收，再解析为 JSON，适合数组或对象参数。",
-                    _ => "调用参数会原样作为字符串透传。"
+                    SkyweaverToolParameterType.Boolean => L("ToolConfiguration.Parameter.BooleanHint", "调用参数会先按字符串接收，再规范化为 true/false、1/0、yes/no 或 on/off。"),
+                    SkyweaverToolParameterType.Integer => L("ToolConfiguration.Parameter.IntegerHint", "调用参数会先按字符串接收，再解析为整数。"),
+                    SkyweaverToolParameterType.Number => L("ToolConfiguration.Parameter.NumberHint", "调用参数会先按字符串接收，再解析为小数。"),
+                    SkyweaverToolParameterType.Json => L("ToolConfiguration.Parameter.JsonHint", "调用参数会先按字符串接收，再解析为 JSON，适合数组或对象参数。"),
+                    _ => L("ToolConfiguration.Parameter.StringHint", "调用参数会原样作为字符串透传。")
                 };
             }
 
-            private static string GetExampleRawValue(SkyweaverToolParameterDefinition definition)
+            private string GetExampleRawValue()
             {
-                if (!string.IsNullOrWhiteSpace(definition.DefaultValue))
+                if (!string.IsNullOrWhiteSpace(DefaultValue))
                 {
-                    return definition.DefaultValue!;
+                    return DefaultValue!;
                 }
 
-                return definition.ParameterType switch
+                return ParameterType switch
                 {
                     SkyweaverToolParameterType.Boolean => "false",
                     SkyweaverToolParameterType.Integer => "0",
                     SkyweaverToolParameterType.Number => "0",
                     SkyweaverToolParameterType.Json => "{}",
-                    _ => "<文本>"
+                    _ => L("ToolConfiguration.Parameter.TextExample", "<文本>")
                 };
             }
         }
@@ -98,37 +111,29 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
         public sealed class ToolItemViewModel : ObservableObject, IDisposable
         {
             private readonly SkyweaverToolConfigurationPresenter? _configurationPresenter;
+            private readonly string _description;
+            private readonly string _iconName;
+            private readonly bool _hasExplicitIcon;
             private bool _isEnabled;
 
             public ToolItemViewModel(SkyweaverToolRegistration registration)
             {
                 Name = registration.Definition.Name;
-                Description = string.IsNullOrWhiteSpace(registration.Definition.Description)
-                    ? "未提供工具说明。"
-                    : registration.Definition.Description;
-                IconName = string.IsNullOrWhiteSpace(registration.Definition.IconName)
-                    ? "默认图标"
-                    : registration.Definition.IconName!;
+                _description = registration.Definition.Description?.Trim() ?? string.Empty;
+                _iconName = registration.Definition.IconName?.Trim() ?? string.Empty;
+                _hasExplicitIcon = !string.IsNullOrWhiteSpace(_iconName);
                 IconPath = registration.IconPath;
                 ImplementationTypeName = registration.ImplementationType.FullName ?? registration.ImplementationType.Name;
                 CanBelongToToolKit = registration.CanBelongToToolKit;
                 _isEnabled = registration.IsEnabled;
                 Parameters = new ObservableCollection<ToolParameterItemViewModel>(
                     registration.Definition.Parameters.Select(parameter => new ToolParameterItemViewModel(parameter)));
-                DynamicDefinitionHint = registration.HasCustomConfiguration
-                    ? "运行时工具定义会基于已保存配置动态计算；修改自定义配置后，可重新加载此页以刷新这里的参数与默认值展示。"
-                    : "当前展示的是工具的静态定义。";
 
                 _configurationPresenter = registration.CreateConfigurationPresenter();
                 if (_configurationPresenter != null)
                 {
                     _configurationPresenter.ConfigurationChanged += OnConfigurationPresenterChanged;
                     CustomConfigurationView = _configurationPresenter.View;
-                    CustomConfigurationSummaryText = "该工具提供独立配置面板。布局、控件和交互由工具自己决定，宿主只负责承载与持久化。";
-                }
-                else
-                {
-                    CustomConfigurationSummaryText = "该工具未提供自定义配置面板。";
                 }
             }
 
@@ -136,9 +141,13 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
 
             public string Name { get; }
 
-            public string Description { get; }
+            public string Description => string.IsNullOrWhiteSpace(_description)
+                ? L("ToolConfiguration.Tool.NoDescription", "未提供工具说明。")
+                : _description;
 
-            public string IconName { get; }
+            public string IconName => _hasExplicitIcon
+                ? _iconName
+                : L("ToolConfiguration.Tool.DefaultIcon", "默认图标");
 
             public string IconPath { get; }
 
@@ -150,9 +159,13 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
 
             public FrameworkElement? CustomConfigurationView { get; }
 
-            public string DynamicDefinitionHint { get; }
+            public string DynamicDefinitionHint => HasCustomConfiguration
+                ? L("ToolConfiguration.Tool.DynamicDefinition", "运行时工具定义会基于已保存配置动态计算；修改自定义配置后，可重新加载此页以刷新这里的参数与默认值展示。")
+                : L("ToolConfiguration.Tool.StaticDefinition", "当前展示的是工具的静态定义。");
 
-            public string CustomConfigurationSummaryText { get; }
+            public string CustomConfigurationSummaryText => HasCustomConfiguration
+                ? L("ToolConfiguration.Tool.CustomPanel", "该工具提供独立配置面板。布局、控件和交互由工具自己决定，宿主只负责承载与持久化。")
+                : L("ToolConfiguration.Tool.NoCustomPanel", "该工具未提供自定义配置面板。");
 
             public bool HasCustomConfiguration => CustomConfigurationView != null;
 
@@ -168,11 +181,17 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
                 }
             }
 
-            public string AvailabilityText => IsEnabled ? "已启用" : "已禁用";
+            public string AvailabilityText => IsEnabled
+                ? L("ToolConfiguration.Tool.Enabled", "已启用")
+                : L("ToolConfiguration.Tool.Disabled", "已禁用");
 
-            public string ConfigurationModeText => HasCustomConfiguration ? "带自定义配置" : "仅基础配置";
+            public string ConfigurationModeText => HasCustomConfiguration
+                ? L("ToolConfiguration.Tool.CustomConfigMode", "带自定义配置")
+                : L("ToolConfiguration.Tool.BasicConfigMode", "仅基础配置");
 
-            public string ParameterCountText => Parameters.Count == 0 ? "无参数" : $"{Parameters.Count} 个参数";
+            public string ParameterCountText => Parameters.Count == 0
+                ? L("ToolConfiguration.Parameter.Count.None", "无参数")
+                : LF("ToolConfiguration.Parameter.Count.Format", "{0} 个参数", Parameters.Count);
 
             public string RequirementSummaryText
             {
@@ -180,18 +199,18 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
                 {
                     if (Parameters.Count == 0)
                     {
-                        return "无需输入";
+                        return L("ToolConfiguration.Parameter.RequirementSummary.None", "无需输入");
                     }
 
                     var requiredCount = Parameters.Count(parameter => parameter.IsRequired);
                     var optionalCount = Parameters.Count - requiredCount;
-                    return $"{requiredCount} 必填 / {optionalCount} 可选";
+                    return LF("ToolConfiguration.Parameter.RequirementSummary.Format", "{0} 必填 / {1} 可选", requiredCount, optionalCount);
                 }
             }
 
-            public string IconSummaryText => string.Equals(IconName, "默认图标", StringComparison.Ordinal)
-                ? "工具未声明显式图标，当前使用默认图标。"
-                : $"图标名称：{IconName}";
+            public string IconSummaryText => !_hasExplicitIcon
+                ? L("ToolConfiguration.Tool.IconSummary.Default", "工具未声明显式图标，当前使用默认图标。")
+                : LF("ToolConfiguration.Tool.IconSummary.Format", "图标名称：{0}", IconName);
 
             public string RawInvocationTemplate => BuildRawInvocationTemplate();
 
@@ -206,7 +225,7 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
                 {
                     throw new InvalidOperationException(
                         string.IsNullOrWhiteSpace(errorMessage)
-                            ? $"工具“{Name}”的自定义配置无法保存。"
+                            ? LF("ToolConfiguration.Tool.CustomSaveFailedFormat", "工具“{0}”的自定义配置无法保存。", Name)
                             : errorMessage);
                 }
 
@@ -239,6 +258,24 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
             private void OnConfigurationPresenterChanged(object? sender, EventArgs e)
             {
                 CustomConfigurationChanged?.Invoke(this, EventArgs.Empty);
+            }
+
+            public void RefreshLocalizedText()
+            {
+                OnPropertyChanged(nameof(Description));
+                OnPropertyChanged(nameof(IconName));
+                OnPropertyChanged(nameof(DynamicDefinitionHint));
+                OnPropertyChanged(nameof(CustomConfigurationSummaryText));
+                OnPropertyChanged(nameof(AvailabilityText));
+                OnPropertyChanged(nameof(ConfigurationModeText));
+                OnPropertyChanged(nameof(ParameterCountText));
+                OnPropertyChanged(nameof(RequirementSummaryText));
+                OnPropertyChanged(nameof(IconSummaryText));
+
+                foreach (var parameter in Parameters)
+                {
+                    parameter.RefreshLocalizedText();
+                }
             }
 
             private static XElement CreateParameterElement(ToolParameterItemViewModel parameter)
@@ -295,16 +332,21 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
 
             Tools.CollectionChanged += OnToolsCollectionChanged;
             ToolKits.CollectionChanged += OnToolKitsCollectionChanged;
+            LocalizationRuntime.Instance.LanguageChanged += (_, _) => RefreshLocalizedText();
 
             LoadToolKits();
             LoadTools();
         }
 
-        public string Title { get; } = "工具配置";
+        public string Title => L("ToolConfiguration.Title", "工具配置");
 
-        public string Description { get; } = "扫描 ISkyweaverTool 实现，展示运行时工具定义，并允许工具在宿主中挂载自己的配置面板与 ToolKit 编排。";
+        public string Description => L(
+            "ToolConfiguration.Description",
+            "扫描 ISkyweaverTool 实现，展示运行时工具定义，并允许工具在宿主中挂载自己的配置面板与 ToolKit 编排。");
 
-        public string DiscoveryHint { get; } = "宿主统一保存启用状态、工具自定义配置与 ToolKit 结构；工具则可以按自己的方式提供 MVVM、动态定义、提示词描述和执行期配置读取。";
+        public string DiscoveryHint => L(
+            "ToolConfiguration.DiscoveryHint",
+            "宿主统一保存启用状态、工具自定义配置与 ToolKit 结构；工具则可以按自己的方式提供 MVVM、动态定义、提示词描述和执行期配置读取。");
 
         public ObservableCollection<ToolItemViewModel> Tools { get; } = new();
 
@@ -334,8 +376,13 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
             .ToArray();
 
         public string SummaryText => Tools.Count == 0
-            ? "未发现工具。"
-            : $"共发现 {Tools.Count} 个工具，已启用 {Tools.Count(tool => tool.IsEnabled)} 个，其中 {Tools.Count(tool => tool.HasCustomConfiguration)} 个带自定义配置。";
+            ? L("ToolConfiguration.Summary.NoTools", "未发现工具。")
+            : LF(
+                "ToolConfiguration.Summary.Format",
+                "共发现 {0} 个工具，已启用 {1} 个，其中 {2} 个带自定义配置。",
+                Tools.Count,
+                Tools.Count(tool => tool.IsEnabled),
+                Tools.Count(tool => tool.HasCustomConfiguration));
 
         public string ToolKitSummaryText
         {
@@ -343,11 +390,17 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
             {
                 if (ToolKits.Count == 0)
                 {
-                    return "当前尚未配置任何 ToolKit。加入 ToolKit 的工具不会在代理循环开始时默认提供给 LLM。";
+                    return L(
+                        "ToolConfiguration.ToolKitSummary.Empty",
+                        "当前尚未配置任何 ToolKit。加入 ToolKit 的工具不会在代理循环开始时默认提供给 LLM。");
                 }
 
                 var groupedToolCount = ToolKits.Sum(toolKit => toolKit.Tools.Count(tool => !string.IsNullOrWhiteSpace(tool.ToolName)));
-                return $"当前已配置 {ToolKits.Count} 个 ToolKit，累计包含 {groupedToolCount} 条工具引用。";
+                return LF(
+                    "ToolConfiguration.ToolKitSummary.Format",
+                    "当前已配置 {0} 个 ToolKit，累计包含 {1} 条工具引用。",
+                    ToolKits.Count,
+                    groupedToolCount);
             }
         }
 
@@ -400,15 +453,15 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
                     ?? Tools.FirstOrDefault();
 
                 StatusMessage = Tools.Count == 0
-                    ? "未找到工具。请在 Tools 目录下添加实现 ISkyweaverTool 的 .cs 文件。"
-                    : $"已加载 {Tools.Count} 个工具。";
+                    ? L("ToolConfiguration.Status.NoTools", "未找到工具。请在 Tools 目录下添加实现 ISkyweaverTool 的 .cs 文件。")
+                    : LF("ToolConfiguration.Status.LoadedFormat", "已加载 {0} 个工具。", Tools.Count);
             }
             catch (Exception ex)
             {
                 SelectedTool = null;
                 DisposeToolItems();
                 Tools.Clear();
-                StatusMessage = $"工具加载失败：{ex.Message}";
+                StatusMessage = LF("ToolConfiguration.Status.LoadFailedFormat", "工具加载失败：{0}", ex.Message);
             }
             finally
             {
@@ -442,7 +495,7 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
                 DisposeToolKits();
                 ToolKits.Clear();
                 SelectedToolKit = null;
-                StatusMessage = $"ToolKit 加载失败：{ex.Message}";
+                StatusMessage = LF("ToolConfiguration.Status.ToolKitLoadFailedFormat", "ToolKit 加载失败：{0}", ex.Message);
             }
             finally
             {
@@ -463,7 +516,9 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
                 return;
             }
 
-            PersistTools($"工具“{item.Name}”已{(item.IsEnabled ? "启用" : "禁用")}。");
+            PersistTools(item.IsEnabled
+                ? LF("ToolConfiguration.Status.ToolEnabledFormat", "工具“{0}”已启用。", item.Name)
+                : LF("ToolConfiguration.Status.ToolDisabledFormat", "工具“{0}”已禁用。", item.Name));
         }
 
         private void OnToolItemCustomConfigurationChanged(object? sender, EventArgs e)
@@ -473,7 +528,7 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
                 return;
             }
 
-            PersistTools($"工具“{item.Name}”的自定义配置已保存。");
+            PersistTools(LF("ToolConfiguration.Status.ToolCustomSavedFormat", "工具“{0}”的自定义配置已保存。", item.Name));
         }
 
         private void SetAllToolsEnabled(bool isEnabled)
@@ -497,20 +552,22 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
                 _isLoading = false;
             }
 
-            PersistTools(isEnabled ? "已启用全部工具。" : "已禁用全部工具。");
+            PersistTools(isEnabled
+                ? L("ToolConfiguration.Status.AllEnabled", "已启用全部工具。")
+                : L("ToolConfiguration.Status.AllDisabled", "已禁用全部工具。"));
         }
 
         private void AddToolKit()
         {
             var toolKit = new SkyweaverToolKitDefinition
             {
-                Name = $"ToolKit {ToolKits.Count + 1}"
+                Name = LF("ToolConfiguration.NewToolKitNameFormat", "ToolKit {0}", ToolKits.Count + 1)
             };
 
             AttachToolKit(toolKit);
             ToolKits.Add(toolKit);
             SelectedToolKit = toolKit;
-            PersistToolKits("ToolKit 已新增并保存。");
+            PersistToolKits(L("ToolConfiguration.Status.ToolKitAdded", "ToolKit 已新增并保存。"));
         }
 
         private void RemoveSelectedToolKit()
@@ -528,14 +585,14 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
                 }
 
                 SelectedToolKit.Tools.Clear();
-                PersistToolKits("Default ToolKit membership override saved.");
+                PersistToolKits(L("ToolConfiguration.Status.DefaultToolKitSaved", "Default ToolKit membership override saved."));
                 return;
             }
 
             DetachToolKit(SelectedToolKit);
             ToolKits.Remove(SelectedToolKit);
             SelectedToolKit = ToolKits.FirstOrDefault();
-            PersistToolKits("ToolKit 已删除并保存。");
+            PersistToolKits(L("ToolConfiguration.Status.ToolKitRemoved", "ToolKit 已删除并保存。"));
         }
 
         private void AddToolToToolKit(SkyweaverToolKitDefinition? toolKit)
@@ -552,7 +609,7 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
 
             AttachToolKitEntry(entry);
             toolKit.Tools.Add(entry);
-            PersistToolKits("ToolKit 中的工具顺序已保存。");
+            PersistToolKits(L("ToolConfiguration.Status.ToolKitOrderSaved", "ToolKit 中的工具顺序已保存。"));
         }
 
         private void RemoveToolFromToolKit(SkyweaverToolKitEntry? entry)
@@ -570,7 +627,7 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
 
             DetachToolKitEntry(entry);
             toolKit.Tools.Remove(entry);
-            PersistToolKits("ToolKit 中的工具顺序已保存。");
+            PersistToolKits(L("ToolConfiguration.Status.ToolKitOrderSaved", "ToolKit 中的工具顺序已保存。"));
         }
 
         private bool CanMoveToolInToolKitUp(SkyweaverToolKitEntry? entry)
@@ -599,7 +656,7 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
             }
 
             toolKit.Tools.Move(index, index - 1);
-            PersistToolKits("ToolKit 中的工具顺序已保存。");
+            PersistToolKits(L("ToolConfiguration.Status.ToolKitOrderSaved", "ToolKit 中的工具顺序已保存。"));
         }
 
         private bool CanMoveToolInToolKitDown(SkyweaverToolKitEntry? entry)
@@ -628,7 +685,7 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
             }
 
             toolKit.Tools.Move(index, index + 1);
-            PersistToolKits("ToolKit 中的工具顺序已保存。");
+            PersistToolKits(L("ToolConfiguration.Status.ToolKitOrderSaved", "ToolKit 中的工具顺序已保存。"));
         }
 
         private void PersistTools(string successMessage)
@@ -640,7 +697,7 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
             }
             catch (Exception ex)
             {
-                StatusMessage = $"保存工具配置失败：{ex.Message}";
+                StatusMessage = LF("ToolConfiguration.Status.SaveToolsFailedFormat", "保存工具配置失败：{0}", ex.Message);
             }
             finally
             {
@@ -662,7 +719,7 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
             }
             catch (Exception ex)
             {
-                StatusMessage = $"保存 ToolKit 配置失败：{ex.Message}";
+                StatusMessage = LF("ToolConfiguration.Status.SaveToolKitFailedFormat", "保存 ToolKit 配置失败：{0}", ex.Message);
             }
             finally
             {
@@ -707,7 +764,7 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
 
         private void OnToolKitPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            PersistToolKits("ToolKit 配置已保存。");
+            PersistToolKits(L("ToolConfiguration.Status.ToolKitSaved", "ToolKit 配置已保存。"));
         }
 
         private void OnToolKitEntriesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -728,13 +785,13 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
                 }
             }
 
-            PersistToolKits("ToolKit 配置已保存。");
+            PersistToolKits(L("ToolConfiguration.Status.ToolKitSaved", "ToolKit 配置已保存。"));
             CommandManager.InvalidateRequerySuggested();
         }
 
         private void OnToolKitEntryPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            PersistToolKits("ToolKit 配置已保存。");
+            PersistToolKits(L("ToolConfiguration.Status.ToolKitSaved", "ToolKit 配置已保存。"));
         }
 
         private SkyweaverToolKitDefinition? FindParentToolKit(SkyweaverToolKitEntry entry)
@@ -796,6 +853,35 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
             OnPropertyChanged(nameof(ToolKitSummaryText));
             OnPropertyChanged(nameof(ToolKitEligibleTools));
             CommandManager.InvalidateRequerySuggested();
+        }
+
+        private void RefreshLocalizedText()
+        {
+            OnPropertyChanged(nameof(Title));
+            OnPropertyChanged(nameof(Description));
+            OnPropertyChanged(nameof(DiscoveryHint));
+
+            foreach (var tool in Tools)
+            {
+                tool.RefreshLocalizedText();
+            }
+
+            foreach (var toolKit in ToolKits)
+            {
+                toolKit.RefreshLocalizedText();
+            }
+
+            RefreshState();
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallback, params object[] args)
+        {
+            return string.Format(L(resourceKey, fallback), args);
         }
     }
 }

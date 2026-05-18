@@ -113,13 +113,13 @@
                                    Foreground="#FFE2FFF8">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="Receiving parameters"/>
+                                    <Setter Property="Text" Value="{DynamicResource ToolInvocation.Status.ReceivingParameters}"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding State.IsInvocationClosed}" Value="True">
-                                            <Setter Property="Text" Value="Parameters received, waiting for tool result"/>
+                                            <Setter Property="Text" Value="{DynamicResource ToolInvocation.Status.ParametersReceived}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding State.HasToolResult}" Value="True">
-                                            <Setter Property="Text" Value="Tool result received"/>
+                                            <Setter Property="Text" Value="{DynamicResource ToolInvocation.Status.ToolResultReceived}"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -206,7 +206,7 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <TextBlock Text="Streaming"
+                                        <TextBlock Text="{DynamicResource ToolInvocation.Streaming}"
                                                    FontFamily="{DynamicResource AeroFontFamily}"
                                                    FontSize="{DynamicResource AeroSmallFontSize}"
                                                    Foreground="#FFF5FAFF"/>
@@ -265,7 +265,7 @@
                                             </TextBlock.Style>
                                         </TextBlock>
 
-                                        <TextBlock Text="Waiting for parameter..."
+                                        <TextBlock Text="{DynamicResource ToolInvocation.WaitingForParameter}"
                                                    FontFamily="{DynamicResource AeroFontFamily}"
                                                    FontSize="{DynamicResource AeroFontSize}"
                                                    Foreground="#CCEAF7FF"
@@ -295,7 +295,7 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <TextBlock Text="Streaming"
+                                        <TextBlock Text="{DynamicResource ToolInvocation.Streaming}"
                                                    FontFamily="{DynamicResource AeroFontFamily}"
                                                    FontSize="{DynamicResource AeroSmallFontSize}"
                                                    Foreground="#FFF5FAFF"/>
@@ -429,7 +429,7 @@
                         </Style>
                     </Border.Style>
                     <StackPanel>
-                        <TextBlock Text="Result"
+                        <TextBlock Text="{DynamicResource ToolInvocation.Result}"
                                    FontFamily="{DynamicResource AeroFontFamily}"
                                    FontSize="{DynamicResource AeroSmallFontSize}"
                                    FontWeight="SemiBold"

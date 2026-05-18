@@ -1,5 +1,6 @@
 using Skyweaver.Controls.SkyweaverPreferencesControl.Models;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels
 {
@@ -10,13 +11,14 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels
         public SelectablePreferencePageViewModel(PreferencePageInfo pageInfo)
         {
             PageInfo = pageInfo;
+            LocalizationRuntime.Instance.LanguageChanged += (_, _) => OnPropertyChanged(nameof(DisplayName));
         }
 
         public PreferencePageInfo PageInfo { get; }
 
         public string Id => PageInfo.Id;
 
-        public string DisplayName => PageInfo.DisplayName;
+        public string DisplayName => LocalizationRuntime.Instance.GetString(PageInfo.DisplayNameResourceKey, PageInfo.DisplayName);
 
         public bool IsSelected
         {

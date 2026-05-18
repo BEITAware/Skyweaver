@@ -1,6 +1,7 @@
 using Skyweaver.Controls.AgentConfigurationControl.Models;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Models;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.AgentConfigurationControl.Services
 {
@@ -95,7 +96,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
 
                 if (!candidate.InterfaceSettings.IsFullyConfigured)
                 {
-                    failureMessages.Add($"{GetLanguageModelDisplayName(candidate)}：接口配置不完整");
+                    failureMessages.Add(LF("AgentLanguageModelResolver.Failure.InterfaceIncompleteFormat", "{0}：接口配置不完整", GetLanguageModelDisplayName(candidate)));
                     continue;
                 }
 
@@ -106,16 +107,16 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
                 catch (Exception ex)
                 {
                     lastError = ex;
-                    failureMessages.Add($"{GetLanguageModelDisplayName(candidate)}：{ex.Message}");
+                    failureMessages.Add(LF("AgentLanguageModelResolver.Failure.ModelErrorFormat", "{0}：{1}", GetLanguageModelDisplayName(candidate), ex.Message));
                 }
             }
 
             var failureText = failureMessages.Count == 0
-                ? "没有可调用的候选语言模型。"
-                : $"已按顺序尝试：{string.Join("；", failureMessages)}";
+                ? L("AgentLanguageModelResolver.Failure.NoCallableCandidates", "没有可调用的候选语言模型。")
+                : LF("AgentLanguageModelResolver.Failure.AttemptedInOrderFormat", "已按顺序尝试：{0}", JoinMessages(failureMessages));
 
             throw new InvalidOperationException(
-                $"代理“{agent.DisplayNameOrFallback}”绑定的功能层级“{plan.SelectionDisplayName}”没有找到无错误可用的语言模型。{failureText}",
+                LF("AgentLanguageModelResolver.Error.AgentCapabilityLayerNoAvailableModelFormat", "代理“{0}”绑定的功能层级“{1}”没有找到无错误可用的语言模型。{2}", agent.DisplayNameOrFallback, plan.SelectionDisplayName, failureText),
                 lastError);
         }
 
@@ -133,9 +134,9 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
 
             if (plan.Cands.Count == 0)
             {
-                var issues = plan.Issues.Count == 0 ? string.Empty : $" {string.Join("；", plan.Issues)}";
+                var issues = plan.Issues.Count == 0 ? string.Empty : $" {JoinMessages(plan.Issues)}";
                 throw new InvalidOperationException(
-                    $"功能层级“{plan.SelectionDisplayName}”无法解析出候选语言模型。{issues}");
+                    LF("AgentLanguageModelResolver.Error.CapabilityLayerNoCandidatesFormat", "功能层级“{0}”无法解析出候选语言模型。{1}", plan.SelectionDisplayName, issues));
             }
 
             Exception? lastError = null;
@@ -147,7 +148,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
 
                 if (!candidate.InterfaceSettings.IsFullyConfigured)
                 {
-                    failureMessages.Add($"{GetLanguageModelDisplayName(candidate)}：接口配置不完整");
+                    failureMessages.Add(LF("AgentLanguageModelResolver.Failure.InterfaceIncompleteFormat", "{0}：接口配置不完整", GetLanguageModelDisplayName(candidate)));
                     continue;
                 }
 
@@ -158,16 +159,16 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
                 catch (Exception ex)
                 {
                     lastError = ex;
-                    failureMessages.Add($"{GetLanguageModelDisplayName(candidate)}：{ex.Message}");
+                    failureMessages.Add(LF("AgentLanguageModelResolver.Failure.ModelErrorFormat", "{0}：{1}", GetLanguageModelDisplayName(candidate), ex.Message));
                 }
             }
 
             var failureText = failureMessages.Count == 0
-                ? "没有可调用的候选语言模型。"
-                : $"已按顺序尝试：{string.Join("；", failureMessages)}";
+                ? L("AgentLanguageModelResolver.Failure.NoCallableCandidates", "没有可调用的候选语言模型。")
+                : LF("AgentLanguageModelResolver.Failure.AttemptedInOrderFormat", "已按顺序尝试：{0}", JoinMessages(failureMessages));
 
             throw new InvalidOperationException(
-                $"功能层级“{plan.SelectionDisplayName}”没有找到无错误可用的语言模型。{failureText}",
+                LF("AgentLanguageModelResolver.Error.CapabilityLayerNoAvailableModelFormat", "功能层级“{0}”没有找到无错误可用的语言模型。{1}", plan.SelectionDisplayName, failureText),
                 lastError);
         }
 
@@ -179,7 +180,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
             if (candidates.Count == 0)
             {
                 throw new InvalidOperationException(
-                    $"代理“{agent.DisplayNameOrFallback}”未能解析到用于计算上下文窗口的语言模型。");
+                    LF("AgentLanguageModelResolver.Error.AgentContextModelMissingFormat", "代理“{0}”未能解析到用于计算上下文窗口的语言模型。", agent.DisplayNameOrFallback));
             }
 
             return candidates.Min(model => model.EffectiveContextWindowTokens);
@@ -193,7 +194,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
             if (candidates.Count == 0)
             {
                 throw new InvalidOperationException(
-                    $"功能层级“{capabilityLayerKey}”未能解析到用于计算上下文窗口的语言模型。");
+                    LF("AgentLanguageModelResolver.Error.CapabilityLayerContextModelMissingFormat", "功能层级“{0}”未能解析到用于计算上下文窗口的语言模型。", capabilityLayerKey));
             }
 
             return candidates.Min(model => model.EffectiveContextWindowTokens);
@@ -231,9 +232,9 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
             {
                 return new ResolutionPlan(
                     UseFallback: false,
-                    SelectionDisplayName: "未选择语言模型",
+                    SelectionDisplayName: L("AgentLanguageModelResolver.Selection.NoLanguageModel", "未选择语言模型"),
                     Candidates: Array.Empty<LanguageModelDefinition>(),
-                    Issues: ["未为代理绑定具体语言模型。"]);
+                    Issues: [L("AgentLanguageModelResolver.Issue.AgentNoSpecificModel", "未为代理绑定具体语言模型。")]);
             }
 
             if (!languageModelMap.TryGetValue(agent.SelectedLanguageModelKey, out var model))
@@ -242,7 +243,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
                     UseFallback: false,
                     SelectionDisplayName: agent.SelectedLanguageModelKey,
                     Candidates: Array.Empty<LanguageModelDefinition>(),
-                    Issues: ["引用的语言模型不存在。"]);
+                    Issues: [L("AgentLanguageModelResolver.Issue.LanguageModelMissing", "引用的语言模型不存在。")]);
             }
 
             return new ResolutionPlan(
@@ -268,9 +269,9 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
             if (string.IsNullOrWhiteSpace(capabilityLayerKey))
             {
                 return new CapabilityLayerResolutionPlan(
-                    SelectionDisplayName: "未选择功能层级",
+                    SelectionDisplayName: L("AgentLanguageModelResolver.Selection.NoCapabilityLayer", "未选择功能层级"),
                     Cands: Array.Empty<LanguageModelDefinition>(),
-                    Issues: ["未指定功能层级。"]);
+                    Issues: [L("AgentLanguageModelResolver.Issue.CapabilityLayerNotSpecified", "未指定功能层级。")]);
             }
 
             if (!capabilityLayerMap.TryGetValue(capabilityLayerKey, out var layer))
@@ -278,7 +279,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
                 return new CapabilityLayerResolutionPlan(
                     SelectionDisplayName: capabilityLayerKey,
                     Cands: Array.Empty<LanguageModelDefinition>(),
-                    Issues: ["引用的功能层级不存在。"]);
+                    Issues: [L("AgentLanguageModelResolver.Issue.CapabilityLayerMissing", "引用的功能层级不存在。")]);
             }
 
             var seenKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -295,7 +296,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
 
                 if (!languageModelMap.TryGetValue(languageModelKey, out var model))
                 {
-                    issues.Add($"功能层级中的语言模型引用“{languageModelKey}”不存在。");
+                    issues.Add(LF("AgentLanguageModelResolver.Issue.LayerLanguageModelMissingFormat", "功能层级中的语言模型引用“{0}”不存在。", languageModelKey));
                     continue;
                 }
 
@@ -316,18 +317,18 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
             }
 
             throw new InvalidOperationException(
-                $"代理“{agent.DisplayNameOrFallback}”绑定的语言模型“{GetLanguageModelDisplayName(model)}”接口配置不完整。");
+                LF("AgentLanguageModelResolver.Error.AgentModelInterfaceIncompleteFormat", "代理“{0}”绑定的语言模型“{1}”接口配置不完整。", agent.DisplayNameOrFallback, GetLanguageModelDisplayName(model)));
         }
 
         private static string BuildMissingSelectionMessage(AgentDefinition agent, ResolutionPlan plan)
         {
             var issues = plan.Issues.Count == 0
                 ? string.Empty
-                : $" {string.Join("；", plan.Issues)}";
+                : $" {JoinMessages(plan.Issues)}";
 
             return plan.UseFallback
-                ? $"代理“{agent.DisplayNameOrFallback}”绑定的功能层级无法解析出候选语言模型。{issues}"
-                : $"代理“{agent.DisplayNameOrFallback}”未能解析到具体语言模型。{issues}";
+                ? LF("AgentLanguageModelResolver.Error.AgentCapabilityLayerNoCandidatesFormat", "代理“{0}”绑定的功能层级无法解析出候选语言模型。{1}", agent.DisplayNameOrFallback, issues)
+                : LF("AgentLanguageModelResolver.Error.AgentSpecificModelMissingFormat", "代理“{0}”未能解析到具体语言模型。{1}", agent.DisplayNameOrFallback, issues);
         }
 
         private static string GetLanguageModelDisplayName(LanguageModelDefinition model)
@@ -341,10 +342,10 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
             var summaryModelId = model.SummaryModelId?.Trim() ?? string.Empty;
             if (summaryModelId.Length > 0)
             {
-                return $"未命名模型 ({summaryModelId})";
+                return LF("AgentLanguageModelResolver.Display.UnnamedModelFormat", "未命名模型 ({0})", summaryModelId);
             }
 
-            return $"未命名模型 ({GetShortKey(model.Key)})";
+            return LF("AgentLanguageModelResolver.Display.UnnamedModelFormat", "未命名模型 ({0})", GetShortKey(model.Key));
         }
 
         private static string GetCapabilityLayerDisplayName(CapabilityLayerDefinition layer)
@@ -352,7 +353,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
             var displayName = layer.Name?.Trim() ?? string.Empty;
             return displayName.Length > 0
                 ? displayName
-                : $"未命名功能层级 ({GetShortKey(layer.Key)})";
+                : LF("AgentLanguageModelResolver.Display.UnnamedCapabilityLayerFormat", "未命名功能层级 ({0})", GetShortKey(layer.Key));
         }
 
         private static string GetShortKey(string? key)
@@ -364,6 +365,22 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
             }
 
             return normalizedKey[..8];
+        }
+
+        private static string JoinMessages(IEnumerable<string> messages)
+        {
+            return string.Join(L("Common.ListSeparator.Semicolon", "；"), messages);
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
+        {
+            var format = L(resourceKey, fallbackFormat);
+            return string.Format(format, args);
         }
 
         private sealed record CapabilityLayerResolutionPlan(

@@ -7,6 +7,7 @@ using Skyweaver.Commands;
 using Skyweaver.Infrastructure.Mvvm;
 using Skyweaver.Models.Directories;
 using Skyweaver.Services.Directories;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
 {
@@ -14,31 +15,34 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
     {
         private readonly SkyweaverDirectoryRuntime _runtime;
         private DirectoriesConfiguration _configuration;
-        private string _statusMessage = "目录配置已加载。";
+        private string _statusMessage;
 
         public DirectoryLocationsPreferencesPageViewModel()
         {
             _runtime = SkyweaverDirectoryRuntime.Instance;
             _configuration = _runtime.GetConfiguration();
+            _statusMessage = L("Directories.Status.Loaded", "目录配置已加载。");
 
             BrowseChatSessionsDirectoryCommand = new RelayCommand(
-                () => BrowseDirectory("选择聊天会话保存目录", ChatSessionsDirectoryPath, path => ChatSessionsDirectoryPath = path));
+                () => BrowseDirectory(L("Directories.Browse.ChatSessions", "选择聊天会话保存目录"), ChatSessionsDirectoryPath, path => ChatSessionsDirectoryPath = path));
             BrowseConfigurationDirectoryCommand = new RelayCommand(
-                () => BrowseDirectory("选择配置文件保存目录", ConfigurationFilesDirectoryPath, path => ConfigurationFilesDirectoryPath = path));
+                () => BrowseDirectory(L("Directories.Browse.ConfigurationFiles", "选择配置文件保存目录"), ConfigurationFilesDirectoryPath, path => ConfigurationFilesDirectoryPath = path));
             BrowseDebugDirectoryCommand = new RelayCommand(
-                () => BrowseDirectory("选择调试文件保存目录", DebugDirectoryPath, path => DebugDirectoryPath = path));
+                () => BrowseDirectory(L("Directories.Browse.Debug", "选择调试文件保存目录"), DebugDirectoryPath, path => DebugDirectoryPath = path));
             BrowseSessionFlowsDirectoryCommand = new RelayCommand(
-                () => BrowseDirectory("选择会话流保存目录", SessionFlowsDirectoryPath, path => SessionFlowsDirectoryPath = path));
+                () => BrowseDirectory(L("Directories.Browse.SessionFlows", "选择会话流保存目录"), SessionFlowsDirectoryPath, path => SessionFlowsDirectoryPath = path));
             BrowseAerialCityDirectoryCommand = new RelayCommand(
-                () => BrowseDirectory("选择 AerialCity 目录", AerialCityDirectoryPath, path => AerialCityDirectoryPath = path));
+                () => BrowseDirectory(L("Directories.Browse.AerialCity", "选择 AerialCity 目录"), AerialCityDirectoryPath, path => AerialCityDirectoryPath = path));
             OpenDirectoriesConfigurationDirectoryCommand = new RelayCommand(OpenDirectoriesConfigurationDirectory);
+
+            LocalizationRuntime.Instance.LanguageChanged += (_, _) => RefreshLocalizedText();
         }
 
-        public string Title { get; } = "目录位置";
+        public string Title => L("Directories.Page.Title", "目录位置");
 
-        public string Description { get; } = "配置 Skyweaver 的会话、配置、调试和会话流文件保存位置。";
+        public string Description => L("Directories.Page.Description", "配置 Skyweaver 的会话、配置、调试和会话流文件保存位置。");
 
-        public string Hint { get; } = "目录设置会立即写入默认 Configuration 目录中的 Directories.xml。";
+        public string Hint => L("Directories.Page.Hint", "目录设置会立即写入默认 Configuration 目录中的 Directories.xml。");
 
         public string DirectoriesConfigurationFilePath => _runtime.DirectoriesConfigurationFilePath;
 
@@ -53,7 +57,7 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
                 value,
                 _configuration.ChatSessionsDirectoryPath,
                 path => _configuration.ChatSessionsDirectoryPath = path,
-                "聊天会话目录已保存。");
+                L("Directories.Status.ChatSessionsSaved", "聊天会话目录已保存。"));
         }
 
         public string ConfigurationFilesDirectoryPath
@@ -63,7 +67,7 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
                 value,
                 _configuration.ConfigurationDirectoryPath,
                 path => _configuration.ConfigurationDirectoryPath = path,
-                "配置文件目录已保存。");
+                L("Directories.Status.ConfigurationFilesSaved", "配置文件目录已保存。"));
         }
 
         public string DebugDirectoryPath
@@ -73,7 +77,7 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
                 value,
                 _configuration.DebugDirectoryPath,
                 path => _configuration.DebugDirectoryPath = path,
-                "调试文件目录已保存。");
+                L("Directories.Status.DebugSaved", "调试文件目录已保存。"));
         }
 
         public string SessionFlowsDirectoryPath
@@ -83,7 +87,7 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
                 value,
                 _configuration.SessionFlowsDirectoryPath,
                 path => _configuration.SessionFlowsDirectoryPath = path,
-                "会话流目录已保存。");
+                L("Directories.Status.SessionFlowsSaved", "会话流目录已保存。"));
         }
 
         public string AerialCityDirectoryPath
@@ -93,7 +97,7 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
                 value,
                 _configuration.AerialCityDirectoryPath,
                 path => _configuration.AerialCityDirectoryPath = path,
-                "AerialCity 目录已保存。");
+                L("Directories.Status.AerialCitySaved", "AerialCity 目录已保存。"));
         }
 
         public string StatusMessage
@@ -154,7 +158,7 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
             }
             catch (Exception ex)
             {
-                StatusMessage = $"选择目录失败：{ex.Message}";
+                StatusMessage = string.Format(L("Directories.Status.BrowseFailedFormat", "选择目录失败：{0}"), ex.Message);
             }
         }
 
@@ -172,7 +176,7 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
             }
             catch (Exception ex)
             {
-                StatusMessage = $"打开目录失败：{ex.Message}";
+                StatusMessage = string.Format(L("Directories.Status.OpenDirectoryFailedFormat", "打开目录失败：{0}"), ex.Message);
             }
         }
 
@@ -187,7 +191,7 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
             }
             catch (Exception ex)
             {
-                StatusMessage = $"保存失败：{ex.Message}";
+                StatusMessage = string.Format(L("Localization.Status.SaveFailedFormat", "保存失败：{0}"), ex.Message);
             }
         }
 
@@ -201,6 +205,18 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
             OnPropertyChanged(nameof(DirectoriesConfigurationFilePath));
             OnPropertyChanged(nameof(FixedConfigurationDirectoryPath));
             OnPropertyChanged(nameof(DefaultApplicationDirectoryPath));
+        }
+
+        private void RefreshLocalizedText()
+        {
+            OnPropertyChanged(nameof(Title));
+            OnPropertyChanged(nameof(Description));
+            OnPropertyChanged(nameof(Hint));
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
 }

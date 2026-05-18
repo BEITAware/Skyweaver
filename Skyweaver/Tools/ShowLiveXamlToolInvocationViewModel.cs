@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Windows;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 using Skyweaver.Services.LiveXaml;
 using Skyweaver.Services.SkyweaverTools;
 
@@ -23,8 +24,8 @@ namespace Skyweaver.Tools
             _state = state ?? throw new ArgumentNullException(nameof(state));
             _filePathParameter = _state.GetOrCreateParameterState("XAMLFilePath");
             _filePathText = string.Empty;
-            _statusText = "Waiting for the ShowLiveXAML call to finish streaming.";
-            _hintText = "The preview will appear here after ShowLiveXAML closes with a full absolute .xaml path.";
+            _statusText = L("ShowLiveXaml.Status.WaitingForClose", "Waiting for the ShowLiveXAML call to finish streaming.");
+            _hintText = L("ShowLiveXaml.Hint.WaitingForClose", "The preview will appear here after ShowLiveXAML closes with a full absolute .xaml path.");
             _diagnosticsText = string.Empty;
 
             _state.PropertyChanged += HandleSourcePropertyChanged;
@@ -91,14 +92,16 @@ namespace Skyweaver.Tools
         private void RefreshPreview()
         {
             var requestedPath = _filePathParameter.Value?.Trim() ?? string.Empty;
-            FilePathText = requestedPath.Length == 0 ? "(no file path yet)" : requestedPath;
+            FilePathText = requestedPath.Length == 0
+                ? L("ShowLiveXaml.FilePath.Missing", "(no file path yet)")
+                : requestedPath;
 
             if (requestedPath.Length == 0)
             {
                 PreviewElement = null;
                 DiagnosticsText = string.Empty;
-                StatusText = "Waiting for a XAML file path.";
-                HintText = "Pass the full absolute .xaml path returned by InitializeLiveXAML.";
+                StatusText = L("ShowLiveXaml.Status.WaitingForPath", "Waiting for a XAML file path.");
+                HintText = L("ShowLiveXaml.Hint.UseInitializePath", "Pass the full absolute .xaml path returned by InitializeLiveXAML.");
                 _lastResolvedFilePath = null;
                 _lastAttemptWasClosed = _state.IsInvocationClosed;
                 return;
@@ -106,8 +109,8 @@ namespace Skyweaver.Tools
 
             if (!_state.IsInvocationClosed && !_filePathParameter.IsClosed)
             {
-                StatusText = "ShowLiveXAML is still streaming its arguments.";
-                HintText = "The preview will render after the tool call closes.";
+                StatusText = L("ShowLiveXaml.Status.StreamingArguments", "ShowLiveXAML is still streaming its arguments.");
+                HintText = L("ShowLiveXaml.Hint.RenderAfterClose", "The preview will render after the tool call closes.");
                 return;
             }
 
@@ -128,20 +131,25 @@ namespace Skyweaver.Tools
                 PreviewElement = previewResult.View;
                 DiagnosticsText = previewResult.BuildDiagnosticsText();
                 StatusText = previewResult.IsSuccess
-                    ? "Rendered a fresh LiveXAML preview instance."
+                    ? L("ShowLiveXaml.Status.Rendered", "Rendered a fresh LiveXAML preview instance.")
                     : previewResult.Summary;
                 HintText = previewResult.IsSuccess
-                    ? "Each ShowLiveXAML call creates a new preview instance in this tool card."
-                    : "Fix the files, then call ShowLiveXAML again to render a new instance.";
+                    ? L("ShowLiveXaml.Hint.Rendered", "Each ShowLiveXAML call creates a new preview instance in this tool card.")
+                    : L("ShowLiveXaml.Hint.FixAndRetry", "Fix the files, then call ShowLiveXAML again to render a new instance.");
                 FilePathText = normalizedXamlFilePath;
             }
             catch (Exception ex)
             {
                 PreviewElement = null;
                 DiagnosticsText = ex.Message;
-                StatusText = "The preview path is invalid.";
-                HintText = "Use the exact full .xaml path returned by InitializeLiveXAML.";
+                StatusText = L("ShowLiveXaml.Status.InvalidPath", "The preview path is invalid.");
+                HintText = L("ShowLiveXaml.Hint.ExactInitializePath", "Use the exact full .xaml path returned by InitializeLiveXAML.");
             }
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
 }

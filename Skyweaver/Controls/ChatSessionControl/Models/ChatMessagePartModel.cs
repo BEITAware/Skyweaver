@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using System.Xml.Linq;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 using Skyweaver.Services.SkyweaverTools;
 
 namespace Skyweaver.Controls.ChatSessionControl.Models
@@ -234,7 +235,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
 
         public static ChatMessagePartModel CreateToolCall(string content, string? title = null, bool isStreaming = false)
         {
-            return new ChatMessagePartModel(ChatMessagePartType.ToolCall, content, title, badgeText: "工具调用", isStreaming: isStreaming);
+            return new ChatMessagePartModel(ChatMessagePartType.ToolCall, content, title, badgeText: L("ChatMessagePart.Badge.ToolCall", "工具调用"), isStreaming: isStreaming);
         }
 
         public static ChatMessagePartModel CreateToolOutput(
@@ -247,7 +248,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
                 ChatMessagePartType.ToolOutput,
                 content,
                 title,
-                badgeText: "工具输出",
+                badgeText: L("ChatMessagePart.Badge.ToolOutput", "工具输出"),
                 isStreaming: isStreaming,
                 isUserVisible: isUserVisible);
         }
@@ -259,12 +260,12 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
 
         public static ChatMessagePartModel CreateImage(string path, string? title = null)
         {
-            return new ChatMessagePartModel(ChatMessagePartType.Image, path, title, badgeText: "图片", resourcePath: path);
+            return new ChatMessagePartModel(ChatMessagePartType.Image, path, title, badgeText: L("ChatMessagePart.Badge.Image", "图片"), resourcePath: path);
         }
 
         public static ChatMessagePartModel CreateAudio(string path, string? title = null)
         {
-            return new ChatMessagePartModel(ChatMessagePartType.Audio, path, title, badgeText: "音频", resourcePath: path);
+            return new ChatMessagePartModel(ChatMessagePartType.Audio, path, title, badgeText: L("ChatMessagePart.Badge.Audio", "音频"), resourcePath: path);
         }
 
         public static ChatMessagePartModel CreateReasoning(
@@ -277,8 +278,8 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
             return new ChatMessagePartModel(
                 ChatMessagePartType.Reasoning,
                 content,
-                title ?? "推理过程",
-                badgeText: "推理过程",
+                title ?? L("ChatMessagePart.Title.Reasoning", "推理过程"),
+                badgeText: L("ChatMessagePart.Badge.Reasoning", "推理过程"),
                 isStreaming: isStreaming,
                 isCollapsible: isCollapsible,
                 isExpanded: isExpanded);
@@ -386,6 +387,11 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
         private static string? NormalizeMetadataValue(string? value)
         {
             return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
 }

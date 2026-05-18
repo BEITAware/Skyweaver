@@ -12,7 +12,7 @@
             Padding="12">
         <StackPanel>
             <DockPanel LastChildFill="False">
-                <TextBlock Text="LiveXAML Preview"
+                <TextBlock Text="{DynamicResource ShowLiveXaml.PreviewTitle}"
                            Foreground="#FFF0FBFF"
                            FontWeight="SemiBold"
                            FontSize="13"/>
@@ -69,7 +69,7 @@
                         <ContentControl Content="{Binding PreviewElement}"/>
                     </ScrollViewer>
 
-                    <TextBlock Text="No preview yet."
+                    <TextBlock Text="{DynamicResource ShowLiveXaml.NoPreview}"
                                Foreground="#CCFFFFFF"
                                FontStyle="Italic"
                                TextWrapping="Wrap"

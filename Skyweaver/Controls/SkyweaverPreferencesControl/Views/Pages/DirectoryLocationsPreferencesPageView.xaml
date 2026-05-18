@@ -44,7 +44,7 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="16,10,16,20">
-            <TextBlock Text="目录位置"
+            <TextBlock Text="{DynamicResource Directories.Page.Title}"
                        Style="{StaticResource PreferenceSectionTitleStyle}"/>
 
             <Grid Margin="0,12,0,0">
@@ -77,7 +77,7 @@
 
                 <TextBlock Grid.Row="0"
                            Grid.Column="0"
-                           Text="聊天会话目录"
+                           Text="{DynamicResource Directories.ChatSessions.Label}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <TextBox Grid.Row="0"
                          Grid.Column="1"
@@ -86,17 +86,17 @@
                 <Button Grid.Row="0"
                         Grid.Column="2"
                         MinWidth="96"
-                        Content="浏览..."
+                        Content="{DynamicResource Common.BrowseEllipsis}"
                         Command="{Binding BrowseChatSessionsDirectoryCommand}"/>
                 <TextBlock Grid.Row="2"
                            Grid.Column="1"
                            Grid.ColumnSpan="2"
-                           Text="设定聊天会话 ChatSessions 保存的位置。默认在用户文件夹/Skyweaver/ChatSessions 之下。"
+                           Text="{DynamicResource Directories.ChatSessions.Hint}"
                            Style="{StaticResource PreferenceMetaStyle}"/>
 
                 <TextBlock Grid.Row="4"
                            Grid.Column="0"
-                           Text="配置文件目录"
+                           Text="{DynamicResource Directories.ConfigurationFiles.Label}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <TextBox Grid.Row="4"
                          Grid.Column="1"
@@ -105,17 +105,17 @@
                 <Button Grid.Row="4"
                         Grid.Column="2"
                         MinWidth="96"
-                        Content="浏览..."
+                        Content="{DynamicResource Common.BrowseEllipsis}"
                         Command="{Binding BrowseConfigurationDirectoryCommand}"/>
                 <TextBlock Grid.Row="6"
                            Grid.Column="1"
                            Grid.ColumnSpan="2"
-                           Text="设定配置文件 Configuration 保存的位置。Directories.xml 始终保留在用户文件夹/Skyweaver/Configuration 中。"
+                           Text="{DynamicResource Directories.ConfigurationFiles.Hint}"
                            Style="{StaticResource PreferenceMetaStyle}"/>
 
                 <TextBlock Grid.Row="8"
                            Grid.Column="0"
-                           Text="调试文件目录"
+                           Text="{DynamicResource Directories.Debug.Label}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <TextBox Grid.Row="8"
                          Grid.Column="1"
@@ -124,17 +124,17 @@
                 <Button Grid.Row="8"
                         Grid.Column="2"
                         MinWidth="96"
-                        Content="浏览..."
+                        Content="{DynamicResource Common.BrowseEllipsis}"
                         Command="{Binding BrowseDebugDirectoryCommand}"/>
                 <TextBlock Grid.Row="10"
                            Grid.Column="1"
                            Grid.ColumnSpan="2"
-                           Text="设定调试目录 Debug 保存的位置。默认在用户文件夹/Skyweaver/Debug 之下。"
+                           Text="{DynamicResource Directories.Debug.Hint}"
                            Style="{StaticResource PreferenceMetaStyle}"/>
 
                 <TextBlock Grid.Row="12"
                            Grid.Column="0"
-                           Text="会话流目录"
+                           Text="{DynamicResource Directories.SessionFlows.Label}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <TextBox Grid.Row="12"
                          Grid.Column="1"
@@ -143,17 +143,17 @@
                 <Button Grid.Row="12"
                         Grid.Column="2"
                         MinWidth="96"
-                        Content="浏览..."
+                        Content="{DynamicResource Common.BrowseEllipsis}"
                         Command="{Binding BrowseSessionFlowsDirectoryCommand}"/>
                 <TextBlock Grid.Row="14"
                            Grid.Column="1"
                            Grid.ColumnSpan="2"
-                           Text="设定会话流节点图保存的位置。默认在用户文件夹/Skyweaver/Nodegraphs 之下。"
+                           Text="{DynamicResource Directories.SessionFlows.Hint}"
                            Style="{StaticResource PreferenceMetaStyle}"/>
 
                 <TextBlock Grid.Row="16"
                            Grid.Column="0"
-                           Text="AerialCity 目录"
+                           Text="{DynamicResource Directories.AerialCity.Label}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <TextBox Grid.Row="16"
                          Grid.Column="1"
@@ -162,12 +162,12 @@
                 <Button Grid.Row="16"
                         Grid.Column="2"
                         MinWidth="96"
-                        Content="浏览..."
+                        Content="{DynamicResource Common.BrowseEllipsis}"
                         Command="{Binding BrowseAerialCityDirectoryCommand}"/>
                 <TextBlock Grid.Row="18"
                            Grid.Column="1"
                            Grid.ColumnSpan="2"
-                           Text="设定 AerialCity RAG 数据库与映射文件保存的位置。默认在用户文件夹/Skyweaver/AerialCity 之下。"
+                           Text="{DynamicResource Directories.AerialCity.Hint}"
                            Style="{StaticResource PreferenceMetaStyle}"/>
             </Grid>
 
@@ -176,7 +176,7 @@
                     Background="#30FFFFFF"/>
 
             <TextBlock Margin="0,18,0,0"
-                       Text="配置状态"
+                       Text="{DynamicResource Common.ConfigurationStatus}"
                        Style="{StaticResource PreferenceSectionTitleStyle}"/>
 
             <Grid Margin="0,12,0,0">
@@ -194,7 +194,7 @@
 
                 <TextBlock Grid.Row="0"
                            Grid.Column="0"
-                           Text="目录配置文件"
+                           Text="{DynamicResource Directories.ConfigurationFile.Label}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <TextBlock Grid.Row="0"
                            Grid.Column="1"
@@ -203,7 +203,7 @@
 
                 <TextBlock Grid.Row="2"
                            Grid.Column="0"
-                           Text="默认根目录"
+                           Text="{DynamicResource Directories.DefaultRoot.Label}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <TextBlock Grid.Row="2"
                            Grid.Column="1"
@@ -212,7 +212,7 @@
 
                 <TextBlock Grid.Row="4"
                            Grid.Column="0"
-                           Text="最近状态"
+                           Text="{DynamicResource Common.RecentStatus}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <TextBlock Grid.Row="4"
                            Grid.Column="1"
@@ -223,7 +223,7 @@
             <StackPanel Margin="0,16,0,0"
                         Orientation="Horizontal">
                 <Button MinWidth="160"
-                        Content="打开目录配置位置"
+                        Content="{DynamicResource Directories.OpenConfigurationLocation}"
                         Command="{Binding OpenDirectoriesConfigurationDirectoryCommand}"/>
             </StackPanel>
 
@@ -232,17 +232,17 @@
                     Background="#30FFFFFF"/>
 
             <TextBlock Margin="0,18,0,0"
-                       Text="说明"
+                       Text="{DynamicResource Common.Instructions}"
                        Style="{StaticResource PreferenceSectionTitleStyle}"/>
 
             <TextBlock Margin="0,12,0,0"
-                       Text="1. Directories.xml 固定写入用户文件夹/Skyweaver/Configuration，不受“配置文件目录”设置影响。"
+                       Text="{DynamicResource Directories.Instruction.1}"
                        Style="{StaticResource PreferenceMetaStyle}"/>
             <TextBlock Margin="0,6,0,0"
-                       Text="2. 目录设置保存时会确保目标目录存在；已有文件不会自动迁移。"
+                       Text="{DynamicResource Directories.Instruction.2}"
                        Style="{StaticResource PreferenceMetaStyle}"/>
             <TextBlock Margin="0,6,0,0"
-                       Text="3. 已经打开的会话或会话流会继续使用自身记录的文件路径，新建和后续加载会使用此页设置。"
+                       Text="{DynamicResource Directories.Instruction.3}"
                        Style="{StaticResource PreferenceMetaStyle}"/>
         </StackPanel>
     </ScrollViewer>

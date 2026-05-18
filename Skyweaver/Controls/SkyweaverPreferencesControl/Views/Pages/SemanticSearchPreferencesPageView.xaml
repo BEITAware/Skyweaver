@@ -44,7 +44,7 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="16,10,16,20">
-            <TextBlock Text="语义搜索"
+            <TextBlock Text="{DynamicResource SemanticSearch.Page.Title}"
                        Style="{StaticResource PreferenceSectionTitleStyle}"/>
 
             <Grid Margin="0,12,0,0">
@@ -75,16 +75,16 @@
                           Grid.Column="1"
                           Grid.ColumnSpan="2"
                           IsChecked="{Binding IsAerialCityRagEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                          Content="启用 AerialCity RAG"/>
+                          Content="{DynamicResource SemanticSearch.AerialCityRag.Content}"/>
                 <TextBlock Grid.Row="2"
                            Grid.Column="1"
                            Grid.ColumnSpan="2"
-                           Text="启用后，InitializeAerialCityRAG、UpdateAerialCityDB、SemanticSearch 与 KeywordSearch 会进入 Agent 可调用工具目录；文件编辑工具写入后会自动同步已初始化的 AerialCity DB。"
+                           Text="{DynamicResource SemanticSearch.AerialCityRag.Hint}"
                            Style="{StaticResource PreferenceMetaStyle}"/>
 
                 <TextBlock Grid.Row="4"
                            Grid.Column="0"
-                           Text="嵌入模型"
+                           Text="{DynamicResource SemanticSearch.EmbeddingModel.Label}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <ComboBox Grid.Row="4"
                           Grid.Column="1"
@@ -95,7 +95,7 @@
                 <Button Grid.Row="4"
                         Grid.Column="2"
                         MinWidth="96"
-                        Content="刷新"
+                        Content="{DynamicResource Common.Refresh}"
                         Command="{Binding RefreshEmbeddingModelsCommand}"/>
                 <TextBlock Grid.Row="6"
                            Grid.Column="1"
@@ -105,7 +105,7 @@
 
                 <TextBlock Grid.Row="8"
                            Grid.Column="0"
-                           Text="嵌入并发量"
+                           Text="{DynamicResource SemanticSearch.EmbeddingConcurrency.Label}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <Slider Grid.Row="8"
                         Grid.Column="1"
@@ -134,7 +134,7 @@
                     Background="#30FFFFFF"/>
 
             <TextBlock Margin="0,18,0,0"
-                       Text="配置状态"
+                       Text="{DynamicResource Common.ConfigurationStatus}"
                        Style="{StaticResource PreferenceSectionTitleStyle}"/>
 
             <Grid Margin="0,12,0,0">
@@ -152,7 +152,7 @@
 
                 <TextBlock Grid.Row="0"
                            Grid.Column="0"
-                           Text="AerialCity 目录"
+                           Text="{DynamicResource Directories.AerialCity.Label}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <TextBlock Grid.Row="0"
                            Grid.Column="1"
@@ -161,7 +161,7 @@
 
                 <TextBlock Grid.Row="2"
                            Grid.Column="0"
-                           Text="配置文件"
+                           Text="{DynamicResource Common.ConfigurationFile}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <TextBlock Grid.Row="2"
                            Grid.Column="1"
@@ -170,7 +170,7 @@
 
                 <TextBlock Grid.Row="4"
                            Grid.Column="0"
-                           Text="最近状态"
+                           Text="{DynamicResource Common.RecentStatus}"
                            Style="{StaticResource PreferenceLabelStyle}"/>
                 <TextBlock Grid.Row="4"
                            Grid.Column="1"
@@ -181,7 +181,7 @@
             <StackPanel Margin="0,16,0,0"
                         Orientation="Horizontal">
                 <Button MinWidth="132"
-                        Content="打开配置目录"
+                        Content="{DynamicResource Common.OpenConfigurationDirectory}"
                         Command="{Binding OpenConfigurationDirectoryCommand}"/>
             </StackPanel>
         </StackPanel>

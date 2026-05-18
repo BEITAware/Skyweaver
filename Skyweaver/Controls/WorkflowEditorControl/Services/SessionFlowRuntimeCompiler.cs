@@ -1,5 +1,6 @@
 using Skyweaver.Controls.AgentConfigurationControl.Models;
 using Skyweaver.Controls.WorkflowEditorControl.Models;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.WorkflowEditorControl.Services
 {
@@ -138,13 +139,13 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
             {
                 if (string.IsNullOrWhiteSpace(node.Id))
                 {
-                    issues.Add(CreateError("发现缺少节点 ID 的会话流节点。"));
+                    issues.Add(CreateError(L("SessionFlowCompiler.Error.NodeIdMissing", "发现缺少节点 ID 的会话流节点。")));
                     continue;
                 }
 
                 if (!nodeMap.TryAdd(node.Id, node))
                 {
-                    issues.Add(CreateError($"节点 ID “{node.Id}”重复。", nodeId: node.Id));
+                    issues.Add(CreateError(LF("SessionFlowCompiler.Error.NodeIdDuplicateFormat", "节点 ID “{0}”重复。", node.Id), nodeId: node.Id));
                 }
             }
 
@@ -157,12 +158,12 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
 
             if (userInputNodes.Length != 1)
             {
-                issues.Add(CreateError($"会话流必须且只能包含 1 个“用户输入”节点，当前为 {userInputNodes.Length} 个。"));
+                issues.Add(CreateError(LF("SessionFlowCompiler.Error.UserInputCountFormat", "会话流必须且只能包含 1 个“用户输入”节点，当前为 {0} 个。", userInputNodes.Length)));
             }
 
             if (returnNodes.Length != 1)
             {
-                issues.Add(CreateError($"会话流必须且只能包含 1 个“返回”节点，当前为 {returnNodes.Length} 个。"));
+                issues.Add(CreateError(LF("SessionFlowCompiler.Error.ReturnCountFormat", "会话流必须且只能包含 1 个“返回”节点，当前为 {0} 个。", returnNodes.Length)));
             }
 
             var incoming = new Dictionary<string, List<SessionFlowConnectionModel>>(StringComparer.OrdinalIgnoreCase);
@@ -173,7 +174,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
                 if (!nodeMap.TryGetValue(connection.SourceNodeId, out var sourceNode))
                 {
                     issues.Add(CreateError(
-                        $"连接“{connection.Id}”引用了不存在的源节点“{connection.SourceNodeId}”。",
+                        LF("SessionFlowCompiler.Error.ConnectionMissingSourceNodeFormat", "连接“{0}”引用了不存在的源节点“{1}”。", connection.Id, connection.SourceNodeId),
                         connectionId: connection.Id));
                     continue;
                 }
@@ -181,7 +182,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
                 if (!nodeMap.TryGetValue(connection.TargetNodeId, out var targetNode))
                 {
                     issues.Add(CreateError(
-                        $"连接“{connection.Id}”引用了不存在的目标节点“{connection.TargetNodeId}”。",
+                        LF("SessionFlowCompiler.Error.ConnectionMissingTargetNodeFormat", "连接“{0}”引用了不存在的目标节点“{1}”。", connection.Id, connection.TargetNodeId),
                         connectionId: connection.Id));
                     continue;
                 }
@@ -194,7 +195,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
                 if (sourcePort == null)
                 {
                     issues.Add(CreateError(
-                        $"连接“{connection.Id}”引用了不存在的源端口“{connection.SourcePortId}”。",
+                        LF("SessionFlowCompiler.Error.ConnectionMissingSourcePortFormat", "连接“{0}”引用了不存在的源端口“{1}”。", connection.Id, connection.SourcePortId),
                         nodeId: sourceNode.Id,
                         portId: connection.SourcePortId,
                         connectionId: connection.Id));
@@ -204,7 +205,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
                 if (targetPort == null)
                 {
                     issues.Add(CreateError(
-                        $"连接“{connection.Id}”引用了不存在的目标端口“{connection.TargetPortId}”。",
+                        LF("SessionFlowCompiler.Error.ConnectionMissingTargetPortFormat", "连接“{0}”引用了不存在的目标端口“{1}”。", connection.Id, connection.TargetPortId),
                         nodeId: targetNode.Id,
                         portId: connection.TargetPortId,
                         connectionId: connection.Id));
@@ -215,7 +216,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
                     targetPort.Direction != SessionFlowPortDirection.Input)
                 {
                     issues.Add(CreateError(
-                        $"连接“{connection.Id}”的端口方向不合法。",
+                        LF("SessionFlowCompiler.Error.ConnectionInvalidDirectionFormat", "连接“{0}”的端口方向不合法。", connection.Id),
                         connectionId: connection.Id));
                     continue;
                 }
@@ -223,7 +224,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
                 if (sourcePort.PortType != targetPort.PortType)
                 {
                     issues.Add(CreateError(
-                        $"连接“{connection.Id}”的源端口与目标端口类型不一致。",
+                        LF("SessionFlowCompiler.Error.ConnectionPortTypeMismatchFormat", "连接“{0}”的源端口与目标端口类型不一致。", connection.Id),
                         connectionId: connection.Id));
                     continue;
                 }
@@ -236,7 +237,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
             {
                 if (string.IsNullOrWhiteSpace(agentNode.AgentId))
                 {
-                    issues.Add(CreateWarning($"代理节点“{agentNode.Title}”尚未绑定代理 ID。", nodeId: agentNode.Id));
+                    issues.Add(CreateWarning(LF("SessionFlowCompiler.Warning.AgentNodeUnboundFormat", "代理节点“{0}”尚未绑定代理 ID。", agentNode.Title), nodeId: agentNode.Id));
                 }
             }
 
@@ -247,7 +248,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
                     userOutgoingConnections.Count > 0;
                 if (!hasUserOutgoingConnections)
                 {
-                    issues.Add(CreateWarning("“用户输入”节点当前没有任何输出连接。", nodeId: userInputNodes[0].Id));
+                    issues.Add(CreateWarning(L("SessionFlowCompiler.Warning.UserInputNoOutput", "“用户输入”节点当前没有任何输出连接。"), nodeId: userInputNodes[0].Id));
                 }
             }
 
@@ -258,7 +259,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
                     returnIncomingConnections.Count > 0;
                 if (!hasReturnIncomingConnections)
                 {
-                    issues.Add(CreateWarning("“返回”节点当前没有任何输入连接。", nodeId: returnNodes[0].Id));
+                    issues.Add(CreateWarning(L("SessionFlowCompiler.Warning.ReturnNoInput", "“返回”节点当前没有任何输入连接。"), nodeId: returnNodes[0].Id));
                 }
             }
 
@@ -398,6 +399,17 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
                 PortId = portId,
                 ConnectionId = connectionId
             };
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
+        {
+            var format = L(resourceKey, fallbackFormat);
+            return string.Format(format, args);
         }
     }
 }

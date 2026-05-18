@@ -1,4 +1,5 @@
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.ChatSessionControl.Models
 {
@@ -11,7 +12,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
         {
             ResourcePath = resourcePath ?? string.Empty;
             MediaType = string.IsNullOrWhiteSpace(mediaType) ? "image/png" : mediaType.Trim();
-            DisplayName = string.IsNullOrWhiteSpace(displayName) ? "图片" : displayName.Trim();
+            DisplayName = string.IsNullOrWhiteSpace(displayName) ? L("ChatMessagePart.Badge.Image", "图片") : displayName.Trim();
         }
 
         public string ResourcePath { get; }
@@ -27,5 +28,10 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
         public string KindLabel => IsAudio ? "Audio" : IsImage ? "Image" : "File";
 
         public string? PreviewSourcePath => IsImage ? ResourcePath : null;
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
     }
 }

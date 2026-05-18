@@ -26,7 +26,7 @@
                    FontSize="36"
                    FontWeight="Bold"
                    Foreground="White"
-                   Text="Skyweaver Preview"
+                 Text="{DynamicResource Splash.Title}"
                    TextWrapping="Wrap"
                    TextAlignment="Center" FontFamily="Segoe UI">
             <TextBlock.Effect>
@@ -41,7 +41,7 @@
                    Margin="237,0,0,310"
                    FontSize="12"
                    Foreground="White"
-                   Text="© 2026 BEITAware.  按原样提供，不附带任何保证。"
+                   Text="{DynamicResource Splash.Copyright}"
                    TextWrapping="Wrap"
                    TextAlignment="Center">
             <TextBlock.Effect>
@@ -56,7 +56,7 @@
                    Margin="392,0,0,38"
                    FontSize="14"
                    Foreground="White"
-                   Text="正在加载脚本..."
+                   Text="{DynamicResource Splash.LoadingScripts}"
                    TextWrapping="Wrap"
                    TextAlignment="Center" Height="25" Width="265">
             <TextBlock.Effect>

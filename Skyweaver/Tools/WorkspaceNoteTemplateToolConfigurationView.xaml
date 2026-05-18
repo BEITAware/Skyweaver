@@ -37,9 +37,9 @@
             <StackPanel>
                 <TextBlock FontSize="15"
                            FontWeight="SemiBold"
-                           Text="Workspace Note Template 配置"/>
+                           Text="{DynamicResource WorkspaceNoteTemplate.ConfigurationTitle}"/>
                 <TextBlock Margin="0,6,0,0"
-                           Text="这个面板完全由工具自己提供。这里演示了预设选择、默认标签和输出模板结构如何一起影响运行时工具定义。"
+                           Text="{DynamicResource WorkspaceNoteTemplate.ConfigurationDescription}"
                            TextWrapping="Wrap"/>
             </StackPanel>
         </Border>
@@ -56,7 +56,7 @@
                     <StackPanel>
                         <TextBlock FontSize="13"
                                    FontWeight="SemiBold"
-                                   Text="模板预设"/>
+                                   Text="{DynamicResource WorkspaceNoteTemplate.Preset}"/>
                         <ComboBox Margin="0,10,0,0"
                                   ItemsSource="{Binding Presets}"
                                   SelectedItem="{Binding SelectedPreset}"
@@ -70,11 +70,11 @@
 
                 <Border Style="{StaticResource PanelBorderStyle}">
                     <StackPanel>
-                        <CheckBox Content="在模板里包含 Workspace / Session 上下文"
+                        <CheckBox Content="{DynamicResource WorkspaceNoteTemplate.IncludeContextMetadata}"
                                   IsChecked="{Binding IncludeContextMetadata}"/>
                         <TextBlock Margin="0,8,0,0"
                                    Foreground="#99FFFFFF"
-                                   Text="关闭后，工具生成结果仍可用，但不会自动把当前工作区路径和会话名写进模板。"
+                                   Text="{DynamicResource WorkspaceNoteTemplate.IncludeContextMetadataHint}"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
@@ -83,7 +83,7 @@
                     <StackPanel>
                         <TextBlock FontSize="13"
                                    FontWeight="SemiBold"
-                                   Text="默认标签"/>
+                                   Text="{DynamicResource WorkspaceNoteTemplate.DefaultTags}"/>
                         <TextBox Margin="0,10,0,0"
                                  Text="{Binding DefaultTagsText, UpdateSourceTrigger=LostFocus}"/>
                         <TextBlock Margin="0,8,0,0"
@@ -97,7 +97,7 @@
                     <StackPanel>
                         <TextBlock FontSize="13"
                                    FontWeight="SemiBold"
-                                   Text="摘要占位行数"/>
+                                   Text="{DynamicResource WorkspaceNoteTemplate.SummaryBulletCount}"/>
                         <ComboBox Margin="0,10,0,0"
                                   ItemsSource="{Binding SummaryBulletCountOptions}"
                                   SelectedItem="{Binding SelectedSummaryBulletCount}"/>
@@ -114,14 +114,14 @@
                 <StackPanel>
                     <TextBlock FontSize="13"
                                FontWeight="SemiBold"
-                               Text="实时预览"/>
+                               Text="{DynamicResource WorkspaceNoteTemplate.LivePreview}"/>
                     <TextBlock Margin="0,10,0,0"
                                FontFamily="Consolas"
                                Text="{Binding PreviewText}"
                                TextWrapping="Wrap"/>
                     <TextBlock Margin="0,14,0,0"
                                Foreground="#99FFFFFF"
-                               Text="提示：这里的变化会被宿主持久化，并在工具实际执行时通过上下文重新读取。"
+                               Text="{DynamicResource WorkspaceNoteTemplate.PreviewHint}"
                                TextWrapping="Wrap"/>
                 </StackPanel>
             </Border>

@@ -7,6 +7,7 @@ using System.Windows.Input;
 using Skyweaver.Commands;
 using Skyweaver.Infrastructure.Mvvm;
 using Skyweaver.Models.LateralFileSystem;
+using Skyweaver.Services.Localization;
 using Skyweaver.Services.LateralFileSystem;
 using Skyweaver.Windows;
 
@@ -19,21 +20,21 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
         private string _currentWorkingRootDirectory = string.Empty;
         private bool _isBackendConfiguredEnabled;
         private bool _isVirtualizationBackendAvailable;
-        private string _statusMessage = "正在连接侧向文件系统后端…";
-        private string _selectedNodeHydratedSizeText = "未选择侧向文件夹";
+        private string _statusMessage = L("LateralFileSystemTree.Status.Connecting", "正在连接侧向文件系统后端…");
+        private string _selectedNodeHydratedSizeText = L("LateralFileSystemTree.Selection.None", "未选择侧向文件夹");
         private string _selectedNodeFileSummaryText = string.Empty;
         private string _selectedNodeStorageNote = string.Empty;
         private string _selectedNodeInspectorStatusText = string.Empty;
         private bool _isLoadingSelectedNodeInspector;
         private int _selectedNodeRefreshVersion;
+        private readonly int _instanceNumber;
 
         public LateralFileSystemTreeControlViewModel(int instanceNumber)
         {
+            _instanceNumber = instanceNumber;
             var stopwatch = Stopwatch.StartNew();
             LateralFileSystemDebugConsole.Write("TreeVM", $"Constructor start; instanceNumber={instanceNumber}.");
             _runtime = LateralFileSystemRuntime.Instance;
-
-            Title = instanceNumber > 1 ? $"侧向文件系统树 {instanceNumber}" : "侧向文件系统树";
 
             CreateProjectionFolderCommand = new RelayCommand(ExecuteCreateProjectionFolder, () => CanManageFolders);
             CreateInheritanceFolderCommand = new RelayCommand(ExecuteCreateInheritanceFolder, () => CanManageFolders && SelectedNode != null);
@@ -49,14 +50,17 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
             WeakEventManager<LateralFileSystemRuntime, EventArgs>.AddHandler(_runtime, nameof(LateralFileSystemRuntime.ConfigurationChanged), OnRuntimeConfigurationChanged);
             WeakEventManager<LateralFileSystemRuntime, EventArgs>.AddHandler(_runtime, nameof(LateralFileSystemRuntime.TreeChanged), OnRuntimeTreeChanged);
             WeakEventManager<LateralFileSystemRuntime, LateralFileSystemSourceChangedEventArgs>.AddHandler(_runtime, nameof(LateralFileSystemRuntime.SourceChanged), OnRuntimeSourceChanged);
+            LocalizationRuntime.Instance.LanguageChanged += (_, _) => RefreshLocalizedText();
 
             RefreshFromBackend(preserveSelection: false);
             LateralFileSystemDebugConsole.Write("TreeVM", $"Constructor end; instanceNumber={instanceNumber}; elapsedMs={stopwatch.ElapsedMilliseconds}.");
         }
 
-        public string Title { get; }
+        public string Title => _instanceNumber > 1
+            ? LF("LateralFileSystemTree.Title.NumberedFormat", "侧向文件系统树 {0}", _instanceNumber)
+            : L("LateralFileSystemTree.Title", "侧向文件系统树");
 
-        public string Description { get; } = "连接本应用程序的 LateralFS 后端，管理侧向文件夹、继承关系和实际文件占用。";
+        public string Description => L("LateralFileSystemTree.Description", "连接本应用程序的 LateralFS 后端，管理侧向文件夹、继承关系和实际文件占用。");
 
         public ObservableCollection<LateralFileSystemNodeViewModel> Nodes { get; } = new();
 
@@ -88,6 +92,11 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
 
                 OnPropertyChanged(nameof(HasSelectedNode));
                 OnPropertyChanged(nameof(SelectedNodeParentName));
+                OnPropertyChanged(nameof(SelectedNodeKindText));
+                OnPropertyChanged(nameof(SelectedNodeOwnerText));
+                OnPropertyChanged(nameof(SelectedNodeParentText));
+                OnPropertyChanged(nameof(SelectedNodeVirtualRootText));
+                OnPropertyChanged(nameof(SelectedNodeProjectionSourceText));
                 OnPropertyChanged(nameof(SelectionPlaceholderText));
                 CommandManager.InvalidateRequerySuggested();
                 _ = RefreshSelectedNodeInspectorAsync(syncSelectedNode: false, refreshStorageSummary: false);
@@ -117,7 +126,7 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
 
         public string CurrentWorkingRootDirectoryDisplay => HasWorkingRootDirectory
             ? CurrentWorkingRootDirectory
-            : "尚未设置工作根目录";
+            : L("LateralFileSystemTree.WorkingRoot.NotConfigured", "尚未设置工作根目录");
 
         public bool HasWorkingRootDirectory => !string.IsNullOrWhiteSpace(CurrentWorkingRootDirectory);
 
@@ -168,15 +177,15 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
 
                 if (!HasWorkingRootDirectory)
                 {
-                    return "尚未设置工作根目录。请先到首选项中的“侧向文件系统”页完成连接。";
+                    return L("LateralFileSystemTree.Backend.WorkingRootMissing", "尚未设置工作根目录。请先到首选项中的“侧向文件系统”页完成连接。");
                 }
 
                 if (!IsBackendConfiguredEnabled)
                 {
-                    return "LateralFS 已配置工作根目录，但当前未启用，因此创建、继承、合并和删除操作已禁用。";
+                    return L("LateralFileSystemTree.Backend.Disabled", "LateralFS 已配置工作根目录，但当前未启用，因此创建、继承、合并和删除操作已禁用。");
                 }
 
-                return "已连接到 LateralFS 后端。";
+                return L("LateralFileSystemTree.Backend.Connected", "已连接到 LateralFS 后端。");
             }
         }
 
@@ -186,22 +195,22 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
             {
                 if (!IsVirtualizationBackendAvailable)
                 {
-                    return "当前系统无法启动侧向文件系统虚拟化后端。已保存节点仍可查看，但创建、继承、合并和删除操作已禁用。";
+                    return L("LateralFileSystemTree.Selection.BackendUnavailable", "当前系统无法启动侧向文件系统虚拟化后端。已保存节点仍可查看，但创建、继承、合并和删除操作已禁用。");
                 }
 
                 if (!HasWorkingRootDirectory)
                 {
-                    return "请先在首选项中的“侧向文件系统”页设置工作根目录。";
+                    return L("LateralFileSystemTree.Selection.WorkingRootMissing", "请先在首选项中的“侧向文件系统”页设置工作根目录。");
                 }
 
                 if (!IsBackendConfiguredEnabled)
                 {
-                    return "当前后端未启用。可以先查看已有节点，创建、合并和删除操作会保持禁用。";
+                    return L("LateralFileSystemTree.Selection.BackendDisabled", "当前后端未启用。可以先查看已有节点，创建、合并和删除操作会保持禁用。");
                 }
 
                 return Nodes.Count == 0
-                    ? "尚未创建任何侧向文件夹。"
-                    : "请先在左侧画布中选择一个侧向文件夹。";
+                    ? L("LateralFileSystemTree.Selection.NoNodes", "尚未创建任何侧向文件夹。")
+                    : L("LateralFileSystemTree.Selection.SelectFolder", "请先在左侧画布中选择一个侧向文件夹。");
             }
         }
 
@@ -247,13 +256,34 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
             {
                 if (SelectedNode?.ParentNodeId is null)
                 {
-                    return "无";
+                    return L("Common.None", "无");
                 }
 
                 return Nodes.FirstOrDefault(node => string.Equals(node.Id, SelectedNode.ParentNodeId, StringComparison.OrdinalIgnoreCase))?.Name
-                    ?? "无";
+                    ?? L("Common.None", "无");
             }
         }
+
+        public string SelectedNodeKindText => SelectedNode is null
+            ? string.Empty
+            : LF("LateralFileSystemTree.SelectedNode.KindFormat", "类型：{0}", SelectedNode.Kind);
+
+        public string SelectedNodeOwnerText => SelectedNode is null
+            ? string.Empty
+            : LF("LateralFileSystemTree.SelectedNode.OwnerFormat", "所有者：{0}", SelectedNode.Owner);
+
+        public string SelectedNodeParentText => LF("LateralFileSystemTree.SelectedNode.ParentFormat", "继承来源：{0}", SelectedNodeParentName);
+
+        public string SelectedNodeVirtualRootText => SelectedNode is null
+            ? string.Empty
+            : LF("LateralFileSystemTree.SelectedNode.VirtualRootFormat", "虚拟根：{0}", SelectedNode.VirtualRootPath);
+
+        public string SelectedNodeProjectionSourceText => LF(
+            "LateralFileSystemTree.SelectedNode.ProjectionSourceFormat",
+            "投影源：{0}",
+            string.IsNullOrWhiteSpace(SelectedNode?.ProjectionSourcePath)
+                ? L("Common.NotConfigured", "未设置")
+                : SelectedNode.ProjectionSourcePath);
 
         public ICommand CreateProjectionFolderCommand { get; }
 
@@ -299,9 +329,9 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
             }
 
             var dialog = new LateralFileSystemFolderDialog(
-                title: "新建侧向文件夹",
-                promptText: "创建一个新的侧向文件夹，并指定被投影的源文件夹。",
-                confirmButtonText: "新建");
+                title: L("LateralFileSystemTree.CreateProjectionFolder", "新建侧向文件夹"),
+                promptText: L("LateralFileSystemTree.Dialog.CreateProjectionPrompt", "创建一个新的侧向文件夹，并指定被投影的源文件夹。"),
+                confirmButtonText: L("Common.Create", "创建"));
             dialog.Owner = Application.Current?.MainWindow;
 
             if (dialog.ShowDialog() != true)
@@ -314,11 +344,11 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
                 var createdNode = _runtime.CreateProjection(dialog.FolderDisplayName, dialog.SourceFolderPath);
                 SaveInitialNodePosition(createdNode, parentNode: null);
                 RefreshFromBackend(preserveSelection: false, preferredSelectedNodeId: createdNode.Id);
-                StatusMessage = $"已新建侧向文件夹“{createdNode.Name}”。";
+                StatusMessage = LF("LateralFileSystemTree.Status.CreatedFormat", "已新建侧向文件夹“{0}”。", createdNode.Name);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(Application.Current?.MainWindow, ex.Message, "新建侧向文件夹", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(Application.Current?.MainWindow, ex.Message, L("LateralFileSystemTree.CreateProjectionFolder", "新建侧向文件夹"), MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -331,15 +361,15 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
 
             if (SelectedNode is null)
             {
-                MessageBox.Show(Application.Current?.MainWindow, "请先选择一个作为继承源的侧向文件夹。", "继承侧向文件夹", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(Application.Current?.MainWindow, L("LateralFileSystemTree.Validation.SelectInheritanceSource", "请先选择一个作为继承源的侧向文件夹。"), L("LateralFileSystemTree.CreateInheritanceFolder", "继承侧向文件夹"), MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
             var parentNode = SelectedNode;
             var dialog = new LateralFileSystemFolderDialog(
-                title: "继承侧向文件夹",
-                promptText: "创建一个继承当前节点的侧向文件夹，内容默认投影父节点。",
-                confirmButtonText: "继承",
+                title: L("LateralFileSystemTree.CreateInheritanceFolder", "继承侧向文件夹"),
+                promptText: L("LateralFileSystemTree.Dialog.CreateInheritancePrompt", "创建一个继承当前节点的侧向文件夹，内容默认投影父节点。"),
+                confirmButtonText: L("LateralFileSystemTree.Inherit", "继承"),
                 inheritedFromName: parentNode.Name,
                 requiresSourcePath: false);
             dialog.Owner = Application.Current?.MainWindow;
@@ -354,11 +384,11 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
                 var createdNode = _runtime.CreateInheritance(dialog.FolderDisplayName, parentNode.Id, string.Empty);
                 SaveInitialNodePosition(createdNode, parentNode);
                 RefreshFromBackend(preserveSelection: false, preferredSelectedNodeId: createdNode.Id);
-                StatusMessage = $"已创建继承自“{parentNode.Name}”的侧向文件夹“{createdNode.Name}”。";
+                StatusMessage = LF("LateralFileSystemTree.Status.InheritedFormat", "已创建继承自“{0}”的侧向文件夹“{1}”。", parentNode.Name, createdNode.Name);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(Application.Current?.MainWindow, ex.Message, "继承侧向文件夹", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(Application.Current?.MainWindow, ex.Message, L("LateralFileSystemTree.CreateInheritanceFolder", "继承侧向文件夹"), MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -374,8 +404,8 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
             {
                 MessageBox.Show(
                     Application.Current?.MainWindow,
-                    $"侧向文件夹“{SelectedNode.Name}”存在向下的继承关系，当前不支持级联删除，请先删除其继承子项。",
-                    "删除侧向文件夹",
+                    LF("LateralFileSystemTree.Delete.HasChildrenFormat", "侧向文件夹“{0}”存在向下的继承关系，当前不支持级联删除，请先删除其继承子项。", SelectedNode.Name),
+                    L("LateralFileSystemTree.DeleteFolder", "删除侧向文件夹"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
                 return;
@@ -383,8 +413,8 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
 
             var result = MessageBox.Show(
                 Application.Current?.MainWindow,
-                $"确定删除侧向文件夹“{SelectedNode.Name}”吗？",
-                "删除侧向文件夹",
+                LF("LateralFileSystemTree.Delete.ConfirmFormat", "确定删除侧向文件夹“{0}”吗？", SelectedNode.Name),
+                L("LateralFileSystemTree.DeleteFolder", "删除侧向文件夹"),
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Warning,
                 MessageBoxResult.No);
@@ -400,11 +430,11 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
             {
                 _runtime.DeleteVirtualRoot(SelectedNode.Id);
                 RefreshFromBackend(preserveSelection: false);
-                StatusMessage = $"已删除侧向文件夹“{deletedName}”。";
+                StatusMessage = LF("LateralFileSystemTree.Status.DeletedFormat", "已删除侧向文件夹“{0}”。", deletedName);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(Application.Current?.MainWindow, ex.Message, "删除侧向文件夹", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(Application.Current?.MainWindow, ex.Message, L("LateralFileSystemTree.DeleteFolder", "删除侧向文件夹"), MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -426,8 +456,8 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
 
             var result = MessageBox.Show(
                 Application.Current?.MainWindow,
-                $"确定将侧向文件夹“{selectedNodeName}”合并回源文件夹吗？\n\n源文件夹：{sourcePath}\n\n这会用当前侧向文件夹视图完整替换源文件夹内容；源文件夹中不存在于侧向文件夹的内容也会被删除。成功后会移除此 LateralFS 节点和投影文件夹。",
-                "合并侧向文件夹",
+                LF("LateralFileSystemTree.Merge.ConfirmFormat", "确定将侧向文件夹“{0}”合并回源文件夹吗？\n\n源文件夹：{1}\n\n这会用当前侧向文件夹视图完整替换源文件夹内容；源文件夹中不存在于侧向文件夹的内容也会被删除。成功后会移除此 LateralFS 节点和投影文件夹。", selectedNodeName, sourcePath),
+                L("LateralFileSystemTree.MergeFolder", "合并回源文件夹"),
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Warning,
                 MessageBoxResult.No);
@@ -439,15 +469,15 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
 
             try
             {
-                StatusMessage = $"正在将侧向文件夹“{selectedNodeName}”合并回源文件夹…";
+                StatusMessage = LF("LateralFileSystemTree.Status.MergingFormat", "正在将侧向文件夹“{0}”合并回源文件夹…", selectedNodeName);
                 var mergeResult = await Task.Run(() => _runtime.MergeVirtualRoot(selectedNodeId)).ConfigureAwait(true);
                 RefreshFromBackend(preserveSelection: false);
-                StatusMessage = $"已将“{mergeResult.NodeName}”合并回源文件夹，并移除对应 LateralFS 节点。快照包含 {mergeResult.SnapshotFileCount} 个文件、{mergeResult.SnapshotDirectoryCount} 个文件夹。";
+                StatusMessage = LF("LateralFileSystemTree.Status.MergedFormat", "已将“{0}”合并回源文件夹，并移除对应 LateralFS 节点。快照包含 {1} 个文件、{2} 个文件夹。", mergeResult.NodeName, mergeResult.SnapshotFileCount, mergeResult.SnapshotDirectoryCount);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(Application.Current?.MainWindow, ex.Message, "合并侧向文件夹", MessageBoxButton.OK, MessageBoxImage.Warning);
-                StatusMessage = $"合并侧向文件夹“{selectedNodeName}”失败。";
+                MessageBox.Show(Application.Current?.MainWindow, ex.Message, L("LateralFileSystemTree.MergeFolder", "合并回源文件夹"), MessageBoxButton.OK, MessageBoxImage.Warning);
+                StatusMessage = LF("LateralFileSystemTree.Status.MergeFailedFormat", "合并侧向文件夹“{0}”失败。", selectedNodeName);
             }
         }
 
@@ -492,7 +522,7 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
 
             if (!HasWorkingRootDirectory)
             {
-                StatusMessage = "请先在首选项中的“侧向文件系统”页设置工作根目录。";
+                StatusMessage = L("LateralFileSystemTree.Selection.WorkingRootMissing", "请先在首选项中的“侧向文件系统”页设置工作根目录。");
             }
             else if (!IsVirtualizationBackendAvailable)
             {
@@ -500,13 +530,13 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
             }
             else if (!IsBackendConfiguredEnabled)
             {
-                StatusMessage = $"已读取 {Nodes.Count} 个侧向文件夹，但后端当前未启用。";
+                StatusMessage = LF("LateralFileSystemTree.Status.LoadedButDisabledFormat", "已读取 {0} 个侧向文件夹，但后端当前未启用。", Nodes.Count);
             }
             else
             {
                 StatusMessage = Nodes.Count == 0
-                    ? "已连接到 LateralFS 后端，但尚未创建侧向文件夹。"
-                    : $"已从后端加载 {Nodes.Count} 个侧向文件夹。";
+                    ? L("LateralFileSystemTree.Status.ConnectedNoNodes", "已连接到 LateralFS 后端，但尚未创建侧向文件夹。")
+                    : LF("LateralFileSystemTree.Status.LoadedFormat", "已从后端加载 {0} 个侧向文件夹。", Nodes.Count);
             }
             LateralFileSystemDebugConsole.Write("TreeVM", $"RefreshFromBackend end; nodes={Nodes.Count}; selectedNode='{SelectedNode?.Name ?? "<null>"}'; status='{StatusMessage}'; elapsedMs={stopwatch.ElapsedMilliseconds}.");
         }
@@ -522,7 +552,7 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
 
             if (selectedNodeId is null)
             {
-                SelectedNodeHydratedSizeText = "未选择侧向文件夹";
+                SelectedNodeHydratedSizeText = L("LateralFileSystemTree.Selection.None", "未选择侧向文件夹");
                 SelectedNodeFileSummaryText = string.Empty;
                 SelectedNodeStorageNote = string.Empty;
                 ResetSelectedNodeInspectorState();
@@ -532,8 +562,8 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
             }
 
             IsLoadingSelectedNodeInspector = refreshStorageSummary;
-            SelectedNodeHydratedSizeText = "正在统计真实体积…";
-            SelectedNodeFileSummaryText = "正在加载文件树…";
+            SelectedNodeHydratedSizeText = L("LateralFileSystemTree.Inspector.CountingSize", "正在统计真实体积…");
+            SelectedNodeFileSummaryText = L("LateralFileSystemTree.Inspector.LoadingFileTree", "正在加载文件树…");
             SelectedNodeStorageNote = string.Empty;
             SelectedNodeInspectorStatusText = BuildInspectorLoadingStatusText(syncSelectedNode, refreshStorageSummary);
             PrepareSelectedNodeInspectorForRefresh(refreshStorageSummary);
@@ -580,7 +610,7 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
                 }
 
                 SelectedNodeHydratedSizeText = FormatBytes(summary.HydratedBytes);
-                SelectedNodeFileSummaryText = $"已 Hydrate {summary.HydratedFileCount}/{summary.TotalFileCount} 个文件，目录 {summary.TotalDirectoryCount} 个";
+                SelectedNodeFileSummaryText = LF("LateralFileSystemTree.Inspector.SummaryFormat", "已 Hydrate {0}/{1} 个文件，目录 {2} 个", summary.HydratedFileCount, summary.TotalFileCount, summary.TotalDirectoryCount);
                 SelectedNodeStorageNote = BuildStorageNote(summary);
 
                 if (refreshStorageSummary)
@@ -613,8 +643,8 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
                     return;
                 }
 
-                SelectedNodeHydratedSizeText = "不可用";
-                SelectedNodeFileSummaryText = "无法读取该侧向文件夹的文件视图。";
+                SelectedNodeHydratedSizeText = L("Common.Unavailable", "不可用");
+                SelectedNodeFileSummaryText = L("LateralFileSystemTree.Inspector.ReadFailed", "无法读取该侧向文件夹的文件视图。");
                 SelectedNodeStorageNote = ex.Message;
                 SelectedNodeInspectorStatusText = string.Empty;
                 LateralFileSystemDebugConsole.WriteException("TreeVM", ex, $"RefreshSelectedNodeInspectorAsync failed; selectedNodeId='{selectedNodeId}'; refreshVersion={refreshVersion}");
@@ -633,7 +663,7 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
 
         private void ResetSelectedNodeInspectorState()
         {
-            SelectedNodeHydratedSizeText = "未选择侧向文件夹";
+            SelectedNodeHydratedSizeText = L("LateralFileSystemTree.Selection.None", "未选择侧向文件夹");
             SelectedNodeFileSummaryText = string.Empty;
             SelectedNodeStorageNote = string.Empty;
             SelectedNodeInspectorStatusText = string.Empty;
@@ -643,57 +673,57 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
         {
             if (refreshStorageSummary)
             {
-                SelectedNodeHydratedSizeText = "正在统计真实体积…";
-                SelectedNodeFileSummaryText = "正在加载文件树…";
+                SelectedNodeHydratedSizeText = L("LateralFileSystemTree.Inspector.CountingSize", "正在统计真实体积…");
+                SelectedNodeFileSummaryText = L("LateralFileSystemTree.Inspector.LoadingFileTree", "正在加载文件树…");
                 SelectedNodeStorageNote = string.Empty;
                 return;
             }
 
             SetSelectedNodeStorageSummaryPending();
-            SelectedNodeFileSummaryText = "正在加载文件树…";
+            SelectedNodeFileSummaryText = L("LateralFileSystemTree.Inspector.LoadingFileTree", "正在加载文件树…");
         }
 
         private void ApplySelectedNodeStorageSummary(LateralFileSystemNodeStorageSummary summary)
         {
             SelectedNodeHydratedSizeText = FormatBytes(summary.HydratedBytes);
-            SelectedNodeFileSummaryText = $"已 Hydrate {summary.HydratedFileCount}/{summary.TotalFileCount} 个文件，目录 {summary.TotalDirectoryCount} 个";
+            SelectedNodeFileSummaryText = LF("LateralFileSystemTree.Inspector.SummaryFormat", "已 Hydrate {0}/{1} 个文件，目录 {2} 个", summary.HydratedFileCount, summary.TotalFileCount, summary.TotalDirectoryCount);
             SelectedNodeStorageNote = BuildStorageNote(summary);
         }
 
         private void ApplySelectedNodeStorageSummaryUnavailable(Exception? exception)
         {
-            SelectedNodeHydratedSizeText = "不可用";
-            SelectedNodeFileSummaryText = "真实体积统计失败，但已加载文件视图。";
-            SelectedNodeStorageNote = exception?.Message ?? "无法统计该侧向文件夹的真实体积。";
+            SelectedNodeHydratedSizeText = L("Common.Unavailable", "不可用");
+            SelectedNodeFileSummaryText = L("LateralFileSystemTree.Inspector.SizeUnavailableButLoaded", "真实体积统计失败，但已加载文件视图。");
+            SelectedNodeStorageNote = exception?.Message ?? L("LateralFileSystemTree.Inspector.SizeUnavailable", "无法统计该侧向文件夹的真实体积。");
         }
 
         private void SetSelectedNodeStorageSummaryPending(int? rootEntryCount = null)
         {
-            SelectedNodeHydratedSizeText = "未统计";
+            SelectedNodeHydratedSizeText = L("LateralFileSystemTree.Inspector.NotCounted", "未统计");
             SelectedNodeFileSummaryText = rootEntryCount is null
-                ? "真实体积不会自动统计。"
-                : $"已加载根目录 {rootEntryCount.Value} 个条目，真实体积未统计。";
-            SelectedNodeStorageNote = "点击“手动刷新并统计”后，才会更新 Hydrate 数量、目录数量和真实体积。";
+                ? L("LateralFileSystemTree.Inspector.SizeNotAutoCounted", "真实体积不会自动统计。")
+                : LF("LateralFileSystemTree.Inspector.RootEntriesLoadedFormat", "已加载根目录 {0} 个条目，真实体积未统计。", rootEntryCount.Value);
+            SelectedNodeStorageNote = L("LateralFileSystemTree.Inspector.ManualRefreshHint", "点击“手动刷新并统计”后，才会更新 Hydrate 数量、目录数量和真实体积。");
         }
 
         private static string BuildInspectorLoadingStatusText(bool syncSelectedNode, bool refreshStorageSummary)
         {
             if (syncSelectedNode && refreshStorageSummary)
             {
-                return "正在同步、统计真实体积并载入文件树…";
+                return L("LateralFileSystemTree.Inspector.SyncingCountingLoading", "正在同步、统计真实体积并载入文件树…");
             }
 
             if (syncSelectedNode)
             {
-                return "正在同步并载入文件树…";
+                return L("LateralFileSystemTree.Inspector.SyncingLoading", "正在同步并载入文件树…");
             }
 
             if (refreshStorageSummary)
             {
-                return "正在统计真实体积并载入文件树…";
+                return L("LateralFileSystemTree.LoadingFileTree", "正在统计真实体积并载入文件树…");
             }
 
-            return "正在加载文件树…";
+            return L("LateralFileSystemTree.Inspector.LoadingFileTree", "正在加载文件树…");
         }
 
         private void SaveInitialNodePosition(LateralFileSystemNodeModel createdNode, LateralFileSystemNodeViewModel? parentNode)
@@ -801,19 +831,19 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
         {
             if (!IsVirtualizationBackendAvailable)
             {
-                MessageBox.Show(Application.Current?.MainWindow, _runtime.VirtualizationBackendStatusMessage, "侧向文件系统树", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(Application.Current?.MainWindow, _runtime.VirtualizationBackendStatusMessage, L("LateralFileSystemTree.Title", "侧向文件系统树"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 return false;
             }
 
             if (!HasWorkingRootDirectory)
             {
-                MessageBox.Show(Application.Current?.MainWindow, "请先在首选项中的“侧向文件系统”页设置工作根目录。", "侧向文件系统树", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(Application.Current?.MainWindow, L("LateralFileSystemTree.Selection.WorkingRootMissing", "请先在首选项中的“侧向文件系统”页设置工作根目录。"), L("LateralFileSystemTree.Title", "侧向文件系统树"), MessageBoxButton.OK, MessageBoxImage.Information);
                 return false;
             }
 
             if (!IsBackendConfiguredEnabled)
             {
-                MessageBox.Show(Application.Current?.MainWindow, "侧向文件系统当前未启用，请先在配置页面中启用后再执行创建、继承、合并或删除。", "侧向文件系统树", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(Application.Current?.MainWindow, L("LateralFileSystemTree.Validation.EnableBackendFirst", "侧向文件系统当前未启用，请先在配置页面中启用后再执行创建、继承、合并或删除。"), L("LateralFileSystemTree.Title", "侧向文件系统树"), MessageBoxButton.OK, MessageBoxImage.Information);
                 return false;
             }
 
@@ -836,7 +866,7 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
                 }
             }
 
-            return "未设置";
+            return L("Common.NotConfigured", "未设置");
         }
 
         private LateralFileSystemFileTreeNodeViewModel CreateFileTreeNode(string nodeId, LateralFileSystemFileEntryModel entry)
@@ -850,14 +880,14 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
         {
             var segments = new List<string>
             {
-                $"占位符 {summary.PlaceholderFileCount} 个",
-                $"已 Hydrate 的占位符 {summary.HydratedPlaceholderFileCount} 个",
-                $"完整文件 {summary.FullFileCount} 个"
+                LF("LateralFileSystemTree.StorageNote.PlaceholderFilesFormat", "占位符 {0} 个", summary.PlaceholderFileCount),
+                LF("LateralFileSystemTree.StorageNote.HydratedPlaceholdersFormat", "已 Hydrate 的占位符 {0} 个", summary.HydratedPlaceholderFileCount),
+                LF("LateralFileSystemTree.StorageNote.FullFilesFormat", "完整文件 {0} 个", summary.FullFileCount)
             };
 
             if (summary.UsedFallbackEstimation)
             {
-                segments.Add("部分状态为估算值");
+                segments.Add(L("LateralFileSystemTree.StorageNote.Estimated", "部分状态为估算值"));
             }
 
             return string.Join("  ·  ", segments);
@@ -902,9 +932,34 @@ namespace Skyweaver.Controls.LateralFileSystemTreeControl.ViewModels
                     return;
                 }
 
-                StatusMessage = $"已检测到“{SelectedNode.Name}”的源目录变更。";
+                StatusMessage = LF("LateralFileSystemTree.Status.SourceChangedFormat", "已检测到“{0}”的源目录变更。", SelectedNode.Name);
                 _ = RefreshSelectedNodeInspectorAsync(syncSelectedNode: false, refreshStorageSummary: false);
             });
+        }
+
+        private void RefreshLocalizedText()
+        {
+            OnPropertyChanged(nameof(Title));
+            OnPropertyChanged(nameof(Description));
+            OnPropertyChanged(nameof(CurrentWorkingRootDirectoryDisplay));
+            OnPropertyChanged(nameof(BackendAvailabilityText));
+            OnPropertyChanged(nameof(SelectionPlaceholderText));
+            OnPropertyChanged(nameof(SelectedNodeParentName));
+            OnPropertyChanged(nameof(SelectedNodeKindText));
+            OnPropertyChanged(nameof(SelectedNodeOwnerText));
+            OnPropertyChanged(nameof(SelectedNodeParentText));
+            OnPropertyChanged(nameof(SelectedNodeVirtualRootText));
+            OnPropertyChanged(nameof(SelectedNodeProjectionSourceText));
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallback, params object[] args)
+        {
+            return string.Format(L(resourceKey, fallback), args);
         }
     }
 }

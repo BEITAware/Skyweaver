@@ -1,3 +1,5 @@
+using Skyweaver.Services.Localization;
+
 namespace Skyweaver.Controls.WorkflowEditorControl.Models
 {
     public sealed class SessionFlowAgentOption
@@ -41,22 +43,39 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Models
 
         public string MenuDescription => CanCreate
             ? IsStructuredXmlIO
-                ? $"Input fields {Math.Max(1, InputFieldPaths.Count)}, output fields {Math.Max(1, OutputFieldPaths.Count)}"
-                : $"Input: {GetPortTypeText(InputPortType)}, Output: {GetPortTypeText(OutputPortType)}"
-            : "Create an agent in Agent Configuration first.";
+                ? LF("WorkflowEditor.AgentOption.StructuredMenuDescriptionFormat", "Input fields {0}, output fields {1}", Math.Max(1, InputFieldPaths.Count), Math.Max(1, OutputFieldPaths.Count))
+                : LF("WorkflowEditor.AgentOption.MenuDescriptionFormat", "Input: {0}, Output: {1}", GetPortTypeText(InputPortType), GetPortTypeText(OutputPortType))
+            : L("WorkflowEditor.AgentOption.CreateAgentFirst", "Create an agent in Agent Configuration first.");
 
-        public string InputPortName => InputPortType == SessionFlowPortType.XmlField ? "XML Input" : "Text Input";
+        public string InputPortName => InputPortType == SessionFlowPortType.XmlField
+            ? L("WorkflowEditor.AgentOption.Port.XmlInput", "XML Input")
+            : L("WorkflowEditor.AgentOption.Port.TextInput", "Text Input");
 
-        public string OutputPortName => OutputPortType == SessionFlowPortType.XmlField ? "XML Output" : "Text Output";
+        public string OutputPortName => OutputPortType == SessionFlowPortType.XmlField
+            ? L("WorkflowEditor.AgentOption.Port.XmlOutput", "XML Output")
+            : L("WorkflowEditor.AgentOption.Port.TextOutput", "Text Output");
 
         private static string GetPortTypeText(SessionFlowPortType portType)
         {
-            return portType == SessionFlowPortType.XmlField ? "XML" : "Text";
+            return portType == SessionFlowPortType.XmlField
+                ? "XML"
+                : L("WorkflowEditor.AgentOption.PortType.Text", "Text");
         }
 
         private static string GetFieldCountText(int inputCount, int outputCount)
         {
-            return $"{Math.Max(1, inputCount)} in / {Math.Max(1, outputCount)} out";
+            return LF("WorkflowEditor.AgentOption.FieldCountFormat", "{0} in / {1} out", Math.Max(1, inputCount), Math.Max(1, outputCount));
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
+        {
+            var format = L(resourceKey, fallbackFormat);
+            return string.Format(format, args);
         }
     }
 }

@@ -2,6 +2,7 @@ using System.IO;
 using System.Text;
 using Skyweaver.Controls.ChatSessionControl.Models;
 using Skyweaver.Controls.ChatSessionControl.Views;
+using Skyweaver.Services.Localization;
 using Skyweaver.Services.SkyweaverTools;
 
 namespace Skyweaver.Controls.ChatSessionControl.Services
@@ -103,7 +104,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
                     break;
 
                 case ChatMessagePartType.Audio:
-                    builder.Append("[音频：")
+                    builder.Append(L("ChatMessageClipboard.AudioMarkdownPrefix", "[音频："))
                         .Append(ResolveMediaAltText(part, "audio"))
                         .Append("](")
                         .Append(ResolveMediaPath(part))
@@ -130,11 +131,11 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
                     break;
 
                 case ChatMessagePartType.Image:
-                    builder.Append("[图片] ").Append(ResolveMediaPath(part));
+                    builder.Append(L("ChatMessageClipboard.ImagePlainPrefix", "[图片] ")).Append(ResolveMediaPath(part));
                     break;
 
                 case ChatMessagePartType.Audio:
-                    builder.Append("[音频] ").Append(ResolveMediaPath(part));
+                    builder.Append(L("ChatMessageClipboard.AudioPlainPrefix", "[音频] ")).Append(ResolveMediaPath(part));
                     break;
 
                 default:
@@ -176,7 +177,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
             var title = string.IsNullOrWhiteSpace(part.Title) ? null : part.Title.Trim();
             if (IsToolPart(part) && includeBadgeForToolParts)
             {
-                var badge = string.IsNullOrWhiteSpace(part.BadgeText) ? "工具调用" : part.BadgeText.Trim();
+                var badge = string.IsNullOrWhiteSpace(part.BadgeText) ? L("ChatMessagePart.Badge.ToolCall", "工具调用") : part.BadgeText.Trim();
                 return string.IsNullOrWhiteSpace(title) ? badge : $"{badge} - {title}";
             }
 
@@ -387,6 +388,11 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
                         break;
                 }
             }
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
 }

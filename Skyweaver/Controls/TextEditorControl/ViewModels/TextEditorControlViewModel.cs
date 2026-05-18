@@ -6,6 +6,7 @@ using System.Windows.Input;
 using Microsoft.Win32;
 using Skyweaver.Commands;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.TextEditorControl.ViewModels
 {
@@ -22,7 +23,6 @@ namespace Skyweaver.Controls.TextEditorControl.ViewModels
         private static readonly Encoding Utf8Bom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
         private static readonly Encoding StrictUtf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
-        private string _title;
         private string _textContent = string.Empty;
         private string _documentName = UntitledFileName;
         private string? _filePath;
@@ -30,38 +30,32 @@ namespace Skyweaver.Controls.TextEditorControl.ViewModels
         private TextEditorDocumentMode _documentMode = TextEditorDocumentMode.Default;
         private bool _hasUnsavedChanges;
         private bool _isUpdatingDocument;
-        private string _operationStatus = "Ready";
+        private string _operationStatus = L("TextEditor.Status.Ready", "Ready");
         private int _lineCount = 1;
         private int _characterCount;
         private string _lineNumbersText = "1";
         private GridLength _lineNumberColumnWidth = new(42);
         private int _caretLine = 1;
         private int _caretColumn = 1;
-        private string _syntaxProfileName = "Plain text";
+        private string _syntaxProfileName = L("TextEditor.Syntax.PlainText", "Plain text");
+        private readonly int _instanceNumber;
 
         public TextEditorControlViewModel(int instanceNumber)
         {
-            _title = instanceNumber > 1 ? $"文本编辑器 {instanceNumber}" : "文本编辑器";
+            _instanceNumber = instanceNumber;
 
             NewDocumentCommand = new AsyncRelayCommand(NewDocumentAsync);
             OpenDocumentCommand = new AsyncRelayCommand(OpenDocumentAsync);
             SaveDocumentCommand = new AsyncRelayCommand(SaveDocumentAsync);
             SaveDocumentAsCommand = new AsyncRelayCommand(SaveDocumentAsAsync);
 
+            LocalizationRuntime.Instance.LanguageChanged += (_, _) => RefreshLocalizedText();
             RefreshTextStatistics();
         }
 
-        public string Title
-        {
-            get => _title;
-            private set
-            {
-                if (SetProperty(ref _title, value))
-                {
-                    RefreshStatusBindings();
-                }
-            }
-        }
+        public string Title => _instanceNumber > 1
+            ? LF("TextEditor.Title.NumberedFormat", "文本编辑器 {0}", _instanceNumber)
+            : L("TextEditor.Title", "文本编辑器");
 
         public string TextContent
         {
@@ -79,7 +73,7 @@ namespace Skyweaver.Controls.TextEditorControl.ViewModels
                 if (!_isUpdatingDocument)
                 {
                     HasUnsavedChanges = true;
-                    SetOperationStatus("Edited");
+                    SetOperationStatus(L("TextEditor.Status.Edited", "Edited"));
                 }
             }
         }
@@ -95,6 +89,7 @@ namespace Skyweaver.Controls.TextEditorControl.ViewModels
                     OnPropertyChanged(nameof(IsPrintablePagesMode));
                     OnPropertyChanged(nameof(ModeDisplayName));
                     OnPropertyChanged(nameof(ModeSummaryText));
+                    OnPropertyChanged(nameof(DocumentSummary));
                     RefreshStatusBindings();
                 }
             }
@@ -123,33 +118,45 @@ namespace Skyweaver.Controls.TextEditorControl.ViewModels
         {
             get
             {
-                var location = string.IsNullOrWhiteSpace(_filePath) ? "Unsaved" : _filePath;
-                return $"{location} | {ModeDisplayName} | {EncodingDisplayName}";
+                var location = string.IsNullOrWhiteSpace(_filePath)
+                    ? L("TextEditor.Document.Unsaved", "Unsaved")
+                    : _filePath;
+                return LF("TextEditor.DocumentSummaryFormat", "{0} | {1} | {2}", location, ModeDisplayName, EncodingDisplayName);
             }
         }
 
-        public string HeaderStatusText => $"{Title} | {DocumentTitle} | {ModeSummaryText}";
+        public string HeaderStatusText => LF("TextEditor.HeaderStatusFormat", "{0} | {1} | {2}", Title, DocumentTitle, ModeSummaryText);
 
         public string StatusText
         {
             get
             {
-                var dirtyState = HasUnsavedChanges ? "Modified" : "Saved";
-                return $"{dirtyState} | {_operationStatus}";
+                var dirtyState = HasUnsavedChanges
+                    ? L("TextEditor.Status.Modified", "Modified")
+                    : L("TextEditor.Status.Saved", "Saved");
+                return LF("TextEditor.StatusTextFormat", "{0} | {1}", dirtyState, _operationStatus);
             }
         }
 
-        public string WordCountText => $"{LineCount.ToString(CultureInfo.InvariantCulture)} lines | {CharacterCount.ToString(CultureInfo.InvariantCulture)} chars";
+        public string WordCountText => LF(
+            "TextEditor.WordCountFormat",
+            "{0} lines | {1} chars",
+            LineCount.ToString(CultureInfo.InvariantCulture),
+            CharacterCount.ToString(CultureInfo.InvariantCulture));
 
-        public string LineColumnText => $"Ln {_caretLine.ToString(CultureInfo.InvariantCulture)}, Col {_caretColumn.ToString(CultureInfo.InvariantCulture)}";
+        public string LineColumnText => LF(
+            "TextEditor.LineColumnFormat",
+            "Ln {0}, Col {1}",
+            _caretLine.ToString(CultureInfo.InvariantCulture),
+            _caretColumn.ToString(CultureInfo.InvariantCulture));
 
         public string ModeDisplayName => DocumentMode == TextEditorDocumentMode.PrintablePages
-            ? "PrintablePages"
-            : "Default";
+            ? L("TextEditor.PrintablePages", "PrintablePages")
+            : L("TextEditor.Mode.Default", "Default");
 
         public string ModeSummaryText => DocumentMode == TextEditorDocumentMode.PrintablePages
-            ? "Markdown rich pages mode - backend pending"
-            : $"Plain text/code mode - syntax profile: {SyntaxProfileName}";
+            ? L("TextEditor.ModeSummary.PrintablePagesPending", "Markdown rich pages mode - backend pending")
+            : LF("TextEditor.ModeSummary.PlainTextFormat", "Plain text/code mode - syntax profile: {0}", SyntaxProfileName);
 
         public string SyntaxProfileName
         {
@@ -237,7 +244,7 @@ namespace Skyweaver.Controls.TextEditorControl.ViewModels
                 filePath: null,
                 encoding: Utf8NoBom,
                 mode: TextEditorDocumentMode.Default,
-                operationStatus: "New document");
+                operationStatus: L("TextEditor.Status.NewDocument", "New document"));
         }
 
         private async Task OpenDocumentAsync()
@@ -249,7 +256,7 @@ namespace Skyweaver.Controls.TextEditorControl.ViewModels
 
             var dialog = new OpenFileDialog
             {
-                Title = "打开文本文件",
+                Title = L("TextEditor.Dialog.OpenTitle", "打开文本文件"),
                 Filter = BuildDocumentFilter(),
                 CheckFileExists = true,
                 Multiselect = false
@@ -257,7 +264,7 @@ namespace Skyweaver.Controls.TextEditorControl.ViewModels
 
             if (dialog.ShowDialog(Application.Current?.MainWindow) != true)
             {
-                SetOperationStatus("Open canceled");
+                SetOperationStatus(L("TextEditor.Status.OpenCanceled", "Open canceled"));
                 return;
             }
 
@@ -283,8 +290,8 @@ namespace Skyweaver.Controls.TextEditorControl.ViewModels
 
             var result = MessageBox.Show(
                 Application.Current?.MainWindow,
-                "当前文档包含未保存的修改。是否先保存？",
-                "文本编辑器",
+                L("TextEditor.ConfirmUnsavedChanges", "当前文档包含未保存的修改。是否先保存？"),
+                L("TextEditor.Title", "文本编辑器"),
                 MessageBoxButton.YesNoCancel,
                 MessageBoxImage.Warning);
 
@@ -306,17 +313,17 @@ namespace Skyweaver.Controls.TextEditorControl.ViewModels
                     filePath,
                     readResult.Encoding,
                     DetermineMode(filePath),
-                    $"Opened {Path.GetFileName(filePath)}");
+                    LF("TextEditor.Status.OpenedFormat", "Opened {0}", Path.GetFileName(filePath)));
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or DecoderFallbackException or ArgumentException)
             {
                 MessageBox.Show(
                     Application.Current?.MainWindow,
                     ex.Message,
-                    "打开文本文件",
+                    L("TextEditor.Dialog.OpenTitle", "打开文本文件"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
-                SetOperationStatus("Open failed");
+                SetOperationStatus(L("TextEditor.Status.OpenFailed", "Open failed"));
             }
         }
 
@@ -334,7 +341,7 @@ namespace Skyweaver.Controls.TextEditorControl.ViewModels
         {
             var dialog = new SaveFileDialog
             {
-                Title = "保存文本文件",
+                Title = L("TextEditor.Dialog.SaveTitle", "保存文本文件"),
                 Filter = BuildDocumentFilter(),
                 AddExtension = true,
                 DefaultExt = IsPrintablePagesMode ? ".smd" : ".txt",
@@ -349,7 +356,7 @@ namespace Skyweaver.Controls.TextEditorControl.ViewModels
 
             if (dialog.ShowDialog(Application.Current?.MainWindow) != true)
             {
-                SetOperationStatus("Save canceled");
+                SetOperationStatus(L("TextEditor.Status.SaveCanceled", "Save canceled"));
                 return false;
             }
 
@@ -371,7 +378,7 @@ namespace Skyweaver.Controls.TextEditorControl.ViewModels
                 OnPropertyChanged(nameof(DocumentTitle));
                 OnPropertyChanged(nameof(DocumentSummary));
                 OnPropertyChanged(nameof(EncodingDisplayName));
-                SetOperationStatus($"Saved {Path.GetFileName(filePath)}");
+                SetOperationStatus(LF("TextEditor.Status.SavedFileFormat", "Saved {0}", Path.GetFileName(filePath)));
 
                 return true;
             }
@@ -380,10 +387,10 @@ namespace Skyweaver.Controls.TextEditorControl.ViewModels
                 MessageBox.Show(
                     Application.Current?.MainWindow,
                     ex.Message,
-                    "保存文本文件",
+                    L("TextEditor.Dialog.SaveTitle", "保存文本文件"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
-                SetOperationStatus("Save failed");
+                SetOperationStatus(L("TextEditor.Status.SaveFailed", "Save failed"));
                 return false;
             }
         }
@@ -465,7 +472,7 @@ namespace Skyweaver.Controls.TextEditorControl.ViewModels
                 ".html" => "HTML",
                 ".css" => "CSS",
                 ".smd" => "Skyweaver Markdown",
-                _ => "Plain text"
+                _ => L("TextEditor.Syntax.PlainText", "Plain text")
             };
         }
 
@@ -569,9 +576,9 @@ namespace Skyweaver.Controls.TextEditorControl.ViewModels
 
         private static string BuildDocumentFilter()
         {
-            return "Text and code files|*.txt;*.md;*.cs;*.xaml;*.xml;*.json;*.ps1;*.js;*.ts;*.html;*.css;*.ini;*.log|" +
-                   "Skyweaver Markdown (*.smd)|*.smd|" +
-                   "All files (*.*)|*.*";
+            return L(
+                "TextEditor.Dialog.FileFilter",
+                "Text and code files|*.txt;*.md;*.cs;*.xaml;*.xml;*.json;*.ps1;*.js;*.ts;*.html;*.css;*.ini;*.log|Skyweaver Markdown (*.smd)|*.smd|All files (*.*)|*.*");
         }
 
         private static string? SafeGetDirectoryName(string? filePath)
@@ -592,5 +599,27 @@ namespace Skyweaver.Controls.TextEditorControl.ViewModels
         }
 
         private readonly record struct TextReadResult(string Text, Encoding Encoding);
+
+        private void RefreshLocalizedText()
+        {
+            OnPropertyChanged(nameof(Title));
+            OnPropertyChanged(nameof(DocumentSummary));
+            OnPropertyChanged(nameof(HeaderStatusText));
+            OnPropertyChanged(nameof(StatusText));
+            OnPropertyChanged(nameof(WordCountText));
+            OnPropertyChanged(nameof(LineColumnText));
+            OnPropertyChanged(nameof(ModeDisplayName));
+            OnPropertyChanged(nameof(ModeSummaryText));
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallback, params object[] args)
+        {
+            return string.Format(L(resourceKey, fallback), args);
+        }
     }
 }

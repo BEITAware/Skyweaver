@@ -1,3 +1,5 @@
+using Skyweaver.Services.Localization;
+
 namespace Skyweaver.Models.ChatSession
 {
     public sealed class ChatSessionModel
@@ -32,7 +34,7 @@ namespace Skyweaver.Models.ChatSession
         public bool HasBoundFlow => FlowBinding.IsBound;
 
         public string BoundFlowDisplayName => string.IsNullOrWhiteSpace(FlowBinding.GraphName)
-            ? "未绑定会话流"
+            ? L("ChatSession.BoundFlow.Unbound", "未绑定会话流")
             : FlowBinding.GraphName;
 
         public DateTime CreatedAt
@@ -45,6 +47,11 @@ namespace Skyweaver.Models.ChatSession
         {
             get => UpdatedAtUtc;
             set => UpdatedAtUtc = value.Kind == DateTimeKind.Utc ? value : value.ToUniversalTime();
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
 }

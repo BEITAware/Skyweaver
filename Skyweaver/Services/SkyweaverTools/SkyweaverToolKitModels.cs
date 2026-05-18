@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Services.SkyweaverTools
 {
@@ -55,10 +56,18 @@ namespace Skyweaver.Services.SkyweaverTools
         }
 
         public string DisplayNameOrFallback => string.IsNullOrWhiteSpace(Name)
-            ? $"未命名工具集 ({GetShortKey(Key)})"
+            ? LF("ToolConfiguration.ToolKits.UnnamedFormat", "未命名工具集 ({0})", GetShortKey(Key))
             : Name;
 
-        public string ManagementHint => "加入该工具集的工具不会在代理循环开始时默认暴露给 LLM，需要通过 LoadToolKits 显式加载。";
+        public string ManagementHint => L(
+            "ToolConfiguration.ToolKits.ManagementHint",
+            "加入该工具集的工具不会在代理循环开始时默认暴露给 LLM，需要通过 LoadToolKits 显式加载。");
+
+        public void RefreshLocalizedText()
+        {
+            OnPropertyChanged(nameof(DisplayNameOrFallback));
+            OnPropertyChanged(nameof(ManagementHint));
+        }
 
         public SkyweaverToolKitDefinition DeepClone()
         {
@@ -81,6 +90,16 @@ namespace Skyweaver.Services.SkyweaverTools
         {
             var normalized = key?.Trim() ?? string.Empty;
             return normalized.Length <= 8 ? normalized : normalized[..8];
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallback, params object[] args)
+        {
+            return string.Format(L(resourceKey, fallback), args);
         }
     }
 

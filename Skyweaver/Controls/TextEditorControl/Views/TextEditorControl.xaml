@@ -136,53 +136,53 @@
                         <Button Style="{StaticResource TextEditorCompactRibbonButtonStyle}"
                                 MinWidth="62"
                                 Command="{Binding NewDocumentCommand}"
-                                ToolTip="创建空白文档">
+                                ToolTip="{DynamicResource TextEditor.New.ToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <Image Width="14"
                                        Height="14"
                                        Source="pack://application:,,,/Resources/NewNodeGraph.png"
                                        Stretch="Uniform"
                                        Margin="0,0,5,0"/>
-                                <TextBlock Text="New"/>
+                                <TextBlock Text="{DynamicResource TextEditor.New}"/>
                             </StackPanel>
                         </Button>
                         <Button Style="{StaticResource TextEditorCompactRibbonButtonStyle}"
                                 MinWidth="62"
                                 Command="{Binding OpenDocumentCommand}"
-                                ToolTip="打开文本文件">
+                                ToolTip="{DynamicResource TextEditor.Open.ToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <Image Width="14"
                                        Height="14"
                                        Source="pack://application:,,,/Resources/open.png"
                                        Stretch="Uniform"
                                        Margin="0,0,5,0"/>
-                                <TextBlock Text="Open"/>
+                                <TextBlock Text="{DynamicResource TextEditor.Open}"/>
                             </StackPanel>
                         </Button>
                         <Button Style="{StaticResource TextEditorCompactRibbonButtonStyle}"
                                 MinWidth="62"
                                 Command="{Binding SaveDocumentCommand}"
-                                ToolTip="保存当前文档">
+                                ToolTip="{DynamicResource TextEditor.Save.ToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <Image Width="14"
                                        Height="14"
                                        Source="pack://application:,,,/Resources/save.png"
                                        Stretch="Uniform"
                                        Margin="0,0,5,0"/>
-                                <TextBlock Text="Save"/>
+                                <TextBlock Text="{DynamicResource TextEditor.Save}"/>
                             </StackPanel>
                         </Button>
                         <Button Style="{StaticResource TextEditorCompactRibbonButtonStyle}"
                                 MinWidth="74"
                                 Command="{Binding SaveDocumentAsCommand}"
-                                ToolTip="另存为">
+                                ToolTip="{DynamicResource TextEditor.SaveAs.ToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <Image Width="14"
                                        Height="14"
                                        Source="pack://application:,,,/Resources/export.png"
                                        Stretch="Uniform"
                                        Margin="0,0,5,0"/>
-                                <TextBlock Text="Save As"/>
+                                <TextBlock Text="{DynamicResource TextEditor.SaveAs}"/>
                             </StackPanel>
                         </Button>
                         <Separator Width="1"
@@ -191,17 +191,17 @@
                         <Button Style="{StaticResource TextEditorCompactRibbonButtonStyle}"
                                 MinWidth="64"
                                 Command="{x:Static ApplicationCommands.Undo}"
-                                ToolTip="撤销上一步编辑">
+                                ToolTip="{DynamicResource TextEditor.Undo.ToolTip}">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="Undo"/>
+                                <TextBlock Text="{DynamicResource TextEditor.Undo}"/>
                             </StackPanel>
                         </Button>
                         <Button Style="{StaticResource TextEditorCompactRibbonButtonStyle}"
                                 MinWidth="64"
                                 Command="{x:Static ApplicationCommands.Redo}"
-                                ToolTip="重做上一步编辑">
+                                ToolTip="{DynamicResource TextEditor.Redo.ToolTip}">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="Redo"/>
+                                <TextBlock Text="{DynamicResource TextEditor.Redo}"/>
                             </StackPanel>
                         </Button>
                         <Separator Width="1"
@@ -211,38 +211,38 @@
                         <Button Style="{StaticResource TextEditorCompactRibbonButtonStyle}"
                                 MinWidth="72"
                                 Visibility="{Binding IsPrintablePagesMode, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                ToolTip="插入链接">
+                                ToolTip="{DynamicResource TextEditor.InsertLink.ToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="URL"
                                            FontSize="10"
                                            Margin="0,0,5,0"/>
-                                <TextBlock Text="Link"/>
+                                <TextBlock Text="{DynamicResource TextEditor.Link}"/>
                             </StackPanel>
                         </Button>
                         <Button Style="{StaticResource TextEditorCompactRibbonButtonStyle}"
                                 MinWidth="76"
                                 Visibility="{Binding IsPrintablePagesMode, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                ToolTip="插入图片">
+                                ToolTip="{DynamicResource TextEditor.InsertPicture.ToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <Image Width="14"
                                        Height="14"
                                        Source="pack://application:,,,/Resources/image.png"
                                        Stretch="Uniform"
                                        Margin="0,0,5,0"/>
-                                <TextBlock Text="Picture"/>
+                                <TextBlock Text="{DynamicResource TextEditor.Picture}"/>
                             </StackPanel>
                         </Button>
                         <Button Style="{StaticResource TextEditorCompactRibbonButtonStyle}"
                                 MinWidth="72"
                                 Visibility="{Binding IsPrintablePagesMode, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                ToolTip="刷新预览">
+                                ToolTip="{DynamicResource TextEditor.RefreshPreview.ToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <Image Width="14"
                                        Height="14"
                                        Source="pack://application:,,,/Resources/Refresh.png"
                                        Stretch="Uniform"
                                        Margin="0,0,5,0"/>
-                                <TextBlock Text="Refresh"/>
+                                <TextBlock Text="{DynamicResource Common.Refresh}"/>
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -261,18 +261,18 @@
                         <ComboBox Width="124"
                                   Height="24"
                                   SelectedIndex="0"
-                                  ToolTip="段落样式">
-                            <ComboBoxItem Content="Paragraph"/>
-                            <ComboBoxItem Content="Heading 1"/>
-                            <ComboBoxItem Content="Heading 2"/>
-                            <ComboBoxItem Content="Code Block"/>
+                                  ToolTip="{DynamicResource TextEditor.ParagraphStyle.ToolTip}">
+                            <ComboBoxItem Content="{DynamicResource TextEditor.Paragraph}"/>
+                            <ComboBoxItem Content="{DynamicResource TextEditor.Heading1}"/>
+                            <ComboBoxItem Content="{DynamicResource TextEditor.Heading2}"/>
+                            <ComboBoxItem Content="{DynamicResource TextEditor.CodeBlock}"/>
                         </ComboBox>
 
                         <ComboBox Width="120"
                                   Height="24"
                                   Margin="6,0,0,0"
                                   SelectedIndex="0"
-                                  ToolTip="字体">
+                                  ToolTip="{DynamicResource TextEditor.Font.ToolTip}">
                             <ComboBoxItem Content="Segoe UI"/>
                             <ComboBoxItem Content="Consolas"/>
                             <ComboBoxItem Content="Microsoft YaHei UI"/>
@@ -283,7 +283,7 @@
                                   Height="24"
                                   Margin="6,0,0,0"
                                   SelectedIndex="1"
-                                  ToolTip="字号">
+                                  ToolTip="{DynamicResource TextEditor.FontSize.ToolTip}">
                             <ComboBoxItem Content="10"/>
                             <ComboBoxItem Content="11"/>
                             <ComboBoxItem Content="12"/>
@@ -297,19 +297,19 @@
                                 Padding="0"
                                 FontWeight="Bold"
                                 Content="B"
-                                ToolTip="加粗"/>
+                                ToolTip="{DynamicResource TextEditor.Bold.ToolTip}"/>
                         <Button Width="28"
                                 Height="24"
                                 Margin="2,0,0,0"
                                 Padding="0"
                                 FontStyle="Italic"
                                 Content="I"
-                                ToolTip="斜体"/>
+                                ToolTip="{DynamicResource TextEditor.Italic.ToolTip}"/>
                         <Button Width="28"
                                 Height="24"
                                 Margin="2,0,0,0"
                                 Padding="0"
-                                ToolTip="下划线">
+                                ToolTip="{DynamicResource TextEditor.Underline.ToolTip}">
                             <TextBlock Text="U"
                                        TextDecorations="Underline"/>
                         </Button>
@@ -319,7 +319,7 @@
                                 Padding="0"
                                 Content="A"
                                 Foreground="#FFE8F8FF"
-                                ToolTip="文字颜色"/>
+                                ToolTip="{DynamicResource TextEditor.TextColor.ToolTip}"/>
 
                         <Separator Width="1"
                                    Margin="8,2"
@@ -329,40 +329,40 @@
                                 Height="24"
                                 Padding="0"
                                 Content="•"
-                                ToolTip="项目符号"/>
+                                ToolTip="{DynamicResource TextEditor.BulletedList.ToolTip}"/>
                         <Button Width="30"
                                 Height="24"
                                 Margin="2,0,0,0"
                                 Padding="0"
                                 Content="1."
-                                ToolTip="编号列表"/>
+                                ToolTip="{DynamicResource TextEditor.NumberedList.ToolTip}"/>
                         <Button Width="30"
                                 Height="24"
                                 Margin="2,0,0,0"
                                 Padding="0"
                                 Content="≡"
-                                ToolTip="左对齐"/>
+                                ToolTip="{DynamicResource TextEditor.AlignLeft.ToolTip}"/>
                         <Button Width="30"
                                 Height="24"
                                 Margin="2,0,0,0"
                                 Padding="0"
                                 Content="≣"
-                                ToolTip="两端对齐"/>
+                                ToolTip="{DynamicResource TextEditor.Justify.ToolTip}"/>
                     </StackPanel>
 
                     <StackPanel DockPanel.Dock="Right"
                                 Orientation="Horizontal"
                                 VerticalAlignment="Center">
-                        <TextBlock Text="Zoom"
+                        <TextBlock Text="{DynamicResource TextEditor.Zoom}"
                                    Foreground="#FFE8F8FF"
                                    VerticalAlignment="Center"
                                    Margin="0,0,6,0"/>
                         <Slider Width="96"
                                 Minimum="80"
-                                Maximum="160"
-                                Value="100"
-                                VerticalAlignment="Center"
-                                ToolTip="缩放"/>
+                                 Maximum="160"
+                                 Value="100"
+                                 VerticalAlignment="Center"
+                                 ToolTip="{DynamicResource TextEditor.Zoom.ToolTip}"/>
                     </StackPanel>
                 </DockPanel>
             </Border>
@@ -546,9 +546,9 @@
                                            Margin="0,0,8,0"
                                            VerticalAlignment="Center"/>
                                     <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="PrintablePages"
+                                        <TextBlock Text="{DynamicResource TextEditor.PrintablePages}"
                                                    Style="{StaticResource PreferencesSidebarTitleTextStyle}"/>
-                                        <TextBlock Text="outline and helpers"
+                                        <TextBlock Text="{DynamicResource TextEditor.OutlineAndHelpers}"
                                                    Foreground="#A8E6F7FF"
                                                    FontSize="10"/>
                                     </StackPanel>
@@ -560,7 +560,7 @@
                                       Padding="8"
                                       VerticalScrollBarVisibility="Auto">
                             <StackPanel>
-                                <Expander Header="Document"
+                                <Expander Header="{DynamicResource TextEditor.Document}"
                                           IsExpanded="True"
                                           Style="{DynamicResource PreferencesSidebarExpanderStyle}">
                                     <StackPanel>
@@ -577,40 +577,40 @@
                                                            Text="{Binding DocumentSummary}"
                                                            Style="{StaticResource TextEditorSidebarCaptionStyle}"/>
                                                 <TextBlock Margin="0,8,0,0"
-                                                           Text="Markdown rich-text backend pending"
+                                                           Text="{DynamicResource TextEditor.MarkdownBackendPending}"
                                                            Style="{StaticResource TextEditorSidebarCaptionStyle}"/>
                                             </StackPanel>
                                         </Border>
 
                                         <Button Style="{DynamicResource PreferencesSidebarItemButtonStyle}"
                                                 Tag="True"
-                                                ToolTip="当前文档">
+                                                ToolTip="{DynamicResource TextEditor.CurrentDocument.ToolTip}">
                                             <StackPanel Orientation="Horizontal">
                                                 <Image Width="18"
                                                        Height="18"
                                                        Source="pack://application:,,,/Resources/Script.png"
                                                        Stretch="Uniform"
                                                        Margin="0,0,8,0"/>
-                                                <TextBlock Text="Source"
+                                                <TextBlock Text="{DynamicResource TextEditor.Source}"
                                                            VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </Button>
                                         <Button Style="{DynamicResource PreferencesSidebarItemButtonStyle}"
-                                                ToolTip="页面设置">
+                                                ToolTip="{DynamicResource TextEditor.PageSettings.ToolTip}">
                                             <StackPanel Orientation="Horizontal">
                                                 <Image Width="18"
                                                        Height="18"
                                                        Source="pack://application:,,,/Resources/Template.png"
                                                        Stretch="Uniform"
                                                        Margin="0,0,8,0"/>
-                                                <TextBlock Text="Pages"
+                                                <TextBlock Text="{DynamicResource TextEditor.Pages}"
                                                            VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </Button>
                                     </StackPanel>
                                 </Expander>
 
-                                <Expander Header="Insert"
+                                <Expander Header="{DynamicResource TextEditor.Insert}"
                                           IsExpanded="True"
                                           Style="{DynamicResource PreferencesSidebarExpanderStyle}">
                                     <StackPanel>
@@ -619,7 +619,7 @@
                                                 <TextBlock Text="URL"
                                                            Width="18"
                                                            Margin="0,0,8,0"/>
-                                                <TextBlock Text="Hyperlink"/>
+                                                <TextBlock Text="{DynamicResource TextEditor.Hyperlink}"/>
                                             </StackPanel>
                                         </Button>
                                         <Button Style="{DynamicResource PreferencesSidebarItemButtonStyle}">
@@ -629,7 +629,7 @@
                                                        Source="pack://application:,,,/Resources/imagealt.png"
                                                        Stretch="Uniform"
                                                        Margin="0,0,8,0"/>
-                                                <TextBlock Text="Picture"/>
+                                                <TextBlock Text="{DynamicResource TextEditor.Picture}"/>
                                             </StackPanel>
                                         </Button>
                                         <Button Style="{DynamicResource PreferencesSidebarItemButtonStyle}">
@@ -638,13 +638,13 @@
                                                            Width="18"
                                                            Margin="0,0,8,0"
                                                            FontFamily="Consolas"/>
-                                                <TextBlock Text="Code Block"/>
+                                                <TextBlock Text="{DynamicResource TextEditor.CodeBlock}"/>
                                             </StackPanel>
                                         </Button>
                                     </StackPanel>
                                 </Expander>
 
-                                <Expander Header="Outline"
+                                <Expander Header="{DynamicResource TextEditor.Outline}"
                                           IsExpanded="True"
                                           Style="{DynamicResource PreferencesSidebarExpanderStyle}">
                                     <StackPanel>
@@ -654,7 +654,7 @@
                                                 BorderBrush="#305D91B4"
                                                 BorderThickness="1"
                                                 CornerRadius="3">
-                                            <TextBlock Text="PrintablePages outline pending"
+                                            <TextBlock Text="{DynamicResource TextEditor.PrintablePagesOutlinePending}"
                                                        Style="{StaticResource TextEditorSidebarCaptionStyle}"/>
                                         </Border>
                                     </StackPanel>

@@ -2,6 +2,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using Skyweaver.Models.LateralFileSystem;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Services.LateralFileSystem
 {
@@ -15,7 +16,7 @@ namespace Skyweaver.Services.LateralFileSystem
         private LateralFileSystemService _service;
         private bool _isVirtualizationBackendAvailable;
         private int _activationRequestId;
-        private string _virtualizationBackendStatusMessage = "侧向文件系统原生后端可用。";
+        private string _virtualizationBackendStatusMessage = L("LateralFileSystem.Runtime.BackendAvailable", "侧向文件系统原生后端可用。");
         private bool _disposed;
 
         private LateralFileSystemRuntime()
@@ -375,19 +376,19 @@ namespace Skyweaver.Services.LateralFileSystem
             {
                 _isVirtualizationBackendAvailable = true;
                 LateralFileSystemDebugConsole.Write("Runtime", "Virtualization backend is available.");
-                _virtualizationBackendStatusMessage = "侧向文件系统原生后端可用。";
+                _virtualizationBackendStatusMessage = L("LateralFileSystem.Runtime.BackendAvailable", "侧向文件系统原生后端可用。");
                 return;
             }
 
             _isVirtualizationBackendAvailable = false;
-            _virtualizationBackendStatusMessage = unavailableReason ?? "侧向文件系统原生后端不可用。";
+            _virtualizationBackendStatusMessage = unavailableReason ?? L("LateralFileSystem.Runtime.BackendUnavailable", "侧向文件系统原生后端不可用。");
         }
 
         private string EnsureWorkingRootIsConfigured()
         {
             if (string.IsNullOrWhiteSpace(_configuration.WorkingRootDirectory))
             {
-                throw new InvalidOperationException("请先在首选项中的“侧向文件系统”页设置工作根目录。");
+                throw new InvalidOperationException(L("LateralFileSystem.Runtime.WorkingRootRequired", "请先在首选项中的“侧向文件系统”页设置工作根目录。"));
             }
 
             return _configuration.WorkingRootDirectory;
@@ -397,7 +398,7 @@ namespace Skyweaver.Services.LateralFileSystem
         {
             if (!_configuration.IsEnabled)
             {
-                throw new InvalidOperationException("侧向文件系统当前未启用，请先在配置页面中启用后再创建或继承侧向文件夹。");
+                throw new InvalidOperationException(L("LateralFileSystem.Runtime.EnableBeforeMutation", "侧向文件系统当前未启用，请先在配置页面中启用后再创建或继承侧向文件夹。"));
             }
 
             RefreshVirtualizationBackendAvailabilityLocked();
@@ -494,6 +495,11 @@ namespace Skyweaver.Services.LateralFileSystem
         private void ThrowIfDisposed()
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
 }

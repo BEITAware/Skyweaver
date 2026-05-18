@@ -1,4 +1,5 @@
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.WorkflowEditorControl.Models
 {
@@ -85,8 +86,10 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Models
         public bool IsFlexiblePort => IsFlexiblePlaceholder;
 
         public string PortTypeDisplayText => IsFlexiblePlaceholder
-            ? "智能"
-            : PortType == SessionFlowPortType.XmlField ? "XML字段" : "自然语言";
+            ? L("WorkflowEditor.PortType.Smart", "智能")
+            : PortType == SessionFlowPortType.XmlField
+                ? L("WorkflowEditor.PortType.XmlField", "XML字段")
+                : L("WorkflowEditor.PortType.NaturalLanguage", "自然语言");
 
         public SessionFlowPortModel DeepClone()
         {
@@ -101,6 +104,11 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Models
                 PairKey = PairKey,
                 IsTransparentOutput = IsTransparentOutput
             };
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
 }

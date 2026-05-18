@@ -9,6 +9,7 @@ using Skyweaver.Infrastructure.Mvvm;
 using Skyweaver.Models.AerialCityRag;
 using Skyweaver.Services.AerialCityRag;
 using Skyweaver.Services.Directories;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
 {
@@ -18,23 +19,25 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
         private readonly EmbeddingModelConfigurationRepository _embeddingModelRepository;
         private AerialCityRagConfiguration _configuration;
         private EmbeddingModelOption? _selectedEmbeddingModel;
-        private string _statusMessage = "语义搜索配置已加载。";
+        private string _statusMessage;
 
         public SemanticSearchPreferencesPageViewModel()
         {
             _configurationRepository = new AerialCityRagConfigurationRepository();
             _embeddingModelRepository = new EmbeddingModelConfigurationRepository(new EmbeddingModelConfigurationPathProvider());
             _configuration = _configurationRepository.Load();
+            _statusMessage = L("SemanticSearch.Status.Loaded", "语义搜索配置已加载。");
 
             RefreshEmbeddingModelsCommand = new RelayCommand(RefreshEmbeddingModels);
             OpenConfigurationDirectoryCommand = new RelayCommand(OpenConfigurationDirectory);
+            LocalizationRuntime.Instance.LanguageChanged += (_, _) => RefreshLocalizedText();
 
             RefreshEmbeddingModels();
         }
 
-        public string Title { get; } = "语义搜索";
+        public string Title => L("SemanticSearch.Page.Title", "语义搜索");
 
-        public string Description { get; } = "配置 AerialCity RAG 工具的启用状态与检索时使用的嵌入模型。";
+        public string Description => L("SemanticSearch.Page.Description", "配置 AerialCity RAG 工具的启用状态与检索时使用的嵌入模型。");
 
         public ObservableCollection<EmbeddingModelOption> EmbeddingModels { get; } = new();
 
@@ -50,7 +53,7 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
 
                 _configuration.IsEnabled = value;
                 OnPropertyChanged();
-                PersistConfiguration(value ? "AerialCity RAG 已启用。" : "AerialCity RAG 已关闭。");
+                PersistConfiguration(value ? L("SemanticSearch.Status.RagEnabled", "AerialCity RAG 已启用。") : L("SemanticSearch.Status.RagDisabled", "AerialCity RAG 已关闭。"));
             }
         }
 
@@ -66,11 +69,13 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
 
                 _configuration.SelectedEmbeddingModelKey = value?.Key ?? string.Empty;
                 OnPropertyChanged(nameof(SelectedEmbeddingModelSummary));
-                PersistConfiguration(value == null ? "嵌入模型选择已清空。" : $"已选择嵌入模型：{value.DisplayName}");
+                PersistConfiguration(value == null
+                    ? L("SemanticSearch.Status.EmbeddingModelCleared", "嵌入模型选择已清空。")
+                    : string.Format(L("SemanticSearch.Status.EmbeddingModelSelectedFormat", "已选择嵌入模型：{0}"), value.DisplayName));
             }
         }
 
-        public string SelectedEmbeddingModelSummary => SelectedEmbeddingModel?.Summary ?? "未选择嵌入模型";
+        public string SelectedEmbeddingModelSummary => SelectedEmbeddingModel?.Summary ?? L("SemanticSearch.EmbeddingModel.NotSelected", "未选择嵌入模型");
 
         public int MinimumEmbeddingConcurrency => AerialCityRagConfiguration.MinimumEmbeddingConcurrency;
 
@@ -89,11 +94,11 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
                 _configuration.EmbeddingConcurrency = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(EmbeddingConcurrencySummary));
-                PersistConfiguration($"嵌入并发量已设为 {_configuration.EmbeddingConcurrency}。");
+                PersistConfiguration(string.Format(L("SemanticSearch.Status.EmbeddingConcurrencySavedFormat", "嵌入并发量已设为 {0}。"), _configuration.EmbeddingConcurrency));
             }
         }
 
-        public string EmbeddingConcurrencySummary => $"{EmbeddingConcurrency} 个并发请求";
+        public string EmbeddingConcurrencySummary => string.Format(L("SemanticSearch.EmbeddingConcurrency.SummaryFormat", "{0} 个并发请求"), EmbeddingConcurrency);
 
         public string AerialCityDirectoryPath => SkyweaverDirectoryRuntime.Instance.AerialCityDirectoryPath;
 
@@ -126,13 +131,13 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
             if (SelectedEmbeddingModel != null && !string.Equals(selectedKey, SelectedEmbeddingModel.Key, StringComparison.Ordinal))
             {
                 _configuration.SelectedEmbeddingModelKey = SelectedEmbeddingModel.Key;
-                PersistConfiguration($"已自动选择嵌入模型：{SelectedEmbeddingModel.DisplayName}");
+                PersistConfiguration(string.Format(L("SemanticSearch.Status.EmbeddingModelAutoSelectedFormat", "已自动选择嵌入模型：{0}"), SelectedEmbeddingModel.DisplayName));
                 return;
             }
 
             StatusMessage = EmbeddingModels.Count == 0
-                ? "尚未配置嵌入模型。请先在嵌入模型配置面板中添加模型。"
-                : $"已获取 {EmbeddingModels.Count} 个嵌入模型。";
+                ? L("SemanticSearch.Status.NoEmbeddingModels", "尚未配置嵌入模型。请先在嵌入模型配置面板中添加模型。")
+                : string.Format(L("SemanticSearch.Status.EmbeddingModelsLoadedFormat", "已获取 {0} 个嵌入模型。"), EmbeddingModels.Count);
         }
 
         private void OpenConfigurationDirectory()
@@ -149,7 +154,7 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
             }
             catch (Exception ex)
             {
-                StatusMessage = $"打开配置目录失败：{ex.Message}";
+                StatusMessage = string.Format(L("Common.Status.OpenConfigurationDirectoryFailedFormat", "打开配置目录失败：{0}"), ex.Message);
             }
         }
 
@@ -168,8 +173,21 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
             }
             catch (Exception ex)
             {
-                StatusMessage = $"保存失败：{ex.Message}";
+                StatusMessage = string.Format(L("Localization.Status.SaveFailedFormat", "保存失败：{0}"), ex.Message);
             }
+        }
+
+        private void RefreshLocalizedText()
+        {
+            OnPropertyChanged(nameof(Title));
+            OnPropertyChanged(nameof(Description));
+            OnPropertyChanged(nameof(SelectedEmbeddingModelSummary));
+            OnPropertyChanged(nameof(EmbeddingConcurrencySummary));
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
 
         public sealed class EmbeddingModelOption
@@ -195,8 +213,12 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
                     displayName = definition.Key;
                 }
 
-                var readiness = definition.IsFullyConfigured ? "已配置" : "未完成";
-                var multimodal = definition.SupportsMultimodalEmbedding ? "多模态" : "文本";
+                var readiness = definition.IsFullyConfigured
+                    ? L("SemanticSearch.EmbeddingModel.Readiness.Configured", "已配置")
+                    : L("SemanticSearch.EmbeddingModel.Readiness.Incomplete", "未完成");
+                var multimodal = definition.SupportsMultimodalEmbedding
+                    ? L("SemanticSearch.EmbeddingModel.Modality.Multimodal", "多模态")
+                    : L("SemanticSearch.EmbeddingModel.Modality.Text", "文本");
                 var modelId = string.IsNullOrWhiteSpace(definition.SummaryModelId)
                     ? definition.InterfaceType
                     : $"{definition.InterfaceType} / {definition.SummaryModelId}";

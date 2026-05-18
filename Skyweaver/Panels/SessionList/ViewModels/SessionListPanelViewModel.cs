@@ -7,13 +7,14 @@ using Skyweaver.Infrastructure.Mvvm;
 using Skyweaver.Models.ChatSession;
 using Skyweaver.Panels.SessionList.Models;
 using Skyweaver.Services.ChatSession;
+using Skyweaver.Services.Localization;
 using Skyweaver.Windows;
 
 namespace Skyweaver.Panels.SessionList.ViewModels
 {
     public sealed class SessionListPanelViewModel : ObservableObject
     {
-        private const string DefaultSessionName = "新建会话";
+        private const string LegacyDefaultSessionName = "新建会话";
 
         private readonly Action<SessionListItem> _openSession;
         private readonly ChatSessionRepository _chatSessionRepository;
@@ -118,7 +119,7 @@ namespace Skyweaver.Panels.SessionList.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show(owner, ex.Message, "创建会话", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(owner, ex.Message, L("SessionList.Create", "创建会话"), MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -138,7 +139,7 @@ namespace Skyweaver.Panels.SessionList.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(Application.Current?.MainWindow, ex.Message, "删除会话", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show(Application.Current?.MainWindow, ex.Message, L("SessionList.Delete.MessageBoxTitle", "删除会话"), MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
             }
@@ -153,10 +154,16 @@ namespace Skyweaver.Panels.SessionList.ViewModels
             {
                 Id = session.SessionId,
                 Title = session.Name,
-                TimeLabel = session.UpdatedAt.ToLocalTime().ToString("tt h:mm", CultureInfo.CurrentCulture),
+                TimeLabel = FormatSessionTimeLabel(session.UpdatedAt),
                 IconPath = string.IsNullOrWhiteSpace(session.IconPath) ? "pack://application:,,,/Resources/NewNodeGraphAlt.png" : session.IconPath,
                 Session = session
             };
+        }
+
+        private static string FormatSessionTimeLabel(DateTime updatedAt)
+        {
+            var format = L("SessionList.TimeFormat", "HH:mm");
+            return updatedAt.ToLocalTime().ToString(format, CultureInfo.CurrentCulture);
         }
 
         private void ApplySessionFilter()
@@ -211,7 +218,7 @@ namespace Skyweaver.Panels.SessionList.ViewModels
             var existingNames = GetExistingSessionNames();
 
             var candidateName = string.IsNullOrWhiteSpace(preferredName)
-                ? DefaultSessionName
+                ? GetDefaultSessionName()
                 : preferredName.Trim();
 
             if (!TryGetDefaultSessionNameNextIndex(candidateName, out var nextIndex))
@@ -226,7 +233,7 @@ namespace Skyweaver.Panels.SessionList.ViewModels
 
             while (true)
             {
-                var numberedCandidate = $"{DefaultSessionName} {nextIndex}";
+                var numberedCandidate = $"{GetDefaultSessionName()} {nextIndex}";
                 if (!existingNames.Contains(numberedCandidate))
                 {
                     return numberedCandidate;
@@ -255,18 +262,23 @@ namespace Skyweaver.Panels.SessionList.ViewModels
             nextIndex = 2;
 
             var trimmedName = sessionName.Trim();
-            if (string.Equals(trimmedName, DefaultSessionName, StringComparison.CurrentCulture))
+            if (string.Equals(trimmedName, GetDefaultSessionName(), StringComparison.CurrentCulture) ||
+                string.Equals(trimmedName, LegacyDefaultSessionName, StringComparison.CurrentCulture))
             {
                 return true;
             }
 
-            var prefix = $"{DefaultSessionName} ";
-            if (!trimmedName.StartsWith(prefix, StringComparison.CurrentCulture))
+            var prefix = $"{GetDefaultSessionName()} ";
+            var legacyPrefix = $"{LegacyDefaultSessionName} ";
+            if (!trimmedName.StartsWith(prefix, StringComparison.CurrentCulture) &&
+                !trimmedName.StartsWith(legacyPrefix, StringComparison.CurrentCulture))
             {
                 return false;
             }
 
-            var suffix = trimmedName[prefix.Length..];
+            var suffix = trimmedName.StartsWith(prefix, StringComparison.CurrentCulture)
+                ? trimmedName[prefix.Length..]
+                : trimmedName[legacyPrefix.Length..];
             if (!int.TryParse(suffix, NumberStyles.None, CultureInfo.InvariantCulture, out var parsedIndex) || parsedIndex < 1)
             {
                 return false;
@@ -274,6 +286,16 @@ namespace Skyweaver.Panels.SessionList.ViewModels
 
             nextIndex = parsedIndex + 1;
             return true;
+        }
+
+        private static string GetDefaultSessionName()
+        {
+            return L("SessionList.DefaultSessionName", LegacyDefaultSessionName);
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
 }

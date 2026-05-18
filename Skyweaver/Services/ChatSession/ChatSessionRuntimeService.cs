@@ -7,6 +7,7 @@ using Skyweaver.Controls.WorkflowEditorControl.Services;
 using Skyweaver.Models.ChatSession;
 using Skyweaver.Services.AgentLoop;
 using Skyweaver.Services.ContextManagement;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Services.ChatSession
 {
@@ -223,8 +224,8 @@ namespace Skyweaver.Services.ChatSession
                         SessionTitle = request.Session.Name,
                         FlowName = graph.Document.Name,
                         Message = compilationResult.Issues.Count == 0
-                            ? "会话流编译与运行时预检查通过，开始执行。"
-                            : $"会话流编译通过，伴随 {compilationResult.Issues.Count} 条提示或警告，开始执行。",
+                            ? L("ChatSessionRuntime.ExecutionStarted.Ready", "会话流编译与运行时预检查通过，开始执行。")
+                            : LF("ChatSessionRuntime.ExecutionStarted.WithIssuesFormat", "会话流编译通过，伴随 {0} 条提示或警告，开始执行。", compilationResult.Issues.Count),
                         CompilationIssues = compilationResult.Issues
                     },
                     linkedCancellationSource.Token).ConfigureAwait(false);
@@ -394,26 +395,26 @@ namespace Skyweaver.Services.ChatSession
             {
                 if (string.IsNullOrWhiteSpace(compiledNode.Node.AgentId))
                 {
-                    errors.Add($"代理节点“{compiledNode.Node.Title}”尚未绑定 AgentDefinition。");
+                    errors.Add(LF("ChatSessionRuntime.Preflight.AgentNodeMissingDefinitionFormat", "代理节点“{0}”尚未绑定 AgentDefinition。", compiledNode.Node.Title));
                     continue;
                 }
 
                 if (!agentsById.TryGetValue(compiledNode.Node.AgentId, out var agent))
                 {
-                    errors.Add($"代理节点“{compiledNode.Node.Title}”引用的代理“{compiledNode.Node.AgentId}”不存在。");
+                    errors.Add(LF("ChatSessionRuntime.Preflight.AgentMissingFormat", "代理节点“{0}”引用的代理“{1}”不存在。", compiledNode.Node.Title, compiledNode.Node.AgentId));
                     continue;
                 }
 
                 var candidates = _languageModelResolver.GetCandidateModels(agent);
                 if (candidates.Count == 0)
                 {
-                    errors.Add($"代理“{agent.DisplayNameOrFallback}”没有解析出任何可用的语言模型候选项。");
+                    errors.Add(LF("ChatSessionRuntime.Preflight.NoCandidateModelsFormat", "代理“{0}”没有解析出任何可用的语言模型候选项。", agent.DisplayNameOrFallback));
                     continue;
                 }
 
                 if (candidates.All(model => !model.InterfaceSettings.IsFullyConfigured))
                 {
-                    errors.Add($"代理“{agent.DisplayNameOrFallback}”的候选语言模型均未完成接口配置。");
+                    errors.Add(LF("ChatSessionRuntime.Preflight.CandidateModelsIncompleteFormat", "代理“{0}”的候选语言模型均未完成接口配置。", agent.DisplayNameOrFallback));
                 }
             }
 
@@ -428,7 +429,7 @@ namespace Skyweaver.Services.ChatSession
 
             if (issues.Count == 0)
             {
-                return "会话流编译失败，但没有返回可读错误。";
+                return L("ChatSessionRuntime.CompilationFailed.NoReadableError", "会话流编译失败，但没有返回可读错误。");
             }
 
             return string.Join(
@@ -447,6 +448,16 @@ namespace Skyweaver.Services.ChatSession
             }
 
             await onEventAsync(runtimeEvent, cancellationToken).ConfigureAwait(false);
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
+        {
+            return string.Format(L(resourceKey, fallbackFormat), args);
         }
     }
 }

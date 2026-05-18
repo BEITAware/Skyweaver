@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Windows;
 using Skyweaver.Controls.SkyweaverPreferencesControl.Services;
+using Skyweaver.Services.Localization;
 using Skyweaver.Windows;
 
 namespace Skyweaver
@@ -13,6 +14,7 @@ namespace Skyweaver
     {
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+            LocalizationRuntime.Instance.ApplyConfiguredLanguage();
             SkyweaverPreferencesRegistration.EnsureRegistered();
 
             var splashWindow = new SplashWindow();

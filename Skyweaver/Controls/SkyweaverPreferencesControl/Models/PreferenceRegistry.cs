@@ -16,24 +16,28 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.Models
                 {
                     Id = "files-system",
                     DisplayName = "文件与系统",
+                    DisplayNameResourceKey = "Preferences.Group.FilesSystem",
                     IsExpanded = true
                 },
                 new()
                 {
                     Id = "presentation-ui",
                     DisplayName = "呈现与界面",
+                    DisplayNameResourceKey = "Preferences.Group.PresentationUi",
                     IsExpanded = true
                 },
                 new()
                 {
                     Id = "context-management",
                     DisplayName = "上下文管理",
+                    DisplayNameResourceKey = "Preferences.Group.ContextManagement",
                     IsExpanded = true
                 },
                 new()
                 {
                     Id = "about-skyweaver",
                     DisplayName = "关于Skyweaver",
+                    DisplayNameResourceKey = "Preferences.Group.AboutSkyweaver",
                     IsExpanded = true
                 }
             };

@@ -254,8 +254,8 @@
                 </MenuItem.Icon>
                 <MenuItem.Header>
                     <StackPanel Margin="0,2">
-                        <TextBlock Text="删除" Style="{StaticResource ChatMessageContextMenuNameTextStyle}"/>
-                        <TextBlock Text="删除这条消息，不可恢复，不再进入代理的上下文。"
+                        <TextBlock Text="{DynamicResource ChatSessionControl.ContextMenu.Delete}" Style="{StaticResource ChatMessageContextMenuNameTextStyle}"/>
+                        <TextBlock Text="{DynamicResource ChatSessionControl.ContextMenu.DeleteDescription}"
                                    Style="{StaticResource ChatMessageContextMenuDescriptionTextStyle}"/>
                     </StackPanel>
                 </MenuItem.Header>
@@ -271,8 +271,8 @@
                 </MenuItem.Icon>
                 <MenuItem.Header>
                     <StackPanel Margin="0,2">
-                        <TextBlock Text="复制" Style="{StaticResource ChatMessageContextMenuNameTextStyle}"/>
-                        <TextBlock Text="复制当前消息，包含 Markdown 格式与工具调用。"
+                        <TextBlock Text="{DynamicResource ChatSessionControl.ContextMenu.Copy}" Style="{StaticResource ChatMessageContextMenuNameTextStyle}"/>
+                        <TextBlock Text="{DynamicResource ChatSessionControl.ContextMenu.CopyDescription}"
                                    Style="{StaticResource ChatMessageContextMenuDescriptionTextStyle}"/>
                     </StackPanel>
                 </MenuItem.Header>
@@ -292,8 +292,8 @@
                 </MenuItem.Icon>
                 <MenuItem.Header>
                     <StackPanel Margin="0,2">
-                        <TextBlock Text="复制为 Markdown" Style="{StaticResource ChatMessageContextMenuNameTextStyle}"/>
-                        <TextBlock Text="复制当前消息，移除工具调用。"
+                        <TextBlock Text="{DynamicResource ChatSessionControl.ContextMenu.CopyMarkdown}" Style="{StaticResource ChatMessageContextMenuNameTextStyle}"/>
+                        <TextBlock Text="{DynamicResource ChatSessionControl.ContextMenu.CopyMarkdownDescription}"
                                    Style="{StaticResource ChatMessageContextMenuDescriptionTextStyle}"/>
                     </StackPanel>
                 </MenuItem.Header>
@@ -313,8 +313,8 @@
                 </MenuItem.Icon>
                 <MenuItem.Header>
                     <StackPanel Margin="0,2">
-                        <TextBlock Text="复制为纯文本" Style="{StaticResource ChatMessageContextMenuNameTextStyle}"/>
-                        <TextBlock Text="复制当前消息，移除 Markdown 格式和工具调用。"
+                        <TextBlock Text="{DynamicResource ChatSessionControl.ContextMenu.CopyPlainText}" Style="{StaticResource ChatMessageContextMenuNameTextStyle}"/>
+                        <TextBlock Text="{DynamicResource ChatSessionControl.ContextMenu.CopyPlainTextDescription}"
                                    Style="{StaticResource ChatMessageContextMenuDescriptionTextStyle}"/>
                     </StackPanel>
                 </MenuItem.Header>
@@ -334,8 +334,8 @@
                 </MenuItem.Icon>
                 <MenuItem.Header>
                     <StackPanel Margin="0,2">
-                        <TextBlock Text="编辑" Style="{StaticResource ChatMessageContextMenuNameTextStyle}"/>
-                        <TextBlock Text="编辑此消息。"
+                        <TextBlock Text="{DynamicResource ChatSessionControl.ContextMenu.Edit}" Style="{StaticResource ChatMessageContextMenuNameTextStyle}"/>
+                        <TextBlock Text="{DynamicResource ChatSessionControl.ContextMenu.EditDescription}"
                                    Style="{StaticResource ChatMessageContextMenuDescriptionTextStyle}"/>
                     </StackPanel>
                 </MenuItem.Header>
@@ -768,7 +768,7 @@
                 <TextBlock Margin="0,6,0,0"
                            Foreground="#CCFFFFFF"
                            FontSize="11"
-                           Text="等待工具执行回填。"
+                           Text="{DynamicResource ChatSessionControl.ToolWaiting}"
                            Visibility="{Binding IsStreaming, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             </StackPanel>
         </DataTemplate>
@@ -1227,12 +1227,12 @@
                                        Style="{StaticResource ChatHeaderCapsuleTextStyle}"/>
                         </Border>
                         <Border Style="{StaticResource ChatHeaderCapsuleBorderStyle}">
-                            <TextBlock Text="{Binding Messages.Count, StringFormat=当前消息 {0} 条}"
+                            <TextBlock Text="{Binding MessageCountText}"
                                        Style="{StaticResource ChatHeaderCapsuleTextStyle}"/>
                         </Border>
                         <Border Style="{StaticResource ChatHeaderCapsuleBorderStyle}"
                                 ToolTip="{Binding SessionFlowValidationSummary}">
-                            <TextBlock Text="{Binding BoundSessionFlowName, StringFormat=会话流：{0}}"
+                            <TextBlock Text="{Binding BoundSessionFlowHeaderText}"
                                        Style="{StaticResource ChatHeaderCapsuleTextStyle}"/>
                         </Border>
                         <Border Style="{StaticResource ChatHeaderStatusCapsuleBorderStyle}">
@@ -1244,7 +1244,7 @@
                             <Border.ToolTip>
                                 <ToolTip Style="{StaticResource AeroContextWindowToolTipStyle}">
                                     <StackPanel>
-                                        <TextBlock Text="上下文窗口占用" Foreground="#FF96FCFF" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
+                                        <TextBlock Text="{DynamicResource ChatSessionControl.ContextWindowUsage}" Foreground="#FF96FCFF" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>
                                         <TextBlock Text="{Binding ContextWindowUsageText}" Foreground="White" FontSize="11"/>
                                     </StackPanel>
                                 </ToolTip>
@@ -1263,9 +1263,9 @@
                     </WrapPanel>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
-                        <Button Style="{StaticResource ChatHeaderButtonStyle}" Content="取消执行" Command="{Binding CancelExecutionCommand}"/>
-                        <Button Style="{StaticResource ChatHeaderButtonStyle}" Content="删除选中" Command="{Binding RemoveSelectedMessageCommand}"/>
-                        <Button Style="{StaticResource ChatHeaderButtonStyle}" Content="清空" Command="{Binding ClearMessagesCommand}"/>
+                        <Button Style="{StaticResource ChatHeaderButtonStyle}" Content="{DynamicResource ChatSessionControl.CancelExecution}" Command="{Binding CancelExecutionCommand}"/>
+                        <Button Style="{StaticResource ChatHeaderButtonStyle}" Content="{DynamicResource ChatSessionControl.DeleteSelected}" Command="{Binding RemoveSelectedMessageCommand}"/>
+                        <Button Style="{StaticResource ChatHeaderButtonStyle}" Content="{DynamicResource ChatSessionControl.Clear}" Command="{Binding ClearMessagesCommand}"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -1287,7 +1287,7 @@
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"/>
 
-                <TextBlock Text="这里还没有消息，可以先在下方输入一条用户消息，然后发送并让会话流开始执行。"
+                <TextBlock Text="{DynamicResource ChatSessionControl.EmptyState}"
                            Margin="26"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
@@ -1381,13 +1381,13 @@
                                 <Button Command="{Binding AddImageCommand}" Style="{StaticResource MediaToolbarButtonStyle}">
                                     <StackPanel Orientation="Horizontal">
                                         <Image Source="pack://application:,,,/Skyweaver;component/Resources/image.png" Width="20" Height="20" Margin="0,0,5,0"/>
-                                        <TextBlock Text="添加图片" VerticalAlignment="Center" FontSize="12"/>
+                                        <TextBlock Text="{DynamicResource ChatSessionControl.AddImage}" VerticalAlignment="Center" FontSize="12"/>
                                     </StackPanel>
                                 </Button>
                                 <Button Command="{Binding AddClipboardCommand}" Style="{StaticResource MediaToolbarButtonStyle}">
                                     <StackPanel Orientation="Horizontal">
                                         <Image Source="pack://application:,,,/Skyweaver;component/Resources/imagealt.png" Width="20" Height="20" Margin="0,0,5,0"/>
-                                        <TextBlock Text="添加剪贴板" VerticalAlignment="Center" FontSize="12"/>
+                                        <TextBlock Text="{DynamicResource ChatSessionControl.AddClipboard}" VerticalAlignment="Center" FontSize="12"/>
                                     </StackPanel>
                                 </Button>
 
@@ -1396,7 +1396,7 @@
                                 <Button Command="{Binding AddAudioCommand}" Style="{StaticResource MediaToolbarButtonStyle}">
                                     <StackPanel Orientation="Horizontal">
                                         <Image Source="pack://application:,,,/Skyweaver;component/Resources/RawImage.png" Width="20" Height="20" Margin="0,0,5,0"/>
-                                        <TextBlock Text="语音" VerticalAlignment="Center" FontSize="12"/>
+                                        <TextBlock Text="{DynamicResource ChatSessionControl.Voice}" VerticalAlignment="Center" FontSize="12"/>
                                     </StackPanel>
                                 </Button>
 
@@ -1405,7 +1405,7 @@
                                 <Button Style="{StaticResource MediaToolbarButtonStyle}">
                                     <StackPanel Orientation="Horizontal">
                                         <Image Source="pack://application:,,,/Skyweaver;component/Resources/imgpp.png" Width="20" Height="20" Margin="0,0,5,0"/>
-                                        <TextBlock Text="添加文件" VerticalAlignment="Center" FontSize="12"/>
+                                        <TextBlock Text="{DynamicResource ChatSessionControl.AddFile}" VerticalAlignment="Center" FontSize="12"/>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -1444,14 +1444,14 @@
                                     Visibility="Collapsed"
                                     Margin="10,0,0,0"
                                     Style="{StaticResource ChatHeaderButtonStyle}"
-                                    Content="取消执行"
+                                    Content="{DynamicResource ChatSessionControl.CancelExecution}"
                                     Command="{Binding CancelExecutionCommand}"/>
 
                             <Button Grid.Column="1"
                                     Visibility="Collapsed"
                                     Margin="10,0,0,0"
                                     Style="{DynamicResource ChatSessionSendButtonStyle}"
-                                    Content="发送"
+                                    Content="{DynamicResource ChatSessionControl.Send}"
                                     Command="{Binding SendMessageCommand}"
                                     />
                         </Grid>

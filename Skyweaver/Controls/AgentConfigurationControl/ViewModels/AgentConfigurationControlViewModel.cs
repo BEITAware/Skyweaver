@@ -14,6 +14,7 @@ using Skyweaver.Controls.LanguageModelConfigurationControl.Models;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
 using Skyweaver.Infrastructure.Mvvm;
 using Skyweaver.Services;
+using Skyweaver.Services.Localization;
 using Skyweaver.Services.SkyweaverTools;
 
 namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
@@ -40,7 +41,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
         private bool _hasValidationError;
         private string _languageModelCatalogErrorMessage = string.Empty;
         private string _promptBuildResult = string.Empty;
-        private string _promptBuildStatusMessage = "请选择代理后点击“构建提示词”。";
+        private string _promptBuildStatusMessage = L("AgentConfiguration.Status.InitialPrompt", "请选择代理后点击“构建提示词”。");
         private bool _hasPromptBuildError;
 
         private sealed class ToolRegistrationSnapshot
@@ -96,13 +97,19 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             OpenConfigurationDirectoryCommand = new RelayCommand(OpenConfigurationDirectory);
             ReloadToolsCommand = new RelayCommand(ReloadTools);
             AllowAllToolPermissionsCommand = new RelayCommand(
-                () => SetAllToolPermissions(AgentToolPermissionMode.Allow, "已将当前代理的全部工具权限设为允许。"),
+                () => SetAllToolPermissions(
+                    AgentToolPermissionMode.Allow,
+                    L("AgentConfiguration.Status.AllToolsAllowed", "已将当前代理的全部工具权限设为允许。")),
                 () => SelectedAgent != null);
             DisableAllToolPermissionsCommand = new RelayCommand(
-                () => SetAllToolPermissions(AgentToolPermissionMode.Disabled, "已将当前代理的全部工具权限设为禁止。"),
+                () => SetAllToolPermissions(
+                    AgentToolPermissionMode.Disabled,
+                    L("AgentConfiguration.Status.AllToolsDisabled", "已将当前代理的全部工具权限设为禁止。")),
                 () => SelectedAgent != null);
             RequireConfirmationAllToolPermissionsCommand = new RelayCommand(
-                () => SetAllToolPermissions(AgentToolPermissionMode.RequireConfirmation, "已将当前代理的全部工具权限设为需确认。"),
+                () => SetAllToolPermissions(
+                    AgentToolPermissionMode.RequireConfirmation,
+                    L("AgentConfiguration.Status.AllToolsRequireConfirmation", "已将当前代理的全部工具权限设为需确认。")),
                 () => SelectedAgent != null);
             ReloadLanguageModelCatalogCommand = new RelayCommand(ReloadLanguageModelCatalog);
             AddInputRootNodeCommand = new RelayCommand(AddInputRootNode, () => SelectedAgent != null);
@@ -119,38 +126,25 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             CopyPromptPreviewCommand = new RelayCommand(CopyPromptPreviewSafe, () => !string.IsNullOrWhiteSpace(PromptBuildResult));
 
             Agents.CollectionChanged += OnAgentsCollectionChanged;
-            PermissionModes = new[]
-            {
-                new AgentToolPermissionModeOption(AgentToolPermissionMode.Disabled, "禁用"),
-                new AgentToolPermissionModeOption(AgentToolPermissionMode.RequireConfirmation, "需确认"),
-                new AgentToolPermissionModeOption(AgentToolPermissionMode.Allow, "允许")
-            };
-            LanguageModelSelectionModes = new[]
-            {
-                new AgentLanguageModelSelectionModeOption(AgentLanguageModelSelectionMode.SpecificLanguageModel, "具体语言模型"),
-                new AgentLanguageModelSelectionModeOption(AgentLanguageModelSelectionMode.CapabilityLayer, "功能层级")
-            };
-            RuntimeRoleOptions = new[]
-            {
-                new AgentRuntimeRoleOption(AgentRuntimeRole.MainOnly, "只允许作为会话流主代理"),
-                new AgentRuntimeRoleOption(AgentRuntimeRole.SubAgentOnly, "只允许作为子代理"),
-                new AgentRuntimeRoleOption(AgentRuntimeRole.MainAndSubAgent, "两者皆可")
-            };
+            RefreshLocalizedOptionLists();
+            LocalizationRuntime.Instance.LanguageChanged += (_, _) => RefreshLocalizedText();
 
             LoadConfiguration();
         }
 
-        public string Title { get; } = "代理配置";
+        public string Title => L("AgentConfiguration.Title", "代理配置");
 
-        public string Description { get; } = "配置代理身份、语言模型、系统提示词、结构化输入输出架构与工具权限。";
+        public string Description => L(
+            "AgentConfiguration.Description",
+            "配置代理身份、语言模型、系统提示词、结构化输入输出架构与工具权限。");
 
         public ObservableCollection<AgentDefinition> Agents { get; } = new();
 
-        public IReadOnlyList<AgentToolPermissionModeOption> PermissionModes { get; }
+        public IReadOnlyList<AgentToolPermissionModeOption> PermissionModes { get; private set; } = Array.Empty<AgentToolPermissionModeOption>();
 
-        public IReadOnlyList<AgentLanguageModelSelectionModeOption> LanguageModelSelectionModes { get; }
+        public IReadOnlyList<AgentLanguageModelSelectionModeOption> LanguageModelSelectionModes { get; private set; } = Array.Empty<AgentLanguageModelSelectionModeOption>();
 
-        public IReadOnlyList<AgentRuntimeRoleOption> RuntimeRoleOptions { get; }
+        public IReadOnlyList<AgentRuntimeRoleOption> RuntimeRoleOptions { get; private set; } = Array.Empty<AgentRuntimeRoleOption>();
 
         public ObservableCollection<AgentConfigurationReferenceOption> AvailableLanguageModels { get; } = new();
 
@@ -163,8 +157,8 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
         public string ConfigurationDirectoryPath => _pathProvider.ConfigurationDirectoryPath;
 
         public string AgentSummaryText => Agents.Count == 0
-            ? "未配置代理。"
-            : $"代理总数：{Agents.Count}";
+            ? L("AgentConfiguration.AgentSummary.Empty", "未配置代理。")
+            : LF("AgentConfiguration.AgentSummary.Format", "代理总数：{0}", Agents.Count);
 
         public AgentDefinition? SelectedAgent
         {
@@ -227,8 +221,8 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
         public string SelectedAgentLanguageModelBindingSummary => BuildLanguageModelBindingSummary(SelectedAgent);
 
         public string PromptBuildHintText => SelectedAgent == null
-            ? "请选择代理后点击“构建提示词”，这里会显示最终发送给 LLM 的完整系统提示词。"
-            : $"当前目标：{BuildPromptTargetLabel(SelectedAgent)}。修改代理配置后请重新构建。";
+            ? L("AgentConfiguration.PromptHint.NoAgent", "请选择代理后点击“构建提示词”，这里会显示最终发送给 LLM 的完整系统提示词。")
+            : LF("AgentConfiguration.PromptHint.SelectedFormat", "当前目标：{0}。修改代理配置后请重新构建。", BuildPromptTargetLabel(SelectedAgent));
 
         public string PromptBuildResult
         {
@@ -339,7 +333,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                     SelectedAgent = Agents.FirstOrDefault();
                 }
 
-                PersistAll("代理配置已加载。");
+                PersistAll(L("AgentConfiguration.Status.Loaded", "代理配置已加载。"));
             }
             catch (Exception ex)
             {
@@ -355,7 +349,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                 }
 
                 HasValidationError = true;
-                StatusMessage = $"加载代理配置失败：{ex.Message}";
+                StatusMessage = LF("AgentConfiguration.Status.LoadFailedFormat", "加载代理配置失败：{0}", ex.Message);
             }
         }
 
@@ -369,7 +363,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                 SelectedAgent = agent;
             }
 
-            PersistAll("已新增代理。");
+            PersistAll(L("AgentConfiguration.Status.Added", "已新增代理。"));
         }
 
         private void DuplicateSelectedAgent()
@@ -389,7 +383,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                 SelectedAgent = clone;
             }
 
-            PersistAll("已复制代理。");
+            PersistAll(L("AgentConfiguration.Status.Duplicated", "已复制代理。"));
         }
 
         private void RemoveSelectedAgent()
@@ -423,7 +417,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                 }
             }
 
-            PersistAll("已删除代理。");
+            PersistAll(L("AgentConfiguration.Status.Removed", "已删除代理。"));
         }
 
         private void BrowseAvatar()
@@ -435,10 +429,10 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
 
             var dialog = new OpenFileDialog
             {
-                Filter = "图像文件|*.png;*.jpg;*.jpeg;*.bmp;*.ico|所有文件|*.*",
+                Filter = L("AgentConfiguration.Dialog.ImageFilter", "图像文件|*.png;*.jpg;*.jpeg;*.bmp;*.ico|所有文件|*.*"),
                 Multiselect = false,
                 CheckFileExists = true,
-                Title = "选择头像图片"
+                Title = L("AgentConfiguration.Dialog.SelectAvatarTitle", "选择头像图片")
             };
 
             if (dialog.ShowDialog() != true)
@@ -447,7 +441,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             }
 
             SelectedAgent.AvatarPath = dialog.FileName;
-            StatusMessage = "头像已更新。";
+            StatusMessage = L("AgentConfiguration.Status.AvatarUpdated", "头像已更新。");
         }
 
         private void OpenConfigurationDirectory()
@@ -471,7 +465,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                 }
             }
 
-            PersistAll("已根据当前工具注册表刷新工具权限。");
+            PersistAll(L("AgentConfiguration.Status.ToolsReloaded", "已根据当前工具注册表刷新工具权限。"));
         }
 
         private void SetAllToolPermissions(AgentToolPermissionMode permissionMode, string successMessage)
@@ -496,8 +490,8 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
         {
             RefreshLanguageModelCatalogInternal();
             StatusMessage = string.IsNullOrWhiteSpace(_languageModelCatalogErrorMessage)
-                ? "语言模型目录已刷新。"
-                : $"语言模型目录刷新失败：{_languageModelCatalogErrorMessage}";
+                ? L("AgentConfiguration.Status.LanguageModelCatalogRefreshed", "语言模型目录已刷新。")
+                : LF("AgentConfiguration.Status.LanguageModelCatalogRefreshFailedFormat", "语言模型目录刷新失败：{0}", _languageModelCatalogErrorMessage);
         }
 
         private void BuildPromptPreview()
@@ -511,37 +505,19 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             {
                 PromptBuildResult = _agentSystemPromptBuilder.BuildCompleteSystemPrompt(SelectedAgent);
                 HasPromptBuildError = false;
-                PromptBuildStatusMessage = $"已为代理“{BuildPromptTargetLabel(SelectedAgent)}”生成完整系统提示词。";
+                PromptBuildStatusMessage = LF("AgentConfiguration.Status.PromptBuiltFormat", "已为代理“{0}”生成完整系统提示词。", BuildPromptTargetLabel(SelectedAgent));
             }
             catch (Exception ex)
             {
                 PromptBuildResult = string.Empty;
                 HasPromptBuildError = true;
-                PromptBuildStatusMessage = $"构建提示词失败：{ex.Message}";
+                PromptBuildStatusMessage = LF("AgentConfiguration.Status.PromptBuildFailedFormat", "构建提示词失败：{0}", ex.Message);
             }
         }
 
         private void CopyPromptPreview()
         {
             CopyPromptPreviewSafe();
-            return;
-
-            if (string.IsNullOrWhiteSpace(PromptBuildResult))
-            {
-                return;
-            }
-
-            try
-            {
-                System.Windows.Clipboard.SetText(PromptBuildResult);
-                HasPromptBuildError = false;
-                PromptBuildStatusMessage = "提示词已复制到剪贴板。";
-            }
-            catch (Exception ex)
-            {
-                HasPromptBuildError = true;
-                PromptBuildStatusMessage = $"复制提示词失败：{ex.Message}";
-            }
         }
 
         private void CopyPromptPreviewSafe()
@@ -554,12 +530,12 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             if (ClipboardAccessService.TrySetText(PromptBuildResult, out var errorMessage))
             {
                 HasPromptBuildError = false;
-                PromptBuildStatusMessage = "提示词已复制到剪贴板。";
+                PromptBuildStatusMessage = L("AgentConfiguration.Status.PromptCopied", "提示词已复制到剪贴板。");
                 return;
             }
 
             HasPromptBuildError = true;
-            PromptBuildStatusMessage = $"复制提示词失败：{errorMessage}";
+            PromptBuildStatusMessage = LF("AgentConfiguration.Status.PromptCopyFailedFormat", "复制提示词失败：{0}", errorMessage ?? string.Empty);
         }
 
         private void AddInputRootNode()
@@ -569,7 +545,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                 return;
             }
 
-            AddNode(SelectedAgent.InputSchemaRoot, isInputTree: true, "已添加输入架构节点。");
+            AddNode(SelectedAgent.InputSchemaRoot, isInputTree: true, L("AgentConfiguration.Status.InputNodeAdded", "已添加输入架构节点。"));
         }
 
         private void AddOutputRootNode()
@@ -579,7 +555,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                 return;
             }
 
-            AddNode(SelectedAgent.OutputSchemaRoot, isInputTree: false, "已添加输出架构节点。");
+            AddNode(SelectedAgent.OutputSchemaRoot, isInputTree: false, L("AgentConfiguration.Status.OutputNodeAdded", "已添加输出架构节点。"));
         }
 
         private void AddInputChildNode()
@@ -589,7 +565,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                 return;
             }
 
-            AddNode(SelectedInputNode, isInputTree: true, "已添加输入架构子节点。");
+            AddNode(SelectedInputNode, isInputTree: true, L("AgentConfiguration.Status.InputChildNodeAdded", "已添加输入架构子节点。"));
         }
 
         private void AddOutputChildNode()
@@ -599,17 +575,17 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                 return;
             }
 
-            AddNode(SelectedOutputNode, isInputTree: false, "已添加输出架构子节点。");
+            AddNode(SelectedOutputNode, isInputTree: false, L("AgentConfiguration.Status.OutputChildNodeAdded", "已添加输出架构子节点。"));
         }
 
         private void RemoveSelectedInputNode()
         {
-            RemoveNode(SelectedInputNode, isInputTree: true, "已移除输入架构节点。");
+            RemoveNode(SelectedInputNode, isInputTree: true, L("AgentConfiguration.Status.InputNodeRemoved", "已移除输入架构节点。"));
         }
 
         private void RemoveSelectedOutputNode()
         {
-            RemoveNode(SelectedOutputNode, isInputTree: false, "已移除输出架构节点。");
+            RemoveNode(SelectedOutputNode, isInputTree: false, L("AgentConfiguration.Status.OutputNodeRemoved", "已移除输出架构节点。"));
         }
 
         private void AddNode(XmlElementNodeDefinition parentNode, bool isInputTree, string successMessage)
@@ -868,7 +844,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                 return;
             }
 
-            PersistAll("代理配置已保存。");
+            PersistAll(L("AgentConfiguration.Status.Saved", "代理配置已保存。"));
         }
 
         private void OnToolPermissionsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -889,7 +865,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                 }
             }
 
-            PersistAll("工具权限列表已更新。");
+            PersistAll(L("AgentConfiguration.Status.ToolPermissionListUpdated", "工具权限列表已更新。"));
         }
 
         private void OnToolPermissionPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -904,7 +880,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                 return;
             }
 
-            PersistAll("工具权限已更新。");
+            PersistAll(L("AgentConfiguration.Status.ToolPermissionUpdated", "工具权限已更新。"));
         }
 
         private void OnDefaultToolKitPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -914,7 +890,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                 return;
             }
 
-            PersistAll("默认工具集已更新。");
+            PersistAll(L("AgentConfiguration.Status.DefaultToolKitUpdated", "默认工具集已更新。"));
         }
 
         private void OnDefaultToolKitsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -935,7 +911,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                 }
             }
 
-            PersistAll("默认工具集列表已更新。");
+            PersistAll(L("AgentConfiguration.Status.DefaultToolKitListUpdated", "默认工具集列表已更新。"));
         }
 
         private void OnXmlNodePropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -945,7 +921,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                 return;
             }
 
-            PersistAll("XML 架构已更新。");
+            PersistAll(L("AgentConfiguration.Status.XmlSchemaUpdated", "XML 架构已更新。"));
         }
 
         private void PersistAll(string successMessage)
@@ -971,7 +947,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             catch (Exception ex)
             {
                 HasValidationError = true;
-                StatusMessage = $"保存代理配置失败：{ex.Message}";
+                StatusMessage = LF("AgentConfiguration.Status.SaveFailedFormat", "保存代理配置失败：{0}", ex.Message);
             }
         }
 
@@ -982,28 +958,36 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             {
                 if (string.IsNullOrWhiteSpace(agent.AgentId))
                 {
-                    errorMessage = $"代理“{agent.DisplayNameOrFallback}”缺少代理 ID。";
+                    errorMessage = LF("AgentConfiguration.Validation.MissingAgentIdFormat", "代理“{0}”缺少代理 ID。", agent.DisplayNameOrFallback);
                     return false;
                 }
 
                 if (!s_agentIdPattern.IsMatch(agent.AgentId))
                 {
-                    errorMessage = $"代理 ID “{agent.AgentId}”无效。仅允许字母和数字。";
+                    errorMessage = LF("AgentConfiguration.Validation.InvalidAgentIdFormat", "代理 ID “{0}”无效。仅允许字母和数字。", agent.AgentId);
                     return false;
                 }
 
                 if (!knownAgentIds.Add(agent.AgentId))
                 {
-                    errorMessage = $"代理 ID “{agent.AgentId}”重复。";
+                    errorMessage = LF("AgentConfiguration.Validation.DuplicateAgentIdFormat", "代理 ID “{0}”重复。", agent.AgentId);
                     return false;
                 }
 
-                if (!ValidateSchemaNodeNames(agent, agent.InputSchemaRoot, "输入架构", out errorMessage))
+                if (!ValidateSchemaNodeNames(
+                        agent,
+                        agent.InputSchemaRoot,
+                        L("AgentConfiguration.Validation.InputSchema", "输入架构"),
+                        out errorMessage))
                 {
                     return false;
                 }
 
-                if (!ValidateSchemaNodeNames(agent, agent.OutputSchemaRoot, "输出架构", out errorMessage))
+                if (!ValidateSchemaNodeNames(
+                        agent,
+                        agent.OutputSchemaRoot,
+                        L("AgentConfiguration.Validation.OutputSchema", "输出架构"),
+                        out errorMessage))
                 {
                     return false;
                 }
@@ -1039,7 +1023,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
         {
             if (string.IsNullOrWhiteSpace(node.Name))
             {
-                errorMessage = $"代理“{agent.AgentIdOrFallback}”在{schemaName}中存在空节点名称。";
+                errorMessage = LF("AgentConfiguration.Validation.EmptyNodeNameFormat", "代理“{0}”在{1}中存在空节点名称。", agent.AgentIdOrFallback, schemaName);
                 return false;
             }
 
@@ -1049,7 +1033,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             }
             catch (XmlException)
             {
-                errorMessage = $"{schemaName}中的节点名称“{node.Name}”不是有效的 XML 元素名。";
+                errorMessage = LF("AgentConfiguration.Validation.InvalidNodeNameFormat", "{0}中的节点名称“{1}”不是有效的 XML 元素名。", schemaName, node.Name);
                 return false;
             }
 
@@ -1069,13 +1053,13 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
         {
             return new AgentDefinition
             {
-                DisplayName = $"代理 {Agents.Count + 1}",
+                DisplayName = LF("AgentConfiguration.NewAgentNameFormat", "代理 {0}", Agents.Count + 1),
                 AgentId = GenerateUniqueAgentId("Agent1"),
                 AvatarPath = AgentDefinition.DefaultAvatarPath,
                 SystemPrompt = string.Empty,
                 IsStructuredXmlIO = false,
-                InputDescription = "用户发送的聊天消息",
-                OutputDescription = "无，无需调用Passdown工具",
+                InputDescription = L("AgentConfiguration.DefaultInputDescription", "用户发送的聊天消息"),
+                OutputDescription = L("AgentConfiguration.DefaultOutputDescription", "无，无需调用Passdown工具"),
                 RuntimeRole = AgentRuntimeRole.MainOnly
             };
         }
@@ -1113,8 +1097,8 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
         private static string BuildDuplicatedDisplayName(string? displayName)
         {
             return string.IsNullOrWhiteSpace(displayName)
-                ? "代理副本"
-                : $"{displayName.Trim()} 副本";
+                ? L("AgentConfiguration.AgentCopyName", "代理副本")
+                : LF("AgentConfiguration.AgentCopyNameFormat", "{0} 副本", displayName.Trim());
         }
 
         private void ResetPromptBuildPreview()
@@ -1122,8 +1106,8 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             PromptBuildResult = string.Empty;
             HasPromptBuildError = false;
             PromptBuildStatusMessage = SelectedAgent == null
-                ? "请选择代理后点击“构建提示词”。"
-                : "当前结果尚未生成。点击“构建提示词”即可查看完整系统提示词。";
+                ? L("AgentConfiguration.Status.InitialPrompt", "请选择代理后点击“构建提示词”。")
+                : L("AgentConfiguration.Status.CurrentResultNotGenerated", "当前结果尚未生成。点击“构建提示词”即可查看完整系统提示词。");
         }
 
         private void RefreshRegisteredToolsInternal()
@@ -1134,7 +1118,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                 _toolRegistrationMap[registration.Definition.Name] = new ToolRegistrationSnapshot(
                     registration.Definition.Name,
                     string.IsNullOrWhiteSpace(registration.Definition.Description)
-                        ? "暂无工具说明。"
+                        ? L("AgentConfiguration.Tool.NoDescription", "暂无工具说明。")
                         : registration.Definition.Description,
                     registration.IsEnabled);
             }
@@ -1160,7 +1144,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             }
             catch (Exception ex)
             {
-                errorMessages.Add($"语言模型：{ex.Message}");
+                errorMessages.Add(LF("AgentConfiguration.Catalog.LanguageModelErrorFormat", "语言模型：{0}", ex.Message));
             }
 
             try
@@ -1174,7 +1158,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             }
             catch (Exception ex)
             {
-                errorMessages.Add($"功能层级：{ex.Message}");
+                errorMessages.Add(LF("AgentConfiguration.Catalog.CapabilityLayerErrorFormat", "功能层级：{0}", ex.Message));
             }
 
             foreach (var model in _languageModelMap.Values.OrderBy(GetLanguageModelDisplayName, StringComparer.OrdinalIgnoreCase))
@@ -1247,7 +1231,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
 
                 if (string.IsNullOrWhiteSpace(missingPermission.ToolDescription))
                 {
-                    missingPermission.ToolDescription = "当前工具发现结果中缺失。";
+                    missingPermission.ToolDescription = L("AgentConfiguration.Tool.MissingDescription", "当前工具发现结果中缺失。");
                 }
 
                 mergedPermissions.Add(missingPermission);
@@ -1301,12 +1285,12 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
         {
             if (!string.IsNullOrWhiteSpace(_languageModelCatalogErrorMessage))
             {
-                return $"语言模型目录读取失败：{_languageModelCatalogErrorMessage}";
+                return LF("AgentConfiguration.Binding.CatalogLoadFailedFormat", "语言模型目录读取失败：{0}", _languageModelCatalogErrorMessage);
             }
 
             if (agent == null)
             {
-                return "请选择代理后配置语言模型。";
+                return L("AgentConfiguration.Binding.NoAgent", "请选择代理后配置语言模型。");
             }
 
             return agent.LanguageModelSelectionMode == AgentLanguageModelSelectionMode.CapabilityLayer
@@ -1318,50 +1302,56 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
         {
             if (_languageModelMap.Count == 0)
             {
-                return "当前尚未配置任何语言模型。请先在“语言模型配置”页面新增模型。";
+                return L("AgentConfiguration.Binding.NoLanguageModels", "当前尚未配置任何语言模型。请先在“语言模型配置”页面新增模型。");
             }
 
             if (string.IsNullOrWhiteSpace(agent.SelectedLanguageModelKey))
             {
-                return "当前未选择具体语言模型。";
+                return L("AgentConfiguration.Binding.SpecificNotSelected", "当前未选择具体语言模型。");
             }
 
             if (!_languageModelMap.TryGetValue(agent.SelectedLanguageModelKey, out var model))
             {
-                return "已选择的语言模型不存在，请重新选择。";
+                return L("AgentConfiguration.Binding.SpecificMissing", "已选择的语言模型不存在，请重新选择。");
             }
 
             var displayName = GetLanguageModelDisplayName(model);
             return model.InterfaceSettings.IsFullyConfigured
-                ? $"将固定使用语言模型“{displayName}”，不会自动回退到其他模型。"
-                : $"已选择语言模型“{displayName}”，但其接口配置尚不完整。";
+                ? LF("AgentConfiguration.Binding.SpecificFixedFormat", "将固定使用语言模型“{0}”，不会自动回退到其他模型。", displayName)
+                : LF("AgentConfiguration.Binding.SpecificIncompleteFormat", "已选择语言模型“{0}”，但其接口配置尚不完整。", displayName);
         }
 
         private string BuildCapabilityLayerBindingSummary(AgentDefinition agent)
         {
             if (_capabilityLayerMap.Count == 0)
             {
-                return "当前尚未配置任何功能层级。请先在“语言模型配置”页面创建功能层级。";
+                return L("AgentConfiguration.Binding.NoCapabilityLayers", "当前尚未配置任何功能层级。请先在“语言模型配置”页面创建功能层级。");
             }
 
             if (string.IsNullOrWhiteSpace(agent.SelectedCapabilityLayerKey))
             {
-                return "当前未选择功能层级。";
+                return L("AgentConfiguration.Binding.CapabilityNotSelected", "当前未选择功能层级。");
             }
 
             if (!_capabilityLayerMap.TryGetValue(agent.SelectedCapabilityLayerKey, out var layer))
             {
-                return "已选择的功能层级不存在，请重新选择。";
+                return L("AgentConfiguration.Binding.CapabilityMissing", "已选择的功能层级不存在，请重新选择。");
             }
 
             if (!layer.IsUserSelectable)
             {
-                return $"功能层级“{GetCapabilityLayerDisplayName(layer)}”为系统内置层级，不能直接绑定给代理。";
+                return LF(
+                    "AgentConfiguration.Binding.CapabilityBuiltInFormat",
+                    "功能层级“{0}”为系统内置层级，不能直接绑定给代理。",
+                    GetCapabilityLayerDisplayName(layer));
             }
 
             if (layer.LanguageModels.Count == 0)
             {
-                return $"功能层级“{GetCapabilityLayerDisplayName(layer)}”尚未配置任何候选语言模型。";
+                return LF(
+                    "AgentConfiguration.Binding.CapabilityNoCandidatesFormat",
+                    "功能层级“{0}”尚未配置任何候选语言模型。",
+                    GetCapabilityLayerDisplayName(layer));
             }
 
             var candidateNames = new List<string>();
@@ -1382,14 +1372,22 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
 
             if (candidateNames.Count == 0)
             {
-                return $"功能层级“{GetCapabilityLayerDisplayName(layer)}”下暂无可直接调用的语言模型。请检查候选模型是否存在且接口配置完整。";
+                return LF(
+                    "AgentConfiguration.Binding.CapabilityNoUsableCandidatesFormat",
+                    "功能层级“{0}”下暂无可直接调用的语言模型。请检查候选模型是否存在且接口配置完整。",
+                    GetCapabilityLayerDisplayName(layer));
             }
 
             var unavailableText = unavailableCount > 0
-                ? $" 当前另有 {unavailableCount} 个候选不可用或引用缺失。"
+                ? LF("AgentConfiguration.Binding.UnavailableCandidatesFormat", " 当前另有 {0} 个候选不可用或引用缺失。", unavailableCount)
                 : string.Empty;
 
-            return $"将按功能层级“{GetCapabilityLayerDisplayName(layer)}”顺序尝试：{FormatCandidatePreview(candidateNames)}。遇到首个无错误可用模型后停止。{unavailableText}";
+            return LF(
+                "AgentConfiguration.Binding.CapabilityOrderFormat",
+                "将按功能层级“{0}”顺序尝试：{1}。遇到首个无错误可用模型后停止。{2}",
+                GetCapabilityLayerDisplayName(layer),
+                FormatCandidatePreview(candidateNames),
+                unavailableText);
         }
 
         private static string FormatCandidatePreview(IReadOnlyList<string> candidateNames)
@@ -1399,7 +1397,11 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                 return string.Join(" -> ", candidateNames);
             }
 
-            return $"{string.Join(" -> ", candidateNames.Take(4))} -> 等 {candidateNames.Count} 个模型";
+            return LF(
+                "AgentConfiguration.Binding.CandidateOverflowFormat",
+                "{0} -> 等 {1} 个模型",
+                string.Join(" -> ", candidateNames.Take(4)),
+                candidateNames.Count);
         }
 
         private static string GetLanguageModelDisplayName(LanguageModelDefinition model)
@@ -1413,10 +1415,10 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             var summaryModelId = model.SummaryModelId?.Trim() ?? string.Empty;
             if (summaryModelId.Length > 0)
             {
-                return $"未命名模型 ({summaryModelId})";
+                return LF("LanguageModelConfiguration.UnnamedModelFormat", "未命名模型 ({0})", summaryModelId);
             }
 
-            return $"未命名模型 ({GetShortKey(model.Key)})";
+            return LF("LanguageModelConfiguration.UnnamedModelFormat", "未命名模型 ({0})", GetShortKey(model.Key));
         }
 
         private static string GetCapabilityLayerDisplayName(CapabilityLayerDefinition layer)
@@ -1424,13 +1426,13 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             var displayName = layer.Name?.Trim() ?? string.Empty;
             return displayName.Length > 0
                 ? displayName
-                : $"未命名功能层级 ({GetShortKey(layer.Key)})";
+                : LF("LanguageModelConfiguration.UnnamedLayerFormat", "未命名功能层级 ({0})", GetShortKey(layer.Key));
         }
 
         private static string GetCapabilityLayerOptionDisplayName(CapabilityLayerDefinition layer)
         {
             var candidateCount = layer.LanguageModels.Count(entry => !string.IsNullOrWhiteSpace(entry.LanguageModelKey));
-            return $"{GetCapabilityLayerDisplayName(layer)}（{candidateCount} 个候选）";
+            return LF("AgentConfiguration.CapabilityLayerOptionFormat", "{0}（{1} 个候选）", GetCapabilityLayerDisplayName(layer), candidateCount);
         }
 
         private static string GetShortKey(string? key)
@@ -1447,13 +1449,82 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
         private static string BuildPromptTargetLabel(AgentDefinition agent)
         {
             var displayName = string.IsNullOrWhiteSpace(agent.DisplayName)
-                ? "未命名代理"
+                ? L("AgentConfiguration.UnnamedAgent", "未命名代理")
                 : agent.DisplayName.Trim();
             var agentId = string.IsNullOrWhiteSpace(agent.AgentId)
-                ? "未设置 ID"
+                ? L("AgentConfiguration.UnsetAgentId", "未设置 ID")
                 : agent.AgentId.Trim();
 
             return $"{displayName} ({agentId})";
+        }
+
+        private void RefreshLocalizedOptionLists()
+        {
+            PermissionModes = new[]
+            {
+                new AgentToolPermissionModeOption(
+                    AgentToolPermissionMode.Disabled,
+                    L("AgentConfiguration.Permission.Disabled", "禁用")),
+                new AgentToolPermissionModeOption(
+                    AgentToolPermissionMode.RequireConfirmation,
+                    L("AgentConfiguration.Permission.RequireConfirmation", "需确认")),
+                new AgentToolPermissionModeOption(
+                    AgentToolPermissionMode.Allow,
+                    L("AgentConfiguration.Permission.Allow", "允许"))
+            };
+
+            LanguageModelSelectionModes = new[]
+            {
+                new AgentLanguageModelSelectionModeOption(
+                    AgentLanguageModelSelectionMode.SpecificLanguageModel,
+                    L("AgentConfiguration.SelectionMode.SpecificLanguageModel", "具体语言模型")),
+                new AgentLanguageModelSelectionModeOption(
+                    AgentLanguageModelSelectionMode.CapabilityLayer,
+                    L("AgentConfiguration.SelectionMode.CapabilityLayer", "功能层级"))
+            };
+
+            RuntimeRoleOptions = new[]
+            {
+                new AgentRuntimeRoleOption(
+                    AgentRuntimeRole.MainOnly,
+                    L("AgentConfiguration.RuntimeRole.MainOnly", "只允许作为会话流主代理")),
+                new AgentRuntimeRoleOption(
+                    AgentRuntimeRole.SubAgentOnly,
+                    L("AgentConfiguration.RuntimeRole.SubAgentOnly", "只允许作为子代理")),
+                new AgentRuntimeRoleOption(
+                    AgentRuntimeRole.MainAndSubAgent,
+                    L("AgentConfiguration.RuntimeRole.MainAndSubAgent", "两者皆可"))
+            };
+        }
+
+        private void RefreshLocalizedText()
+        {
+            RefreshLocalizedOptionLists();
+
+            OnPropertyChanged(nameof(Title));
+            OnPropertyChanged(nameof(Description));
+            OnPropertyChanged(nameof(PermissionModes));
+            OnPropertyChanged(nameof(LanguageModelSelectionModes));
+            OnPropertyChanged(nameof(RuntimeRoleOptions));
+            OnPropertyChanged(nameof(AgentSummaryText));
+            OnPropertyChanged(nameof(PromptBuildHintText));
+
+            foreach (var agent in Agents)
+            {
+                agent.RefreshLocalizedText();
+            }
+
+            RefreshLanguageModelCatalogInternal();
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallback, params object[] args)
+        {
+            return string.Format(L(resourceKey, fallback), args);
         }
 
         private IDisposable SuspendPersistence()

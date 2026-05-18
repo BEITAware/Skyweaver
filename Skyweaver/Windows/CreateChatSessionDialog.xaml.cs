@@ -14,6 +14,7 @@ using Skyweaver.Controls.WorkflowEditorControl.Services;
 using Skyweaver.Infrastructure.Mvvm;
 using Skyweaver.Models.ChatSession;
 using Skyweaver.Services.ChatSession;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Windows
 {
@@ -48,17 +49,22 @@ namespace Skyweaver.Windows
         {
             if (string.IsNullOrWhiteSpace(SessionName))
             {
-                MessageBox.Show(this, "请输入会话名称。", "创建会话", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(this, L("CreateChatSession.Validation.SessionNameRequired", "请输入会话名称。"), L("CreateChatSession.MessageBoxTitle", "创建会话"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             if (SelectedFlowBinding == null)
             {
-                MessageBox.Show(this, "请先为新会话选择一个会话流。", "创建会话", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(this, L("CreateChatSession.Validation.FlowRequired", "请先为新会话选择一个会话流。"), L("CreateChatSession.MessageBoxTitle", "创建会话"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             DialogResult = true;
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
 
@@ -83,9 +89,9 @@ namespace Skyweaver.Windows
         private Dictionary<string, CapabilityLayerDefinition> _capabilityLayersByKey = new(StringComparer.OrdinalIgnoreCase);
 
         private string _sessionName;
-        private string _flowDisplayName = "未选择会话流";
-        private string _flowSubtitle = "请选择一个会话流以预览将要创建的 ChatSession。";
-        private string _flowStatusText = "尚未选择会话流";
+        private string _flowDisplayName = L("CreateChatSession.Flow.NotSelected", "未选择会话流");
+        private string _flowSubtitle = L("CreateChatSession.Flow.SelectPrompt", "请选择一个会话流以预览将要创建的 ChatSession。");
+        private string _flowStatusText = L("CreateChatSession.Flow.NotSelectedStatus", "尚未选择会话流");
         private string _agentCountText = "0";
         private string _modelCountText = "0";
         private string _nodeCountText = "0";
@@ -104,7 +110,7 @@ namespace Skyweaver.Windows
             IReadOnlyList<ChatSessionFlowBindingOption>? sessionFlowOptions,
             string? initialSessionName)
         {
-            _sessionName = string.IsNullOrWhiteSpace(initialSessionName) ? "新建会话" : initialSessionName.Trim();
+            _sessionName = string.IsNullOrWhiteSpace(initialSessionName) ? L("SessionList.DefaultSessionName", "新建会话") : initialSessionName.Trim();
             _initialSessionFlowOptions = sessionFlowOptions ?? Array.Empty<ChatSessionFlowBindingOption>();
             SessionFlowOptions = new ObservableCollection<CreateChatSessionFlowOptionViewModel>();
             RecentSessions = new ObservableCollection<CreateChatSessionHistoryItemViewModel>();
@@ -134,7 +140,7 @@ namespace Skyweaver.Windows
             get
             {
                 var trimmed = SessionName.Trim();
-                return trimmed.Length == 0 ? "未命名会话" : trimmed;
+                return trimmed.Length == 0 ? L("CreateChatSession.Session.Unnamed", "未命名会话") : trimmed;
             }
         }
 
@@ -178,8 +184,16 @@ namespace Skyweaver.Windows
         public string FlowDisplayName
         {
             get => _flowDisplayName;
-            private set => SetProperty(ref _flowDisplayName, value);
+            private set
+            {
+                if (SetProperty(ref _flowDisplayName, value))
+                {
+                    OnPropertyChanged(nameof(FlowHeaderText));
+                }
+            }
         }
+
+        public string FlowHeaderText => LF("CreateChatSession.Flow.HeaderFormat", "会话流：{0}", FlowDisplayName);
 
         public string FlowSubtitle
         {
@@ -299,7 +313,7 @@ namespace Skyweaver.Windows
                     RecentSessions.Add(new CreateChatSessionHistoryItemViewModel
                     {
                         Title = session.Name,
-                        FlowName = session.HasBoundFlow ? session.BoundFlowDisplayName : "未绑定会话流",
+                        FlowName = session.HasBoundFlow ? session.BoundFlowDisplayName : L("ChatSession.BoundFlow.Unbound", "未绑定会话流"),
                         UpdatedAtText = FormatTimestamp(session.UpdatedAtUtc),
                         IconPath = string.IsNullOrWhiteSpace(session.IconPath)
                             ? "pack://application:,,,/Resources/NewNodeGraphAlt.png"
@@ -309,7 +323,7 @@ namespace Skyweaver.Windows
             }
             catch (Exception ex)
             {
-                _globalStatusMessages.Add($"历史会话列表加载失败：{ex.Message}");
+                _globalStatusMessages.Add(LF("CreateChatSession.Status.HistoryLoadFailedFormat", "历史会话列表加载失败：{0}", ex.Message));
             }
 
             HasRecentSessions = RecentSessions.Count > 0;
@@ -324,9 +338,9 @@ namespace Skyweaver.Windows
 
             if (SelectedFlowOption == null)
             {
-                FlowDisplayName = "未选择会话流";
-                FlowSubtitle = "请选择一个会话流以预览将要创建的 ChatSession。";
-                FlowStatusText = "尚未选择会话流";
+                FlowDisplayName = L("CreateChatSession.Flow.NotSelected", "未选择会话流");
+                FlowSubtitle = L("CreateChatSession.Flow.SelectPrompt", "请选择一个会话流以预览将要创建的 ChatSession。");
+                FlowStatusText = L("CreateChatSession.Flow.NotSelectedStatus", "尚未选择会话流");
                 AgentCountText = "0";
                 ModelCountText = "0";
                 NodeCountText = "0";
@@ -335,7 +349,9 @@ namespace Skyweaver.Windows
                 AppendGlobalStatusItems();
                 if (FlowStatusItems.Count == 0)
                 {
-                    FlowStatusItems.Add(CreateInfoIssue("等待选择", "选择会话流后，这里会展示代理、模型和流状态。"));
+                    FlowStatusItems.Add(CreateInfoIssue(
+                        L("CreateChatSession.Issue.WaitingSelection.Title", "等待选择"),
+                        L("CreateChatSession.Issue.WaitingSelection.Message", "选择会话流后，这里会展示代理、模型和流状态。")));
                 }
 
                 return;
@@ -358,15 +374,17 @@ namespace Skyweaver.Windows
             if (document == null)
             {
                 FlowDisplayName = SelectedFlowOption.DisplayName;
-                FlowSubtitle = "无法读取当前会话流文件。";
-                FlowStatusText = "读取失败";
+                FlowSubtitle = L("CreateChatSession.Flow.ReadFileFailed", "无法读取当前会话流文件。");
+                FlowStatusText = L("CreateChatSession.Flow.ReadFailed", "读取失败");
                 AgentCountText = "0";
                 ModelCountText = "0";
                 NodeCountText = "0";
                 ConnectionCountText = "0";
                 ApplyEmptyFlags();
                 AppendGlobalStatusItems();
-                FlowStatusItems.Add(CreateErrorIssue("无法读取", loadError ?? "未能读取当前会话流。"));
+                FlowStatusItems.Add(CreateErrorIssue(
+                    L("CreateChatSession.Issue.ReadFailed.Title", "无法读取"),
+                    loadError ?? L("CreateChatSession.Issue.ReadFailed.Message", "未能读取当前会话流。")));
                 return;
             }
 
@@ -391,7 +409,7 @@ namespace Skyweaver.Windows
             }
 
             FlowDisplayName = string.IsNullOrWhiteSpace(document.Name) ? SelectedFlowOption.DisplayName : document.Name;
-            FlowSubtitle = $"文件：{Path.GetFileName(document.FilePath)} · 更新于 {FormatTimestamp(document.UpdatedAtUtc)}";
+            FlowSubtitle = LF("CreateChatSession.Flow.SubtitleFormat", "文件：{0} · 更新于 {1}", Path.GetFileName(document.FilePath), FormatTimestamp(document.UpdatedAtUtc));
             FlowStatusText = BuildFlowStatusText(compilationResult);
             AgentCountText = AgentPreviews.Count.ToString(CultureInfo.InvariantCulture);
             ModelCountText = ModelPreviews.Count.ToString(CultureInfo.InvariantCulture);
@@ -402,11 +420,15 @@ namespace Skyweaver.Windows
 
             if (compilationResult == null)
             {
-                FlowStatusItems.Add(CreateErrorIssue("读取失败", "未能为当前会话流生成状态信息。"));
+                FlowStatusItems.Add(CreateErrorIssue(
+                    L("CreateChatSession.Issue.ReadFailed.Title", "读取失败"),
+                    L("CreateChatSession.Issue.StatusUnavailable.Message", "未能为当前会话流生成状态信息。")));
             }
             else if (compilationResult.Issues.Count == 0)
             {
-                FlowStatusItems.Add(CreateInfoIssue("已就绪", "当前会话流编译通过，可以直接用于创建新的 ChatSession。"));
+                FlowStatusItems.Add(CreateInfoIssue(
+                    L("CreateChatSession.Issue.Ready.Title", "已就绪"),
+                    L("CreateChatSession.Issue.Ready.Message", "当前会话流编译通过，可以直接用于创建新的 ChatSession。")));
             }
             else
             {
@@ -435,7 +457,7 @@ namespace Skyweaver.Windows
         {
             foreach (var message in _globalStatusMessages)
             {
-                FlowStatusItems.Add(CreateWarningIssue("附加提示", message));
+                FlowStatusItems.Add(CreateWarningIssue(L("CreateChatSession.Issue.AdditionalHint.Title", "附加提示"), message));
             }
         }
 
@@ -452,7 +474,7 @@ namespace Skyweaver.Windows
                 return CreateMissingAgentPreview(
                     string.IsNullOrWhiteSpace(firstNode.AgentDisplayName) ? firstNode.Title : firstNode.AgentDisplayName,
                     nodeSummary,
-                    "代理节点尚未绑定 AgentDefinition。");
+                    L("CreateChatSession.Agent.MissingDefinition", "代理节点尚未绑定 AgentDefinition。"));
             }
 
             if (!_agentsById.TryGetValue(agentId, out var agent))
@@ -460,7 +482,7 @@ namespace Skyweaver.Windows
                 return CreateMissingAgentPreview(
                     string.IsNullOrWhiteSpace(firstNode.AgentDisplayName) ? firstNode.Title : firstNode.AgentDisplayName,
                     nodeSummary,
-                    $"未找到 AgentDefinition：{agentId}",
+                    LF("CreateChatSession.Agent.DefinitionNotFoundFormat", "未找到 AgentDefinition：{0}", agentId),
                     agentId);
             }
 
@@ -476,10 +498,14 @@ namespace Skyweaver.Windows
             {
                 AvatarPath = string.IsNullOrWhiteSpace(agent.AvatarPreviewPath) ? AgentDefinition.DefaultAvatarPath : agent.AvatarPreviewPath,
                 DisplayName = agent.DisplayNameOrFallback,
-                AgentIdText = $"ID: {agent.AgentIdOrFallback}",
+                AgentIdText = LF("CreateChatSession.Agent.IdFormat", "ID: {0}", agent.AgentIdOrFallback),
                 NodeSummary = nodeSummary,
-                ModeText = agent.IsStructuredXmlIO ? "结构化 XML" : "自然语言",
-                SelectionModeText = agent.LanguageModelSelectionMode == AgentLanguageModelSelectionMode.CapabilityLayer ? "功能层级" : "具体模型",
+                ModeText = agent.IsStructuredXmlIO
+                    ? L("CreateChatSession.Agent.Mode.StructuredXml", "结构化 XML")
+                    : L("CreateChatSession.Agent.Mode.NaturalLanguage", "自然语言"),
+                SelectionModeText = agent.LanguageModelSelectionMode == AgentLanguageModelSelectionMode.CapabilityLayer
+                    ? L("CreateChatSession.Agent.SelectionMode.CapabilityLayer", "功能层级")
+                    : L("CreateChatSession.Agent.SelectionMode.SpecificModel", "具体模型"),
                 ModelSummary = BuildAgentModelSummary(agent, candidates),
                 DescriptionText = BuildAgentDescription(agent),
                 HasStatusBadge = status != null,
@@ -499,15 +525,17 @@ namespace Skyweaver.Windows
             return new CreateChatSessionAgentPreviewItemViewModel
             {
                 AvatarPath = AgentDefinition.DefaultAvatarPath,
-                DisplayName = string.IsNullOrWhiteSpace(displayName) ? "未绑定代理" : displayName.Trim(),
-                AgentIdText = string.IsNullOrWhiteSpace(agentId) ? "ID: 未绑定" : $"ID: {agentId.Trim()}",
+                DisplayName = string.IsNullOrWhiteSpace(displayName) ? L("CreateChatSession.Agent.Unbound", "未绑定代理") : displayName.Trim(),
+                AgentIdText = string.IsNullOrWhiteSpace(agentId)
+                    ? L("CreateChatSession.Agent.IdUnbound", "ID: 未绑定")
+                    : LF("CreateChatSession.Agent.IdFormat", "ID: {0}", agentId.Trim()),
                 NodeSummary = nodeSummary,
-                ModeText = "未知模式",
-                SelectionModeText = "未绑定",
-                ModelSummary = "当前无法解析语言模型。",
+                ModeText = L("CreateChatSession.Agent.Mode.Unknown", "未知模式"),
+                SelectionModeText = L("CreateChatSession.Agent.UnboundStatus", "未绑定"),
+                ModelSummary = L("CreateChatSession.Agent.ModelSummary.Unresolved", "当前无法解析语言模型。"),
                 DescriptionText = message,
                 HasStatusBadge = true,
-                StatusBadgeText = "未绑定",
+                StatusBadgeText = L("CreateChatSession.Agent.UnboundStatus", "未绑定"),
                 StatusBadgeBackground = ErrorBackgroundBrush,
                 StatusBadgeBorderBrush = ErrorBorderBrush,
                 StatusBadgeForeground = ErrorForegroundBrush
@@ -551,17 +579,17 @@ namespace Skyweaver.Windows
             {
                 if (string.IsNullOrWhiteSpace(agent.SelectedCapabilityLayerKey))
                 {
-                    return new CreateChatSessionAgentStatus("模型缺失", ErrorBackgroundBrush, ErrorBorderBrush, ErrorForegroundBrush);
+                    return new CreateChatSessionAgentStatus(L("CreateChatSession.Agent.Status.ModelMissing", "模型缺失"), ErrorBackgroundBrush, ErrorBorderBrush, ErrorForegroundBrush);
                 }
 
                 if (!_capabilityLayersByKey.ContainsKey(agent.SelectedCapabilityLayerKey) || candidates.Count == 0)
                 {
-                    return new CreateChatSessionAgentStatus("层级为空", WarningBackgroundBrush, WarningBorderBrush, WarningForegroundBrush);
+                    return new CreateChatSessionAgentStatus(L("CreateChatSession.Agent.Status.EmptyLayer", "层级为空"), WarningBackgroundBrush, WarningBorderBrush, WarningForegroundBrush);
                 }
 
                 if (candidates.Any(model => !model.IsFullyConfigured))
                 {
-                    return new CreateChatSessionAgentStatus("配置不完整", WarningBackgroundBrush, WarningBorderBrush, WarningForegroundBrush);
+                    return new CreateChatSessionAgentStatus(L("CreateChatSession.Agent.Status.IncompleteConfiguration", "配置不完整"), WarningBackgroundBrush, WarningBorderBrush, WarningForegroundBrush);
                 }
 
                 return null;
@@ -569,12 +597,12 @@ namespace Skyweaver.Windows
 
             if (string.IsNullOrWhiteSpace(agent.SelectedLanguageModelKey))
             {
-                return new CreateChatSessionAgentStatus("模型缺失", ErrorBackgroundBrush, ErrorBorderBrush, ErrorForegroundBrush);
+                return new CreateChatSessionAgentStatus(L("CreateChatSession.Agent.Status.ModelMissing", "模型缺失"), ErrorBackgroundBrush, ErrorBorderBrush, ErrorForegroundBrush);
             }
 
             if (candidates.Count == 0 || candidates.Any(model => !model.IsFullyConfigured))
             {
-                return new CreateChatSessionAgentStatus("配置不完整", WarningBackgroundBrush, WarningBorderBrush, WarningForegroundBrush);
+                return new CreateChatSessionAgentStatus(L("CreateChatSession.Agent.Status.IncompleteConfiguration", "配置不完整"), WarningBackgroundBrush, WarningBorderBrush, WarningForegroundBrush);
             }
 
             return null;
@@ -586,21 +614,21 @@ namespace Skyweaver.Windows
             {
                 var layerName = GetCapabilityLayerDisplayName(agent.SelectedCapabilityLayerKey);
                 return candidates.Count == 0
-                    ? $"功能层级：{layerName}（未解析到候选模型）"
-                    : $"功能层级：{layerName}（候选 {candidates.Count} 个）";
+                    ? LF("CreateChatSession.Agent.ModelSummary.LayerNoCandidatesFormat", "功能层级：{0}（未解析到候选模型）", layerName)
+                    : LF("CreateChatSession.Agent.ModelSummary.LayerCandidatesFormat", "功能层级：{0}（候选 {1} 个）", layerName, candidates.Count);
             }
 
             if (string.IsNullOrWhiteSpace(agent.SelectedLanguageModelKey))
             {
-                return "具体模型：尚未选择语言模型。";
+                return L("CreateChatSession.Agent.ModelSummary.SpecificNotSelected", "具体模型：尚未选择语言模型。");
             }
 
             if (candidates.Count == 0)
             {
-                return $"具体模型：未找到 {agent.SelectedLanguageModelKey}。";
+                return LF("CreateChatSession.Agent.ModelSummary.SpecificNotFoundFormat", "具体模型：未找到 {0}。", agent.SelectedLanguageModelKey);
             }
 
-            return $"具体模型：{GetLanguageModelDisplayName(candidates[0])}";
+            return LF("CreateChatSession.Agent.ModelSummary.SpecificFormat", "具体模型：{0}", GetLanguageModelDisplayName(candidates[0]));
         }
 
         private static string BuildAgentDescription(AgentDefinition agent)
@@ -609,12 +637,12 @@ namespace Skyweaver.Windows
 
             if (!string.IsNullOrWhiteSpace(agent.InputDescription))
             {
-                segments.Add($"输入：{agent.InputDescription.Trim()}");
+                segments.Add(LF("CreateChatSession.Agent.Description.InputFormat", "输入：{0}", agent.InputDescription.Trim()));
             }
 
             if (!string.IsNullOrWhiteSpace(agent.OutputDescription))
             {
-                segments.Add($"输出：{agent.OutputDescription.Trim()}");
+                segments.Add(LF("CreateChatSession.Agent.Description.OutputFormat", "输出：{0}", agent.OutputDescription.Trim()));
             }
 
             if (segments.Count > 0)
@@ -623,8 +651,8 @@ namespace Skyweaver.Windows
             }
 
             return agent.IsStructuredXmlIO
-                ? "该代理使用结构化 XML 输入输出。"
-                : "该代理使用自然语言输入输出。";
+                ? L("CreateChatSession.Agent.Description.StructuredXml", "该代理使用结构化 XML 输入输出。")
+                : L("CreateChatSession.Agent.Description.NaturalLanguage", "该代理使用自然语言输入输出。");
         }
 
         private static string BuildNodeSummary(IReadOnlyList<SessionFlowNodeModel> nodes)
@@ -633,19 +661,19 @@ namespace Skyweaver.Windows
                 .Select(node =>
                 {
                     var title = node.Title?.Trim() ?? string.Empty;
-                    return title.Length == 0 ? "未命名节点" : title;
+                    return title.Length == 0 ? L("CreateChatSession.Node.Unnamed", "未命名节点") : title;
                 })
                 .Distinct(StringComparer.CurrentCultureIgnoreCase)
                 .ToArray();
 
             if (titles.Length == 1)
             {
-                return $"节点：{titles[0]}";
+                return LF("CreateChatSession.Node.SummarySingleFormat", "节点：{0}", titles[0]);
             }
 
             var previewTitles = titles.Take(3).ToArray();
             var suffix = titles.Length > previewTitles.Length ? "..." : string.Empty;
-            return $"节点：{titles.Length} 个（{string.Join("、", previewTitles)}{suffix}）";
+            return LF("CreateChatSession.Node.SummaryMultipleFormat", "节点：{0} 个（{1}{2}）", titles.Length, string.Join(L("Common.ListSeparator.IdeographicComma", "、"), previewTitles), suffix);
         }
 
         private static string GetAgentGroupingKey(SessionFlowNodeModel node)
@@ -664,20 +692,20 @@ namespace Skyweaver.Windows
                 var nodeTitle = node.Title?.Trim();
                 if (!string.IsNullOrWhiteSpace(nodeTitle))
                 {
-                    message = $"{nodeTitle}：{message}";
+                    message = LF("CreateChatSession.Issue.NodeMessageFormat", "{0}：{1}", nodeTitle, message);
                 }
             }
 
             return issue.Severity == SessionFlowCompilationIssueSeverity.Error
-                ? CreateErrorIssue("错误", message)
-                : CreateWarningIssue("警告", message);
+                ? CreateErrorIssue(L("CreateChatSession.Issue.Severity.Error", "错误"), message)
+                : CreateWarningIssue(L("CreateChatSession.Issue.Severity.Warning", "警告"), message);
         }
 
         private static string BuildFlowStatusText(SessionFlowCompilationResult? compilationResult)
         {
             if (compilationResult == null)
             {
-                return "无法分析会话流状态";
+                return L("CreateChatSession.Flow.Status.Unavailable", "无法分析会话流状态");
             }
 
             var errorCount = compilationResult.Issues.Count(issue => issue.Severity == SessionFlowCompilationIssueSeverity.Error);
@@ -685,20 +713,20 @@ namespace Skyweaver.Windows
 
             if (errorCount == 0 && warningCount == 0)
             {
-                return "当前会话流已就绪";
+                return L("CreateChatSession.Flow.Status.Ready", "当前会话流已就绪");
             }
 
             if (errorCount == 0)
             {
-                return $"存在 {warningCount} 个警告";
+                return LF("CreateChatSession.Flow.Status.WarningsFormat", "存在 {0} 个警告", warningCount);
             }
 
             if (warningCount == 0)
             {
-                return $"存在 {errorCount} 个错误";
+                return LF("CreateChatSession.Flow.Status.ErrorsFormat", "存在 {0} 个错误", errorCount);
             }
 
-            return $"存在 {errorCount} 个错误，{warningCount} 个警告";
+            return LF("CreateChatSession.Flow.Status.ErrorsAndWarningsFormat", "存在 {0} 个错误，{1} 个警告", errorCount, warningCount);
         }
 
         private static string FormatTimestamp(DateTime utcDateTime)
@@ -707,7 +735,7 @@ namespace Skyweaver.Windows
                 ? utcDateTime.ToLocalTime()
                 : utcDateTime;
 
-            return localTime.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture);
+            return localTime.ToString(L("CreateChatSession.TimestampFormat", "yyyy-MM-dd HH:mm"), CultureInfo.CurrentCulture);
         }
 
         private Dictionary<string, AgentDefinition> LoadAgents()
@@ -721,7 +749,7 @@ namespace Skyweaver.Windows
             }
             catch (Exception ex)
             {
-                _globalStatusMessages.Add($"代理配置读取失败：{ex.Message}");
+                _globalStatusMessages.Add(LF("CreateChatSession.Status.AgentConfigurationLoadFailedFormat", "代理配置读取失败：{0}", ex.Message));
                 return new Dictionary<string, AgentDefinition>(StringComparer.OrdinalIgnoreCase);
             }
         }
@@ -737,7 +765,7 @@ namespace Skyweaver.Windows
             }
             catch (Exception ex)
             {
-                _globalStatusMessages.Add($"语言模型配置读取失败：{ex.Message}");
+                _globalStatusMessages.Add(LF("CreateChatSession.Status.LanguageModelConfigurationLoadFailedFormat", "语言模型配置读取失败：{0}", ex.Message));
                 return new Dictionary<string, LanguageModelDefinition>(StringComparer.OrdinalIgnoreCase);
             }
         }
@@ -753,7 +781,7 @@ namespace Skyweaver.Windows
             }
             catch (Exception ex)
             {
-                _globalStatusMessages.Add($"功能层级配置读取失败：{ex.Message}");
+                _globalStatusMessages.Add(LF("CreateChatSession.Status.CapabilityLayerConfigurationLoadFailedFormat", "功能层级配置读取失败：{0}", ex.Message));
                 return new Dictionary<string, CapabilityLayerDefinition>(StringComparer.OrdinalIgnoreCase);
             }
         }
@@ -765,12 +793,16 @@ namespace Skyweaver.Windows
         {
             if (usageMap.TryGetValue(model.Key, out var existing))
             {
-                existing.SourceTypes.Add(selectionMode == AgentLanguageModelSelectionMode.CapabilityLayer ? "功能层级" : "具体模型");
+                existing.SourceTypes.Add(selectionMode == AgentLanguageModelSelectionMode.CapabilityLayer
+                    ? L("CreateChatSession.Agent.SelectionMode.CapabilityLayer", "功能层级")
+                    : L("CreateChatSession.Agent.SelectionMode.SpecificModel", "具体模型"));
                 return existing;
             }
 
             var created = new CreateChatSessionModelUsageAccumulator(model);
-            created.SourceTypes.Add(selectionMode == AgentLanguageModelSelectionMode.CapabilityLayer ? "功能层级" : "具体模型");
+            created.SourceTypes.Add(selectionMode == AgentLanguageModelSelectionMode.CapabilityLayer
+                ? L("CreateChatSession.Agent.SelectionMode.CapabilityLayer", "功能层级")
+                : L("CreateChatSession.Agent.SelectionMode.SpecificModel", "具体模型"));
             usageMap[model.Key] = created;
             return created;
         }
@@ -779,13 +811,13 @@ namespace Skyweaver.Windows
         {
             if (string.IsNullOrWhiteSpace(capabilityLayerKey))
             {
-                return "未选择功能层级";
+                return L("CreateChatSession.CapabilityLayer.NotSelected", "未选择功能层级");
             }
 
             if (_capabilityLayersByKey.TryGetValue(capabilityLayerKey, out var layer))
             {
                 return string.IsNullOrWhiteSpace(layer.Name)
-                    ? $"未命名功能层级 ({TrimKey(capabilityLayerKey)})"
+                    ? LF("CreateChatSession.CapabilityLayer.UnnamedFormat", "未命名功能层级 ({0})", TrimKey(capabilityLayerKey))
                     : layer.Name.Trim();
             }
 
@@ -803,16 +835,27 @@ namespace Skyweaver.Windows
             var summaryModelId = model.SummaryModelId?.Trim() ?? string.Empty;
             if (summaryModelId.Length > 0)
             {
-                return $"未命名模型 ({summaryModelId})";
+                return LF("CreateChatSession.Model.UnnamedFormat", "未命名模型 ({0})", summaryModelId);
             }
 
-            return $"未命名模型 ({TrimKey(model.Key)})";
+            return LF("CreateChatSession.Model.UnnamedFormat", "未命名模型 ({0})", TrimKey(model.Key));
         }
 
         private static string TrimKey(string? key)
         {
             var value = key?.Trim() ?? string.Empty;
             return value.Length <= 8 ? value : value[..8];
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
+        {
+            var format = L(resourceKey, fallbackFormat);
+            return string.Format(format, args);
         }
 
         private static Brush CreateBrush(Color color)
@@ -959,34 +1002,45 @@ namespace Skyweaver.Windows
                 var summaryModelId = Model.SummaryModelId?.Trim() ?? string.Empty;
                 if (summaryModelId.Length > 0)
                 {
-                    return $"未命名模型 ({summaryModelId})";
+                    return LF("CreateChatSession.Model.UnnamedFormat", "未命名模型 ({0})", summaryModelId);
                 }
 
                 var key = Model.Key?.Trim() ?? string.Empty;
-                return key.Length <= 8 ? $"未命名模型 ({key})" : $"未命名模型 ({key[..8]})";
+                return LF("CreateChatSession.Model.UnnamedFormat", "未命名模型 ({0})", key.Length <= 8 ? key : key[..8]);
             }
         }
 
         public string ModelIdText => string.IsNullOrWhiteSpace(Model.SummaryModelId)
             ? $"Key: {Model.Key}"
-            : $"模型 ID: {Model.SummaryModelId}";
+            : LF("CreateChatSession.Model.ModelIdFormat", "模型 ID: {0}", Model.SummaryModelId);
 
         public CreateChatSessionModelPreviewItemViewModel ToViewModel()
         {
             var sourceTypeText = string.Join(" / ", SourceTypes.OrderBy(item => item, StringComparer.CurrentCultureIgnoreCase));
             var agentList = AgentNames.OrderBy(item => item, StringComparer.CurrentCultureIgnoreCase).ToArray();
             var usedByText = agentList.Length == 0
-                ? "尚未关联代理"
-                : $"代理：{string.Join("、", agentList)}";
+                ? L("CreateChatSession.Model.UsedBy.None", "尚未关联代理")
+                : LF("CreateChatSession.Model.UsedBy.AgentsFormat", "代理：{0}", string.Join(L("Common.ListSeparator.IdeographicComma", "、"), agentList));
 
             return new CreateChatSessionModelPreviewItemViewModel
             {
                 DisplayName = DisplayName,
                 ModelIdText = ModelIdText,
-                InterfaceTypeText = string.IsNullOrWhiteSpace(Model.InterfaceType) ? "未知接口" : Model.InterfaceType,
-                SourceTypeText = sourceTypeText.Length == 0 ? "未说明来源" : sourceTypeText,
+                InterfaceTypeText = string.IsNullOrWhiteSpace(Model.InterfaceType) ? L("CreateChatSession.Model.Interface.Unknown", "未知接口") : Model.InterfaceType,
+                SourceTypeText = sourceTypeText.Length == 0 ? L("CreateChatSession.Model.Source.Unspecified", "未说明来源") : sourceTypeText,
                 UsedByText = usedByText
             };
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
+        {
+            var format = L(resourceKey, fallbackFormat);
+            return string.Format(format, args);
         }
     }
 

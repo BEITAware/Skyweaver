@@ -110,7 +110,7 @@
                 <DockPanel Grid.Column="0">
                     <StackPanel DockPanel.Dock="Top"
                                 Margin="0,0,0,10">
-                        <TextBlock Text="代理"
+                        <TextBlock Text="{DynamicResource AgentConfiguration.ListTitle}"
                                    FontSize="14"
                                    FontWeight="SemiBold"/>
                         <WrapPanel Margin="0,10,0,0">
@@ -134,13 +134,13 @@
 
                         <Button Grid.Column="0"
                                 Command="{Binding AddAgentCommand}"
-                                Content="新增"/>
+                                Content="{DynamicResource Common.Add}"/>
                         <Button Grid.Column="2"
                                 Command="{Binding DuplicateAgentCommand}"
-                                Content="复制"/>
+                                Content="{DynamicResource Common.Duplicate}"/>
                         <Button Grid.Column="4"
                                 Command="{Binding RemoveAgentCommand}"
-                                Content="删除"/>
+                                Content="{DynamicResource Common.Delete}"/>
                     </Grid>
 
                     <Border CornerRadius="2"
@@ -240,7 +240,7 @@
                     <Grid>
                         <TextBlock HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
-                                   Text="请先在左侧列表中选择一个代理，再编辑其配置。"
+                                   Text="{DynamicResource AgentConfiguration.EmptySelection}"
                                    Visibility="Collapsed">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
@@ -285,7 +285,7 @@
                                     <Button Grid.Column="2"
                                             Width="90"
                                             Command="{Binding BrowseAvatarCommand}"
-                                            Content="浏览"/>
+                                            Content="{DynamicResource Common.Browse}"/>
                                 </Grid>
 
                                 <Grid Margin="0,0,0,12">
@@ -296,14 +296,14 @@
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel>
-                                        <TextBlock Text="显示名称"
+                                        <TextBlock Text="{DynamicResource Common.DisplayName}"
                                                    FontWeight="SemiBold"/>
                                         <TextBox Margin="0,6,0,0"
                                                  Text="{Binding SelectedAgent.DisplayName, UpdateSourceTrigger=LostFocus}"/>
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="2">
-                                        <TextBlock Text="代理 ID（仅限字母和数字）"
+                                        <TextBlock Text="{DynamicResource AgentConfiguration.AgentId}"
                                                    FontWeight="SemiBold"/>
                                         <TextBox Margin="0,6,0,0"
                                                  Text="{Binding SelectedAgent.AgentId, UpdateSourceTrigger=LostFocus}"/>
@@ -311,7 +311,7 @@
                                  </Grid>
 
                                 <StackPanel Margin="0,0,0,12">
-                                    <TextBlock Text="代理用途"
+                                    <TextBlock Text="{DynamicResource AgentConfiguration.RuntimeRole}"
                                                FontWeight="SemiBold"/>
                                     <ComboBox Margin="0,6,0,0"
                                               ItemsSource="{Binding RuntimeRoleOptions}"
@@ -320,7 +320,7 @@
                                               SelectedValue="{Binding SelectedAgent.RuntimeRole, UpdateSourceTrigger=PropertyChanged}"/>
                                     <StackPanel Margin="0,10,0,0"
                                                 Visibility="{Binding IsSubAgentIntroductionVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <TextBlock Text="子代理介绍"
+                                        <TextBlock Text="{DynamicResource AgentConfiguration.SubAgentIntroduction}"
                                                    FontWeight="SemiBold"/>
                                         <TextBox Margin="0,6,0,0"
                                                  MinHeight="90"
@@ -333,12 +333,12 @@
 
                                  <StackPanel Margin="0,0,0,12">
                                      <DockPanel>
-                                        <TextBlock Text="语言模型"
+                                        <TextBlock Text="{DynamicResource AgentConfiguration.LanguageModel}"
                                                    FontWeight="SemiBold"/>
                                         <Button DockPanel.Dock="Right"
                                                 Width="120"
                                                 Command="{Binding ReloadLanguageModelCatalogCommand}"
-                                                Content="刷新模型目录"/>
+                                                                Content="{DynamicResource AgentConfiguration.RefreshModelCatalog}"/>
                                     </DockPanel>
 
                                     <Grid Margin="0,8,0,0">
@@ -349,7 +349,7 @@
                                         </Grid.ColumnDefinitions>
 
                                         <StackPanel>
-                                            <TextBlock Text="选择方式"
+                                                    <TextBlock Text="{DynamicResource AgentConfiguration.SelectionMode}"
                                                        FontWeight="SemiBold"/>
                                             <ComboBox Margin="0,6,0,0"
                                                       ItemsSource="{Binding LanguageModelSelectionModes}"
@@ -359,7 +359,7 @@
                                         </StackPanel>
 
                                         <StackPanel Grid.Column="2">
-                                            <TextBlock Text="目标"
+                                                    <TextBlock Text="{DynamicResource AgentConfiguration.Target}"
                                                        FontWeight="SemiBold"/>
                                             <Grid Margin="0,6,0,0">
                                                 <ComboBox ItemsSource="{Binding AvailableLanguageModels}"
@@ -386,18 +386,18 @@
                                          Style="{StaticResource GlassCardBorderStyle}">
                                      <StackPanel>
                                          <DockPanel>
-                                             <TextBlock Text="默认工具集"
+                                             <TextBlock Text="{DynamicResource AgentConfiguration.DefaultToolKits}"
                                                         FontWeight="SemiBold"/>
                                              <Button DockPanel.Dock="Right"
                                                      Width="120"
                                                      Command="{Binding AddDefaultToolKitCommand}"
-                                                     Content="添加工具集"/>
+                                                            Content="{DynamicResource AgentConfiguration.DefaultToolKits.Add}"/>
                                          </DockPanel>
 
                                          <TextBlock Margin="0,8,0,0"
                                                     Foreground="#D9FFFFFF"
                                                     TextWrapping="Wrap"
-                                                    Text="这里选择的工具集会在该代理启动时自动加载；主代理和子代理模式都会生效，无需再调用 LoadToolKits。"/>
+                                                   Text="{DynamicResource AgentConfiguration.DefaultToolKits.Hint}"/>
 
                                          <ListView Margin="0,10,0,0"
                                                    ItemsSource="{Binding SelectedAgent.DefaultToolKits}"
@@ -424,19 +424,19 @@
                                                                      Margin="8,0,0,0"
                                                                      Command="{Binding DataContext.MoveDefaultToolKitUpCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                      CommandParameter="{Binding}"
-                                                                     Content="上移"/>
+                                                                        Content="{DynamicResource Common.MoveUp}"/>
                                                              <Button Grid.Column="2"
                                                                      Width="60"
                                                                      Margin="8,0,0,0"
                                                                      Command="{Binding DataContext.MoveDefaultToolKitDownCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                      CommandParameter="{Binding}"
-                                                                     Content="下移"/>
+                                                                        Content="{DynamicResource Common.MoveDown}"/>
                                                              <Button Grid.Column="3"
                                                                      Width="60"
                                                                      Margin="8,0,0,0"
                                                                      Command="{Binding DataContext.RemoveDefaultToolKitCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                      CommandParameter="{Binding}"
-                                                                     Content="删除"/>
+                                                                        Content="{DynamicResource Common.Delete}"/>
                                                          </Grid>
                                                      </Border>
                                                  </DataTemplate>
@@ -446,7 +446,7 @@
                                  </Border>
 
                                  <StackPanel Margin="0,0,0,12">
-                                     <TextBlock Text="系统提示词"
+                                     <TextBlock Text="{DynamicResource AgentConfiguration.SystemPrompt}"
                                                 FontWeight="SemiBold"/>
                                     <TextBox Margin="0,6,0,0"
                                              MinHeight="110"
@@ -458,26 +458,26 @@
 
                                 <StackPanel Margin="0,0,0,12">
                                     <DockPanel>
-                                        <TextBlock Text="工具权限"
+                                        <TextBlock Text="{DynamicResource AgentConfiguration.ToolPermissions}"
                                                    FontWeight="SemiBold"/>
                                         <WrapPanel DockPanel.Dock="Right"
                                                    HorizontalAlignment="Right">
                                             <Button Width="120"
                                                     Margin="8,0,0,0"
                                                     Command="{Binding ReloadToolsCommand}"
-                                                    Content="重新加载工具"/>
+                                                        Content="{DynamicResource AgentConfiguration.ReloadTools}"/>
                                             <Button Width="96"
                                                     Margin="8,0,0,0"
                                                     Command="{Binding AllowAllToolPermissionsCommand}"
-                                                    Content="全部允许"/>
+                                                        Content="{DynamicResource Common.AllowAll}"/>
                                             <Button Width="96"
                                                     Margin="8,0,0,0"
                                                     Command="{Binding DisableAllToolPermissionsCommand}"
-                                                    Content="全部禁止"/>
+                                                        Content="{DynamicResource Common.DisableAll}"/>
                                             <Button Width="108"
                                                     Margin="8,0,0,0"
                                                     Command="{Binding RequireConfirmationAllToolPermissionsCommand}"
-                                                    Content="全部需确认"/>
+                                                        Content="{DynamicResource Common.RequireConfirmationAll}"/>
                                         </WrapPanel>
                                     </DockPanel>
 
@@ -509,7 +509,7 @@
                                                                         CornerRadius="8"
                                                                         Visibility="{Binding IsMissing, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                                     <TextBlock FontSize="10"
-                                                                               Text="工具缺失"/>
+                                                                               Text="{DynamicResource AgentConfiguration.ToolMissing}"/>
                                                                 </Border>
                                                             </DockPanel>
                                                             <TextBlock Margin="0,6,0,0"
@@ -538,7 +538,7 @@
                                 <Border Style="{StaticResource GlassCardBorderStyle}">
                                     <StackPanel>
                                         <CheckBox IsChecked="{Binding SelectedAgent.IsStructuredXmlIO, UpdateSourceTrigger=PropertyChanged}"
-                                                  Content="使用结构化 XML 输入/输出"
+                                                  Content="{DynamicResource AgentConfiguration.UseStructuredXmlIo}"
                                                   FontWeight="SemiBold"/>
 
                                         <Border Margin="0,10,0,0">
@@ -560,7 +560,7 @@
                                                 </Grid.ColumnDefinitions>
 
                                                 <StackPanel>
-                                                    <TextBlock Text="输入说明"
+                                                    <TextBlock Text="{DynamicResource AgentConfiguration.InputDescription}"
                                                                FontWeight="SemiBold"/>
                                                     <TextBox Margin="0,6,0,0"
                                                              MinHeight="90"
@@ -571,7 +571,7 @@
                                                 </StackPanel>
 
                                                 <StackPanel Grid.Column="2">
-                                                    <TextBlock Text="输出说明"
+                                                    <TextBlock Text="{DynamicResource AgentConfiguration.OutputDescription}"
                                                                FontWeight="SemiBold"/>
                                                     <TextBox Margin="0,6,0,0"
                                                              MinHeight="90"
@@ -593,7 +593,7 @@
                                                 </Grid.ColumnDefinitions>
 
                                                 <StackPanel>
-                                                    <TextBlock Text="输入 XML 节点"
+                                                    <TextBlock Text="{DynamicResource AgentConfiguration.InputXmlNodes}"
                                                                FontWeight="SemiBold"/>
                                                     <Grid Margin="0,8,0,0">
                                                         <Grid.ColumnDefinitions>
@@ -605,13 +605,13 @@
                                                         </Grid.ColumnDefinitions>
                                                         <Button Grid.Column="0"
                                                                 Command="{Binding AddInputRootNodeCommand}"
-                                                                Content="添加根子节点"/>
+                                                                Content="{DynamicResource AgentConfiguration.AddRootChildNode}"/>
                                                         <Button Grid.Column="2"
                                                                 Command="{Binding AddInputChildNodeCommand}"
-                                                                Content="添加子节点"/>
+                                                                Content="{DynamicResource AgentConfiguration.AddChildNode}"/>
                                                         <Button Grid.Column="4"
                                                                 Command="{Binding RemoveInputNodeCommand}"
-                                                                Content="移除"/>
+                                                                Content="{DynamicResource Common.Remove}"/>
                                                     </Grid>
                                                     <TreeView x:Name="InputSchemaTreeView"
                                                               Margin="0,8,0,0"
@@ -623,7 +623,7 @@
                                                 </StackPanel>
 
                                                 <StackPanel Grid.Column="2">
-                                                    <TextBlock Text="输出 XML 节点"
+                                                    <TextBlock Text="{DynamicResource AgentConfiguration.OutputXmlNodes}"
                                                                FontWeight="SemiBold"/>
                                                     <Grid Margin="0,8,0,0">
                                                         <Grid.ColumnDefinitions>
@@ -635,13 +635,13 @@
                                                         </Grid.ColumnDefinitions>
                                                         <Button Grid.Column="0"
                                                                 Command="{Binding AddOutputRootNodeCommand}"
-                                                                Content="添加根子节点"/>
+                                                                Content="{DynamicResource AgentConfiguration.AddRootChildNode}"/>
                                                         <Button Grid.Column="2"
                                                                 Command="{Binding AddOutputChildNodeCommand}"
-                                                                Content="添加子节点"/>
+                                                                Content="{DynamicResource AgentConfiguration.AddChildNode}"/>
                                                         <Button Grid.Column="4"
                                                                 Command="{Binding RemoveOutputNodeCommand}"
-                                                                Content="移除"/>
+                                                                Content="{DynamicResource Common.Remove}"/>
                                                     </Grid>
                                                     <TreeView x:Name="OutputSchemaTreeView"
                                                               Margin="0,8,0,0"
@@ -659,7 +659,7 @@
                                 <Border Margin="0,12,0,0"
                                         Style="{StaticResource GlassCardBorderStyle}">
                                     <StackPanel>
-                                        <TextBlock Text="提示词构建测试"
+                                        <TextBlock Text="{DynamicResource AgentConfiguration.PromptBuildTest}"
                                                    FontWeight="SemiBold"
                                                    FontSize="13"/>
                                         <TextBlock Margin="0,6,0,0"
@@ -680,13 +680,13 @@
                                                     Width="108"
                                                     Height="32"
                                                     Command="{Binding BuildPromptPreviewCommand}"
-                                                    Content="构建提示词"/>
+                                                    Content="{DynamicResource AgentConfiguration.BuildPrompt}"/>
 
                                             <Button Grid.Column="2"
                                                     Width="96"
                                                     Height="32"
                                                     Command="{Binding CopyPromptPreviewCommand}"
-                                                    Content="复制结果"/>
+                                                    Content="{DynamicResource AgentConfiguration.CopyResult}"/>
 
                                             <TextBox Grid.Column="4"
                                                      MinHeight="120"
@@ -750,7 +750,7 @@
                             Margin="12,0,0,0"
                             Width="180"
                             Command="{Binding OpenConfigurationDirectoryCommand}"
-                            Content="打开配置目录"/>
+                            Content="{DynamicResource Common.OpenConfigurationDirectory}"/>
                 </Grid>
             </Border>
         </Grid>

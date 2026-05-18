@@ -1,5 +1,6 @@
 using System.Globalization;
 using Skyweaver.Controls.EmbeddingModelConfigurationControl.Models;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.EmbeddingModelConfigurationControl.Services
 {
@@ -35,7 +36,17 @@ namespace Skyweaver.Controls.EmbeddingModelConfigurationControl.Services
                 .Select(index => result.Vector[index].ToString("0.####", CultureInfo.InvariantCulture));
             var preview = string.Join(", ", previewValues);
 
-            return $"嵌入测试成功：{result.Vector.Dimensions:N0} 维，范数 {result.Vector.Norm():0.####}，模型 {result.Model}，接口 {result.ApiType}。预览：[{preview}]";
+            return LF("EmbeddingModel.Test.SuccessFormat", "嵌入测试成功：{0:N0} 维，范数 {1:0.####}，模型 {2}，接口 {3}。预览：[{4}]", result.Vector.Dimensions, result.Vector.Norm(), result.Model, result.ApiType, preview);
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
+        {
+            return string.Format(L(resourceKey, fallbackFormat), args);
         }
     }
 }

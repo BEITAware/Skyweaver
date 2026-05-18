@@ -4,6 +4,7 @@ using Skyweaver.Commands;
 using Skyweaver.Infrastructure.Mvvm;
 using Skyweaver.Panels.DocumentWorkspace.Contracts;
 using Skyweaver.Panels.DocumentWorkspace.Models;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Panels.DocumentWorkspace.ViewModels
 {
@@ -65,7 +66,7 @@ namespace Skyweaver.Panels.DocumentWorkspace.ViewModels
                 Subtitle = subtitle ?? string.Empty,
                 IconPath = iconPath ?? WorkspaceDocument.DefaultIconPath,
                 ContentViewModel = contentViewModel,
-                PlaceholderText = $"Document '{title}' has no content view model yet."
+                PlaceholderText = LF("DocumentWorkspace.Placeholder.NoContentViewModelFormat", "Document '{0}' has no content view model yet.", title)
             };
 
             return OpenDocument(document);
@@ -118,6 +119,12 @@ namespace Skyweaver.Panels.DocumentWorkspace.ViewModels
             }
 
             DocumentClosed?.Invoke(document);
+        }
+
+        private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
+        {
+            var format = LocalizationRuntime.Instance.GetString(resourceKey, fallbackFormat);
+            return string.Format(format, args);
         }
     }
 }

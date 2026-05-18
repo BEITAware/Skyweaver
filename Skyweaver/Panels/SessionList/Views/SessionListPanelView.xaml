@@ -20,7 +20,7 @@
                     BorderBrush="{DynamicResource TransparentBrush}"
                     BorderThickness="0"
                     Padding="8,5">
-                <TextBlock Text="会话列表"
+                <TextBlock Text="{DynamicResource SessionList.Title}"
                            FontWeight="Bold"
                            Foreground="{DynamicResource LightTextBrush}"
                            FontFamily="{DynamicResource AeroFontFamily}"
@@ -46,7 +46,7 @@
                     </Grid.ColumnDefinitions>
 
                     <Button Grid.Column="0"
-                            ToolTip="创建一个新的会话"
+                            ToolTip="{DynamicResource SessionList.Create.ToolTip}"
                             Style="{StaticResource ResourceToolbarButtonStyle}"
                             Height="32"
                             Margin="0,0,6,0"
@@ -63,7 +63,7 @@
                                    Margin="0,0,4,0"
                                    VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1"
-                                       Text="创建会话"
+                                       Text="{DynamicResource SessionList.Create}"
                                        VerticalAlignment="Center"
                                        TextAlignment="Center"
                                        TextTrimming="CharacterEllipsis"
@@ -72,7 +72,7 @@
                     </Button>
 
                     <Button Grid.Column="1"
-                            ToolTip="删除当前选中的会话"
+                            ToolTip="{DynamicResource SessionList.Delete.ToolTip}"
                             Style="{StaticResource ResourceToolbarButtonStyle}"
                             Height="32"
                             Margin="3,0"
@@ -89,7 +89,7 @@
                                    Margin="0,0,4,0"
                                    VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1"
-                                       Text="删除会话..."
+                                       Text="{DynamicResource SessionList.Delete}"
                                        VerticalAlignment="Center"
                                        TextAlignment="Center"
                                        TextTrimming="CharacterEllipsis"
@@ -98,7 +98,7 @@
                     </Button>
 
                     <Button Grid.Column="2"
-                            ToolTip="按标题关键词搜索会话"
+                            ToolTip="{DynamicResource SessionList.Search.ToolTip}"
                             Style="{StaticResource ResourceToolbarButtonStyle}"
                             Height="32"
                             Margin="6,0,0,0"
@@ -115,7 +115,7 @@
                                    Margin="0,0,4,0"
                                    VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1"
-                                       Text="搜索会话..."
+                                       Text="{DynamicResource SessionList.Search}"
                                        VerticalAlignment="Center"
                                        TextAlignment="Center"
                                        TextTrimming="CharacterEllipsis"
@@ -146,7 +146,7 @@
                                VerticalAlignment="Center"
                                Foreground="{DynamicResource SecondaryForeground}"
                                IsHitTestVisible="False"
-                               Text="搜索标题">
+                               Text="{DynamicResource SessionList.SearchPlaceholder}">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Visibility" Value="Collapsed"/>

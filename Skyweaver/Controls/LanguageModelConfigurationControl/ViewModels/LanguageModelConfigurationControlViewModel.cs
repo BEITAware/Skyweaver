@@ -12,6 +12,7 @@ using Skyweaver.Commands;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Models;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
 {
@@ -25,9 +26,11 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
         private LanguageModelDefinition? _selectedLanguageModel;
         private CapabilityLayerDefinition? _selectedCapabilityLayer;
 
-        public string Title { get; } = "语言模型配置";
+        public string Title => L("LanguageModelConfiguration.Title", "语言模型配置");
 
-        public string Description { get; } = "配置具体语言模型连接信息，并为上层功能定义可回退的模型调用顺序。";
+        public string Description => L(
+            "LanguageModelConfiguration.Description",
+            "配置具体语言模型连接信息，并为上层功能定义可回退的模型调用顺序。");
 
         public ObservableCollection<LanguageModelDefinition> LanguageModels { get; } = new();
 
@@ -36,8 +39,11 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
         public IReadOnlyList<string> AvailableInterfaceTypes => LanguageModelDefinition.AvailableInterfaceTypes;
 
         public string InterfaceSettingsSectionTitle => SelectedLanguageModel == null
-            ? "接口配置"
-            : $"{SelectedLanguageModel.InterfaceType} 接口配置";
+            ? L("LanguageModelConfiguration.InterfaceSettings.Default", "接口配置")
+            : LF(
+                "LanguageModelConfiguration.InterfaceSettings.Format",
+                "{0} 接口配置",
+                SelectedLanguageModel.InterfaceType);
 
         public string LanguageModelConfigurationFilePath => _languageModelRepository.ConfigurationFilePath;
 
@@ -108,6 +114,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
 
             LanguageModels.CollectionChanged += OnLanguageModelsCollectionChanged;
             CapabilityLayers.CollectionChanged += OnCapabilityLayersCollectionChanged;
+            LocalizationRuntime.Instance.LanguageChanged += (_, _) => RefreshLocalizedText();
 
             Load();
         }
@@ -116,17 +123,17 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                return "未选择语言模型";
+                return L("LanguageModelConfiguration.Status.NoModelSelected", "未选择语言模型");
             }
 
             var model = LanguageModels.FirstOrDefault(item => string.Equals(item.Key, key, StringComparison.Ordinal));
             if (model == null)
             {
-                return "引用的语言模型不存在";
+                return L("LanguageModelConfiguration.Status.MissingModel", "引用的语言模型不存在");
             }
 
             return string.IsNullOrWhiteSpace(model.DisplayName)
-                ? $"未命名模型 ({model.SummaryModelId})"
+                ? LF("LanguageModelConfiguration.UnnamedModelFormat", "未命名模型 ({0})", model.SummaryModelId)
                 : model.DisplayName;
         }
 
@@ -161,7 +168,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
         {
             var model = new LanguageModelDefinition
             {
-                DisplayName = $"语言模型 {LanguageModels.Count + 1}",
+                DisplayName = LF("LanguageModelConfiguration.NewModelNameFormat", "语言模型 {0}", LanguageModels.Count + 1),
                 InterfaceType = LanguageModelInterfaceCatalog.DefaultInterfaceType
             };
 
@@ -170,7 +177,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
             AttachLanguageModel(model);
             LanguageModels.Add(model);
             SelectedLanguageModel = model;
-            PersistAll("语言模型已新增并保存。");
+            PersistAll(L("LanguageModelConfiguration.Status.Added", "语言模型已新增并保存。"));
         }
 
         private void RemoveSelectedLanguageModel()
@@ -198,7 +205,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
             }
 
             SelectedLanguageModel = LanguageModels.FirstOrDefault();
-            PersistAll("语言模型已删除并保存。", refreshCapabilityLayerDisplayNames: true);
+            PersistAll(L("LanguageModelConfiguration.Status.Removed", "语言模型已删除并保存。"), refreshCapabilityLayerDisplayNames: true);
         }
 
         private void DuplicateSelectedLanguageModel()
@@ -212,20 +219,20 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
             AttachLanguageModel(clone);
             LanguageModels.Add(clone);
             SelectedLanguageModel = clone;
-            PersistAll("语言模型已复制并保存。");
+            PersistAll(L("LanguageModelConfiguration.Status.Duplicated", "语言模型已复制并保存。"));
         }
 
         private void AddCapabilityLayer()
         {
             var layer = new CapabilityLayerDefinition
             {
-                Name = $"功能层级 {CapabilityLayers.Count + 1}"
+                Name = LF("LanguageModelConfiguration.NewLayerNameFormat", "功能层级 {0}", CapabilityLayers.Count + 1)
             };
 
             AttachCapabilityLayer(layer);
             CapabilityLayers.Add(layer);
             SelectedCapabilityLayer = layer;
-            PersistAll("功能层级已新增并保存。");
+            PersistAll(L("LanguageModelConfiguration.Status.LayerAdded", "功能层级已新增并保存。"));
         }
 
         private void RemoveSelectedCapabilityLayer()
@@ -238,7 +245,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
             DetachCapabilityLayer(SelectedCapabilityLayer);
             CapabilityLayers.Remove(SelectedCapabilityLayer);
             SelectedCapabilityLayer = CapabilityLayers.FirstOrDefault();
-            PersistAll("功能层级已删除并保存。");
+            PersistAll(L("LanguageModelConfiguration.Status.LayerRemoved", "功能层级已删除并保存。"));
         }
 
         private void AddCapabilityLayerEntry(CapabilityLayerDefinition? layer)
@@ -255,7 +262,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
 
             AttachCapabilityLayerEntry(entry);
             layer.LanguageModels.Add(entry);
-            PersistAll("功能层级中的语言模型顺序已保存。", refreshCapabilityLayerDisplayNames: true);
+            PersistAll(L("LanguageModelConfiguration.Status.LayerOrderSaved", "功能层级中的语言模型顺序已保存。"), refreshCapabilityLayerDisplayNames: true);
         }
 
         private void RemoveCapabilityLayerEntry(CapabilityLayerEntry? entry)
@@ -273,7 +280,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
 
             DetachCapabilityLayerEntry(entry);
             layer.LanguageModels.Remove(entry);
-            PersistAll("功能层级中的语言模型顺序已保存。");
+            PersistAll(L("LanguageModelConfiguration.Status.LayerOrderSaved", "功能层级中的语言模型顺序已保存。"));
         }
 
         private bool CanMoveCapabilityLayerEntryUp(CapabilityLayerEntry? entry)
@@ -302,7 +309,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
             }
 
             layer.LanguageModels.Move(index, index - 1);
-            PersistAll("功能层级中的语言模型顺序已保存。");
+            PersistAll(L("LanguageModelConfiguration.Status.LayerOrderSaved", "功能层级中的语言模型顺序已保存。"));
         }
 
         private bool CanMoveCapabilityLayerEntryDown(CapabilityLayerEntry? entry)
@@ -331,7 +338,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
             }
 
             layer.LanguageModels.Move(index, index + 1);
-            PersistAll("功能层级中的语言模型顺序已保存。");
+            PersistAll(L("LanguageModelConfiguration.Status.LayerOrderSaved", "功能层级中的语言模型顺序已保存。"));
         }
 
         private void OpenConfigurationDirectory()
@@ -458,8 +465,10 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
 
         private static string BuildDuplicatedDisplayName(string? displayName)
         {
-            var normalizedName = string.IsNullOrWhiteSpace(displayName) ? "语言模型" : displayName.Trim();
-            return $"{normalizedName} - 副本";
+            var normalizedName = string.IsNullOrWhiteSpace(displayName)
+                ? L("LanguageModelConfiguration.DefaultModelName", "语言模型")
+                : displayName.Trim();
+            return LF("LanguageModelConfiguration.DuplicateSuffixFormat", "{0} - 副本", normalizedName);
         }
 
         private static void ApplySuggestedDefaults(LanguageModelInterfaceSettings settings)
@@ -538,12 +547,14 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
                 OnPropertyChanged(nameof(InterfaceSettingsSectionTitle));
             }
 
-            PersistAll("语言模型配置已保存。", refreshCapabilityLayerDisplayNames: string.Equals(e.PropertyName, nameof(LanguageModelDefinition.DisplayName), StringComparison.Ordinal));
+            PersistAll(
+                L("LanguageModelConfiguration.Status.ModelSaved", "语言模型配置已保存。"),
+                refreshCapabilityLayerDisplayNames: string.Equals(e.PropertyName, nameof(LanguageModelDefinition.DisplayName), StringComparison.Ordinal));
         }
 
         private void OnCapabilityLayerPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            PersistAll("功能层级配置已保存。");
+            PersistAll(L("LanguageModelConfiguration.Status.LayerSaved", "功能层级配置已保存。"));
         }
 
         private void OnCapabilityLayerEntriesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -564,13 +575,13 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
                 }
             }
 
-            PersistAll("功能层级配置已保存。");
+            PersistAll(L("LanguageModelConfiguration.Status.LayerSaved", "功能层级配置已保存。"));
             CommandManager.InvalidateRequerySuggested();
         }
 
         private void OnCapabilityLayerEntryPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            PersistAll("功能层级配置已保存。");
+            PersistAll(L("LanguageModelConfiguration.Status.LayerSaved", "功能层级配置已保存。"));
         }
 
         private CapabilityLayerDefinition? FindParentLayer(CapabilityLayerEntry entry)
@@ -600,7 +611,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
             {
                 if (SelectedLanguageModel != null)
                 {
-                    SelectedLanguageModel.TestResponse = $"保存失败：{ex.Message}";
+                    SelectedLanguageModel.TestResponse = LF("LanguageModelConfiguration.Status.SaveFailedFormat", "保存失败：{0}", ex.Message);
                 }
             }
         }
@@ -641,12 +652,12 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
             catch (OperationCanceledException)
             {
                 model.TestResponse = string.IsNullOrWhiteSpace(model.TestResponse)
-                    ? "测试已中止。"
-                    : $"{model.TestResponse}{Environment.NewLine}{Environment.NewLine}[测试已中止]";
+                    ? L("LanguageModelConfiguration.Status.TestCanceled", "测试已中止。")
+                    : $"{model.TestResponse}{Environment.NewLine}{Environment.NewLine}{L("LanguageModelConfiguration.Status.TestCanceledInline", "[测试已中止]")}";
             }
             catch (Exception ex)
             {
-                model.TestResponse = $"测试失败：{ex.Message}";
+                model.TestResponse = LF("LanguageModelConfiguration.Status.TestFailedFormat", "测试失败：{0}", ex.Message);
             }
             finally
             {
@@ -686,6 +697,33 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
                 cancellationSource.Cancel();
                 cancellationSource.Dispose();
             }
+        }
+
+        private void RefreshLocalizedText()
+        {
+            OnPropertyChanged(nameof(Title));
+            OnPropertyChanged(nameof(Description));
+            OnPropertyChanged(nameof(InterfaceSettingsSectionTitle));
+
+            foreach (var model in LanguageModels)
+            {
+                model.RefreshLocalizedText();
+            }
+
+            foreach (var layer in CapabilityLayers)
+            {
+                layer.RefreshLocalizedText();
+            }
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallback, params object[] args)
+        {
+            return string.Format(L(resourceKey, fallback), args);
         }
     }
 }

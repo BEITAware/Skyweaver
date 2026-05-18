@@ -21,7 +21,7 @@
                     BorderBrush="{DynamicResource TransparentBrush}"
                     BorderThickness="0"
                     Padding="8,5">
-                <TextBlock Text="文件"
+                <TextBlock Text="{DynamicResource FileExplorer.Title}"
                            FontWeight="Bold"
                            Foreground="{DynamicResource LightTextBrush}"
                            FontFamily="{DynamicResource AeroFontFamily}"
@@ -47,7 +47,7 @@
                     </Grid.ColumnDefinitions>
 
                     <Button Grid.Column="0"
-                            ToolTip="刷新文件树"
+                            ToolTip="{DynamicResource FileExplorer.Refresh.ToolTip}"
                             Style="{StaticResource ResourceToolbarButtonStyle}"
                             Height="32"
                             Margin="0,0,6,0"
@@ -64,7 +64,7 @@
                                    Margin="0,0,4,0"
                                    VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1"
-                                       Text="刷新"
+                                       Text="{DynamicResource Common.Refresh}"
                                        VerticalAlignment="Center"
                                        TextAlignment="Center"
                                        TextTrimming="CharacterEllipsis"
@@ -73,7 +73,7 @@
                     </Button>
 
                     <Button Grid.Column="1"
-                            ToolTip="导入功能待接入"
+                            ToolTip="{DynamicResource FileExplorer.Import.ToolTip}"
                             Style="{StaticResource ResourceToolbarButtonStyle}"
                             Height="32"
                             Margin="3,0"
@@ -90,7 +90,7 @@
                                    Margin="0,0,4,0"
                                    VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1"
-                                       Text="导入"
+                                       Text="{DynamicResource FileExplorer.Import}"
                                        VerticalAlignment="Center"
                                        TextAlignment="Center"
                                        TextTrimming="CharacterEllipsis"
@@ -99,7 +99,7 @@
                     </Button>
 
                     <Button Grid.Column="2"
-                            ToolTip="管理功能待接入"
+                            ToolTip="{DynamicResource FileExplorer.Manage.ToolTip}"
                             Style="{StaticResource ResourceToolbarButtonStyle}"
                             Height="32"
                             Margin="6,0,0,0"
@@ -116,7 +116,7 @@
                                    Margin="0,0,4,0"
                                    VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1"
-                                       Text="管理"
+                                       Text="{DynamicResource FileExplorer.Manage}"
                                        VerticalAlignment="Center"
                                        TextAlignment="Center"
                                        TextTrimming="CharacterEllipsis"
@@ -147,7 +147,7 @@
                                         <Setter.Value>
                                             <VisualBrush AlignmentX="Left" AlignmentY="Center" Stretch="None">
                                                 <VisualBrush.Visual>
-                                                    <TextBlock Text="搜索资源..."
+                                                    <TextBlock Text="{DynamicResource FileExplorer.SearchPlaceholder}"
                                                               Foreground="{DynamicResource SecondaryForeground}"
                                                               FontStyle="Italic"
                                                               FontFamily="Segoe UI, Microsoft YaHei UI, Arial"

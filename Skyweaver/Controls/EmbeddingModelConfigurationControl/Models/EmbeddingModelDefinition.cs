@@ -3,6 +3,7 @@ using System.Windows.Input;
 using Skyweaver.Commands;
 using Skyweaver.Controls.EmbeddingModelConfigurationControl.Services;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.EmbeddingModelConfigurationControl.Models
 {
@@ -190,7 +191,9 @@ namespace Skyweaver.Controls.EmbeddingModelConfigurationControl.Models
 
         public string MaxInputTokensText => $"{MaxInputTokens:N0} Tokens";
 
-        public string MultimodalEmbeddingSupportText => SupportsMultimodalEmbedding ? "支持" : "不支持";
+        public string MultimodalEmbeddingSupportText => SupportsMultimodalEmbedding
+            ? L("EmbeddingModelConfiguration.Multimodal.Supported", "支持")
+            : L("EmbeddingModelConfiguration.Multimodal.Unsupported", "不支持");
 
         public static IReadOnlyList<string> AvailableInterfaceTypes => EmbeddingModelInterfaceCatalog.AvailableInterfaceTypes;
 
@@ -198,9 +201,21 @@ namespace Skyweaver.Controls.EmbeddingModelConfigurationControl.Models
 
         public ICommand CancelTestCommand { get; }
 
-        public string ConfigurationStatusText => IsFullyConfigured ? "已完成" : "未完成";
+        public string ConfigurationStatusText => IsFullyConfigured
+            ? L("EmbeddingModelConfiguration.Status.Complete", "已完成")
+            : L("EmbeddingModelConfiguration.Status.Incomplete", "未完成");
 
         public string SummaryModelId => InterfaceSettings.SummaryModelId;
+
+        public string SummaryModelIdText => LF("Common.ModelIdSummaryFormat", "模型 ID: {0}", SummaryModelId);
+
+        public string InterfaceTypeText => LF("Common.InterfaceSummaryFormat", "接口: {0}", InterfaceType);
+
+        public string DimensionsSummaryText => LF("Common.DimensionsSummaryFormat", "维度: {0}", DimensionsText);
+
+        public string MultimodalEmbeddingSupportSummaryText => LF("Common.MultimodalSummaryFormat", "多模态: {0}", MultimodalEmbeddingSupportText);
+
+        public string ConfigurationStatusSummaryText => LF("Common.StatusSummaryFormat", "状态: {0}", ConfigurationStatusText);
 
         public void SetTestAction(Func<EmbeddingModelDefinition, Task> testAction)
         {
@@ -212,6 +227,11 @@ namespace Skyweaver.Controls.EmbeddingModelConfigurationControl.Models
         {
             _cancelTestAction = cancelTestAction ?? throw new ArgumentNullException(nameof(cancelTestAction));
             CommandManager.InvalidateRequerySuggested();
+        }
+
+        public void RefreshLocalizedText()
+        {
+            NotifyDerivedStateChanged();
         }
 
         private void AttachInterfaceSettings(EmbeddingModelInterfaceSettings settings)
@@ -239,6 +259,11 @@ namespace Skyweaver.Controls.EmbeddingModelConfigurationControl.Models
             OnPropertyChanged(nameof(DimensionsText));
             OnPropertyChanged(nameof(MaxInputTokensText));
             OnPropertyChanged(nameof(MultimodalEmbeddingSupportText));
+            OnPropertyChanged(nameof(SummaryModelIdText));
+            OnPropertyChanged(nameof(InterfaceTypeText));
+            OnPropertyChanged(nameof(DimensionsSummaryText));
+            OnPropertyChanged(nameof(MultimodalEmbeddingSupportSummaryText));
+            OnPropertyChanged(nameof(ConfigurationStatusSummaryText));
         }
 
         private bool CanExecuteTest()
@@ -264,6 +289,16 @@ namespace Skyweaver.Controls.EmbeddingModelConfigurationControl.Models
         private void ExecuteCancelTest()
         {
             _cancelTestAction?.Invoke(this);
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallback, params object[] args)
+        {
+            return string.Format(L(resourceKey, fallback), args);
         }
     }
 }

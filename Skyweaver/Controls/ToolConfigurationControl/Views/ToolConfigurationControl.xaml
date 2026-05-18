@@ -120,7 +120,7 @@
                     </StackPanel>
                 </Grid>
 
-                <TextBlock Text="工具元数据"
+                <TextBlock Text="{DynamicResource ToolConfiguration.Metadata}"
                            FontSize="14"
                            FontWeight="SemiBold"/>
                 <Border Margin="0,10,0,0"
@@ -141,7 +141,7 @@
                                    Grid.Column="0"
                                    Margin="0,0,10,8"
                                    FontWeight="SemiBold"
-                                   Text="图标"/>
+                                   Text="{DynamicResource ToolConfiguration.Icon}"/>
                         <TextBlock Grid.Row="0"
                                    Grid.Column="1"
                                    Margin="0,0,0,8"
@@ -152,7 +152,7 @@
                                    Grid.Column="0"
                                    Margin="0,0,10,8"
                                    FontWeight="SemiBold"
-                                   Text="实现类型"/>
+                                   Text="{DynamicResource ToolConfiguration.ImplementationType}"/>
                         <TextBlock Grid.Row="1"
                                    Grid.Column="1"
                                    Margin="0,0,0,8"
@@ -163,7 +163,7 @@
                                    Grid.Column="0"
                                    Margin="0,0,10,8"
                                    FontWeight="SemiBold"
-                                   Text="定义来源"/>
+                                   Text="{DynamicResource ToolConfiguration.DefinitionSource}"/>
                         <TextBlock Grid.Row="2"
                                    Grid.Column="1"
                                    Margin="0,0,0,8"
@@ -175,7 +175,7 @@
                                    Grid.Column="0"
                                    Margin="0,0,10,0"
                                    FontWeight="SemiBold"
-                                   Text="调用模板"/>
+                                   Text="{DynamicResource ToolConfiguration.InvocationTemplate}"/>
                         <TextBox Grid.Row="3"
                                  Grid.Column="1"
                                  MinHeight="96"
@@ -188,7 +188,7 @@
                 </Border>
 
                 <TextBlock Margin="0,16,0,0"
-                           Text="自定义配置"
+                           Text="{DynamicResource ToolConfiguration.CustomConfiguration}"
                            FontSize="14"
                            FontWeight="SemiBold"/>
                 <Border Margin="0,10,0,0"
@@ -213,7 +213,7 @@
 
                         <TextBlock Margin="0,12,0,0"
                                    Foreground="#99FFFFFF"
-                                   Text="修改会直接保存到宿主工具配置文件中。"
+                                   Text="{DynamicResource ToolConfiguration.CustomConfigurationSavedHint}"
                                    TextWrapping="Wrap">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
@@ -230,7 +230,7 @@
                 </Border>
 
                 <TextBlock Margin="0,16,0,0"
-                           Text="参数"
+                           Text="{DynamicResource ToolConfiguration.Parameters}"
                            FontSize="14"
                            FontWeight="SemiBold"/>
 
@@ -269,7 +269,7 @@
                                         <Border Style="{StaticResource CapsuleBorderStyle}">
                                             <TextBlock VerticalAlignment="Center"
                                                        FontSize="11"
-                                                       Text="{Binding ExampleRawValue, StringFormat=示例：{0}}"/>
+                                                       Text="{Binding ExampleRawValueText}"/>
                                         </Border>
                                     </WrapPanel>
 
@@ -285,7 +285,7 @@
 
                 <TextBlock Margin="0,2,0,0"
                            Foreground="#99FFFFFF"
-                           Text="注意：调用参数原始输入始终是字符串，执行前会按参数类型做规范化转换。"
+                           Text="{DynamicResource ToolConfiguration.ParameterInputNote}"
                            TextWrapping="Wrap"/>
             </StackPanel>
         </DataTemplate>
@@ -327,7 +327,7 @@
                     <DockPanel Grid.Column="0">
                         <StackPanel DockPanel.Dock="Top"
                                     Margin="0,0,0,10">
-                            <TextBlock Text="工具列表"
+                            <TextBlock Text="{DynamicResource ToolConfiguration.ListTitle}"
                                        FontSize="14"
                                        FontWeight="SemiBold"/>
                             <WrapPanel Margin="0,10,0,0">
@@ -351,13 +351,13 @@
 
                             <Button Grid.Column="0"
                                     Command="{Binding ReloadToolsCommand}"
-                                    Content="重新加载"/>
+                                    Content="{DynamicResource Common.Reload}"/>
                             <Button Grid.Column="2"
                                     Command="{Binding EnableAllToolsCommand}"
-                                    Content="全部启用"/>
+                                    Content="{DynamicResource Common.EnableAll}"/>
                             <Button Grid.Column="4"
                                     Command="{Binding DisableAllToolsCommand}"
-                                    Content="全部禁用"/>
+                                    Content="{DynamicResource Common.DisableAll}"/>
                         </Grid>
 
                         <Border CornerRadius="2"
@@ -450,7 +450,7 @@
                                                 <CheckBox Grid.Column="2"
                                                           VerticalAlignment="Top"
                                                           Margin="0,4,0,0"
-                                                          Content="已启用"
+                                                          Content="{DynamicResource ToolConfiguration.Enabled}"
                                                           IsChecked="{Binding IsEnabled, UpdateSourceTrigger=PropertyChanged}"/>
                                             </Grid>
                                         </Border>
@@ -466,7 +466,7 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Text="详情"
+                        <TextBlock Text="{DynamicResource ToolConfiguration.Details}"
                                    FontSize="14"
                                    FontWeight="SemiBold"/>
 
@@ -479,7 +479,7 @@
 
                                 <TextBlock HorizontalAlignment="Center"
                                            VerticalAlignment="Center"
-                                           Text="请在左侧选择一个工具，以查看它的运行时定义、参数和自定义配置。">
+                                           Text="{DynamicResource ToolConfiguration.EmptySelection}">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -497,18 +497,18 @@
                 </Grid>
 
                 <GroupBox Grid.Row="2"
-                          Header="工具集配置">
+                          Header="{DynamicResource ToolConfiguration.ToolKits.Title}">
                     <DockPanel Margin="10">
                         <StackPanel DockPanel.Dock="Top"
                                     Orientation="Horizontal"
                                     Margin="0,0,0,10">
                             <Button Width="120"
                                     Command="{Binding AddToolKitCommand}"
-                                    Content="新增工具集"/>
+                                    Content="{DynamicResource ToolConfiguration.ToolKits.Add}"/>
                             <Button Width="120"
                                     Margin="8,0,0,0"
                                     Command="{Binding RemoveToolKitCommand}"
-                                    Content="删除所选工具集"/>
+                                    Content="{DynamicResource ToolConfiguration.ToolKits.RemoveSelected}"/>
                         </StackPanel>
 
                         <TextBlock DockPanel.Dock="Top"
@@ -534,7 +534,7 @@
                                                         Margin="0,0,0,8">
                                                 <TextBlock Width="72"
                                                            VerticalAlignment="Center"
-                                                           Text="工具集名称"
+                                                           Text="{DynamicResource ToolConfiguration.ToolKits.Name}"
                                                            FontWeight="SemiBold"/>
                                                 <TextBox MinWidth="240"
                                                          Text="{Binding Name, UpdateSourceTrigger=LostFocus}"/>
@@ -542,7 +542,7 @@
                                                         Margin="10,0,0,0"
                                                         Command="{Binding DataContext.AddToolToToolKitCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                         CommandParameter="{Binding}"
-                                                        Content="添加工具"/>
+                                                        Content="{DynamicResource ToolConfiguration.ToolKits.AddTool}"/>
                                             </StackPanel>
 
                                             <TextBlock Margin="0,0,0,8"
@@ -573,19 +573,19 @@
                                                                         Margin="8,0,0,0"
                                                                         Command="{Binding DataContext.MoveToolInToolKitUpCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                         CommandParameter="{Binding}"
-                                                                        Content="上移"/>
+                                                                        Content="{DynamicResource Common.MoveUp}"/>
                                                                 <Button Grid.Column="2"
                                                                         Width="60"
                                                                         Margin="8,0,0,0"
                                                                         Command="{Binding DataContext.MoveToolInToolKitDownCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                         CommandParameter="{Binding}"
-                                                                        Content="下移"/>
+                                                                        Content="{DynamicResource Common.MoveDown}"/>
                                                                 <Button Grid.Column="3"
                                                                         Width="60"
                                                                         Margin="8,0,0,0"
                                                                         Command="{Binding DataContext.RemoveToolFromToolKitCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                         CommandParameter="{Binding}"
-                                                                        Content="删除"/>
+                                                                        Content="{DynamicResource Common.Delete}"/>
                                                             </Grid>
                                                         </Border>
                                                     </DataTemplate>

@@ -1,4 +1,5 @@
 using Skyweaver.Controls.WorkflowEditorControl.Models;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.WorkflowEditorControl.Services
 {
@@ -20,7 +21,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
             {
                 Id = Guid.NewGuid().ToString("N"),
                 Kind = SessionFlowNodeKind.UserInput,
-                Title = "用户输入",
+                Title = L("WorkflowEditor.Node.UserInput", "用户输入"),
                 Width = 220,
                 X = 120,
                 Y = 220,
@@ -30,7 +31,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
             userInputNode.OutputPorts.Add(new SessionFlowPortModel
             {
                 Id = "output-user-text",
-                Name = "自然语言输出",
+                Name = L("WorkflowEditor.Port.NaturalLanguageOutput", "自然语言输出"),
                 Direction = SessionFlowPortDirection.Output,
                 PortType = SessionFlowPortType.NaturalLanguage
             });
@@ -39,7 +40,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
             {
                 Id = Guid.NewGuid().ToString("N"),
                 Kind = SessionFlowNodeKind.Return,
-                Title = "返回",
+                Title = L("WorkflowEditor.Node.Return", "返回"),
                 Width = 220,
                 X = userInputNode.X + userInputNode.Width + DefaultEndpointNodeGap,
                 Y = 260,
@@ -49,7 +50,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
             returnNode.InputPorts.Add(new SessionFlowPortModel
             {
                 Id = "input-return-text",
-                Name = "自然语言输入",
+                Name = L("WorkflowEditor.Port.NaturalLanguageInput", "自然语言输入"),
                 Direction = SessionFlowPortDirection.Input,
                 PortType = SessionFlowPortType.NaturalLanguage
             });
@@ -57,7 +58,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
             returnNode.InputPorts.Add(new SessionFlowPortModel
             {
                 Id = "input-return-xml",
-                Name = "XML字段输入",
+                Name = L("WorkflowEditor.Port.XmlFieldInput", "XML字段输入"),
                 Direction = SessionFlowPortDirection.Input,
                 PortType = SessionFlowPortType.XmlField
             });
@@ -65,6 +66,11 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
             graph.Nodes.Add(userInputNode);
             graph.Nodes.Add(returnNode);
             return graph;
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
 }

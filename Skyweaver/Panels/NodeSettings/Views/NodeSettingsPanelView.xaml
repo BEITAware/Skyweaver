@@ -31,7 +31,7 @@
                         BorderThickness="1"
                         Background="#12000000"/>
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <TextBlock Text="Panel Ready"
+                    <TextBlock Text="{DynamicResource Common.PanelReady}"
                                Foreground="#FF96FCFF"
                                FontSize="18"
                                FontWeight="SemiBold"

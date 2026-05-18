@@ -496,7 +496,7 @@
                                        Margin="0,8,0,0"
                                        Foreground="#A7D8F0"
                                        TextWrapping="Wrap"/>
-                            <TextBlock Text="{Binding CurrentNodeGraphName, StringFormat=当前节点图：{0}}"
+                            <TextBlock Text="{Binding CurrentNodeGraphHeaderText}"
                                        Margin="0,10,0,0"
                                        Foreground="#DDF6FFFF"
                                        FontWeight="SemiBold"
@@ -1102,7 +1102,7 @@
                                                             <RotateTransform Angle="45"/>
                                                         </Rectangle.RenderTransform>
                                                     </Rectangle>
-                                                    <TextBlock Text="XML&#23383;&#27573;"/>
+                                                    <TextBlock Text="{DynamicResource WorkflowEditor.XmlField}"/>
                                                 </StackPanel>
                                             </Button>
                                         </StackPanel>
@@ -1140,7 +1140,7 @@
 
                 <StackPanel Grid.Row="0"
                             Margin="0,0,0,12">
-                    <TextBlock Text="节点图库"
+                    <TextBlock Text="{DynamicResource WorkflowEditor.GraphLibrary.Title}"
                                FontSize="14"
                                FontWeight="SemiBold"/>
                     <TextBlock Margin="0,6,0,0"
@@ -1154,27 +1154,27 @@
                     <Button Width="102"
                             Margin="0,0,8,8"
                             Command="{Binding CreateNodeGraphCommand}"
-                            Content="新建"/>
+                            Content="{DynamicResource Common.Create}"/>
                     <Button Width="102"
                             Margin="0,0,8,8"
                             Command="{Binding OpenSelectedNodeGraphCommand}"
-                            Content="打开"/>
+                            Content="{DynamicResource Common.Open}"/>
                     <Button Width="102"
                             Margin="0,0,8,8"
                             Command="{Binding SaveCommand}"
-                            Content="保存"/>
+                            Content="{DynamicResource Common.Save}"/>
                     <Button Width="102"
                             Margin="0,0,8,8"
                             Command="{Binding RenameSelectedNodeGraphCommand}"
-                            Content="重命名"/>
+                            Content="{DynamicResource Common.Rename}"/>
                     <Button Width="102"
                             Margin="0,0,8,8"
                             Command="{Binding DeleteSelectedNodeGraphCommand}"
-                            Content="删除"/>
+                            Content="{DynamicResource Common.Delete}"/>
                     <Button Width="102"
                             Margin="0,0,8,8"
                             Command="{Binding RefreshNodeGraphLibraryCommand}"
-                            Content="刷新"/>
+                            Content="{DynamicResource Common.Refresh}"/>
                 </WrapPanel>
 
                 <Border Grid.Row="2"
@@ -1256,9 +1256,9 @@
                                                         BorderThickness="1"
                                                         CornerRadius="8"
                                                         Visibility="{Binding IsCurrent, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                    <TextBlock FontSize="10"
-                                                               Foreground="#FFF3FCFF"
-                                                               Text="当前打开"/>
+                                                     <TextBlock FontSize="10"
+                                                                Foreground="#FFF3FCFF"
+                                                                Text="{DynamicResource WorkflowEditor.GraphLibrary.CurrentOpen}"/>
                                                 </Border>
                                             </DockPanel>
 
@@ -1302,7 +1302,7 @@
 
                         <StackPanel>
                             <TextBlock Foreground="#D9FFFFFF"
-                                       Text="节点图库目录"
+                                       Text="{DynamicResource WorkflowEditor.GraphLibrary.Directory}"
                                        FontWeight="SemiBold"/>
                             <TextBlock Margin="0,4,0,0"
                                        Foreground="#D9FFFFFF"
@@ -1310,7 +1310,7 @@
                                        TextWrapping="Wrap"/>
                             <TextBlock Margin="0,8,0,0"
                                        Foreground="#FFD3F6FF"
-                                       Text="当前节点图文件"
+                                       Text="{DynamicResource WorkflowEditor.GraphLibrary.CurrentFile}"
                                        FontWeight="SemiBold"/>
                             <TextBlock Margin="0,4,0,0"
                                        Foreground="#FFD3F6FF"
@@ -1322,7 +1322,7 @@
                                 Width="132"
                                 Margin="12,0,0,0"
                                 Command="{Binding OpenConfigurationDirectoryCommand}"
-                                Content="打开节点图库"/>
+                                Content="{DynamicResource WorkflowEditor.GraphLibrary.OpenDirectory}"/>
                     </Grid>
                 </Border>
             </Grid>

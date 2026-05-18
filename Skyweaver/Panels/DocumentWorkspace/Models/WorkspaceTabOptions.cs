@@ -12,7 +12,7 @@ namespace Skyweaver.Panels.DocumentWorkspace.Models
 
         public object? ContentViewModel { get; init; }
 
-        public string PlaceholderText { get; init; } = "Document content here...";
+        public string PlaceholderText { get; init; } = WorkspaceDocument.DefaultPlaceholderText;
 
         public string TabTypeKey { get; init; } = string.Empty;
 

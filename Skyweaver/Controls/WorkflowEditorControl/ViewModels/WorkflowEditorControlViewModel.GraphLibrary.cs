@@ -9,7 +9,6 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
 {
     public sealed partial class WorkflowEditorControlViewModel
     {
-        private const string DefaultNodeGraphBaseName = "会话流节点图";
         private readonly ObservableCollection<SessionFlowGraphListItemModel> _nodeGraphs = new();
         private SessionFlowGraphListItemModel? _selectedNodeGraph;
         private SessionFlowGraphListItemModel? _currentNodeGraph;
@@ -35,11 +34,13 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
 
         public bool HasCurrentNodeGraph => _currentNodeGraph != null;
 
-        public string CurrentNodeGraphName => _currentNodeGraph?.Name ?? "未打开节点图";
+        public string CurrentNodeGraphName => _currentNodeGraph?.Name ?? L("WorkflowEditor.Graph.NotOpen", "未打开节点图");
+
+        public string CurrentNodeGraphHeaderText => LF("WorkflowEditor.Graph.CurrentHeaderFormat", "当前节点图：{0}", CurrentNodeGraphName);
 
         public string NodeGraphLibrarySummaryText => _nodeGraphs.Count == 0
-            ? "暂无节点图。"
-            : $"已保存 {_nodeGraphs.Count} 个节点图，双击列表项即可在上方编辑器中打开。";
+            ? L("WorkflowEditor.GraphLibrary.Empty", "暂无节点图。")
+            : LF("WorkflowEditor.GraphLibrary.SummaryFormat", "已保存 {0} 个节点图，双击列表项即可在上方编辑器中打开。", _nodeGraphs.Count);
 
         public ICommand CreateNodeGraphCommand { get; private set; } = null!;
 
@@ -70,7 +71,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
                 RefreshNodeGraphLibrary(createdDocument.FilePath, createdDocument.FilePath);
 
                 var createdItem = _nodeGraphs.FirstOrDefault(item => PathsEqual(item.FilePath, createdDocument.FilePath));
-                OpenNodeGraph(createdItem, persistAfterOpen: true, $"已创建并打开节点图“{createdDocument.Name}”。");
+                OpenNodeGraph(createdItem, persistAfterOpen: true, LF("WorkflowEditor.Graph.Status.CreatedAndOpenedFormat", "已创建并打开节点图“{0}”。", createdDocument.Name));
                 return;
             }
 
@@ -80,7 +81,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
         private void RefreshNodeGraphLibraryCommandExecute()
         {
             RefreshNodeGraphLibrary(SelectedNodeGraph?.FilePath, _currentNodeGraph?.FilePath);
-            StatusMessage = "节点图库已刷新。";
+            StatusMessage = L("WorkflowEditor.Graph.Status.LibraryRefreshed", "节点图库已刷新。");
         }
 
         private void RefreshNodeGraphLibrary(string? preferredSelectedFilePath, string? currentFilePath)
@@ -127,11 +128,11 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
 
                 if (persistAfterOpen)
                 {
-                    PersistGraph(successMessage ?? $"已创建并保存节点图“{document.Name}”。");
+                    PersistGraph(successMessage ?? LF("WorkflowEditor.Graph.Status.CreatedAndSavedFormat", "已创建并保存节点图“{0}”。", document.Name));
                 }
                 else
                 {
-                    StatusMessage = successMessage ?? $"已打开节点图“{document.Name}”。";
+                    StatusMessage = successMessage ?? LF("WorkflowEditor.Graph.Status.OpenedFormat", "已打开节点图“{0}”。", document.Name);
                 }
             }
             catch (Exception ex)
@@ -139,7 +140,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
                 MessageBox.Show(
                     Application.Current?.MainWindow,
                     ex.Message,
-                    "打开节点图",
+                    L("WorkflowEditor.Graph.Dialog.OpenTitle", "打开节点图"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
             }
@@ -149,11 +150,11 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
         {
             var owner = Application.Current?.MainWindow;
             var dialog = new NameInputDialog(
-                "新建节点图",
-                "输入新节点图名称。",
+                L("WorkflowEditor.Graph.Dialog.CreateTitle", "新建节点图"),
+                L("WorkflowEditor.Graph.Dialog.CreatePrompt", "输入新节点图名称。"),
                 GetDefaultNodeGraphName(),
-                "创建",
-                "请输入节点图名称。");
+                L("Common.Create", "创建"),
+                L("WorkflowEditor.Graph.Validation.NameRequired", "请输入节点图名称。"));
 
             if (owner != null && owner != dialog)
             {
@@ -171,11 +172,11 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
                 RefreshNodeGraphLibrary(document.FilePath, document.FilePath);
 
                 var createdItem = _nodeGraphs.FirstOrDefault(item => PathsEqual(item.FilePath, document.FilePath));
-                OpenNodeGraph(createdItem, persistAfterOpen: true, $"已创建并打开节点图“{document.Name}”。");
+                OpenNodeGraph(createdItem, persistAfterOpen: true, LF("WorkflowEditor.Graph.Status.CreatedAndOpenedFormat", "已创建并打开节点图“{0}”。", document.Name));
             }
             catch (Exception ex)
             {
-                MessageBox.Show(owner, ex.Message, "新建节点图", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(owner, ex.Message, L("WorkflowEditor.Graph.Dialog.CreateTitle", "新建节点图"), MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -189,11 +190,11 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
             var targetGraph = SelectedNodeGraph;
             var owner = Application.Current?.MainWindow;
             var dialog = new NameInputDialog(
-                "重命名节点图",
-                "输入新的节点图名称。",
+                L("WorkflowEditor.Graph.Dialog.RenameTitle", "重命名节点图"),
+                L("WorkflowEditor.Graph.Dialog.RenamePrompt", "输入新的节点图名称。"),
                 targetGraph.Name,
-                "重命名",
-                "请输入节点图名称。");
+                L("Common.Rename", "重命名"),
+                L("WorkflowEditor.Graph.Validation.NameRequired", "请输入节点图名称。"));
 
             if (owner != null && owner != dialog)
             {
@@ -215,12 +216,12 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
                     currentFilePath: wasCurrent ? renamedDocument.FilePath : _currentNodeGraph?.FilePath);
 
                 StatusMessage = wasCurrent
-                    ? $"已重命名当前节点图为“{renamedDocument.Name}”。"
-                    : $"已重命名节点图为“{renamedDocument.Name}”。";
+                    ? LF("WorkflowEditor.Graph.Status.CurrentRenamedFormat", "已重命名当前节点图为“{0}”。", renamedDocument.Name)
+                    : LF("WorkflowEditor.Graph.Status.RenamedFormat", "已重命名节点图为“{0}”。", renamedDocument.Name);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(owner, ex.Message, "重命名节点图", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(owner, ex.Message, L("WorkflowEditor.Graph.Dialog.RenameTitle", "重命名节点图"), MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -235,8 +236,8 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
             var owner = Application.Current?.MainWindow;
             var result = MessageBox.Show(
                 owner,
-                $"确定删除节点图“{graphToDelete.Name}”吗？",
-                "删除节点图",
+                LF("WorkflowEditor.Graph.Delete.ConfirmFormat", "确定删除节点图“{0}”吗？", graphToDelete.Name),
+                L("WorkflowEditor.Graph.Dialog.DeleteTitle", "删除节点图"),
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Warning);
 
@@ -260,20 +261,20 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
                         RefreshNodeGraphLibrary(createdDocument.FilePath, createdDocument.FilePath);
 
                         var createdItem = _nodeGraphs.FirstOrDefault(item => PathsEqual(item.FilePath, createdDocument.FilePath));
-                        OpenNodeGraph(createdItem, persistAfterOpen: true, $"已删除节点图，并创建新的空白节点图“{createdDocument.Name}”。");
+                        OpenNodeGraph(createdItem, persistAfterOpen: true, LF("WorkflowEditor.Graph.Status.DeletedAndCreatedFormat", "已删除节点图，并创建新的空白节点图“{0}”。", createdDocument.Name));
                         return;
                     }
 
-                    OpenNodeGraph(SelectedNodeGraph ?? _nodeGraphs.FirstOrDefault(), persistAfterOpen: false, $"已删除节点图“{graphToDelete.Name}”。");
+                    OpenNodeGraph(SelectedNodeGraph ?? _nodeGraphs.FirstOrDefault(), persistAfterOpen: false, LF("WorkflowEditor.Graph.Status.DeletedFormat", "已删除节点图“{0}”。", graphToDelete.Name));
                     return;
                 }
 
                 RefreshNodeGraphLibrary(SelectedNodeGraph?.FilePath, _currentNodeGraph?.FilePath);
-                StatusMessage = $"已删除节点图“{graphToDelete.Name}”。";
+                StatusMessage = LF("WorkflowEditor.Graph.Status.DeletedFormat", "已删除节点图“{0}”。", graphToDelete.Name);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(owner, ex.Message, "删除节点图", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(owner, ex.Message, L("WorkflowEditor.Graph.Dialog.DeleteTitle", "删除节点图"), MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -288,6 +289,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
 
             OnPropertyChanged(nameof(HasCurrentNodeGraph));
             OnPropertyChanged(nameof(CurrentNodeGraphName));
+            OnPropertyChanged(nameof(CurrentNodeGraphHeaderText));
             OnPropertyChanged(nameof(PersistenceFilePath));
         }
 
@@ -320,7 +322,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
         {
             if (_currentNodeGraph == null)
             {
-                throw new InvalidOperationException("当前没有打开的节点图。");
+                throw new InvalidOperationException(L("WorkflowEditor.Graph.NotOpen", "当前没有打开的节点图。"));
             }
 
             return new SessionFlowGraphDocumentModel
@@ -338,7 +340,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
 
         private string GetDefaultNodeGraphName()
         {
-            return _sessionFlowRepository.CreateUniqueGraphName(DefaultNodeGraphBaseName);
+            return _sessionFlowRepository.CreateUniqueGraphName(L("WorkflowEditor.Graph.DefaultBaseName", "会话流节点图"));
         }
 
         private static bool PathsEqual(string? left, string? right)

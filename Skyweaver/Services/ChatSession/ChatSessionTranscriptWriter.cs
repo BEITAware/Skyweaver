@@ -5,6 +5,7 @@ using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
 using Skyweaver.Controls.WorkflowEditorControl.Models;
 using Skyweaver.Models.ChatSession;
 using Skyweaver.Services.AgentLoop;
+using Skyweaver.Services.Localization;
 using Skyweaver.Services.SkyweaverTools;
 
 namespace Skyweaver.Services.ChatSession
@@ -465,7 +466,7 @@ namespace Skyweaver.Services.ChatSession
             {
                 Kind = ChatSessionTranscriptBlockKind.CompressedSummary,
                 Content = content,
-                Title = "上下文压缩"
+                Title = L("ChatSessionTranscript.Title.ContextCompression", "上下文压缩")
             });
 
             session.Transcript.Entries.Add(entry);
@@ -615,7 +616,7 @@ namespace Skyweaver.Services.ChatSession
             {
                 Kind = ChatSessionTranscriptBlockKind.ErrorText,
                 Content = Normalize(message),
-                Title = "执行失败"
+                Title = L("ChatSessionTranscript.Title.ExecutionFailed", "执行失败")
             });
 
             session.Transcript.Entries.Add(entry);
@@ -646,7 +647,7 @@ namespace Skyweaver.Services.ChatSession
             {
                 Kind = ChatSessionTranscriptBlockKind.StatusText,
                 Content = Normalize(message),
-                Title = "执行已取消"
+                Title = L("ChatSessionTranscript.Title.ExecutionCancelled", "执行已取消")
             });
 
             session.Transcript.Entries.Add(entry);
@@ -1087,8 +1088,18 @@ namespace Skyweaver.Services.ChatSession
         {
             var completedTurns = session.Transcript.Turns.Count(turn => turn.Status == ChatSessionTurnStatus.Completed);
             return session.Transcript.Entries.Count == 0
-                ? "空会话。"
-                : $"会话记录 {session.Transcript.Entries.Count} 条，已完成轮次 {completedTurns} 次。";
+                ? L("ChatSessionTranscript.ContextSummary.Empty", "空会话。")
+                : LF("ChatSessionTranscript.ContextSummary.Format", "会话记录 {0} 条，已完成轮次 {1} 次。", session.Transcript.Entries.Count, completedTurns);
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
+        {
+            return string.Format(L(resourceKey, fallbackFormat), args);
         }
     }
 }

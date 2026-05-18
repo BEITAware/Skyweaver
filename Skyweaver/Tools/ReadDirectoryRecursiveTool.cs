@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using Skyweaver.Controls.ChatSessionControl.Views;
+using Skyweaver.Services.Localization;
 using Skyweaver.Services.SkyweaverTools;
 
 namespace Skyweaver.Tools
@@ -11,26 +12,7 @@ namespace Skyweaver.Tools
     {
         public const string ToolName = "ReadDirectoryRecursive";
 
-        private static readonly SkyweaverToolDefinition s_definition = new(
-            ToolName,
-            "读取目录并按清晰层级返回文件列表。Depth 为可选参数，省略时默认为 1，也就是常见的目录列表。",
-            "Script",
-            [
-                new SkyweaverToolParameterDefinition(
-                    "Directory",
-                    "要枚举的目录路径。相对路径会相对于当前工作区解析。",
-                    SkyweaverToolParameterType.String,
-                    isRequired: true),
-                new SkyweaverToolParameterDefinition(
-                    "Depth",
-                    "最大递归深度。1 表示仅列出当前目录；省略时默认为 1。",
-                    SkyweaverToolParameterType.Integer,
-                    isRequired: false,
-                    defaultValue: "1")
-            ],
-            defaultAgentPermission: SkyweaverToolDefaultAgentPermission.Allow);
-
-        public SkyweaverToolDefinition Definition => s_definition;
+        public SkyweaverToolDefinition Definition => CreateDefinition();
 
         public FrameworkElement? CreateInvocationPresentation(SkyweaverToolInvocationPresentationContext context)
         {
@@ -39,8 +21,8 @@ namespace Skyweaver.Tools
             return ToolInvocationCardFactory.Create(
                 context,
                 [
-                    new ToolInvocationCardFieldDefinition("目录", "Directory", "等待目录路径..."),
-                    new ToolInvocationCardFieldDefinition("深度", "Depth", "默认深度为 1")
+                    new ToolInvocationCardFieldDefinition(L("ReadDirectoryRecursive.InvocationField.Directory", "目录"), "Directory", L("ReadDirectoryRecursive.InvocationField.Directory.Placeholder", "等待目录路径...")),
+                    new ToolInvocationCardFieldDefinition(L("ReadDirectoryRecursive.InvocationField.Depth", "深度"), "Depth", L("ReadDirectoryRecursive.InvocationField.Depth.Placeholder", "默认深度为 1"))
                 ]);
         }
 
@@ -339,6 +321,33 @@ namespace Skyweaver.Tools
             public List<DirectoryListingNode> Children { get; } = [];
 
             public List<string> Notes { get; } = [];
+        }
+
+        private static SkyweaverToolDefinition CreateDefinition()
+        {
+            return new SkyweaverToolDefinition(
+                ToolName,
+                L("ReadDirectoryRecursive.Description", "读取目录并按清晰层级返回文件列表。Depth 为可选参数，省略时默认为 1，也就是常见的目录列表。"),
+                "Script",
+                [
+                    new SkyweaverToolParameterDefinition(
+                        "Directory",
+                        L("ReadDirectoryRecursive.Parameter.Directory.Description", "要枚举的目录路径。相对路径会相对于当前工作区解析。"),
+                        SkyweaverToolParameterType.String,
+                        isRequired: true),
+                    new SkyweaverToolParameterDefinition(
+                        "Depth",
+                        L("ReadDirectoryRecursive.Parameter.Depth.Description", "最大递归深度。1 表示仅列出当前目录；省略时默认为 1。"),
+                        SkyweaverToolParameterType.Integer,
+                        isRequired: false,
+                        defaultValue: "1")
+                ],
+                defaultAgentPermission: SkyweaverToolDefaultAgentPermission.Allow);
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
 }

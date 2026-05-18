@@ -3,6 +3,7 @@ using System.Windows.Input;
 using Skyweaver.Commands;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
 using Skyweaver.Infrastructure.Mvvm;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.LanguageModelConfigurationControl.Models
 {
@@ -152,9 +153,19 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Models
 
         public ICommand CancelTestCommand { get; }
 
-        public string ConfigurationStatusText => IsFullyConfigured ? "已完善" : "未完善";
+        public string ConfigurationStatusText => IsFullyConfigured
+            ? L("LanguageModelConfiguration.Status.Complete", "已完善")
+            : L("LanguageModelConfiguration.Status.Incomplete", "未完善");
 
         public string SummaryModelId => InterfaceSettings.SummaryModelId;
+
+        public string SummaryModelIdText => LF("Common.ModelIdSummaryFormat", "模型 ID: {0}", SummaryModelId);
+
+        public string InterfaceTypeText => LF("Common.InterfaceSummaryFormat", "接口: {0}", InterfaceType);
+
+        public string ContextWindowSummaryText => LF("Common.ContextSummaryFormat", "上下文: {0}", ContextWindowText);
+
+        public string ConfigurationStatusSummaryText => LF("Common.StatusSummaryFormat", "状态: {0}", ConfigurationStatusText);
 
         public void SetTestAction(Func<LanguageModelDefinition, Task> testAction)
         {
@@ -171,6 +182,11 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Models
         public static LanguageModelInterfaceSettings CreateInterfaceSettings(string? interfaceType)
         {
             return LanguageModelInterfaceCatalog.CreateInterfaceSettings(interfaceType);
+        }
+
+        public void RefreshLocalizedText()
+        {
+            NotifyDerivedStateChanged();
         }
 
         private void AttachInterfaceSettings(LanguageModelInterfaceSettings settings)
@@ -197,6 +213,10 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Models
             OnPropertyChanged(nameof(SummaryModelId));
             OnPropertyChanged(nameof(EffectiveContextWindowTokens));
             OnPropertyChanged(nameof(ContextWindowText));
+            OnPropertyChanged(nameof(SummaryModelIdText));
+            OnPropertyChanged(nameof(InterfaceTypeText));
+            OnPropertyChanged(nameof(ContextWindowSummaryText));
+            OnPropertyChanged(nameof(ConfigurationStatusSummaryText));
         }
 
         private bool CanExecuteTest()
@@ -222,6 +242,16 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Models
         private void ExecuteCancelTest()
         {
             _cancelTestAction?.Invoke(this);
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallback, params object[] args)
+        {
+            return string.Format(L(resourceKey, fallback), args);
         }
     }
 }

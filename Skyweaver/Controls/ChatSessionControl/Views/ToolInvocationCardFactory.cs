@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
+using Skyweaver.Services.Localization;
 using Skyweaver.Services.SkyweaverTools;
 
 namespace Skyweaver.Controls.ChatSessionControl.Views
@@ -14,7 +15,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
         {
             Label = string.IsNullOrWhiteSpace(label) ? parameterName : label.Trim();
             ParameterName = string.IsNullOrWhiteSpace(parameterName) ? string.Empty : parameterName.Trim();
-            EmptyValueText = string.IsNullOrWhiteSpace(emptyValueText) ? "等待参数..." : emptyValueText.Trim();
+            EmptyValueText = string.IsNullOrWhiteSpace(emptyValueText) ? L("ToolInvocation.WaitingForParameterFallback", "等待参数...") : emptyValueText.Trim();
         }
 
         public string Label { get; }
@@ -22,6 +23,11 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
         public string ParameterName { get; }
 
         public string EmptyValueText { get; }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
     }
 
     public sealed class ToolInvocationCardFieldViewModel
@@ -139,10 +145,15 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             {
                 DataContext = new ToolInvocationCardViewModel(
                     state,
-                    description ?? "该工具未提供专用参数呈现控件。",
+                    description ?? L("ToolInvocation.DefaultDescription", "该工具未提供专用参数呈现控件。"),
                     iconPath ?? string.Empty,
                     fields: null)
             };
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Xml.Linq;
+using Skyweaver.Services.Localization;
 using Skyweaver.Services.SkyweaverTools;
 
 namespace Skyweaver.Tools
@@ -34,9 +35,20 @@ namespace Skyweaver.Tools
             catch (Exception ex)
             {
                 configuration = null;
-                errorMessage = $"WorkspaceNoteTemplate 配置无效：{ex.Message}";
+                errorMessage = LF("WorkspaceNoteTemplate.Configuration.InvalidFormat", "WorkspaceNoteTemplate 配置无效：{0}", ex.Message);
                 return false;
             }
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
+        }
+
+        private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
+        {
+            var format = L(resourceKey, fallbackFormat);
+            return string.Format(format, args);
         }
     }
 }
