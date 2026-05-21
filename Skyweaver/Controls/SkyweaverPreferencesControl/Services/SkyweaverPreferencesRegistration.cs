@@ -88,6 +88,16 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.Services
                     Order = 20
                 });
 
+                registry.RegisterPage("context-management", new PreferencePageInfo
+                {
+                    Id = "preferences-search",
+                    DisplayName = "搜索配置",
+                    DisplayNameResourceKey = "Preferences.Page.Search",
+                    ViewType = typeof(SearchPreferencesPageView),
+                    ViewModelType = typeof(SearchPreferencesPageViewModel),
+                    Order = 30
+                });
+
                 s_isRegistered = true;
             }
         }
