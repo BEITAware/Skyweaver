@@ -25,7 +25,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Models
 
         public string ToolDescription
         {
-            get => _toolDescription;
+            get => L($"Tool.{ToolName}.Description", _toolDescription);
             set => SetProperty(ref _toolDescription, value ?? string.Empty);
         }
 
@@ -53,6 +53,8 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Models
             }
         }
 
+        public string ToolDisplayName => L($"Tool.{ToolName}.DisplayName", ToolName);
+
         public string GlobalAvailabilityText => IsMissing
             ? L("AgentConfiguration.GlobalAvailability.Missing", "当前工具发现结果中缺失")
             : IsGloballyEnabled
@@ -61,6 +63,8 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Models
 
         public void RefreshLocalizedText()
         {
+            OnPropertyChanged(nameof(ToolDisplayName));
+            OnPropertyChanged(nameof(ToolDescription));
             OnPropertyChanged(nameof(GlobalAvailabilityText));
         }
 

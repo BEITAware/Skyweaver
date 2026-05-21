@@ -94,7 +94,7 @@
                     </Border>
 
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="{Binding Name}"
+                        <TextBlock Text="{Binding DisplayName}"
                                    FontSize="18"
                                    FontWeight="SemiBold"/>
                         <TextBlock Margin="0,6,0,0"
@@ -244,7 +244,7 @@
                                     <DockPanel>
                                         <TextBlock FontSize="13"
                                                    FontWeight="SemiBold"
-                                                   Text="{Binding Name}"/>
+                                                   Text="{Binding DisplayName}"/>
                                         <TextBlock DockPanel.Dock="Right"
                                                    Text="{Binding TypeDisplayName}"
                                                    FontWeight="SemiBold"
@@ -425,7 +425,7 @@
 
                                                 <StackPanel Grid.Column="1"
                                                             Margin="0,0,10,0">
-                                                    <TextBlock Text="{Binding Name}"
+                                                    <TextBlock Text="{Binding DisplayName}"
                                                                FontSize="14"
                                                                FontWeight="SemiBold"
                                                                TextWrapping="Wrap"/>
@@ -565,7 +565,7 @@
 
                                                                 <ComboBox Grid.Column="0"
                                                                           ItemsSource="{Binding DataContext.ToolKitEligibleTools, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                                          DisplayMemberPath="Name"
+                                                                          DisplayMemberPath="DisplayName"
                                                                           SelectedValuePath="Name"
                                                                           SelectedValue="{Binding ToolName, UpdateSourceTrigger=PropertyChanged}"/>
                                                                 <Button Grid.Column="1"

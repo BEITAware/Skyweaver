@@ -163,6 +163,16 @@ namespace Skyweaver.Services.SkyweaverTools
             {
                 OnPropertyChanged(nameof(HasToolProgressActiveItems));
             };
+
+            WeakEventManager<Skyweaver.Services.Localization.LocalizationRuntime, System.EventArgs>.AddHandler(
+                Skyweaver.Services.Localization.LocalizationRuntime.Instance,
+                nameof(Skyweaver.Services.Localization.LocalizationRuntime.Instance.LanguageChanged),
+                OnLanguageChanged);
+        }
+
+        private void OnLanguageChanged(object? sender, System.EventArgs e)
+        {
+            OnPropertyChanged(nameof(ToolDisplayName));
         }
 
         public int ToolCallIndex { get; }
@@ -170,8 +180,16 @@ namespace Skyweaver.Services.SkyweaverTools
         public string ToolName
         {
             get => _toolName;
-            set => SetProperty(ref _toolName, string.IsNullOrWhiteSpace(value) ? $"Tool #{ToolCallIndex}" : value.Trim());
+            set
+            {
+                if (SetProperty(ref _toolName, string.IsNullOrWhiteSpace(value) ? $"Tool #{ToolCallIndex}" : value.Trim()))
+                {
+                    OnPropertyChanged(nameof(ToolDisplayName));
+                }
+            }
         }
+
+        public string ToolDisplayName => Skyweaver.Services.Localization.LocalizationRuntime.Instance.GetString($"Tool.{ToolName}.DisplayName", ToolName);
 
         public string ToolDescription
         {

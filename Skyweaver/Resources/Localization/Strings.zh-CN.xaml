@@ -3,6 +3,7 @@
                     xmlns:system="clr-namespace:System;assembly=System.Runtime">
     <system:String x:Key="Localization.Language.zh-CN">简体中文</system:String>
     <system:String x:Key="Localization.Language.en-US">English</system:String>
+    <system:String x:Key="Localization.Language.ja-JP">日本語</system:String>
 
     <system:String x:Key="Preferences.Group.FilesSystem">文件与系统</system:String>
     <system:String x:Key="Preferences.Group.PresentationUi">呈现与界面</system:String>
@@ -632,18 +633,18 @@
     <system:String x:Key="Common.LoadFailedFormat">加载失败: {0}</system:String>
     <system:String x:Key="Common.PanelReady">Panel Ready</system:String>
 
-    <system:String x:Key="MainWindow.Title">Skyweaver Alpha Preview</system:String>
-    <system:String x:Key="Splash.Title">Skyweaver Preview</system:String>
+    <system:String x:Key="MainWindow.Title">Skyweaver Alpha 预览版</system:String>
+    <system:String x:Key="Splash.Title">Skyweaver 预览版</system:String>
 
-    <system:String x:Key="ToolInvocation.Status.ReceivingParameters">Receiving parameters</system:String>
-    <system:String x:Key="ToolInvocation.Status.ParametersReceived">Parameters received, waiting for tool result</system:String>
-    <system:String x:Key="ToolInvocation.Status.ToolResultReceived">Tool result received</system:String>
-    <system:String x:Key="ToolInvocation.Streaming">Streaming</system:String>
-    <system:String x:Key="ToolInvocation.WaitingForParameter">Waiting for parameter...</system:String>
-    <system:String x:Key="ToolInvocation.Result">Result</system:String>
+    <system:String x:Key="ToolInvocation.Status.ReceivingParameters">正在接收参数</system:String>
+    <system:String x:Key="ToolInvocation.Status.ParametersReceived">参数已接收，等待工具执行结果</system:String>
+    <system:String x:Key="ToolInvocation.Status.ToolResultReceived">已收到工具执行结果</system:String>
+    <system:String x:Key="ToolInvocation.Streaming">流式传输中</system:String>
+    <system:String x:Key="ToolInvocation.WaitingForParameter">等待参数...</system:String>
+    <system:String x:Key="ToolInvocation.Result">结果</system:String>
 
-    <system:String x:Key="ShowLiveXaml.PreviewTitle">LiveXAML Preview</system:String>
-    <system:String x:Key="ShowLiveXaml.NoPreview">No preview yet.</system:String>
+    <system:String x:Key="ShowLiveXaml.PreviewTitle">LiveXAML 预览</system:String>
+    <system:String x:Key="ShowLiveXaml.NoPreview">暂无预览。</system:String>
 
     <system:String x:Key="WorkspaceNoteTemplate.ConfigurationTitle">WorkspaceNoteTemplate 配置</system:String>
     <system:String x:Key="WorkspaceNoteTemplate.ConfigurationDescription">调整笔记模板工具的默认预设、上下文信息和摘要占位行。</system:String>
@@ -925,37 +926,37 @@
     <system:String x:Key="FilmstripPanel.Description">该面板已独立成模块，后续可挂接缩略图时间线、历史快照或输出预览。</system:String>
     <system:String x:Key="NodeSettingsPanel.Title">节点参数设定</system:String>
     <system:String x:Key="NodeSettingsPanel.Description">该面板已从主窗口布局中拆出，后续可独立承载节点属性、参数编辑器和校验状态。</system:String>
-    <system:String x:Key="SessionWorkspace.PlaceholderFormat">Session '{0}' content will appear here.</system:String>
+    <system:String x:Key="SessionWorkspace.PlaceholderFormat">会话 '{0}' 的内容将在此处显示。</system:String>
 
-    <system:String x:Key="ShowLiveXaml.FilePath.Missing">(no file path yet)</system:String>
-    <system:String x:Key="ShowLiveXaml.Status.WaitingForClose">Waiting for the ShowLiveXAML call to finish streaming.</system:String>
-    <system:String x:Key="ShowLiveXaml.Hint.WaitingForClose">The preview will appear here after ShowLiveXAML closes with a full absolute .xaml path.</system:String>
-    <system:String x:Key="ShowLiveXaml.Status.WaitingForPath">Waiting for a XAML file path.</system:String>
-    <system:String x:Key="ShowLiveXaml.Hint.UseInitializePath">Pass the full absolute .xaml path returned by InitializeLiveXAML.</system:String>
-    <system:String x:Key="ShowLiveXaml.Status.StreamingArguments">ShowLiveXAML is still streaming its arguments.</system:String>
-    <system:String x:Key="ShowLiveXaml.Hint.RenderAfterClose">The preview will render after the tool call closes.</system:String>
-    <system:String x:Key="ShowLiveXaml.Status.Rendered">Rendered a fresh LiveXAML preview instance.</system:String>
-    <system:String x:Key="ShowLiveXaml.Hint.Rendered">Each ShowLiveXAML call creates a new preview instance in this tool card.</system:String>
-    <system:String x:Key="ShowLiveXaml.Hint.FixAndRetry">Fix the files, then call ShowLiveXAML again to render a new instance.</system:String>
-    <system:String x:Key="ShowLiveXaml.Status.InvalidPath">The preview path is invalid.</system:String>
-    <system:String x:Key="ShowLiveXaml.Hint.ExactInitializePath">Use the exact full .xaml path returned by InitializeLiveXAML.</system:String>
+    <system:String x:Key="ShowLiveXaml.FilePath.Missing">(暂无文件路径)</system:String>
+    <system:String x:Key="ShowLiveXaml.Status.WaitingForClose">正在等待 ShowLiveXAML 块完成流式参数输入。</system:String>
+    <system:String x:Key="ShowLiveXaml.Hint.WaitingForClose">当 ShowLiveXAML 以完整的绝对 .xaml 路径关闭后，预览将在此处呈现。</system:String>
+    <system:String x:Key="ShowLiveXaml.Status.WaitingForPath">正在等待 XAML 文件路径。</system:String>
+    <system:String x:Key="ShowLiveXaml.Hint.UseInitializePath">请传递由 InitializeLiveXAML 返回的完整绝对 .xaml 路径。</system:String>
+    <system:String x:Key="ShowLiveXaml.Status.StreamingArguments">ShowLiveXAML 仍处于流式参数输入状态。</system:String>
+    <system:String x:Key="ShowLiveXaml.Hint.RenderAfterClose">预览将在工具调用关闭后渲染呈现。</system:String>
+    <system:String x:Key="ShowLiveXaml.Status.Rendered">已渲染最新的 LiveXAML 预览实例。</system:String>
+    <system:String x:Key="ShowLiveXaml.Hint.Rendered">每次 ShowLiveXAML 调用都会在此工具卡片中创建一个全新的预览实例。</system:String>
+    <system:String x:Key="ShowLiveXaml.Hint.FixAndRetry">请修正文件中的问题，然后再次调用 ShowLiveXAML 重新渲染实例。</system:String>
+    <system:String x:Key="ShowLiveXaml.Status.InvalidPath">预览路径无效。</system:String>
+    <system:String x:Key="ShowLiveXaml.Hint.ExactInitializePath">请使用由 InitializeLiveXAML 返回的准确完整 .xaml 路径。</system:String>
 
-    <system:String x:Key="WorkspaceNoteTemplate.Preset.general.DisplayName">General</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Preset.general.Description">Balanced template suitable for everyday tasks and ad-hoc notes.</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Preset.general.SummaryPrompt.1">Add a short task overview here</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Preset.general.SummaryPrompt.2">Capture the next action here</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Preset.general.SummaryPrompt.3">Capture risks or blockers here</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Preset.planning.DisplayName">Planning</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Preset.planning.Description">Focus on milestones, sequencing and ownership.</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Preset.planning.SummaryPrompt.1">Clarify the desired outcome</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Preset.planning.SummaryPrompt.2">List milestones or checkpoints</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Preset.planning.SummaryPrompt.3">Record dependencies or risks</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Preset.investigation.DisplayName">Investigation</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Preset.investigation.Description">Focus on evidence, observations and open questions.</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Preset.investigation.SummaryPrompt.1">Summarize the question being explored</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Preset.investigation.SummaryPrompt.2">List evidence or observations</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Preset.investigation.SummaryPrompt.3">Capture open questions and follow-ups</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Preset.AdditionalSummaryPromptFormat">Capture additional {0} detail {1} here</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.general.DisplayName">通用 (General)</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.general.Description">适用于日常任务和临时笔记的平衡模板。</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.general.SummaryPrompt.1">在此处添加简短的任务概述</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.general.SummaryPrompt.2">在此处记录下一步的行动</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.general.SummaryPrompt.3">在此处记录潜在风险或阻碍因素</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.planning.DisplayName">规划 (Planning)</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.planning.Description">侧重于里程碑、任务顺序和负责人分配。</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.planning.SummaryPrompt.1">明确期望的产出成果</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.planning.SummaryPrompt.2">列出关键里程碑或核对点</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.planning.SummaryPrompt.3">记录依赖项或潜在风险</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.investigation.DisplayName">调查 (Investigation)</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.investigation.Description">侧重于收集证据、观察记录和未决问题。</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.investigation.SummaryPrompt.1">简述正在探究的问题</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.investigation.SummaryPrompt.2">列出关键证据或观察结果</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.investigation.SummaryPrompt.3">记录未决问题和后续跟进事项</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.AdditionalSummaryPromptFormat">在此处记录附加的 {0} 详情 {1}</system:String>
     <system:String x:Key="WorkspaceNoteTemplate.DefaultTagsHint.Empty">留空时会回退到 memo。</system:String>
     <system:String x:Key="WorkspaceNoteTemplate.DefaultTagsHint.Format">将作为 Tags 参数默认值：{0}</system:String>
     <system:String x:Key="WorkspaceNoteTemplate.Preview.PresetFormat">预设：{0}</system:String>
@@ -981,16 +982,16 @@
     <system:String x:Key="WorkspaceNoteTemplate.InvocationField.Pin.Placeholder">默认不置顶</system:String>
     <system:String x:Key="WorkspaceNoteTemplate.InvocationField.Tags">标签</system:String>
     <system:String x:Key="WorkspaceNoteTemplate.InvocationField.Tags.Placeholder">默认标签来自工具配置</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Execute.UntitledNote">Untitled note</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Execute.PresetFormat">Preset: {0}</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Execute.PriorityFormat">Priority: {0}</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Execute.PinnedFormat">Pinned: {0}</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Execute.TagsFormat">Tags: {0}</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Execute.SummaryHeader">Summary:</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Execute.NotAvailable">n/a</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Execute.WorkspaceFormat">Workspace: {0}</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Execute.SessionFormat">Session: {0}</system:String>
-    <system:String x:Key="WorkspaceNoteTemplate.Execute.None">none</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Execute.UntitledNote">无标题笔记</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Execute.PresetFormat">预设：{0}</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Execute.PriorityFormat">优先级：{0}</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Execute.PinnedFormat">已置顶：{0}</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Execute.TagsFormat">标签：{0}</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Execute.SummaryHeader">摘要占位行：</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Execute.NotAvailable">暂无</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Execute.WorkspaceFormat">工作区：{0}</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Execute.SessionFormat">会话：{0}</system:String>
+    <system:String x:Key="WorkspaceNoteTemplate.Execute.None">无</system:String>
 
     <system:String x:Key="AgentLanguageModelResolver.Failure.InterfaceIncompleteFormat">{0}：接口配置不完整</system:String>
     <system:String x:Key="AgentLanguageModelResolver.Failure.ModelErrorFormat">{0}：{1}</system:String>
@@ -1223,4 +1224,388 @@
     <system:String x:Key="ReadDirectoryRecursive.InvocationField.Directory.Placeholder">等待目录路径...</system:String>
     <system:String x:Key="ReadDirectoryRecursive.InvocationField.Depth">深度</system:String>
     <system:String x:Key="ReadDirectoryRecursive.InvocationField.Depth.Placeholder">默认深度为 1</system:String>
+
+    <!-- Tool Localization -->
+    <system:String x:Key="Tool.FileSystemIO_CreateFile.DisplayName">创建文件</system:String>
+    <system:String x:Key="Tool.FileSystemIO_CreateFile.Description">创建一个新的空文件。如果父目录不存在，该工具会先创建父目录。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_CreateFile.Param.FilePath.DisplayName">文件路径</system:String>
+    <system:String x:Key="Tool.FileSystemIO_CreateFile.Param.FilePath.Description">要创建的文件路径。相对路径将相对于当前工作区解析。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_CreateFile.Param.FilePath.Label">文件</system:String>
+    <system:String x:Key="Tool.FileSystemIO_CreateFile.Param.FilePath.EmptyText">等待文件路径...</system:String>
+
+    <system:String x:Key="Tool.FileSystemIO_DeleteFile.DisplayName">删除文件</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteFile.Description">删除指定的文件。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteFile.Param.FilePath.DisplayName">文件路径</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteFile.Param.FilePath.Description">要删除的文件路径。相对路径将相对于当前工作区解析。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteFile.Param.FilePath.Label">文件</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteFile.Param.FilePath.EmptyText">等待文件路径...</system:String>
+
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.DisplayName">删除目录</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Description">删除指定的目录。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.DirectoryPath.DisplayName">目录路径</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.DirectoryPath.Description">要删除的目录路径。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.DirectoryPath.Label">目录</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.DirectoryPath.EmptyText">等待目录路径...</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.Recursive.DisplayName">递归删除</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.Recursive.Description">是否递归删除其所有子目录及文件。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.Recursive.Label">递归</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.Recursive.EmptyText">默认不递归</system:String>
+
+    <system:String x:Key="Tool.FileSystemIO_NewDirectory.DisplayName">新建目录</system:String>
+    <system:String x:Key="Tool.FileSystemIO_NewDirectory.Description">新建一个目录。如果父级目录不存在，则一并创建。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_NewDirectory.Param.DirectoryPath.DisplayName">目录路径</system:String>
+    <system:String x:Key="Tool.FileSystemIO_NewDirectory.Param.DirectoryPath.Description">要创建的目录路径。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_NewDirectory.Param.DirectoryPath.Label">目录</system:String>
+    <system:String x:Key="Tool.FileSystemIO_NewDirectory.Param.DirectoryPath.EmptyText">等待目录路径...</system:String>
+
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.DisplayName">重命名文件/目录</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Description">重命名或移动文件或目录。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.SourcePath.DisplayName">原路径</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.SourcePath.Description">当前文件或目录路径。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.SourcePath.Label">原路径</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.SourcePath.EmptyText">等待原路径...</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.DestinationPath.DisplayName">目标路径</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.DestinationPath.Description">新的文件或目录路径。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.DestinationPath.Label">目标路径</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.DestinationPath.EmptyText">等待目标路径...</system:String>
+
+    <system:String x:Key="Tool.ReadTextFile.DisplayName">读取文本文件</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Description">读取并返回指定文本文件的全部或部分行内容。</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.FilePath.DisplayName">文件路径</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.FilePath.Description">要读取的文本文件路径。</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.FilePath.Label">文件</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.FilePath.EmptyText">等待文件路径...</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.StartLine.DisplayName">起始行号</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.StartLine.Description">开始读取的行号，从 1 开始。</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.StartLine.Label">起始行</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.StartLine.EmptyText">默认第 1 行</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.EndLine.DisplayName">结束行号</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.EndLine.Description">结束读取的行号（含）。</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.EndLine.Label">结束行</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.EndLine.EmptyText">默认读取到文件末尾</system:String>
+
+    <system:String x:Key="Tool.ReadDirectoryRecursive.DisplayName">递归读取目录</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Description">读取目录并按层级返回文件列表。</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Directory.DisplayName">目录路径</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Directory.Description">要枚举的目录路径。</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Directory.Label">目录</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Directory.EmptyText">等待目录路径...</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Depth.DisplayName">递归深度</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Depth.Description">最大递归深度，默认深度为 1。</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Depth.Label">深度</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Depth.EmptyText">默认深度为 1</system:String>
+
+    <system:String x:Key="Tool.SpawnSubAgent.DisplayName">启动子代理</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Description">启动一个子代理来执行特定任务。</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.AgentId.DisplayName">子代理 ID</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.AgentId.Description">要启动的子代理的唯一标识符。</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.AgentId.Label">子代理 ID</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.AgentId.EmptyText">等待代理 ID...</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.InputXml.DisplayName">输入 XML</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.InputXml.Description">传递给子代理的任务参数 XML 结构。</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.InputXml.Label">输入 XML</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.InputXml.EmptyText">等待输入数据...</system:String>
+
+    <system:String x:Key="Tool.LoadToolKits.DisplayName">加载工具集</system:String>
+    <system:String x:Key="Tool.LoadToolKits.Description">加载工具集，并让这些工具集中的工具在后续代理迭代中可调用。</system:String>
+    <system:String x:Key="Tool.LoadToolKits.Param.ToolKits.DisplayName">工具集列表</system:String>
+    <system:String x:Key="Tool.LoadToolKits.Param.ToolKits.Description">要加载的工具集名称 JSON 数组。</system:String>
+    <system:String x:Key="Tool.LoadToolKits.Param.ToolKits.Label">工具集</system:String>
+    <system:String x:Key="Tool.LoadToolKits.Param.ToolKits.EmptyText">等待填写工具集...</system:String>
+
+    <!-- AerialCity RAG Tools Localization -->
+    <system:String x:Key="Tool.InitializeAerialCityRAG.DisplayName">初始化 AerialCity RAG</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Description">初始化目标文件夹的 AerialCity RAG。生成相关配置文件并将文件编码后导入数据库。</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.TargetDirectory.DisplayName">目标目录</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.TargetDirectory.Description">要初始化的文件夹路径。相对路径会相对于当前工作区解析。</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.TargetDirectory.Label">目标目录</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.TargetDirectory.EmptyText">等待目标目录路径...</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.Mode.DisplayName">索引模式</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.Mode.Description">可选的索引模式（Code 或 Everything）。默认为 Code。</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.Mode.Label">模式</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.Mode.EmptyText">Code</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.MaxFileBytes.DisplayName">最大字节限制</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.MaxFileBytes.Description">单个文件的最大字节大小限制。0 表示无限制。</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.MaxFileBytes.Label">大小限制</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.MaxFileBytes.EmptyText">默认 10485760 字节</system:String>
+
+    <system:String x:Key="Tool.UpdateAerialCityDB.DisplayName">更新 AerialCity 数据库</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Description">更新包含指定路径的已初始化的 AerialCity 数据库。</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.FolderPath.DisplayName">刷新路径</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.FolderPath.Description">要刷新的文件夹或文件路径，必须属于已初始化的数据库中。</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.FolderPath.Label">刷新路径</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.FolderPath.EmptyText">等待路径...</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.MaxFileBytes.DisplayName">最大字节限制</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.MaxFileBytes.Description">单个文件的最大字节大小限制。0 表示无限制。</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.MaxFileBytes.Label">大小限制</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.MaxFileBytes.EmptyText">默认 10485760 字节</system:String>
+
+    <system:String x:Key="Tool.SemanticSearch.DisplayName">语义搜索</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Description">在已初始化的 AerialCity 数据库中，通过余弦相似度进行向量语义搜索。</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.SearchPath.DisplayName">搜索路径</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.SearchPath.Description">要搜索的文件夹或文件路径，必须属于已初始化的数据库中。</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.SearchPath.Label">搜索路径</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.SearchPath.EmptyText">等待搜索路径...</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.Query.DisplayName">查询内容</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.Query.Description">用于向量匹配搜索的查询短语。</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.Query.Label">查询内容</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.Query.EmptyText">等待查询文本...</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.TopK.DisplayName">最大结果数</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.TopK.Description">要返回的最大结果条数。默认为 10。</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.TopK.Label">结果上限</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.TopK.EmptyText">默认 10</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.MinScore.DisplayName">最低评分</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.MinScore.Description">可选的最低相似度评分过滤条件。</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.MinScore.Label">最低评分</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.MinScore.EmptyText">无评分限制</system:String>
+
+    <system:String x:Key="Tool.KeywordSearch.DisplayName">关键词搜索</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Description">在已初始化的 AerialCity 数据库中，通过 BM25 算法进行关键词匹配检索。</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.SearchPath.DisplayName">搜索路径</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.SearchPath.Description">要搜索的文件夹或文件路径，必须属于已初始化的数据库中。</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.SearchPath.Label">搜索路径</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.SearchPath.EmptyText">等待搜索路径...</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.Query.DisplayName">关键词查询</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.Query.Description">用于 BM25 检索匹配的关键词文本。</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.Query.Label">关键词</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.Query.EmptyText">等待关键词查询...</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.TopK.DisplayName">最大结果数</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.TopK.Description">要返回的最大结果条数。默认为 10。</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.TopK.Label">结果上限</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.TopK.EmptyText">默认 10</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.MinScore.DisplayName">最低评分</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.MinScore.Description">可选的最低 BM25 评分过滤条件。</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.MinScore.Label">最低评分</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.MinScore.EmptyText">无评分限制</system:String>
+
+    <!-- General Search Tools -->
+    <system:String x:Key="Tool.GrepSearch.DisplayName">正则内容搜索</system:String>
+    <system:String x:Key="Tool.GrepSearch.Description">在文本文件中使用正则表达式搜索匹配内容。</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Pattern.DisplayName">正则模式</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Pattern.Description">要在文本文件中搜索的正则表达式模式。</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Pattern.Label">匹配模式</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Pattern.EmptyText">等待搜索模式...</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Directory.DisplayName">搜索目录</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Directory.Description">要搜索的目录路径。</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Directory.Label">搜索目录</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Directory.EmptyText">等待目录...</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Context.DisplayName">上下文行数</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Context.Description">匹配行前后的上下文行数。例如，默认为 1。</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Context.Label">上下文行数</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Context.EmptyText">默认前后各 1 行</system:String>
+
+    <system:String x:Key="Tool.GlobSearch.DisplayName">文件名搜索</system:String>
+    <system:String x:Key="Tool.GlobSearch.Description">使用 Glob 通配符模式在目录中搜索文件名称。</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Pattern.DisplayName">Glob 模式</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Pattern.Description">文件名或相对路径的 Glob 匹配模式，例如 *.cs 或 **/*.xaml。</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Pattern.Label">通配模式</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Pattern.EmptyText">等待通配模式...</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Directory.DisplayName">搜索目录</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Directory.Description">要搜索的目录路径。</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Directory.Label">搜索目录</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Directory.EmptyText">等待目录...</system:String>
+
+    <!-- Wget Tool -->
+    <system:String x:Key="Tool.Wget.DisplayName">Wget 下载</system:String>
+    <system:String x:Key="Tool.Wget.Description">运行 wget.exe 下载文件或获取服务器响应。</system:String>
+    <system:String x:Key="Tool.Wget.Param.Arguments.DisplayName">参数</system:String>
+    <system:String x:Key="Tool.Wget.Param.Arguments.Description">传递给 wget 的命令行参数。</system:String>
+    <system:String x:Key="Tool.Wget.Param.Arguments.Label">命令行参数</system:String>
+    <system:String x:Key="Tool.Wget.Param.Arguments.EmptyText">等待输入 wget 参数...</system:String>
+    <system:String x:Key="Tool.Wget.Param.WorkingDirectory.DisplayName">工作目录</system:String>
+    <system:String x:Key="Tool.Wget.Param.WorkingDirectory.Description">运行 wget 的工作目录。</system:String>
+    <system:String x:Key="Tool.Wget.Param.WorkingDirectory.Label">工作目录</system:String>
+    <system:String x:Key="Tool.Wget.Param.WorkingDirectory.EmptyText">默认工作区</system:String>
+    <system:String x:Key="Tool.Wget.Param.TimeoutSeconds.DisplayName">超时时间</system:String>
+    <system:String x:Key="Tool.Wget.Param.TimeoutSeconds.Description">下载超时限制（秒）。</system:String>
+    <system:String x:Key="Tool.Wget.Param.TimeoutSeconds.Label">超时时间</system:String>
+    <system:String x:Key="Tool.Wget.Param.TimeoutSeconds.EmptyText">默认 60 秒</system:String>
+
+    <!-- SWSniff Tool -->
+    <system:String x:Key="Tool.SWSniff.DisplayName">局域网主机扫描</system:String>
+    <system:String x:Key="Tool.SWSniff.Description">扫描网络目标中的 IPv4 地址，查找可达的活跃主机。</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.Target.DisplayName">扫描目标</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.Target.Description">要扫描的 IPv4 网段或目标（例如 192.168.1.0/24）。</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.Target.Label">扫描目标</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.Target.EmptyText">等待输入 IPv4 扫描目标...</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.TimeoutMilliseconds.DisplayName">超时时间</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.TimeoutMilliseconds.Description">单个 IP Ping 响应的最大等待时间（毫秒）。</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.TimeoutMilliseconds.Label">超时 (毫秒)</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.TimeoutMilliseconds.EmptyText">默认 1000 毫秒</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.MaxConcurrency.DisplayName">并发数</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.MaxConcurrency.Description">扫描时允许的最大并发 Ping 数量。</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.MaxConcurrency.Label">并发数</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.MaxConcurrency.EmptyText">默认 64</system:String>
+
+    <!-- Context Snapshot Tool -->
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.DisplayName">运行时上下文快照</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Description">获取当前 Skyweaver 运行时的上下文信息，生成系统与环境快照。</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeProperties.DisplayName">包含属性</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeProperties.Description">是否在快照中包含当前系统属性信息。</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeProperties.Label">包含属性</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeProperties.EmptyText">默认包含</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeOperatingSystem.DisplayName">包含系统信息</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeOperatingSystem.Description">是否在快照中包含操作系统及版本信息。</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeOperatingSystem.Label">包含系统信息</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeOperatingSystem.EmptyText">默认包含</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeFileSystem.DisplayName">包含文件系统卷</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeFileSystem.Description">是否在快照中包含磁盘卷与驱动器信息。</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeFileSystem.Label">包含文件系统卷</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeFileSystem.EmptyText">默认包含</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeLateralFS.DisplayName">包含 LateralFS 节点</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeLateralFS.Description">是否在快照中包含当前活动的 LateralFS 投影节点列表。</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeLateralFS.Label">包含 LateralFS 节点</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeLateralFS.EmptyText">默认包含</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.UppercaseLabels.DisplayName">标签大写</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.UppercaseLabels.Description">是否将快照中字段的标签强制转换为大写形式。</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.UppercaseLabels.Label">标签大写</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.UppercaseLabels.EmptyText">默认正常大小写</system:String>
+
+    <!-- SharpSpray Tool -->
+    <system:String x:Key="Tool.SharpSpray.DisplayName">域密码喷洒测试</system:String>
+    <system:String x:Key="Tool.SharpSpray.Description">Active Directory 域用户密码喷洒安全测试工具。</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Passwords.DisplayName">待测试密码</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Passwords.Description">用于密码喷洒测试的候选密码列表（逗号分隔）。</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Passwords.Label">待测试密码</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Passwords.EmptyText">等候输入要喷洒的密码列表...</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.TargetDomain.DisplayName">目标域名</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.TargetDomain.Description">要进行测试的 Active Directory 目标域名。</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.TargetDomain.Label">目标域名</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.TargetDomain.EmptyText">等待输入目标域名...</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Delay.DisplayName">喷洒延迟</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Delay.Description">每次尝试喷洒之间的延迟时间（毫秒）。</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Delay.Label">喷洒延迟</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Delay.EmptyText">每次尝试之间的延迟时间</system:String>
+
+    <!-- MergeLateralFS Tool -->
+    <system:String x:Key="Tool.MergeLateralFS.DisplayName">合并 LateralFS 分支节点</system:String>
+    <system:String x:Key="Tool.MergeLateralFS.Description">将 LateralFS 节点中被编辑的或本地特有的更改合并回其投影源目录。</system:String>
+    <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.DisplayName">节点名称</system:String>
+    <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.Description">要合并的 LateralFS 节点名称。</system:String>
+    <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.Label">节点名称</system:String>
+    <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.EmptyText">默认最新的会话拥有节点</system:String>
+
+    <!-- InitializeLiveXAML Tool -->
+    <system:String x:Key="Tool.InitializeLiveXAML.DisplayName">初始化 LiveXAML 视图对</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Description">在当前工作区初始化一对新的 LiveXAML UI 视图定义文件及后台代码。</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Param.XAMLFileName.DisplayName">文件名</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Param.XAMLFileName.Description">要创建的 XAML 视图文件名，例如 MyView.xaml。</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Param.XAMLFileName.Label">文件名</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Param.XAMLFileName.EmptyText">等待输入 LiveXAML 布局文件名...</system:String>
+
+    <!-- InheritLateralFS Tool -->
+    <system:String x:Key="Tool.InheritLateralFS.DisplayName">继承 LateralFS 分支节点</system:String>
+    <system:String x:Key="Tool.InheritLateralFS.Description">创建一个继承自现有父节点的子 LateralFS 分支节点。</system:String>
+    <system:String x:Key="Tool.InheritLateralFS.Param.NodeName.DisplayName">节点名称</system:String>
+    <system:String x:Key="Tool.InheritLateralFS.Param.NodeName.Description">要继承的父 LateralFS 节点名称。</system:String>
+    <system:String x:Key="Tool.InheritLateralFS.Param.NodeName.Label">节点名称</system:String>
+    <system:String x:Key="Tool.InheritLateralFS.Param.NodeName.EmptyText">等待输入节点名称...</system:String>
+
+    <!-- ExecutePowershellCommand Tool -->
+    <system:String x:Key="Tool.ExecutePowershellCommand.DisplayName">执行 PowerShell 命令</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Description">提议并执行一条本地 PowerShell 命令行。</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.Command.DisplayName">命令行</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.Command.Description">要在主机上执行的 PowerShell 命令行文本。</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.Command.Label">命令行</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.Command.EmptyText">等待输入要执行的命令...</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.WorkingDirectory.DisplayName">工作目录</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.WorkingDirectory.Description">命令执行的工作目录。</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.WorkingDirectory.Label">工作目录</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.WorkingDirectory.EmptyText">默认工作区</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.TimeoutSeconds.DisplayName">超时时间</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.TimeoutSeconds.Description">命令执行超时限制（秒）。</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.TimeoutSeconds.Label">超时时间</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.TimeoutSeconds.EmptyText">默认 600 秒</system:String>
+
+    <!-- EditFileSearchReplace Tool -->
+    <system:String x:Key="Tool.EditFile_SearchReplace.DisplayName">搜索并替换文件内容</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Description">通过精确定位，搜索并替换目标文件中的特定文本块。</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.FilePath.DisplayName">文件路径</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.FilePath.Description">要编辑的目标文件绝对路径。</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.FilePath.Label">文件路径</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.FilePath.EmptyText">等待输入文件路径...</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Search.DisplayName">搜索内容</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Search.Description">要查找并替换的精确文本块。</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Search.Label">搜索内容</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Search.EmptyText">等待输入待搜索替换的文本...</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Replace.DisplayName">替换为</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Replace.Description">用于替换的新文本内容。</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Replace.Label">替换为</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Replace.EmptyText">留空表示直接删除匹配内容</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Encoding.DisplayName">字符编码</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Encoding.Description">文件保存时使用的字符编码。</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Encoding.Label">字符编码</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Encoding.EmptyText">默认为带自动检测的 utf-8 编码</system:String>
+
+    <!-- EditFileRewrite Tool -->
+    <system:String x:Key="Tool.EditFile_Rewrite.DisplayName">重写文件内容</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Description">完全重写或直接覆盖写入目标文件的全部内容。</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.FilePath.DisplayName">文件路径</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.FilePath.Description">要写入的目标文件绝对路径。</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.FilePath.Label">文件路径</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.FilePath.EmptyText">等待输入文件路径...</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.Content.DisplayName">文件内容</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.Content.Description">要写入目标文件的完整文本内容。</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.Content.Label">文件内容</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.Content.EmptyText">等待写入文件内容...</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.Encoding.DisplayName">字符编码</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.Encoding.Description">文件保存时使用的字符编码。</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.Encoding.Label">字符编码</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.Encoding.EmptyText">默认为带自动检测的 utf-8 编码</system:String>
+
+    <!-- EditFileAdvanced Tool -->
+    <system:String x:Key="Tool.EditFile_Advanced.DisplayName">高级文件编辑</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Description">对目标文件进行多处非连续文本区块的替换与编辑。</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Param.FilePath.DisplayName">文件路径</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Param.FilePath.Description">要编辑的目标文件绝对路径。</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Param.FilePath.Label">文件路径</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Param.FilePath.EmptyText">等待输入文件路径...</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Param.EditText.DisplayName">编辑描述</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Param.EditText.Description">用于描述多处区块修改的结构化编辑文本。</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Param.EditText.Label">编辑文本</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Param.EditText.EmptyText">等待编辑描述文本...</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Param.Encoding.DisplayName">字符编码</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Param.Encoding.Description">文件保存时使用的字符编码。</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Param.Encoding.Label">字符编码</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Param.Encoding.EmptyText">默认为带自动检测的 utf-8 编码</system:String>
+
+    <!-- Curl Tool -->
+    <system:String x:Key="Tool.Curl.DisplayName">Curl 请求</system:String>
+    <system:String x:Key="Tool.Curl.Description">运行 curl.exe 发送 HTTP 请求或访问网络资源。</system:String>
+    <system:String x:Key="Tool.Curl.Param.Arguments.DisplayName">参数</system:String>
+    <system:String x:Key="Tool.Curl.Param.Arguments.Description">传递给 curl 的命令行参数。</system:String>
+    <system:String x:Key="Tool.Curl.Param.Arguments.Label">命令行参数</system:String>
+    <system:String x:Key="Tool.Curl.Param.Arguments.EmptyText">等待输入 curl 参数...</system:String>
+    <system:String x:Key="Tool.Curl.Param.WorkingDirectory.DisplayName">工作目录</system:String>
+    <system:String x:Key="Tool.Curl.Param.WorkingDirectory.Description">运行 curl 的工作目录。</system:String>
+    <system:String x:Key="Tool.Curl.Param.WorkingDirectory.Label">工作目录</system:String>
+    <system:String x:Key="Tool.Curl.Param.WorkingDirectory.EmptyText">默认工作区</system:String>
+    <system:String x:Key="Tool.Curl.Param.TimeoutSeconds.DisplayName">超时时间</system:String>
+    <system:String x:Key="Tool.Curl.Param.TimeoutSeconds.Description">请求超时限制（秒）。</system:String>
+    <system:String x:Key="Tool.Curl.Param.TimeoutSeconds.Label">超时时间</system:String>
+    <system:String x:Key="Tool.Curl.Param.TimeoutSeconds.EmptyText">默认 60 秒</system:String>
+
+    <!-- CreateLateralFS Tool -->
+    <system:String x:Key="Tool.CreateLateralFS.DisplayName">创建 LateralFS 分支节点</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Description">初始化一个新的 LateralFS 投影分支节点以挂载工作区视图。</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.NodeName.DisplayName">节点名称</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.NodeName.Description">要创建的 LateralFS 分支节点名称。</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.NodeName.Label">节点名称</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.NodeName.EmptyText">等待输入节点名称...</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.ProjectionSourceFolder.DisplayName">源文件夹</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.ProjectionSourceFolder.Description">用作挂载投影的源目标文件夹路径。</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.ProjectionSourceFolder.Label">源文件夹</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.ProjectionSourceFolder.EmptyText">等待输入投影源文件夹路径...</system:String>
+
+    <!-- ShowLiveXAML Tool -->
+    <system:String x:Key="Tool.ShowLiveXAML.DisplayName">渲染 LiveXAML 预览</system:String>
+    <system:String x:Key="Tool.ShowLiveXAML.Description">校验并在会话卡片中实时渲染呈现现有的 LiveXAML 布局预览。</system:String>
+    <system:String x:Key="Tool.ShowLiveXAML.Param.XAMLFilePath.DisplayName">XAML 文件路径</system:String>
+    <system:String x:Key="Tool.ShowLiveXAML.Param.XAMLFilePath.Description">要渲染的 .xaml 布局文件绝对路径。</system:String>
+    <system:String x:Key="Tool.ShowLiveXAML.Param.XAMLFilePath.Label">XAML 文件路径</system:String>
+    <system:String x:Key="Tool.ShowLiveXAML.Param.XAMLFilePath.EmptyText">等待输入 XAML 文件路径...</system:String>
+
+    <!-- WorkspaceNoteTemplate Tool -->
+    <system:String x:Key="Tool.WorkspaceNoteTemplate.DisplayName">工作区笔记模板</system:String>
+    <system:String x:Key="Tool.WorkspaceNoteTemplate.Description">生成一个工作区笔记模板。宿主可以通过工具自身配置扩展默认值、摘要布局和运行时行为。</system:String>
 </ResourceDictionary>

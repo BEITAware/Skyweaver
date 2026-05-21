@@ -3,6 +3,7 @@
                     xmlns:system="clr-namespace:System;assembly=System.Runtime">
     <system:String x:Key="Localization.Language.zh-CN">Simplified Chinese</system:String>
     <system:String x:Key="Localization.Language.en-US">English</system:String>
+    <system:String x:Key="Localization.Language.ja-JP">Japanese</system:String>
 
     <system:String x:Key="Preferences.Group.FilesSystem">Files and System</system:String>
     <system:String x:Key="Preferences.Group.PresentationUi">Presentation and Interface</system:String>
@@ -1223,4 +1224,440 @@
     <system:String x:Key="ReadDirectoryRecursive.InvocationField.Directory.Placeholder">Waiting for directory path...</system:String>
     <system:String x:Key="ReadDirectoryRecursive.InvocationField.Depth">Depth</system:String>
     <system:String x:Key="ReadDirectoryRecursive.InvocationField.Depth.Placeholder">Default depth is 1</system:String>
+
+    <!-- Tool Localization -->
+    <system:String x:Key="Tool.FileSystemIO_CreateFile.DisplayName">Create File</system:String>
+    <system:String x:Key="Tool.FileSystemIO_CreateFile.Description">Creates a new empty file. If the parent directory does not exist, it will be created first.</system:String>
+    <system:String x:Key="Tool.FileSystemIO_CreateFile.Param.FilePath.DisplayName">File Path</system:String>
+    <system:String x:Key="Tool.FileSystemIO_CreateFile.Param.FilePath.Description">Path to the file to create. Relative paths are resolved against the current workspace.</system:String>
+    <system:String x:Key="Tool.FileSystemIO_CreateFile.Param.FilePath.Label">File</system:String>
+    <system:String x:Key="Tool.FileSystemIO_CreateFile.Param.FilePath.EmptyText">Waiting for file path...</system:String>
+
+    <system:String x:Key="Tool.FileSystemIO_DeleteFile.DisplayName">Delete File</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteFile.Description">Deletes a specified file.</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteFile.Param.FilePath.DisplayName">File Path</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteFile.Param.FilePath.Description">Path to the file to delete. Relative paths resolve against the current workspace.</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteFile.Param.FilePath.Label">File</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteFile.Param.FilePath.EmptyText">Waiting for file path...</system:String>
+
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.DisplayName">Delete Directory</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Description">Deletes a specified directory.</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.DirectoryPath.DisplayName">Directory Path</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.DirectoryPath.Description">Path to the directory to delete.</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.DirectoryPath.Label">Directory</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.DirectoryPath.EmptyText">Waiting for directory path...</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.Recursive.DisplayName">Recursive Delete</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.Recursive.Description">Whether to delete recursively with all subdirectories and files.</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.Recursive.Label">Recursive</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.Recursive.EmptyText">Not recursive by default</system:String>
+
+    <system:String x:Key="Tool.FileSystemIO_NewDirectory.DisplayName">Create Directory</system:String>
+    <system:String x:Key="Tool.FileSystemIO_NewDirectory.Description">Creates a new directory and any intermediate directories as needed.</system:String>
+    <system:String x:Key="Tool.FileSystemIO_NewDirectory.Param.DirectoryPath.DisplayName">Directory Path</system:String>
+    <system:String x:Key="Tool.FileSystemIO_NewDirectory.Param.DirectoryPath.Description">Path to the directory to create.</system:String>
+    <system:String x:Key="Tool.FileSystemIO_NewDirectory.Param.DirectoryPath.Label">Directory</system:String>
+    <system:String x:Key="Tool.FileSystemIO_NewDirectory.Param.DirectoryPath.EmptyText">Waiting for directory path...</system:String>
+
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.DisplayName">Rename File/Directory</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Description">Renames or moves a file or directory.</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.SourcePath.DisplayName">Source Path</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.SourcePath.Description">Path to the current file or directory.</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.SourcePath.Label">Source</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.SourcePath.EmptyText">Waiting for source path...</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.DestinationPath.DisplayName">Destination Path</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.DestinationPath.Description">The new path for the file or directory.</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.DestinationPath.Label">Destination</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.DestinationPath.EmptyText">Waiting for destination path...</system:String>
+
+    <system:String x:Key="Tool.ReadTextFile.DisplayName">Read Text File</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Description">Reads and returns some or all lines of a text file.</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.FilePath.DisplayName">File Path</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.FilePath.Description">Path to the text file to read.</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.FilePath.Label">File</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.FilePath.EmptyText">Waiting for file path...</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.StartLine.DisplayName">Start Line Number</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.StartLine.Description">1-indexed line number to start reading from.</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.StartLine.Label">Start Line</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.StartLine.EmptyText">Defaults to line 1</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.EndLine.DisplayName">End Line Number</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.EndLine.Description">Inclusive line number to end reading at.</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.EndLine.Label">End Line</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.EndLine.EmptyText">Reads to the end by default</system:String>
+
+    <system:String x:Key="Tool.ReadDirectoryRecursive.DisplayName">Read Directory Recursively</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Description">Reads a directory and returns files in a hierarchy.</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Directory.DisplayName">Directory Path</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Directory.Description">Path to the directory to enumerate.</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Directory.Label">Directory</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Directory.EmptyText">Waiting for directory path...</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Depth.DisplayName">Recursion Depth</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Depth.Description">Maximum recursion depth, default is 1.</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Depth.Label">Depth</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Depth.EmptyText">Default depth is 1</system:String>
+
+    <system:String x:Key="Tool.SpawnSubAgent.DisplayName">Spawn Sub-Agent</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Description">Spawns a sub-agent to perform a specific subtask.</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.AgentId.DisplayName">Sub-Agent ID</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.AgentId.Description">Unique identifier of the sub-agent to spawn.</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.AgentId.Label">Sub-Agent ID</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.AgentId.EmptyText">Waiting for agent ID...</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.InputXml.DisplayName">Input XML</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.InputXml.Description">XML parameters to pass as the sub-agent's task inputs.</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.InputXml.Label">Input XML</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.InputXml.EmptyText">Waiting for input data...</system:String>
+
+    <system:String x:Key="Tool.LoadToolKits.DisplayName">Load Toolkits</system:String>
+    <system:String x:Key="Tool.LoadToolKits.Description">Loads toolkits, making their tools callable from the next agent iteration.</system:String>
+    <system:String x:Key="Tool.LoadToolKits.Param.ToolKits.DisplayName">Toolkits List</system:String>
+    <system:String x:Key="Tool.LoadToolKits.Param.ToolKits.Description">JSON array of toolkit names to load.</system:String>
+    <system:String x:Key="Tool.LoadToolKits.Param.ToolKits.Label">Toolkits</system:String>
+    <system:String x:Key="Tool.LoadToolKits.Param.ToolKits.EmptyText">Waiting for toolkits list...</system:String>
+
+    <!-- AerialCity RAG Tools Localization -->
+    <system:String x:Key="Tool.InitializeAerialCityRAG.DisplayName">Initialize AerialCity RAG</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Description">Initializes AerialCity RAG for a target folder. It creates AerialCity.xml, embeds text/code files, and builds graph/vector storage.</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.TargetDirectory.DisplayName">Target Directory</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.TargetDirectory.Description">Target folder to initialize for AerialCity RAG. Relative paths resolve against current workspace.</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.TargetDirectory.Label">Target directory</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.TargetDirectory.EmptyText">Waiting for target directory...</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.Mode.DisplayName">Indexing Mode</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.Mode.Description">Optional indexing mode. Code is default and excludes version-control/cache/noisy files.</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.Mode.Label">Mode</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.Mode.EmptyText">Code</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.MaxFileBytes.DisplayName">Max File Bytes</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.MaxFileBytes.Description">Maximum single file size to embed. Default is 10485760 bytes. Use 0 to disable.</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.MaxFileBytes.Label">Max file bytes</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.MaxFileBytes.EmptyText">Default 10485760</system:String>
+
+    <system:String x:Key="Tool.UpdateAerialCityDB.DisplayName">Update AerialCity DB</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Description">Updates the initialized AerialCity database that contains the supplied path.</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.FolderPath.DisplayName">Folder Path</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.FolderPath.Description">Folder, file, or deleted path to refresh. Must be equal to or inside an initialized target folder.</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.FolderPath.Label">Path</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.FolderPath.EmptyText">Waiting for path...</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.MaxFileBytes.DisplayName">Max File Bytes</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.MaxFileBytes.Description">Maximum single file size to embed. Default is 10485760 bytes. Use 0 to disable.</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.MaxFileBytes.Label">Max file bytes</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.MaxFileBytes.EmptyText">Default 10485760</system:String>
+
+    <system:String x:Key="Tool.SemanticSearch.DisplayName">Semantic Search</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Description">Searches initialized AerialCity RAG databases with cosine similarity.</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.SearchPath.DisplayName">Search Path</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.SearchPath.Description">Folder or file path to search. Must be equal to or inside an initialized target folder.</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.SearchPath.Label">Search path</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.SearchPath.EmptyText">Waiting for search path...</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.Query.DisplayName">Query Phrase</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.Query.Description">Semantic query text to embed and search with cosine similarity.</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.Query.Label">Query</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.Query.EmptyText">Waiting for semantic query...</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.TopK.DisplayName">Max Results</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.TopK.Description">Maximum number of results. Default is 10.</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.TopK.Label">Top K</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.TopK.EmptyText">Default 10</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.MinScore.DisplayName">Min Score</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.MinScore.Description">Optional minimum cosine score.</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.MinScore.Label">Min score</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.MinScore.EmptyText">Optional</system:String>
+
+    <system:String x:Key="Tool.KeywordSearch.DisplayName">Keyword Search</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Description">Searches initialized AerialCity RAG databases with BM25 keyword ranking.</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.SearchPath.DisplayName">Search Path</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.SearchPath.Description">Folder or file path to search. Must be equal to or inside an initialized target folder.</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.SearchPath.Label">Search path</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.SearchPath.EmptyText">Waiting for search path...</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.Query.DisplayName">Query Keyword</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.Query.Description">Keyword query text for BM25 ranking.</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.Query.Label">Query</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.Query.EmptyText">Waiting for keyword query...</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.TopK.DisplayName">Max Results</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.TopK.Description">Maximum number of results. Default is 10.</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.TopK.Label">Top K</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.TopK.EmptyText">Default 10</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.MinScore.DisplayName">Min Score</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.MinScore.Description">Optional minimum BM25 score.</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.MinScore.Label">Min score</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.MinScore.EmptyText">Optional</system:String>
+
+    <!-- General Search Tools -->
+    <system:String x:Key="Tool.GrepSearch.DisplayName">Grep Search</system:String>
+    <system:String x:Key="Tool.GrepSearch.Description">Searches text file contents with a regular expression.</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Pattern.DisplayName">Pattern</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Pattern.Description">Regular expression pattern to search for in text file contents.</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Pattern.Label">Pattern</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Pattern.EmptyText">Waiting for search pattern...</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Directory.DisplayName">Directory</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Directory.Description">Directory to search.</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Directory.Label">Directory</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Directory.EmptyText">Waiting for directory...</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Context.DisplayName">Context Lines</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Context.Description">Context line count around each match. Default is 1.</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Context.Label">Context</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Context.EmptyText">Default 1 line before and after</system:String>
+
+    <system:String x:Key="Tool.GlobSearch.DisplayName">Glob Search</system:String>
+    <system:String x:Key="Tool.GlobSearch.Description">Searches file names with a glob pattern.</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Pattern.DisplayName">Pattern</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Pattern.Description">Glob pattern for file names or relative paths, for example *.cs or **/*.xaml.</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Pattern.Label">Pattern</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Pattern.EmptyText">Waiting for glob pattern...</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Directory.DisplayName">Directory</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Directory.Description">Directory to search.</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Directory.Label">Directory</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Directory.EmptyText">Waiting for directory...</system:String>
+
+    <!-- CreateLateralFS Tool -->
+    <system:String x:Key="Tool.CreateLateralFS.DisplayName">Create Lateral F S</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Description">Description placeholder</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.NodeName.DisplayName">NodeName</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.NodeName.Description">New LateralFS node name. It must be unique and valid as a Windows folder name.</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.NodeName.Label">Node</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.NodeName.EmptyText">Waiting for node name...</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.ProjectionSourceFolder.DisplayName">ProjectionSourceFolder</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.ProjectionSourceFolder.Description">Folder whose contents should be projected into the new LateralFS node. Relative paths resolve against the current workspace. LateralFS\\NodeName\\... shortcuts are also accepted.</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.ProjectionSourceFolder.Label">Source</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.ProjectionSourceFolder.EmptyText">Waiting for source folder...</system:String>
+
+    <!-- Curl Tool -->
+    <system:String x:Key="Tool.Curl.DisplayName">Curl</system:String>
+    <system:String x:Key="Tool.Curl.Description">Description placeholder</system:String>
+    <system:String x:Key="Tool.Curl.Param.Arguments.DisplayName">Arguments</system:String>
+    <system:String x:Key="Tool.Curl.Param.Arguments.Description">curl.exe command-line arguments only, for example -I https://example.com or -sS -X POST https://example.com/api -H \</system:String>
+    <system:String x:Key="Tool.Curl.Param.Arguments.Label">Arguments</system:String>
+    <system:String x:Key="Tool.Curl.Param.Arguments.EmptyText">Waiting for curl arguments...</system:String>
+    <system:String x:Key="Tool.Curl.Param.WorkingDirectory.DisplayName">WorkingDirectory</system:String>
+    <system:String x:Key="Tool.Curl.Param.WorkingDirectory.Description">Optional working directory for curl.exe. Relative paths resolve against the current workspace. If omitted, the tool uses the current workspace directory.</system:String>
+    <system:String x:Key="Tool.Curl.Param.WorkingDirectory.Label">Working dir</system:String>
+    <system:String x:Key="Tool.Curl.Param.WorkingDirectory.EmptyText">Default workspace</system:String>
+    <system:String x:Key="Tool.Curl.Param.TimeoutSeconds.DisplayName">TimeoutSeconds</system:String>
+    <system:String x:Key="Tool.Curl.Param.TimeoutSeconds.Description">Optional timeout in seconds. Default is 60. Valid range is 1 to 3600.</system:String>
+    <system:String x:Key="Tool.Curl.Param.TimeoutSeconds.Label">TimeoutSeconds</system:String>
+    <system:String x:Key="Tool.Curl.Param.TimeoutSeconds.EmptyText">Waiting for timeoutseconds...</system:String>
+
+    <!-- EditFile_Advanced Tool -->
+    <system:String x:Key="Tool.EditFile_Advanced.DisplayName">Edit File_ Advanced</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Description">Description placeholder</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Param.FilePath.DisplayName">FilePath</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Param.FilePath.Description">目标文件路径。当前工具常见配置是 LateralFileSystemOnly：这种配置下必须使用 LateralFS\\NodeName\\relative\\file.ext，或使用已经位于 LateralFS 虚拟根目录下的实际路径；不要用原始投影源路径。FullAccess 配置下也可使用普通绝对/相对路径。LateralFS 快捷路径会被解析到节点虚拟目录，并阻止 '..' 越界。</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Param.FilePath.Label">File</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Param.FilePath.EmptyText">Waiting for file path...</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Param.Encoding.DisplayName">Encoding</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Param.Encoding.Description">Optional text encoding name. Default is utf-8. When utf-8 is requested, the tool safely auto-detects UTF BOMs plus strong UTF-16/UTF-32 zero-byte patterns. If bytes are not valid UTF-8 and cannot be identified, pass the correct encoding explicitly.</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Param.Encoding.Label">Encoding</system:String>
+    <system:String x:Key="Tool.EditFile_Advanced.Param.Encoding.EmptyText">Default utf-8 with safe auto-detection</system:String>
+
+    <!-- EditFile_Rewrite Tool -->
+    <system:String x:Key="Tool.EditFile_Rewrite.DisplayName">Edit File_ Rewrite</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Description">Description placeholder</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.FilePath.DisplayName">FilePath</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.FilePath.Description">Full file path and name. You may also use LateralFS\\NodeName\\relative\\file.ext; the host resolves that shortcut to the node virtual folder and blocks path traversal outside the node.</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.FilePath.Label">File</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.FilePath.EmptyText">Waiting for file path...</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.Content.DisplayName">Content</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.Content.Description">The new content of the file. It will completely overwrite the existing content.</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.Content.Label">Content</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.Content.EmptyText">Waiting for file content...</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.Encoding.DisplayName">Encoding</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.Encoding.Description">Optional text encoding name. Default is utf-8. When utf-8 is requested, the tool safely auto-detects UTF BOMs plus strong UTF-16/UTF-32 zero-byte patterns. If bytes are not valid UTF-8 and cannot be identified, pass the correct encoding explicitly.</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.Encoding.Label">Encoding</system:String>
+    <system:String x:Key="Tool.EditFile_Rewrite.Param.Encoding.EmptyText">Default utf-8 with safe auto-detection</system:String>
+
+    <!-- EditFile_SearchReplace Tool -->
+    <system:String x:Key="Tool.EditFile_SearchReplace.DisplayName">Edit File_ Search Replace</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Description">Description placeholder</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.FilePath.DisplayName">FilePath</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.FilePath.Description">Full file path and name. You may also use LateralFS\\NodeName\\relative\\file.ext; the host resolves that shortcut to the node virtual folder and blocks path traversal outside the node.</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.FilePath.Label">File</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.FilePath.EmptyText">Waiting for file path...</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Search.DisplayName">Search</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Search.Description">Exact text to find. Matching is ordinal and case-sensitive.</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Search.Label">Search</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Search.EmptyText">Waiting for search text...</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Replace.DisplayName">Replace</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Replace.Description">Replacement text. Omit or leave empty to delete every Search match.</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Replace.Label">Replace</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Replace.EmptyText">Empty means delete matches</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Encoding.DisplayName">Encoding</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Encoding.Description">Optional text encoding name. Default is utf-8. When utf-8 is requested, the tool safely auto-detects UTF BOMs plus strong UTF-16/UTF-32 zero-byte patterns. If bytes are not valid UTF-8 and cannot be identified, pass the correct encoding explicitly.</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Encoding.Label">Encoding</system:String>
+    <system:String x:Key="Tool.EditFile_SearchReplace.Param.Encoding.EmptyText">Default utf-8 with safe auto-detection</system:String>
+
+    <!-- ExecutePowershellCommand Tool -->
+    <system:String x:Key="Tool.ExecutePowershellCommand.DisplayName">Execute Powershell Command</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Description">Description placeholder</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.Command.DisplayName">Command</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.Command.Description">PowerShell command text to execute. Pass only the command body, not powershell.exe itself. If the command text contains '&lt;', '&gt;', or '&amp;', wrap the Command value in CDATA in the outer XML tool call.</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.Command.Label">Command</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.Command.EmptyText">Waiting for command...</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.WorkingDirectory.DisplayName">WorkingDirectory</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.WorkingDirectory.Description">Optional working directory for the command. Relative paths resolve against the current workspace. If omitted, the tool uses the current workspace directory.</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.WorkingDirectory.Label">Working dir</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.WorkingDirectory.EmptyText">Default workspace</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.TimeoutSeconds.DisplayName">TimeoutSeconds</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.TimeoutSeconds.Description">Optional timeout in seconds. Default is 60. Valid range is 1 to 3600.</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.TimeoutSeconds.Label">TimeoutSeconds</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.TimeoutSeconds.EmptyText">Waiting for timeoutseconds...</system:String>
+
+    <!-- InheritLateralFS Tool -->
+    <system:String x:Key="Tool.InheritLateralFS.DisplayName">Inherit Lateral F S</system:String>
+    <system:String x:Key="Tool.InheritLateralFS.Description">Description placeholder</system:String>
+    <system:String x:Key="Tool.InheritLateralFS.Param.NodeName.DisplayName">NodeName</system:String>
+    <system:String x:Key="Tool.InheritLateralFS.Param.NodeName.Description">New LateralFS inheritance node name. It must be unique and valid as a Windows folder name.</system:String>
+    <system:String x:Key="Tool.InheritLateralFS.Param.NodeName.Label">Node</system:String>
+    <system:String x:Key="Tool.InheritLateralFS.Param.NodeName.EmptyText">Waiting for node name...</system:String>
+
+    <!-- InitializeLiveXAML Tool -->
+    <system:String x:Key="Tool.InitializeLiveXAML.DisplayName">Initialize Live X A M L</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Description">Description placeholder</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Param.XAMLFileName.DisplayName">XAMLFileName</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Param.XAMLFileName.Description">File name or relative path for the new .xaml file inside the session LiveXaml folder. If the .xaml extension is omitted, the host adds it.</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Param.XAMLFileName.Label">File</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Param.XAMLFileName.EmptyText">Waiting for a LiveXAML file name...</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Param.XAMLFileContent.DisplayName">XAMLFileContent</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Param.XAMLFileContent.Description">The exact XAML text to write into the .xaml file.</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Param.XAMLFileContent.Label">XAMLFileContent</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Param.XAMLFileContent.EmptyText">Waiting for xamlfilecontent...</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Param.CodeBehindFileContent.DisplayName">CodeBehindFileContent</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Param.CodeBehindFileContent.Description">The exact C# code-behind text to write into the sibling .xaml.cs file. Blank is allowed; if the XAML root has x:Class, the host synthesizes a minimal partial class shell when needed.</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Param.CodeBehindFileContent.Label">CodeBehindFileContent</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Param.CodeBehindFileContent.EmptyText">Waiting for codebehindfilecontent...</system:String>
+
+    <!-- MergeLateralFS Tool -->
+    <system:String x:Key="Tool.MergeLateralFS.DisplayName">Merge Lateral F S</system:String>
+    <system:String x:Key="Tool.MergeLateralFS.Description">Description placeholder</system:String>
+    <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.DisplayName">NodeName</system:String>
+    <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.Description">Optional LateralFS node name to merge. If omitted, the newest LateralFS node owned by the current session is merged.</system:String>
+    <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.Label">Node</system:String>
+    <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.EmptyText">Newest session-owned node</system:String>
+
+    <!-- SWSniff Tool -->
+    <system:String x:Key="Tool.SWSniff.DisplayName">SWSniff (Network Scanner)</system:String>
+    <system:String x:Key="Tool.SWSniff.Description">Description placeholder</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.Target.DisplayName">Target</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.Target.Description">IPv4 scan target. Supported formats: a single IPv4 address, CIDR like 192.168.1.0/24, a last-octet wildcard like 192.168.1.*, and ranges like 192.168.1.10-50 or 192.168.1.10-192.168.1.50.</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.Target.Label">Target</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.Target.EmptyText">Waiting for IPv4 target...</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.TimeoutMilliseconds.DisplayName">TimeoutMilliseconds</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.TimeoutMilliseconds.Description">Optional per-address ping timeout in milliseconds. Default is 1000. Valid range is 1 to 10000.</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.TimeoutMilliseconds.Label">TimeoutMilliseconds</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.TimeoutMilliseconds.EmptyText">Waiting for timeoutmilliseconds...</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.MaxConcurrency.DisplayName">MaxConcurrency</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.MaxConcurrency.Description">Optional maximum number of concurrent ping operations. Default is 64. Valid range is 1 to 256.</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.MaxConcurrency.Label">MaxConcurrency</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.MaxConcurrency.EmptyText">Waiting for maxconcurrency...</system:String>
+
+    <!-- SharpSpray Tool -->
+    <system:String x:Key="Tool.SharpSpray.DisplayName">Sharp Spray</system:String>
+    <system:String x:Key="Tool.SharpSpray.Description">Description placeholder</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Passwords.DisplayName">Passwords</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Passwords.Description">A single password or a list of passwords separated by `|` to use for the spray (-p). Required if PasswordListFile is not provided.</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Passwords.Label">Passwords</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Passwords.EmptyText">Passwords to spray</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.PasswordListFile.DisplayName">PasswordListFile</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.PasswordListFile.Description">Path to a file containing a list of passwords to spray (-k or --pl). Optional.</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.PasswordListFile.Label">PasswordListFile</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.PasswordListFile.EmptyText">Waiting for passwordlistfile...</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.UserListFile.DisplayName">UserListFile</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.UserListFile.Description">Path to a file containing a list of usernames (-u). Optional. If not specified, the tool automatically fetches users from the Active Directory.</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.UserListFile.Label">UserListFile</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.UserListFile.EmptyText">Waiting for userlistfile...</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.TargetDomain.DisplayName">TargetDomain</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.TargetDomain.Description">Specify the target domain name (-d). Optional. If omitted, uses the current domain.</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.TargetDomain.Label">Domain</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.TargetDomain.EmptyText">Target domain</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.OutsideDomain.DisplayName">OutsideDomain</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.OutsideDomain.Description">Set to true if spraying from a host located outside the domain context (-m). Optional.</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.OutsideDomain.Label">OutsideDomain</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.OutsideDomain.EmptyText">Waiting for outsidedomain...</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.DomainControllerIp.DisplayName">DomainControllerIp</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.DomainControllerIp.Description">Required when OutsideDomain is true. Specifies the Domain Controller IP (-q or --dc-ip).</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.DomainControllerIp.Label">DomainControllerIp</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.DomainControllerIp.EmptyText">Waiting for domaincontrollerip...</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.LockoutWindow.DisplayName">LockoutWindow</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.LockoutWindow.Description">Specify the lockout observation window in minutes (-w). Default is 32 minutes.</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.LockoutWindow.Label">LockoutWindow</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.LockoutWindow.EmptyText">Waiting for lockoutwindow...</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Delay.DisplayName">Delay</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Delay.Description">Delay in seconds between each authentication attempt (-s). Optional.</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Delay.Label">Delay</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Delay.EmptyText">Delay between attempts</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Jitter.DisplayName">Jitter</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Jitter.Description">Jitter in seconds to randomize the delay (-j). Optional.</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Jitter.Label">Jitter</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Jitter.EmptyText">Waiting for jitter...</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.ExcludeDisabled.DisplayName">ExcludeDisabled</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.ExcludeDisabled.Description">Set to true to exclude disabled accounts from the user list (-x). Not supported with OutsideDomain.</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.ExcludeDisabled.Label">ExcludeDisabled</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.ExcludeDisabled.EmptyText">Waiting for excludedisabled...</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.ExcludeNearLockout.DisplayName">ExcludeNearLockout</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.ExcludeNearLockout.Description">Set to true to exclude accounts within one attempt of locking out (-z). Not supported with OutsideDomain.</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.ExcludeNearLockout.Label">ExcludeNearLockout</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.ExcludeNearLockout.EmptyText">Waiting for excludenearlockout...</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.LdapFilter.DisplayName">LdapFilter</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.LdapFilter.Description">Custom LDAP filter for users (e.g., '(description=*admin*)') (-f). Optional.</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.LdapFilter.Label">LdapFilter</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.LdapFilter.EmptyText">Waiting for ldapfilter...</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.ExecutablePath.DisplayName">ExecutablePath</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.ExecutablePath.Description">Path to the SharpSpray.exe binary. If not provided, it will assume 'SharpSpray.exe' in the current directory or PATH.</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.ExecutablePath.Label">ExecutablePath</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.ExecutablePath.EmptyText">Waiting for executablepath...</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.WorkingDirectory.DisplayName">WorkingDirectory</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.WorkingDirectory.Description">Optional working directory for the command. Relative paths resolve against the current workspace.</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.WorkingDirectory.Label">WorkingDirectory</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.WorkingDirectory.EmptyText">Waiting for workingdirectory...</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.TimeoutSeconds.DisplayName">TimeoutSeconds</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.TimeoutSeconds.Description">Optional timeout in seconds for the execution. Default is 600.</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.TimeoutSeconds.Label">TimeoutSeconds</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.TimeoutSeconds.EmptyText">Waiting for timeoutseconds...</system:String>
+
+    <!-- ShowLiveXAML Tool -->
+    <system:String x:Key="Tool.ShowLiveXAML.DisplayName">Show Live X A M L</system:String>
+    <system:String x:Key="Tool.ShowLiveXAML.Description">Description placeholder</system:String>
+    <system:String x:Key="Tool.ShowLiveXAML.Param.XAMLFilePath.DisplayName">XAMLFilePath</system:String>
+    <system:String x:Key="Tool.ShowLiveXAML.Param.XAMLFilePath.Description">The full absolute path of the .xaml file to preview. Always reuse the exact absolute path returned by InitializeLiveXAML or by later file-editing results.</system:String>
+    <system:String x:Key="Tool.ShowLiveXAML.Param.XAMLFilePath.Label">XAMLFilePath</system:String>
+    <system:String x:Key="Tool.ShowLiveXAML.Param.XAMLFilePath.EmptyText">Waiting for xamlfilepath...</system:String>
+
+    <!-- SkyweaverContextSnapshot Tool -->
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.DisplayName">Skyweaver Context Snapshot</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Description">Description placeholder</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeProperties.DisplayName">IncludeProperties</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeProperties.Description">Whether to include custom context properties in the snapshot.</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeProperties.Label">Properties</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeProperties.EmptyText">Default: included</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeOperatingSystem.DisplayName">IncludeOperatingSystem</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeOperatingSystem.Description">Whether to include operating system and process runtime information.</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeOperatingSystem.Label">OS</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeOperatingSystem.EmptyText">Default: included</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeFileSystem.DisplayName">IncludeFileSystem</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeFileSystem.Description">Whether to enumerate all mounted filesystem volumes.</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeFileSystem.Label">Volumes</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeFileSystem.EmptyText">Default: included</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeLateralFS.DisplayName">IncludeLateralFS</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeLateralFS.Description">Whether to include LateralFS configuration and node information.</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeLateralFS.Label">LateralFS</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeLateralFS.EmptyText">Default: included</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.UppercaseLabels.DisplayName">UppercaseLabels</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.UppercaseLabels.Description">Whether to render snapshot labels in uppercase.</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.UppercaseLabels.Label">Uppercase</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.UppercaseLabels.EmptyText">Default: normal</system:String>
+
+    <!-- Wget Tool -->
+    <system:String x:Key="Tool.Wget.DisplayName">Wget</system:String>
+    <system:String x:Key="Tool.Wget.Description">Description placeholder</system:String>
+    <system:String x:Key="Tool.Wget.Param.Arguments.DisplayName">Arguments</system:String>
+    <system:String x:Key="Tool.Wget.Param.Arguments.Description">wget.exe command-line arguments only, for example --server-response --output-document report.html https://example.com/. If the value contains '&lt;', '&gt;', or '&amp;', wrap it in CDATA in the outer XML tool call.</system:String>
+    <system:String x:Key="Tool.Wget.Param.Arguments.Label">Arguments</system:String>
+    <system:String x:Key="Tool.Wget.Param.Arguments.EmptyText">Waiting for wget arguments...</system:String>
+    <system:String x:Key="Tool.Wget.Param.WorkingDirectory.DisplayName">WorkingDirectory</system:String>
+    <system:String x:Key="Tool.Wget.Param.WorkingDirectory.Description">Optional working directory for wget.exe. Relative paths resolve against the current workspace. If omitted, the tool uses the current workspace directory.</system:String>
+    <system:String x:Key="Tool.Wget.Param.WorkingDirectory.Label">Working dir</system:String>
+    <system:String x:Key="Tool.Wget.Param.WorkingDirectory.EmptyText">Default workspace</system:String>
+    <system:String x:Key="Tool.Wget.Param.TimeoutSeconds.DisplayName">TimeoutSeconds</system:String>
+    <system:String x:Key="Tool.Wget.Param.TimeoutSeconds.Description">Optional timeout in seconds. Default is 60. Valid range is 1 to 3600.</system:String>
+    <system:String x:Key="Tool.Wget.Param.TimeoutSeconds.Label">TimeoutSeconds</system:String>
+    <system:String x:Key="Tool.Wget.Param.TimeoutSeconds.EmptyText">Waiting for timeoutseconds...</system:String>
+
+    <!-- WorkspaceNoteTemplate Tool -->
+    <system:String x:Key="Tool.WorkspaceNoteTemplate.DisplayName">Workspace Note Template</system:String>
+    <system:String x:Key="Tool.WorkspaceNoteTemplate.Description">Description placeholder</system:String>
 </ResourceDictionary>

@@ -9,11 +9,13 @@ namespace Skyweaver.Services.Localization
     {
         public const string DefaultLanguageCode = "zh-CN";
         public const string EnglishLanguageCode = "en-US";
+        public const string JapaneseLanguageCode = "ja-JP";
 
         private static readonly IReadOnlyList<LocalizationLanguageInfo> s_supportedLanguages =
         [
             new LocalizationLanguageInfo(DefaultLanguageCode, "Localization.Language.zh-CN", "简体中文"),
-            new LocalizationLanguageInfo(EnglishLanguageCode, "Localization.Language.en-US", "English")
+            new LocalizationLanguageInfo(EnglishLanguageCode, "Localization.Language.en-US", "English"),
+            new LocalizationLanguageInfo(JapaneseLanguageCode, "Localization.Language.ja-JP", "日本語")
         ];
 
         private readonly object _syncRoot = new();

@@ -30,42 +30,68 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
         }
     }
 
-    public sealed class ToolInvocationCardFieldViewModel
+    public sealed class ToolInvocationCardFieldViewModel : Skyweaver.Infrastructure.Mvvm.ObservableObject
     {
+        private readonly string _toolName;
+        private readonly string _parameterName;
+        private readonly string _originalLabel;
+        private readonly string _originalEmptyValueText;
+
         public ToolInvocationCardFieldViewModel(
-            string label,
+            string toolName,
+            string parameterName,
+            string originalLabel,
             SkyweaverToolInvocationParameterPresentationState parameter,
-            string emptyValueText)
+            string originalEmptyValueText)
         {
-            Label = label;
+            _toolName = toolName;
+            _parameterName = parameterName;
+            _originalLabel = originalLabel;
             Parameter = parameter;
-            EmptyValueText = emptyValueText;
+            _originalEmptyValueText = originalEmptyValueText;
+
+            LocalizationRuntime.Instance.LanguageChanged += OnLanguageChanged;
         }
 
-        public string Label { get; }
+        private void OnLanguageChanged(object? sender, EventArgs e)
+        {
+            OnPropertyChanged(nameof(Label));
+            OnPropertyChanged(nameof(EmptyValueText));
+        }
+
+        public string Label => LocalizationRuntime.Instance.GetString($"Tool.{_toolName}.Param.{_parameterName}.Label", _originalLabel);
 
         public SkyweaverToolInvocationParameterPresentationState Parameter { get; }
 
-        public string EmptyValueText { get; }
+        public string EmptyValueText => LocalizationRuntime.Instance.GetString($"Tool.{_toolName}.Param.{_parameterName}.EmptyText", _originalEmptyValueText);
     }
 
-    public sealed class ToolInvocationCardViewModel
+    public sealed class ToolInvocationCardViewModel : Skyweaver.Infrastructure.Mvvm.ObservableObject
     {
+        private readonly string _originalDescription;
+
         public ToolInvocationCardViewModel(
             SkyweaverToolInvocationPresentationState state,
-            string description,
+            string originalDescription,
             string iconPath,
             IEnumerable<ToolInvocationCardFieldViewModel>? fields)
         {
             State = state ?? throw new ArgumentNullException(nameof(state));
-            Description = description ?? string.Empty;
+            _originalDescription = originalDescription ?? string.Empty;
             IconPath = iconPath ?? string.Empty;
             Fields = new ObservableCollection<ToolInvocationCardFieldViewModel>(fields ?? Array.Empty<ToolInvocationCardFieldViewModel>());
+
+            LocalizationRuntime.Instance.LanguageChanged += OnLanguageChanged;
+        }
+
+        private void OnLanguageChanged(object? sender, EventArgs e)
+        {
+            OnPropertyChanged(nameof(Description));
         }
 
         public SkyweaverToolInvocationPresentationState State { get; }
 
-        public string Description { get; }
+        public string Description => LocalizationRuntime.Instance.GetString($"Tool.{State.ToolName}.Description", _originalDescription);
 
         public string IconPath { get; }
 
@@ -91,7 +117,13 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                     var definition = context.EffectiveDefinition.Parameters.FirstOrDefault(parameter =>
                         string.Equals(parameter.Name, field.ParameterName, StringComparison.OrdinalIgnoreCase));
                     var parameterState = context.State.GetOrCreateParameterState(field.ParameterName, definition);
-                    return new ToolInvocationCardFieldViewModel(field.Label, parameterState, field.EmptyValueText);
+                    var toolName = context.EffectiveDefinition.Name;
+                    return new ToolInvocationCardFieldViewModel(
+                        toolName,
+                        field.ParameterName,
+                        field.Label,
+                        parameterState,
+                        field.EmptyValueText);
                 })
                 .ToArray();
 
@@ -120,7 +152,13 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                     var definition = context.EffectiveDefinition.Parameters.FirstOrDefault(parameter =>
                         string.Equals(parameter.Name, field.ParameterName, StringComparison.OrdinalIgnoreCase));
                     var parameterState = context.State.GetOrCreateParameterState(field.ParameterName, definition);
-                    return new ToolInvocationCardFieldViewModel(field.Label, parameterState, field.EmptyValueText);
+                    var toolName = context.EffectiveDefinition.Name;
+                    return new ToolInvocationCardFieldViewModel(
+                        toolName,
+                        field.ParameterName,
+                        field.Label,
+                        parameterState,
+                        field.EmptyValueText);
                 })
                 .ToArray();
 

@@ -16,10 +16,12 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
     {
         public sealed class ToolParameterItemViewModel : ObservableObject
         {
+            private readonly string _toolName;
             private readonly string _description;
 
-            public ToolParameterItemViewModel(SkyweaverToolParameterDefinition definition)
+            public ToolParameterItemViewModel(string toolName, SkyweaverToolParameterDefinition definition)
             {
+                _toolName = toolName;
                 Name = definition.Name;
                 _description = definition.Description?.Trim() ?? string.Empty;
                 ParameterType = definition.ParameterType;
@@ -29,9 +31,11 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
 
             public string Name { get; }
 
+            public string DisplayName => L($"Tool.{_toolName}.Param.{Name}.DisplayName", Name);
+
             public string Description => string.IsNullOrWhiteSpace(_description)
                 ? L("ToolConfiguration.Parameter.NoDescription", "未提供参数说明。")
-                : _description;
+                : L($"Tool.{_toolName}.Param.{Name}.Description", _description);
 
             public SkyweaverToolParameterType ParameterType { get; }
 
@@ -57,6 +61,7 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
 
             public void RefreshLocalizedText()
             {
+                OnPropertyChanged(nameof(DisplayName));
                 OnPropertyChanged(nameof(Description));
                 OnPropertyChanged(nameof(TypeDisplayName));
                 OnPropertyChanged(nameof(RequirementText));
@@ -127,7 +132,7 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
                 CanBelongToToolKit = registration.CanBelongToToolKit;
                 _isEnabled = registration.IsEnabled;
                 Parameters = new ObservableCollection<ToolParameterItemViewModel>(
-                    registration.Definition.Parameters.Select(parameter => new ToolParameterItemViewModel(parameter)));
+                    registration.Definition.Parameters.Select(parameter => new ToolParameterItemViewModel(Name, parameter)));
 
                 _configurationPresenter = registration.CreateConfigurationPresenter();
                 if (_configurationPresenter != null)
@@ -141,9 +146,11 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
 
             public string Name { get; }
 
+            public string DisplayName => L($"Tool.{Name}.DisplayName", Name);
+
             public string Description => string.IsNullOrWhiteSpace(_description)
                 ? L("ToolConfiguration.Tool.NoDescription", "未提供工具说明。")
-                : _description;
+                : L($"Tool.{Name}.Description", _description);
 
             public string IconName => _hasExplicitIcon
                 ? _iconName
@@ -262,6 +269,7 @@ namespace Skyweaver.Controls.ToolConfigurationControl.ViewModels
 
             public void RefreshLocalizedText()
             {
+                OnPropertyChanged(nameof(DisplayName));
                 OnPropertyChanged(nameof(Description));
                 OnPropertyChanged(nameof(IconName));
                 OnPropertyChanged(nameof(DynamicDefinitionHint));

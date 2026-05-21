@@ -499,7 +499,7 @@
                                                             <DockPanel LastChildFill="False">
                                                                 <TextBlock FontSize="13"
                                                                            FontWeight="SemiBold"
-                                                                           Text="{Binding ToolName}"/>
+                                                                           Text="{Binding ToolDisplayName}"/>
                                                                 <Border DockPanel.Dock="Right"
                                                                         Margin="8,0,0,0"
                                                                         Padding="6,2"

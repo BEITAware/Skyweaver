@@ -95,7 +95,7 @@
                     </Border>
 
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="{Binding State.ToolName}"
+                        <TextBlock Text="{Binding State.ToolDisplayName}"
                                    FontFamily="{DynamicResource AeroFontFamily}"
                                    FontSize="{DynamicResource AeroLargeFontSize}"
                                    FontWeight="SemiBold"

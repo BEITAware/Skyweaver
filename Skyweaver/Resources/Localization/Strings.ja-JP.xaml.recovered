@@ -1,0 +1,2797 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=System.Runtime">
+    <system:String x:Key="Localization.Language.zh-CN">中国語 (簡体字)</system:String>
+
+    <system:String x:Key="Localization.Language.en-US">英語</system:String>
+
+    <system:String x:Key="Localization.Language.ja-JP">日本語</system:String>
+
+
+    <system:String x:Key="Preferences.Group.FilesSystem">ファイルとシステム</system:String>
+
+    <system:String x:Key="Preferences.Group.PresentationUi">表示とインターフェース</system:String>
+
+    <system:String x:Key="Preferences.Group.ContextManagement">コンテキスト管理</system:String>
+
+    <system:String x:Key="Preferences.Group.AboutSkyweaver">Skyweaverについて</system:String>
+
+    <system:String x:Key="Preferences.Page.DirectoryLocations">ディレクトリの場所</system:String>
+
+    <system:String x:Key="Preferences.Page.LateralFileSystem">ラテラルファイルシステム</system:String>
+
+    <system:String x:Key="Preferences.Page.Localization">言語設定</system:String>
+
+    <system:String x:Key="Preferences.Page.ChatSession">チャットセッション</system:String>
+
+    <system:String x:Key="Preferences.Page.ContextCompression">圧縮</system:String>
+
+    <system:String x:Key="Preferences.Page.SemanticSearch">セマンティック検索</system:String>
+
+    <system:String x:Key="Preferences.Sidebar.Title">設定</system:String>
+
+    <system:String x:Key="Preferences.BottomNav.LanguageModelConfiguration">言語モデル設定</system:String>
+
+    <system:String x:Key="Preferences.BottomNav.EmbeddingModelConfiguration">埋め込みモデル設定</system:String>
+
+    <system:String x:Key="Preferences.BottomNav.ToolConfiguration">ツール設定</system:String>
+
+    <system:String x:Key="Preferences.BottomNav.AgentConfiguration">エージェント設定</system:String>
+
+    <system:String x:Key="Preferences.BottomNav.WorkflowEditor">セッションフローエディタ</system:String>
+
+    <system:String x:Key="Preferences.Welcome.Title">Skyweaver 設定</system:String>
+
+    <system:String x:Key="Preferences.Welcome.Description">左側のメニューから設定ページを選択してください。</system:String>
+
+    <system:String x:Key="Preferences.Welcome.Hint">ファイルシステム、表示インターフェース、コンテキスト管理の設定が利用可能です。</system:String>
+
+    <system:String x:Key="Preferences.Welcome.CurrentGroups">現在のグループ</system:String>
+
+
+    <system:String x:Key="Common.ConfigurationStatus">設定ステータス</system:String>
+
+    <system:String x:Key="Common.ConfigurationFile">設定ファイル</system:String>
+
+    <system:String x:Key="Common.RecentStatus">最近のステータス</system:String>
+
+    <system:String x:Key="Common.OpenConfigurationDirectory">設定ディレクトリを開く</system:String>
+
+    <system:String x:Key="Common.BrowseEllipsis">参照...</system:String>
+
+    <system:String x:Key="Common.Confirm">OK</system:String>
+
+    <system:String x:Key="Common.Cancel">キャンセル</system:String>
+
+    <system:String x:Key="Common.Create">作成</system:String>
+
+    <system:String x:Key="Common.Agent">エージェント</system:String>
+
+    <system:String x:Key="Common.Model">モデル</system:String>
+
+    <system:String x:Key="Common.Node">ノード</system:String>
+
+    <system:String x:Key="Common.Connection">接続</system:String>
+
+    <system:String x:Key="Common.Instructions">説明</system:String>
+
+    <system:String x:Key="Common.Add">追加</system:String>
+
+    <system:String x:Key="Common.Duplicate">複製</system:String>
+
+    <system:String x:Key="Common.Delete">削除</system:String>
+
+    <system:String x:Key="Common.Remove">削除</system:String>
+
+    <system:String x:Key="Common.Browse">参照</system:String>
+
+    <system:String x:Key="Common.OpenDirectory">フォルダを開く</system:String>
+
+    <system:String x:Key="Common.Reload">再読み込み</system:String>
+
+    <system:String x:Key="Common.EnableAll">すべて有効化</system:String>
+
+    <system:String x:Key="Common.DisableAll">すべて無効化</system:String>
+
+    <system:String x:Key="Common.AllowAll">すべて許可</system:String>
+
+    <system:String x:Key="Common.RequireConfirmationAll">すべて要確認</system:String>
+
+    <system:String x:Key="Common.MoveUp">上に移動</system:String>
+
+    <system:String x:Key="Common.MoveDown">下に移動</system:String>
+
+    <system:String x:Key="Common.BuiltIn">組み込み</system:String>
+
+    <system:String x:Key="Common.DisplayName">表示名</system:String>
+
+    <system:String x:Key="Common.InterfaceType">インターフェースの種類</system:String>
+
+    <system:String x:Key="Common.ModelId">モデルID</system:String>
+
+    <system:String x:Key="Common.ApiKey">APIキー</system:String>
+
+    <system:String x:Key="Common.BaseUrl">ベースURL</system:String>
+
+    <system:String x:Key="Common.User">ユーザー</system:String>
+
+    <system:String x:Key="Common.ModelIdSummaryFormat">モデルID: {0}</system:String>
+
+    <system:String x:Key="Common.InterfaceSummaryFormat">インターフェース: {0}</system:String>
+
+    <system:String x:Key="Common.ContextSummaryFormat">コンテキスト: {0}</system:String>
+
+    <system:String x:Key="Common.DimensionsSummaryFormat">次元数: {0}</system:String>
+
+    <system:String x:Key="Common.MultimodalSummaryFormat">マルチモーダル: {0}</system:String>
+
+    <system:String x:Key="Common.StatusSummaryFormat">ステータス: {0}</system:String>
+
+    <system:String x:Key="Common.ExampleFormat">例: {0}</system:String>
+
+    <system:String x:Key="Common.DefaultValueFormat">デフォルト値: {0}</system:String>
+
+    <system:String x:Key="Common.Status.ConfigurationDirectoryUnavailable">設定ディレクトリが見つかりませんでした。</system:String>
+
+    <system:String x:Key="Common.Status.OpenConfigurationDirectoryFailedFormat">設定ディレクトリのオープンに失敗しました: {0}</system:String>
+
+    <system:String x:Key="Common.Status.ConfigurationLoaded">設定が読み込まれました。</system:String>
+
+
+    <system:String x:Key="LanguageModelConfiguration.Title">言語モデル設定</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.Description">言語モデルの接続詳細と、上位機能用のフォールバックモデル順序を設定します。</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.ListTitle">言語モデル一覧</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.AddModel">言語モデルを追加</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.DuplicateSelectedModel">選択したモデルを複製</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.RemoveSelectedModel">選択したモデルを削除</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.EditorTitle">言語モデルの設定</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.EmptySelection">左側で言語モデルを選択すると、ここで設定を編集できます。</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.ContextWindowTokens">コンテキストウィンドウのトークン数</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.InterfaceSettings.Default">インターフェース設定</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.InterfaceSettings.Format">{0} インターフェース設定</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.TestModel">モデルのテスト</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.CancelTest">テストを中止</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.SendTemperature">Temperature を送信</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.SendTopP">Top P を送信</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.SendTopPUnderscore">Top_P を送信</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.LimitOutputTokens">出力トークン数を制限</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.SendPresencePenalty">PresencePenalty を送信</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.SendFrequencyPenalty">FrequencyPenalty を送信</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.FixedSeed">固定シード</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.ReasoningEffort">推論の強さ (Reasoning Effort)</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.IncludeThoughts">思考プロセスを含める</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.SendThinkingLevel">Thinking Level を送信</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.SendThinkingBudget">Thinking Budget を送信</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.Title">機能レイヤー一覧</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.Add">機能レイヤーを追加</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.RemoveSelected">選択したレイヤーを削除</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.LayerName">レイヤー名</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.AddLanguageModel">言語モデルを追加</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.ManagementHint.BuiltIn">システム組み込みの機能レイヤーです。名前の変更や削除はできません。</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.ManagementHint.User">ユーザー定義の機能レイヤー。</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.Status.Complete">完了</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.Status.Incomplete">未完了</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.Status.NoModelSelected">言語モデルが選択されていません</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.Status.MissingModel">参照されている言語モデルが存在しません</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.Status.Added">言語モデルが追加され、保存されました。</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.Status.Removed">言語モデルが削除され、保存されました。</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.Status.Duplicated">言語モデルが複製され、保存されました。</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.Status.LayerAdded">機能レイヤーが追加され、保存されました。</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.Status.LayerRemoved">機能レイヤーが削除され、保存されました。</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.Status.LayerOrderSaved">機能レイヤー内の言語モデルの順序が保存されました。</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.Status.ModelSaved">言語モデルの設定が保存されました。</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.Status.LayerSaved">機能レイヤーの設定が保存されました。</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.Status.SaveFailedFormat">保存に失敗しました: {0}</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.Status.TestCanceled">テストが中止されました。</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.Status.TestCanceledInline">[テスト中止]</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.Status.TestFailedFormat">テスト失敗: {0}</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.NewModelNameFormat">言語モデル {0}</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.NewLayerNameFormat">機能レイヤー {0}</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.DuplicateSuffixFormat">{0} - コピー</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.DefaultModelName">言語モデル</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.UnnamedModelFormat">名前なしモデル ({0})</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.UnnamedLayerFormat">名前なし機能レイヤー ({0})</system:String>
+
+    <system:String x:Key="GoogleLanguageModel.Error.CountTokensFailedFormat">Google countTokens リクエストがステータス {0} ({1}) で失敗しました。{2}</system:String>
+
+    <system:String x:Key="GoogleLanguageModel.Error.TotalTokensMissing">Google countTokens レスポンスに totalTokens が含まれていません。</system:String>
+
+    <system:String x:Key="GoogleLanguageModel.Error.RequestFailedFormat">Google API リクエストがステータス {0} ({1}) で失敗しました。{2}</system:String>
+
+    <system:String x:Key="GoogleLanguageModel.Error.NoErrorPayload">エラー情報が返されませんでした。</system:String>
+
+    <system:String x:Key="GoogleLanguageModel.Error.Unknown">不明な Google API エラー。</system:String>
+
+
+    <system:String x:Key="EmbeddingModelConfiguration.Title">埋め込みモデル設定</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.Description">AerialCity の検索および埋め込み呼び出し用のベクトル埋め込みモデル接続を設定します。</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.ListTitle">埋め込みモデル一覧</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.EditorTitle">埋め込みモデルの設定</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.EmptySelection">左側で埋め込みモデルを選択すると、ここで設定を編集できます。</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.Dimensions">ベクトル次元数</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.MaxInputTokens">最大入力トークン数</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.Normalize">ベクトルを正規化</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.SupportsMultimodal">マルチモーダル埋め込みをサポート</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.IncludeBinaryProjection">保存されたコンテンツ投影にバイナリデータを含める</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.SendTaskType">Task Type を送信</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.SendInlineData">Google リクエストに inlineData を送信</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.InterfaceSettings.Default">インターフェース設定</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.InterfaceSettings.Format">{0} インターフェース設定</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.NewModelNameFormat">埋め込みモデル {0}</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.DefaultModelName">埋め込みモデル</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.Status.Complete">完了</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.Status.Incomplete">未完了</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.Status.SaveFailedFormat">保存に失敗しました: {0}</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.Status.GeneratingTestEmbedding">テスト埋め込みを生成中...</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.Status.TestCanceled">テストが中止されました。</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.Status.TestFailedFormat">テストに失敗しました: {0}</system:String>
+
+    <system:String x:Key="EmbeddingModel.Test.SuccessFormat">埋め込みテスト成功: {0:N0} 次元、ノルム {1:0.####}、モデル {2}、インターフェース {3}。プレビュー: [{4}]</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.Multimodal.Supported">サポートあり</system:String>
+
+    <system:String x:Key="EmbeddingModelConfiguration.Multimodal.Unsupported">サポートなし</system:String>
+
+
+    <system:String x:Key="ToolConfiguration.Title">ツール設定</system:String>
+
+    <system:String x:Key="ToolConfiguration.Description">ISkyweaverTool 実装をスキャンし、ランタイムのツール定義を表示して、ツールが自身の設定パネルや ToolKit オーケストレーションをマウントできるようにします。</system:String>
+
+    <system:String x:Key="ToolConfiguration.DiscoveryHint">ホストは有効状態、カスタムツール設定、および ToolKit 構造を保存します。ツールは独自の MVVM、動的定義、プロンプト説明、および実行時設定読み込みを提供できます。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Permission">権限</system:String>
+
+    <system:String x:Key="ToolConfiguration.ListTitle">ツール一覧</system:String>
+
+    <system:String x:Key="ToolConfiguration.Details">詳細</system:String>
+
+    <system:String x:Key="ToolConfiguration.EmptySelection">左側のツールを選択すると、その実行時定義、パラメータ、およびカスタム設定が表示されます。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Metadata">ツールのメタデータ</system:String>
+
+    <system:String x:Key="ToolConfiguration.Icon">アイコン</system:String>
+
+    <system:String x:Key="ToolConfiguration.ImplementationType">実装タイプ</system:String>
+
+    <system:String x:Key="ToolConfiguration.DefinitionSource">定義ソース</system:String>
+
+    <system:String x:Key="ToolConfiguration.InvocationTemplate">呼び出しテンプレート</system:String>
+
+    <system:String x:Key="ToolConfiguration.CustomConfiguration">カスタム設定</system:String>
+
+    <system:String x:Key="ToolConfiguration.CustomConfigurationSavedHint">変更はホストのツール設定ファイルに直接保存されます。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Parameters">パラメータ</system:String>
+
+    <system:String x:Key="ToolConfiguration.ParameterInputNote">注意: 呼び出しパラメータの生の入力は常に文字列であり、実行前にパラメータタイプに従って正規化されます。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Enabled">有効</system:String>
+
+    <system:String x:Key="ToolConfiguration.ToolKits.Title">ToolKit 設定</system:String>
+
+    <system:String x:Key="ToolConfiguration.ToolKits.Add">ToolKit を追加</system:String>
+
+    <system:String x:Key="ToolConfiguration.ToolKits.RemoveSelected">選択した ToolKit を削除</system:String>
+
+    <system:String x:Key="ToolConfiguration.ToolKits.Name">ToolKit 名</system:String>
+
+    <system:String x:Key="ToolConfiguration.ToolKits.AddTool">ツールを追加</system:String>
+
+    <system:String x:Key="ToolConfiguration.ToolKits.ManagementHint">この ToolKit に追加されたツールは、エージェントループ開始時にデフォルトで LLM に公開されません。LoadToolKits を使用して明示的にロードする必要があります。</system:String>
+
+    <system:String x:Key="ToolConfiguration.ToolKits.UnnamedFormat">名前なし ToolKit ({0})</system:String>
+
+    <system:String x:Key="ToolConfiguration.Parameter.NoDescription">パラメータの説明はありません。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Parameter.Type.Boolean">Boolean</system:String>
+
+    <system:String x:Key="ToolConfiguration.Parameter.Type.Integer">Integer</system:String>
+
+    <system:String x:Key="ToolConfiguration.Parameter.Type.Number">Number</system:String>
+
+    <system:String x:Key="ToolConfiguration.Parameter.Type.Json">JSON</system:String>
+
+    <system:String x:Key="ToolConfiguration.Parameter.Type.String">String</system:String>
+
+    <system:String x:Key="ToolConfiguration.Parameter.Required">必須</system:String>
+
+    <system:String x:Key="ToolConfiguration.Parameter.Optional">オプション</system:String>
+
+    <system:String x:Key="ToolConfiguration.Parameter.NoDefaultValue">デフォルト値なし</system:String>
+
+    <system:String x:Key="ToolConfiguration.Parameter.RequirementSummary.None">入力不要</system:String>
+
+    <system:String x:Key="ToolConfiguration.Parameter.RequirementSummary.Format">必須 {0} / オプション {1}</system:String>
+
+    <system:String x:Key="ToolConfiguration.Parameter.Count.None">パラメータなし</system:String>
+
+    <system:String x:Key="ToolConfiguration.Parameter.Count.Format">パラメータ数: {0}</system:String>
+
+    <system:String x:Key="ToolConfiguration.Parameter.BooleanHint">呼び出しパラメータは最初に文字列として受信され、その後 true/false、1/0、yes/no、または on/off に正規化されます。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Parameter.IntegerHint">呼び出しパラメータは最初に文字列として受信され、その後整数として解析されます。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Parameter.NumberHint">呼び出しパラメータは最初に文字列として受信され、その後小数として解析されます。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Parameter.JsonHint">呼び出しパラメータは最初に文字列として受信され、その後 JSON として解析されます。配列やオブジェクトに適しています。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Parameter.StringHint">呼び出しパラメータは文字列としてそのまま渡されます。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Parameter.TextExample">&lt;テキスト&gt;</system:String>
+
+    <system:String x:Key="ToolConfiguration.Tool.NoDescription">ツールの説明はありません。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Tool.DefaultIcon">デフォルトアイコン</system:String>
+
+    <system:String x:Key="ToolConfiguration.Tool.DynamicDefinition">実行時ツール定義は保存された設定から動的に計算されます。カスタム設定の編集後、このページを再読み込みしてパラメータとデフォルト値を更新してください。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Tool.StaticDefinition">現在の表示はツールの静的定義を使用しています。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Tool.CustomPanel">このツールは独自のカスタマイズ設定パネルを提供します。レイアウト、コントロール、およびインタラクションはツール自身によって所有され、ホストはそれらを埋め込みおよび永続化するのみです。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Tool.NoCustomPanel">このツールはカスタム設定パネルを提供していません。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Tool.Enabled">有効</system:String>
+
+    <system:String x:Key="ToolConfiguration.Tool.Disabled">無効</system:String>
+
+    <system:String x:Key="ToolConfiguration.Tool.CustomConfigMode">カスタム設定あり</system:String>
+
+    <system:String x:Key="ToolConfiguration.Tool.BasicConfigMode">基本設定のみ</system:String>
+
+    <system:String x:Key="ToolConfiguration.Tool.IconSummary.Default">ツールに明示的なアイコンが宣言されていないため、デフォルトのアイコンが使用されます。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Tool.IconSummary.Format">アイコン名: {0}</system:String>
+
+    <system:String x:Key="ToolConfiguration.Tool.CustomSaveFailedFormat">ツール '{0}' のカスタム設定を保存できませんでした。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Summary.NoTools">ツールが見つかりませんでした。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Summary.Format">合計 {0} 个のツールが見つかりました。{1} 個が有効で、{2} 個がカスタム設定を持っています。</system:String>
+
+    <system:String x:Key="ToolConfiguration.ToolKitSummary.Empty">ToolKit がまだ設定されていません。ToolKit に追加されたツールは、エージェントループ開始時にデフォルトで LLM に提供されません。</system:String>
+
+    <system:String x:Key="ToolConfiguration.ToolKitSummary.Format">{0} 個の ToolKit が設定されており、合計 {1} 個のツール参照があります。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Status.NoTools">ツールが見つかりませんでした。Tools ディレクトリ配下に ISkyweaverTool を実装する .cs ファイルを追加してください。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Status.LoadedFormat">{0} 個のツールがロードされました。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Status.LoadFailedFormat">ツールのロードに失敗しました: {0}</system:String>
+
+    <system:String x:Key="ToolConfiguration.Status.ToolEnabledFormat">ツール '{0}' が有効化されました。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Status.ToolDisabledFormat">ツール '{0}' が無効化されました。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Status.ToolCustomSavedFormat">ツール '{0}' のカスタム設定が保存されました。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Status.AllEnabled">すべてのツールが有効化されました。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Status.AllDisabled">すべてのツールが無効化されました。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Status.SaveToolsFailedFormat">ツール設定の保存に失敗しました: {0}</system:String>
+
+    <system:String x:Key="ToolConfiguration.Status.ToolKitLoadFailedFormat">ToolKit のロードに失敗しました: {0}</system:String>
+
+    <system:String x:Key="ToolConfiguration.Status.ToolKitAdded">ToolKit が追加され、保存されました。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Status.DefaultToolKitSaved">デフォルト ToolKit メンバーシップの上書きが保存されました。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Status.ToolKitRemoved">ToolKit が削除され、保存されました。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Status.ToolKitOrderSaved">ToolKit 内のツール順序が保存されました。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Status.ToolKitSaved">ToolKit 設定が保存されました。</system:String>
+
+    <system:String x:Key="ToolConfiguration.Status.SaveToolKitFailedFormat">ToolKit 設定の保存に失敗しました: {0}</system:String>
+
+    <system:String x:Key="ToolConfiguration.NewToolKitNameFormat">ToolKit {0}</system:String>
+
+
+    <system:String x:Key="AgentConfiguration.Title">エージェント設定</system:String>
+
+    <system:String x:Key="AgentConfiguration.Description">エージェント ID、バインドされたモデル、システムプロンプト、ツール権限、および実行パラメータを定義します。エージェントはこれらを使用して、指定された指示を実行します。</system:String>
+
+    <system:String x:Key="AgentConfiguration.ListTitle">エージェント一覧</system:String>
+
+    <system:String x:Key="AgentConfiguration.EmptySelection">左側でエージェントを選択すると、ここで設定を編集できます。</system:String>
+
+    <system:String x:Key="AgentConfiguration.AgentId">エージェントID</system:String>
+
+    <system:String x:Key="AgentConfiguration.RuntimeRole">エージェントの役割</system:String>
+
+    <system:String x:Key="AgentConfiguration.SubAgentIntroduction">サブエージェント紹介</system:String>
+
+    <system:String x:Key="AgentConfiguration.LanguageModel">言語モデル</system:String>
+
+    <system:String x:Key="AgentConfiguration.RefreshModelCatalog">モデルカタログを更新</system:String>
+
+    <system:String x:Key="AgentConfiguration.SelectionMode">選択モード</system:String>
+
+    <system:String x:Key="AgentConfiguration.Target">ターゲット</system:String>
+
+    <system:String x:Key="AgentConfiguration.DefaultToolKits">デフォルト ToolKit</system:String>
+
+    <system:String x:Key="AgentConfiguration.DefaultToolKits.Add">ToolKit を追加</system:String>
+
+    <system:String x:Key="AgentConfiguration.DefaultToolKits.Hint">ここで選択した ToolKit は、このエージェントの起動時に自動的にロードされます。LoadToolKits を呼び出さなくても、メインエージェントとサブエージェントの両方のモードに適用されます。</system:String>
+
+    <system:String x:Key="AgentConfiguration.SystemPrompt">システムプロンプト</system:String>
+
+    <system:String x:Key="AgentConfiguration.ToolPermissions">ツール権限</system:String>
+
+    <system:String x:Key="AgentConfiguration.ReloadTools">ツールを再読み込み</system:String>
+
+    <system:String x:Key="AgentConfiguration.ToolMissing">ツールが見つかりません</system:String>
+
+    <system:String x:Key="AgentConfiguration.UseStructuredXmlIo">構造化 XML 入出力を使用</system:String>
+
+    <system:String x:Key="AgentConfiguration.InputDescription">入力の説明</system:String>
+
+    <system:String x:Key="AgentConfiguration.OutputDescription">出力の説明</system:String>
+
+    <system:String x:Key="AgentConfiguration.InputXmlNodes">入力 XML ノード</system:String>
+
+    <system:String x:Key="AgentConfiguration.OutputXmlNodes">出力 XML ノード</system:String>
+
+    <system:String x:Key="AgentConfiguration.AddRootChildNode">ルート子ノードを追加</system:String>
+
+    <system:String x:Key="AgentConfiguration.AddChildNode">子ノードを追加</system:String>
+
+    <system:String x:Key="AgentConfiguration.PromptBuildTest">プロンプト構築テスト</system:String>
+
+    <system:String x:Key="AgentConfiguration.BuildPrompt">プロンプトを構築</system:String>
+
+    <system:String x:Key="AgentConfiguration.CopyResult">結果をコピー</system:String>
+
+    <system:String x:Key="AgentConfiguration.Permission.Disabled">無効</system:String>
+
+    <system:String x:Key="AgentConfiguration.Permission.RequireConfirmation">要確認</system:String>
+
+    <system:String x:Key="AgentConfiguration.Permission.Allow">許可</system:String>
+
+    <system:String x:Key="AgentConfiguration.SelectionMode.SpecificLanguageModel">特定の言語モデル</system:String>
+
+    <system:String x:Key="AgentConfiguration.SelectionMode.CapabilityLayer">機能レイヤー</system:String>
+
+    <system:String x:Key="AgentConfiguration.RuntimeRole.MainOnly">メインセッションフローエージェントのみ</system:String>
+
+    <system:String x:Key="AgentConfiguration.RuntimeRole.SubAgentOnly">サブエージェントのみ</system:String>
+
+    <system:String x:Key="AgentConfiguration.RuntimeRole.MainAndSubAgent">両方の役割</system:String>
+
+    <system:String x:Key="AgentConfiguration.AgentSummary.Empty">エージェントが設定されていません。</system:String>
+
+    <system:String x:Key="AgentConfiguration.AgentSummary.Format">エージェント数: {0}</system:String>
+
+    <system:String x:Key="AgentConfiguration.DisplayNameFallback">(名前なしエージェント)</system:String>
+
+    <system:String x:Key="AgentConfiguration.AgentIdFallback">(IDなし)</system:String>
+
+    <system:String x:Key="AgentConfiguration.StructuredMode.Xml">结构化 XML</system:String>
+
+    <system:String x:Key="AgentConfiguration.StructuredMode.NaturalLanguage">自然言語</system:String>
+
+    <system:String x:Key="AgentConfiguration.RuntimeRoleText.SubOnly">サブエージェントのみ</system:String>
+
+    <system:String x:Key="AgentConfiguration.RuntimeRoleText.MainAndSub">メイン/サブエージェント</system:String>
+
+    <system:String x:Key="AgentConfiguration.RuntimeRoleText.MainOnly">メインエージェントのみ</system:String>
+
+    <system:String x:Key="AgentConfiguration.GlobalAvailability.Missing">現在のツール検出結果にありません</system:String>
+
+    <system:String x:Key="AgentConfiguration.GlobalAvailability.Enabled">グローバル: 有効</system:String>
+
+    <system:String x:Key="AgentConfiguration.GlobalAvailability.Disabled">グローバル: 無効</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.InitialPrompt">エージェントを選択し、「プロンプトを構築」をクリックしてください。</system:String>
+
+    <system:String x:Key="AgentConfiguration.PromptHint.NoAgent">エージェントを選択し、「プロンプトを構築」をクリックします。LLM に送信される完全なシステムプロンプトがここに表示されます。</system:String>
+
+    <system:String x:Key="AgentConfiguration.PromptHint.SelectedFormat">現在のターゲット: {0}。エージェント設定の編集後に再構築してください。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.Loaded">エージェント設定が読み込まれました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.LoadFailedFormat">エージェントのロードに失敗しました: {0}</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.Added">エージェントが追加され、保存されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.Duplicated">エージェントが複製され、保存されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.Removed">エージェントが削除され、保存されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.AvatarUpdated">アバターが更新されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.ToolsReloaded">ツール権限が現在のツールレジストリから更新されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.AllToolsAllowed">現在のエージェントのすべてのツール権限が「許可」に設定されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.AllToolsDisabled">現在のエージェントのすべてのツール権限が「無効」に設定されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.AllToolsRequireConfirmation">現在のエージェントのすべてのツール権限が「要確認」に設定されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.SaveFailedFormat">エージェント設定の保存に失敗しました: {0}</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.CurrentResultNotGenerated">結果はまだ生成されていません。「プロンプトを構築」をクリックして、完全なシステムプロンプトを表示してください。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Tool.NoDescription">ツール説明はありません。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Tool.MissingDescription">現在のツール検出結果にありません。</system:String>
+
+    <system:String x:Key="AgentConfiguration.NewAgentNameFormat">エージェント {0}</system:String>
+
+    <system:String x:Key="AgentConfiguration.AgentCopyName">エージェントのコピー</system:String>
+
+    <system:String x:Key="AgentConfiguration.AgentCopyNameFormat">{0} のコピー</system:String>
+
+    <system:String x:Key="AgentConfiguration.DefaultInputDescription">ユーザーのチャットメッセージ</system:String>
+
+    <system:String x:Key="AgentConfiguration.DefaultOutputDescription">なし。Passdown ツール呼び出しは不要</system:String>
+
+    <system:String x:Key="AgentConfiguration.Dialog.ImageFilter">画像ファイル|*.png;*.jpg;*.jpeg;*.bmp;*.ico|すべてのファイル|*.*</system:String>
+
+    <system:String x:Key="AgentConfiguration.Dialog.SelectAvatarTitle">アバター画像を選択</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.LanguageModelCatalogRefreshed">言語モデルカタログが更新されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.LanguageModelCatalogRefreshFailedFormat">言語モデルカタログの更新に失敗しました: {0}</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.PromptBuiltFormat">エージェント '{0}' の完全なシステムプロンプトが生成されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.PromptBuildFailedFormat">プロンプトの構築に失敗しました: {0}</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.PromptCopied">プロンプトをクリップボードにコピーしました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.PromptCopyFailedFormat">プロンプトのコピーに失敗しました: {0}</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.InputNodeAdded">入力スキーマノードが追加されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.OutputNodeAdded">出力スキーマノードが追加されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.InputChildNodeAdded">入力スキーマ子ノードが追加されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.OutputChildNodeAdded">出力スキーマ子ノードが追加されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.InputNodeRemoved">入力スキーマノードが削除されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.OutputNodeRemoved">出力スキーマノードが削除されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.Saved">エージェント設定が保存されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.ToolPermissionListUpdated">ツール権限リストが更新されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.ToolPermissionUpdated">ツール権限が更新されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.DefaultToolKitUpdated">デフォルト ToolKit が更新されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.DefaultToolKitListUpdated">デフォルト ToolKit リストが更新されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Status.XmlSchemaUpdated">XML スキーマが更新されました。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Validation.MissingAgentIdFormat">エージェント '{0}' にエージェント ID がありません。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Validation.InvalidAgentIdFormat">エージェント ID '{0}' は無効です。英数字のみ許可されます。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Validation.DuplicateAgentIdFormat">エージェント ID '{0}' が重複しています。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Validation.InputSchema">入力スキーマ</system:String>
+
+    <system:String x:Key="AgentConfiguration.Validation.OutputSchema">出力スキーマ</system:String>
+
+    <system:String x:Key="AgentConfiguration.Validation.EmptyNodeNameFormat">エージェント '{0}' の {1} に空のノード名があります。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Validation.InvalidNodeNameFormat">{0} のノード名 '{1}' は有効な XML 要素名ではありません。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Catalog.LanguageModelErrorFormat">言語モデル: {0}</system:String>
+
+    <system:String x:Key="AgentConfiguration.Catalog.CapabilityLayerErrorFormat">機能レイヤー: {0}</system:String>
+
+    <system:String x:Key="AgentConfiguration.Binding.CatalogLoadFailedFormat">言語モデルカタログの読み込みに失敗しました: {0}</system:String>
+
+    <system:String x:Key="AgentConfiguration.Binding.NoAgent">言語モデルを設定する前にエージェントを選択してください。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Binding.NoLanguageModels">言語モデルがまだ設定されていません。まず「言語モデル設定」ページでモデルを追加してください。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Binding.SpecificNotSelected">特定の言語モデルが選択されていません。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Binding.SpecificMissing">選択された言語モデルは存在しません。別のモデルを選択してください。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Binding.SpecificFixedFormat">エージェントは常に言語モデル '{0}' を使用し、他のモデルへのフォールバックは行いません。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Binding.SpecificIncompleteFormat">言語モデル '{0}' が選択されていますが、そのインターフェース設定が不完全です。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Binding.NoCapabilityLayers">機能レイヤーがまだ設定されていません。まず「言語モデル設定」ページで作成してください。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Binding.CapabilityNotSelected">機能レイヤーが選択されていません。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Binding.CapabilityMissing">選択された機能レイヤーは存在しません。別のレイヤーを選択してください。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Binding.CapabilityBuiltInFormat">機能レイヤー '{0}' は組み込みであり、エージェントに直接バインドすることはできません。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Binding.CapabilityNoCandidatesFormat">機能レイヤー '{0}' に候補言語モデルがありません。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Binding.CapabilityNoUsableCandidatesFormat">機能レイヤー '{0}' に直接呼び出し可能な言語モデルがありません。候補が存在し、完全なインターフェース設定を持っているか確認してください。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Binding.UnavailableCandidatesFormat"> さらに {0} 個の候補が利用不可であるか、参照が見つかりません。</system:String>
+
+    <system:String x:Key="AgentConfiguration.Binding.CapabilityOrderFormat">エージェントは機能レイヤー '{0}' を次の順序で試行します: {1}。エラーなしで応答した最初のモデルで停止します。{2}</system:String>
+
+    <system:String x:Key="AgentConfiguration.Binding.CandidateOverflowFormat">{0} -&amp;gt; 合計 {1} 個のモデル</system:String>
+
+    <system:String x:Key="AgentConfiguration.CapabilityLayerOptionFormat">{0} ({1} 個の候補)</system:String>
+
+    <system:String x:Key="AgentConfiguration.UnnamedAgent">無題のエージェント</system:String>
+
+    <system:String x:Key="AgentConfiguration.UnsetAgentId">未設定の ID</system:String>
+
+
+    <system:String x:Key="Localization.Page.Title">言語設定</system:String>
+
+    <system:String x:Key="Localization.Page.Description">Skyweaver ユーザーインターフェースの表示言語を設定します。</system:String>
+
+    <system:String x:Key="Localization.Page.Hint">変更はすぐに Localization.xml に書き込まれ、ローカライズのリソースキーを使用するUIに即座に適用されます。</system:String>
+
+    <system:String x:Key="Localization.Language.Label">言語</system:String>
+
+    <system:String x:Key="Localization.Language.Hint">現在は簡体字中国語、英語、日本語が利用可能です。Skyweaver や AerialCity などの固有名詞は変更されません。</system:String>
+
+    <system:String x:Key="Localization.Status.Loaded">ローカライズ設定が読み込まれました。</system:String>
+
+    <system:String x:Key="Localization.Status.Saved">言語設定が保存されました。</system:String>
+
+    <system:String x:Key="Localization.Status.SaveFailedFormat">保存に失敗しました：{0}</system:String>
+
+    <system:String x:Key="Localization.Instruction.1">1. この設定は、現在の設定ディレクトリにある Localization.xml に即座に書き込まれます。</system:String>
+
+    <system:String x:Key="Localization.Instruction.2">2. リソースキーに紐づくユーザーインターフェースは即座に切り替わりますが、LLM側のプロンプト、ツール定義、会話内容はローカライズランタイムによって書き換えられません。</system:String>
+
+
+    <system:String x:Key="Directories.Page.Title">ディレクトリの場所</system:String>
+
+    <system:String x:Key="Directories.Page.Description">Skyweaver がセッション、設定、デバッグファイル、セッションフローを保存する場所を設定します。</system:String>
+
+    <system:String x:Key="Directories.Page.Hint">ディレクトリ設定は、デフォルト設定ディレクトリの Directories.xml に即座に書き込まれます。</system:String>
+
+    <system:String x:Key="Directories.ChatSessions.Label">チャットセッションディレクトリ</system:String>
+
+    <system:String x:Key="Directories.ChatSessions.Hint">ChatSessions が保存される場所を設定します。デフォルトは ユーザーフォルダ/Skyweaver/ChatSessions です。</system:String>
+
+    <system:String x:Key="Directories.ConfigurationFiles.Label">設定ディレクトリ</system:String>
+
+    <system:String x:Key="Directories.ConfigurationFiles.Hint">設定ファイルが保存される場所を設定します。Directories.xml は常に ユーザーフォルダ/Skyweaver/Configuration に残ります。</system:String>
+
+    <system:String x:Key="Directories.Debug.Label">デバッグディレクトリ</system:String>
+
+    <system:String x:Key="Directories.Debug.Hint">デバッグファイルが保存される場所を設定します。デフォルトは ユーザーフォルダ/Skyweaver/Debug です。</system:String>
+
+    <system:String x:Key="Directories.SessionFlows.Label">セッションフローディレクトリ</system:String>
+
+    <system:String x:Key="Directories.SessionFlows.Hint">セッションフローのノードグラフが保存される場所を設定します。デフォルトは ユーザーフォルダ/Skyweaver/Nodegraphs です。</system:String>
+
+    <system:String x:Key="Directories.AerialCity.Label">AerialCity ディレクトリ</system:String>
+
+    <system:String x:Key="Directories.AerialCity.Hint">AerialCity RAG データベースとマッピングファイルが保存される場所を設定します。デフォルトは ユーザーフォルダ/Skyweaver/AerialCity です。</system:String>
+
+    <system:String x:Key="Directories.ConfigurationFile.Label">ディレクトリ設定ファイル</system:String>
+
+    <system:String x:Key="Directories.DefaultRoot.Label">デフォルトルートディレクトリ</system:String>
+
+    <system:String x:Key="Directories.OpenConfigurationLocation">ディレクトリ設定場所を開く</system:String>
+
+    <system:String x:Key="Directories.Instruction.1">1. Directories.xml は ユーザーフォルダ/Skyweaver/Configuration に固定されており、設定ディレクトリの設定による影響を受けません。</system:String>
+
+    <system:String x:Key="Directories.Instruction.2">2. ディレクトリ設定の保存時にターゲットディレクトリの存在を確認します。既存のファイルは自動的に移行されません。</system:String>
+
+    <system:String x:Key="Directories.Instruction.3">3. 開いているセッションやセッションフローは自身の記録されたパスを使用し続けます。新規作成または後からロードされるものはこのページの設定を使用します。</system:String>
+
+    <system:String x:Key="Directories.Status.Loaded">ディレクトリ設定が読み込まれました。</system:String>
+
+    <system:String x:Key="Directories.Status.ChatSessionsSaved">チャットセッションディレクトリが保存されました。</system:String>
+
+    <system:String x:Key="Directories.Status.ConfigurationFilesSaved">設定ディレクトリが保存されました。</system:String>
+
+    <system:String x:Key="Directories.Status.DebugSaved">デバッグディレクトリが保存されました。</system:String>
+
+    <system:String x:Key="Directories.Status.SessionFlowsSaved">セッションフローディレクトリが保存されました。</system:String>
+
+    <system:String x:Key="Directories.Status.AerialCitySaved">AerialCity ディレクトリが保存されました。</system:String>
+
+    <system:String x:Key="Directories.Status.BrowseFailedFormat">フォルダの選択に失敗しました: {0}</system:String>
+
+    <system:String x:Key="Directories.Status.OpenDirectoryFailedFormat">フォルダを開くのに失敗しました: {0}</system:String>
+
+    <system:String x:Key="Directories.Browse.ChatSessions">チャットセッション保存先フォルダを選択</system:String>
+
+    <system:String x:Key="Directories.Browse.ConfigurationFiles">設定ファイル保存先フォルダを選択</system:String>
+
+    <system:String x:Key="Directories.Browse.Debug">デバッグファイル保存先フォルダを選択</system:String>
+
+    <system:String x:Key="Directories.Browse.SessionFlows">セッションフロー保存先フォルダを選択</system:String>
+
+    <system:String x:Key="Directories.Browse.AerialCity">AerialCity フォルダを選択</system:String>
+
+
+    <system:String x:Key="ChatSession.Page.Title">チャットセッション</system:String>
+
+    <system:String x:Key="ChatSession.Page.Description">チャットセッションでの思考プロセスの表示形式を設定します。</system:String>
+
+    <system:String x:Key="ChatSession.Page.Hint">変更はすぐに PresentationUI.xml に書き込まれます。</system:String>
+
+    <system:String x:Key="ChatSession.CollapseReasoning.Label">デフォルトで思考プロセスを折りたたむ</system:String>
+
+    <system:String x:Key="ChatSession.CollapseReasoning.Content">新しい可折の思考プロセスブロックは、デフォルトで折りたたまれた状態で表示されます。</system:String>
+
+    <system:String x:Key="ChatSession.CollapseReasoning.Hint">可折の思考プロセスカードにのみ適用されます。本文に直接表示されるコンテンツは変更されません。</system:String>
+
+    <system:String x:Key="ChatSession.DefaultReasoning.Collapsed">新しい可折思考ブロックの初期状態は「折りたたむ」です。</system:String>
+
+    <system:String x:Key="ChatSession.DefaultReasoning.Expanded">新しい可折思考ブロックの初期状態は「展開する」です。</system:String>
+
+    <system:String x:Key="ChatSession.Status.Saved">チャットセッションの表示設定が保存されました。</system:String>
+
+    <system:String x:Key="ChatSession.Instruction.1">1. この設定は、現在の設定ディレクトリの PresentationUI.xml に即座に書き込まれます。</system:String>
+
+    <system:String x:Key="ChatSession.Instruction.2">2. これは、新しく出現する可折思考ブロックが、デフォルトで展開されるか折りたたまれるかを制御します。</system:String>
+
+    <system:String x:Key="ChatSession.Instruction.3">3. 現在のチャットビューでの手動の展開/折りたたみ状態は、ストリーミング更新時に強制的にリセットされません。</system:String>
+
+
+    <system:String x:Key="LateralFileSystem.Page.Description">ラテラルファイルシステムを有効にするかと、仮想化ルートで共有されるワークルートディレクトリを設定します。</system:String>
+
+    <system:String x:Key="LateralFileSystem.Page.Hint">フロントエンドの変更は自動的に XML に書き込まれます。LateralFileSystemTree.xml は最初の仮想フォルダが作成された後にのみ作成されます。</system:String>
+
+    <system:String x:Key="LateralFileSystem.Section.Basic">基本設定</system:String>
+
+    <system:String x:Key="LateralFileSystem.Enabled.Label">ラテラルファイルシステムを有効化</system:String>
+
+    <system:String x:Key="LateralFileSystem.Enabled.Content">ラテラルファイルシステム仮想化ルートの作成、維持、アクティブ化を許可します。</system:String>
+
+    <system:String x:Key="LateralFileSystem.WorkingRoot.Label">ワークルートディレクトリ</system:String>
+
+    <system:String x:Key="LateralFileSystem.WorkingRoot.Hint.HasValue">すべてのラテラルファイルシステム仮想化ルートはこのディレクトリの下に作成されます。</system:String>
+
+    <system:String x:Key="LateralFileSystem.WorkingRoot.Hint.Empty">ワークルートディレクトリを選択してください。</system:String>
+
+    <system:String x:Key="LateralFileSystem.Section.Environment">環境ステータス</system:String>
+
+    <system:String x:Key="LateralFileSystem.Backend.Label">仮想化バックエンド</system:String>
+
+    <system:String x:Key="LateralFileSystem.Section.Constraints">制約事項</system:String>
+
+    <system:String x:Key="LateralFileSystem.Instruction.1">1. すべての仮想化ルートはワークルートディレクトリの下にある必要があります。</system:String>
+
+    <system:String x:Key="LateralFileSystem.Instruction.2">2. LateralFileSystemTree.xml は設定段階では作成されず、バックエンドが最初のラテラルファイルシステムノードを作成した後に作成されます。</system:String>
+
+    <system:String x:Key="LateralFileSystem.Instruction.3">3. このページの有効化状態とワークルートディレクトリの変更は即座に設定ファイルに書き込まれます。</system:String>
+
+    <system:String x:Key="LateralFileSystem.Status.EnabledSaved">有効状態が保存されました。</system:String>
+
+    <system:String x:Key="LateralFileSystem.Status.WorkingRootSaved">ワークルートディレクトリが保存されました。</system:String>
+
+    <system:String x:Key="LateralFileSystem.Browse.WorkingRoot">ラテラルファイルシステムワークルートフォルダを選択</system:String>
+
+
+    <system:String x:Key="ContextCompression.Page.Title">圧縮</system:String>
+
+    <system:String x:Key="ContextCompression.Page.Description">コンテキスト圧縮およびコンテキスト保持ライフサイクルに関する設定を行います。</system:String>
+
+    <system:String x:Key="ContextCompression.Page.Hint">変更は ContextManagement.xml に即座に書き込まれます。</system:String>
+
+    <system:String x:Key="ContextCompression.MinCompaction.Content">コンテキストが制限に近づいたとき、バックグラウンドで古いツール呼び出しを圧縮します。</system:String>
+
+    <system:String x:Key="ContextCompression.MinCompaction.EnabledText">コンテキストが80%に達した後、バックグラウンドで古いツール呼び出しが圧縮されます。</system:String>
+
+    <system:String x:Key="ContextCompression.MinCompaction.DisabledText">MinCompaction は現在オフです。</system:String>
+
+    <system:String x:Key="ContextCompression.MaxCompaction.Content">MaxCompaction を有効化</system:String>
+
+    <system:String x:Key="ContextCompression.MaxCompaction.Hint">コンテキストウィンドウが上限に達し、MinCompaction が動作しない場合、セッションコンテキストに完全な圧縮を適用します。</system:String>
+
+    <system:String x:Key="ContextCompression.LifeCycle.Content">LifeCycle を有効化</system:String>
+
+    <system:String x:Key="ContextCompression.LifeCycle.Hint">特定のツール呼び出し結果にはライフサイクル制限が適用されます。一定のセッションターン数の後、それらはコンテキストから無効化され、ディスクに書き出されます。エージェントはそれらを取得でき、取得されると LifeCycle は適用されなくなります。</system:String>
+
+    <system:String x:Key="ContextCompression.LifeCycleRatio.Label">LifeCycle 比率</system:String>
+
+    <system:String x:Key="ContextCompression.LifeCycleRatio.Hint">LifeCycle で使用される実際の有効ライフサイクル長を調整します。端数は切り上げられます。</system:String>
+
+    <system:String x:Key="ContextCompression.RnnOptimization.Label">RNN 最適化</system:String>
+
+    <system:String x:Key="ContextCompression.RnnOptimization.Content">RNN 最適化された圧縮を有効化</system:String>
+
+    <system:String x:Key="ContextCompression.RnnOptimization.Hint">RWKV や Mamba などの RNN 言語モデルの場合にのみ有効にしてください。有効にすると、コンテキスト制限が解除され、より重要な結果やコンテンツが後方に移動され、線形アテンションに対するより強い影響力を維持します。無制限のコンテキストには外挿（extrapolation）が必要です。</system:String>
+
+    <system:String x:Key="ContextCompression.Status.MinCompactionSaved">MinCompaction 設定が保存されました。</system:String>
+
+    <system:String x:Key="ContextCompression.Status.MaxCompactionSaved">MaxCompaction 設定が保存されました。</system:String>
+
+    <system:String x:Key="ContextCompression.Status.LifeCycleSaved">LifeCycle 設定が保存されました。</system:String>
+
+    <system:String x:Key="ContextCompression.Status.LifeCycleRatioSaved">LifeCycle 比率が保存されました。</system:String>
+
+    <system:String x:Key="ContextCompression.Status.RnnOptimizationSaved">RNN 最適化圧縮設定が保存されました。</system:String>
+
+    <system:String x:Key="ContextCompression.Instruction.1">1. このページの設定は、現在の設定ディレクトリの ContextManagement.xml に即座に書き込まれます。</system:String>
+
+    <system:String x:Key="ContextCompression.Instruction.2">2. MinCompaction を除き、現在のオプションは設定の永続化のみを行い、実行時動作はまだ接続されていません。</system:String>
+
+
+    <system:String x:Key="Common.Refresh">更新</system:String>
+
+    <system:String x:Key="SemanticSearch.Page.Title">セマンティック検索</system:String>
+
+    <system:String x:Key="SemanticSearch.Page.Description">AerialCity RAG ツールの有効状態と、検索時に使用する埋め込みモデルを設定します。</system:String>
+
+    <system:String x:Key="SemanticSearch.AerialCityRag.Content">AerialCity RAG を有効化</system:String>
+
+    <system:String x:Key="SemanticSearch.AerialCityRag.Hint">有効にすると、InitializeAerialCityRAG、UpdateAerialCityDB、SemanticSearch、および KeywordSearch がエージェント呼び出し可能なツールカタログに入ります。ファイル編集ツールの書き込みは自動的に初期化された AerialCity DB に同期されます。</system:String>
+
+    <system:String x:Key="SemanticSearch.EmbeddingModel.Label">埋め込みモデル</system:String>
+
+    <system:String x:Key="SemanticSearch.EmbeddingModel.NotSelected">埋め込みモデルが選択されていません</system:String>
+
+    <system:String x:Key="SemanticSearch.EmbeddingModel.Readiness.Configured">設定済み</system:String>
+
+    <system:String x:Key="SemanticSearch.EmbeddingModel.Readiness.Incomplete">未完了</system:String>
+
+    <system:String x:Key="SemanticSearch.EmbeddingModel.Modality.Multimodal">マルチモーダル</system:String>
+
+    <system:String x:Key="SemanticSearch.EmbeddingModel.Modality.Text">テキスト</system:String>
+
+    <system:String x:Key="SemanticSearch.EmbeddingConcurrency.Label">埋め込み並行数</system:String>
+
+    <system:String x:Key="SemanticSearch.EmbeddingConcurrency.SummaryFormat">{0} 同時リクエスト</system:String>
+
+    <system:String x:Key="SemanticSearch.Status.Loaded">セマンティック検索設定が読み込まれました。</system:String>
+
+    <system:String x:Key="SemanticSearch.Status.RagEnabled">AerialCity RAG が有効化されました。</system:String>
+
+    <system:String x:Key="SemanticSearch.Status.RagDisabled">AerialCity RAG が無効化されました。</system:String>
+
+    <system:String x:Key="SemanticSearch.Status.EmbeddingModelCleared">埋め込みモデルの選択がクリアされました。</system:String>
+
+    <system:String x:Key="SemanticSearch.Status.EmbeddingModelSelectedFormat">選択された埋め込みモデル: {0}</system:String>
+
+    <system:String x:Key="SemanticSearch.Status.EmbeddingModelAutoSelectedFormat">自動選択された埋め込みモデル: {0}</system:String>
+
+    <system:String x:Key="SemanticSearch.Status.EmbeddingConcurrencySavedFormat">埋め込み並行数が {0} に設定されました。</system:String>
+
+    <system:String x:Key="SemanticSearch.Status.NoEmbeddingModels">埋め込みモデルがまだ設定されていません。まず「埋め込みモデル設定」パネルで追加してください。</system:String>
+
+    <system:String x:Key="SemanticSearch.Status.EmbeddingModelsLoadedFormat">{0} 個の埋め込みモデルがロードされました。</system:String>
+
+
+    <system:String x:Key="MainWindow.Ribbon.StatusTab">ステータス</system:String>
+
+    <system:String x:Key="MainWindow.Ribbon.ViewTab">表示</system:String>
+
+    <system:String x:Key="MainWindow.Ribbon.ZoomGroup">ズーム</system:String>
+
+    <system:String x:Key="MainWindow.Ribbon.ZoomFit">合わせる</system:String>
+
+    <system:String x:Key="MainWindow.Ribbon.ZoomFit.ToolTip">全体表示 (Ctrl+0)</system:String>
+
+    <system:String x:Key="MainWindow.Ribbon.ZoomIn">拡大</system:String>
+
+    <system:String x:Key="MainWindow.Ribbon.ZoomIn.ToolTip">拡大 (Ctrl+=)</system:String>
+
+    <system:String x:Key="MainWindow.Ribbon.ZoomOut">縮小</system:String>
+
+    <system:String x:Key="MainWindow.Ribbon.ZoomOut.ToolTip">縮小 (Ctrl+-)</system:String>
+
+    <system:String x:Key="MainWindow.Ribbon.DisplayGroup">表示</system:String>
+
+    <system:String x:Key="MainWindow.Ribbon.ShowGrid">グリッドを表示</system:String>
+
+    <system:String x:Key="MainWindow.Ribbon.ShowRuler">ルーラーを表示</system:String>
+
+    <system:String x:Key="MainWindow.Ribbon.ShowConnections">接続線を表示</system:String>
+
+    <system:String x:Key="MainWindow.Status.Ready">準備完了</system:String>
+
+    <system:String x:Key="MainWindow.Status.Zoom100">ズーム: 100%</system:String>
+
+    <system:String x:Key="MainWindow.Status.NodeCount0">ノード数: 0</system:String>
+
+
+    <system:String x:Key="SessionList.Title">セッション一覧</system:String>
+
+    <system:String x:Key="SessionList.Create">セッション作成</system:String>
+
+    <system:String x:Key="SessionList.Create.ToolTip">新しいセッションを作成</system:String>
+
+    <system:String x:Key="SessionList.Delete">セッションを削除...</system:String>
+
+    <system:String x:Key="SessionList.Delete.ToolTip">選択したセッションを削除</system:String>
+
+    <system:String x:Key="SessionList.Search">セッションを検索...</system:String>
+
+    <system:String x:Key="SessionList.Search.ToolTip">タイトルキーワードでセッションを検索</system:String>
+
+    <system:String x:Key="SessionList.SearchPlaceholder">タイトルを検索</system:String>
+
+    <system:String x:Key="SessionList.DefaultSessionName">新しいセッション</system:String>
+
+    <system:String x:Key="SessionList.TimeFormat">HH:mm</system:String>
+
+    <system:String x:Key="SessionList.Delete.MessageBoxTitle">セッションを削除</system:String>
+
+
+    <system:String x:Key="FileExplorer.Title">ファイル</system:String>
+
+    <system:String x:Key="FileExplorer.Refresh.ToolTip">ファイルツリーを更新</system:String>
+
+    <system:String x:Key="FileExplorer.Import">インポート</system:String>
+
+    <system:String x:Key="FileExplorer.Import.ToolTip">インポート機能は未接続です</system:String>
+
+    <system:String x:Key="FileExplorer.Manage">管理</system:String>
+
+    <system:String x:Key="FileExplorer.Manage.ToolTip">管理機能は未接続です</system:String>
+
+    <system:String x:Key="FileExplorer.SearchPlaceholder">リソースを検索...</system:String>
+
+    <system:String x:Key="FileExplorer.Loading">ロード中...</system:String>
+
+    <system:String x:Key="FileExplorer.Unknown">不明</system:String>
+
+    <system:String x:Key="Clipboard.Error.UnableToAccess">システムクリップボードにアクセスできません。</system:String>
+
+    <system:String x:Key="Clipboard.Error.InUse">システムクリップボードが現在他のアプリケーションによって使用されています。もう一度お試しください。</system:String>
+
+    <system:String x:Key="Clipboard.Error.TemporarilyUnavailable">システムクリップボードが一時的に利用できません。もう一度お試しください。</system:String>
+
+    <system:String x:Key="Clipboard.Error.ThreadCannotAccess">現在のスレッドはシステムクリップボードにアクセスできません。</system:String>
+
+    <system:String x:Key="Clipboard.Error.UnableToAccessFormat">システムクリップボードにアクセスできません: {0}</system:String>
+
+
+    <system:String x:Key="MultiFunctionArea.Title">フルビュー</system:String>
+
+    <system:String x:Key="MultiFunctionArea.CreateTab">タブを作成</system:String>
+
+    <system:String x:Key="Tabs.SkyweaverPreferences.Title">Skyweaver設定</system:String>
+
+    <system:String x:Key="Tabs.SkyweaverPreferences.Description">Skyweaver のグローバル設定、外観、デフォルト動作を管理します。</system:String>
+
+    <system:String x:Key="Tabs.WorkflowEditor.Title">セッションフローエディタ</system:String>
+
+    <system:String x:Key="Tabs.WorkflowEditor.Description">フルビュー領域でセッションフロー、ノード接続、プロセス状態を編集します。</system:String>
+
+    <system:String x:Key="Tabs.FileManager.Title">ファイルマネージャー</system:String>
+
+    <system:String x:Key="Tabs.FileManager.Description">現在のプロジェクトやアセットディレクトリ内のファイルを閲覧、フィルタリング、操作します。</system:String>
+
+    <system:String x:Key="Tabs.LateralFileSystemTree.Title">ラテラルファイルシステムツリー</system:String>
+
+    <system:String x:Key="Tabs.LateralFileSystemTree.Description">ナビゲーションや補助的なファイル閲覧に適したコンパクトなディレクトリツリーを表示します。</system:String>
+
+    <system:String x:Key="Tabs.LanguageModelConfiguration.Title">言語モデル設定</system:String>
+
+    <system:String x:Key="Tabs.LanguageModelConfiguration.Description">モデルソース、デフォルトパラメータ、コンテキストポリシー、および呼び出しプリセットを設定します。</system:String>
+
+    <system:String x:Key="Tabs.EmbeddingModelConfiguration.Title">埋め込みモデル設定</system:String>
+
+    <system:String x:Key="Tabs.EmbeddingModelConfiguration.Description">ベクトル埋め込みモデルソース、次元数、呼び出しパラメータ、および接続性テストを設定します。</system:String>
+
+    <system:String x:Key="Tabs.ToolConfiguration.Title">ツール設定</system:String>
+
+    <system:String x:Key="Tabs.ToolConfiguration.Description">ツールカタログ、有効状態、パラメータテンプレート、および実行時ポリシーを設定します。</system:String>
+
+    <system:String x:Key="Tabs.AgentConfiguration.Title">エージェント設定</system:String>
+
+    <system:String x:Key="Tabs.AgentConfiguration.Description">エージェントID、役割、モデルバインディング、およびツール権限を設定します。</system:String>
+
+    <system:String x:Key="Tabs.TextEditor.Title">テキストエディタ</system:String>
+
+    <system:String x:Key="Tabs.TextEditor.Description">スクリプト、プロンプト、設定ファイル用のテキストワークスペース。</system:String>
+
+    <system:String x:Key="Tabs.AgentWizard.Title">エージェント作成ウィザード</system:String>
+
+    <system:String x:Key="Tabs.AgentWizard.Description">ステップバイステップのウィザードを使用して、新しいエージェント、役割、行動テンプレートを素早く設定します。</system:String>
+
+    <system:String x:Key="Tabs.Placeholder.NoContentFormat">タブ '{0}' にはまだコンテンツがありません。</system:String>
+
+    <system:String x:Key="DocumentWorkspace.Placeholder.Default">ドキュメントの内容がここに表示されます...</system:String>
+
+    <system:String x:Key="DocumentWorkspace.Placeholder.NoContentViewModelFormat">ドキュメント '{0}' のコンテンツビューモデルがまだバインドされていません。</system:String>
+
+
+    <system:String x:Key="NameInput.Title">名前を入力</system:String>
+
+    <system:String x:Key="NameInput.Prompt">名前を入力してください</system:String>
+
+    <system:String x:Key="NameInput.Label">名前</system:String>
+
+    <system:String x:Key="LateralFolder.Title">ラテラルフォルダ</system:String>
+
+    <system:String x:Key="LateralFolder.Prompt.Create">新しいラテラルフォルダを作成します。</system:String>
+
+    <system:String x:Key="LateralFolder.DisplayName.Label">表示名</system:String>
+
+    <system:String x:Key="LateralFolder.SourcePath.Label">投影元フォルダ</system:String>
+
+    <system:String x:Key="LateralFolder.ParentHintFormat">継承元: {0}</system:String>
+
+    <system:String x:Key="LateralFolder.Browse.SourceFolder">投影元フォルダを選択</system:String>
+
+    <system:String x:Key="LateralFolder.Validation.DisplayNameRequired">ラテラルフォルダの表示名を入力してください。</system:String>
+
+    <system:String x:Key="LateralFolder.Validation.SourceFolderRequired">投影元フォルダを選択してください。</system:String>
+
+    <system:String x:Key="LateralFileSystem.Runtime.BackendAvailable">ネイティブのラテラルファイルシステムバックエンドは利用可能です。</system:String>
+
+    <system:String x:Key="LateralFileSystem.Runtime.BackendUnavailable">ネイティブのラテラルファイルシステムバックエンドは利用できません。</system:String>
+
+    <system:String x:Key="LateralFileSystem.Runtime.WorkingRootRequired">まず「ラテラルファイルシステム」設定ページでワークルートディレクトリを設定してください。</system:String>
+
+    <system:String x:Key="LateralFileSystem.Runtime.EnableBeforeMutation">ラテラルファイルシステムが有効になっていません。ラテラルフォルダの作成や継承を行う前に、設定ページで有効にしてください。</system:String>
+
+    <system:String x:Key="LateralFolder.Validation.SourceFolderMissing">選択したフォルダが存在しません。</system:String>
+
+    <system:String x:Key="ToolConfirmation.Title">ツール呼び出し確認</system:String>
+
+    <system:String x:Key="ToolConfirmation.TitleWithToolFormat">ツール呼び出し確認 - {0}</system:String>
+
+    <system:String x:Key="ToolConfirmation.FullInvocationXml">完全な呼び出し XML</system:String>
+
+    <system:String x:Key="ToolConfirmation.AllowExecution">実行を許可</system:String>
+
+    <system:String x:Key="Splash.Copyright">© 2026 BEITAware. 現状のまま提供され、保証はありません。</system:String>
+
+    <system:String x:Key="Splash.LoadingScripts">スクリプトを読み込み中...</system:String>
+
+    <system:String x:Key="ResourceManager.Title">リソースマネージャー</system:String>
+
+    <system:String x:Key="ResourceManager.Sort.ByName">名前順</system:String>
+
+    <system:String x:Key="ResourceManager.Sort.ByTime">日付順</system:String>
+
+    <system:String x:Key="ResourceManager.Sort.BySize">サイズ順</system:String>
+
+    <system:String x:Key="ResourceManager.Preview">プレビュー</system:String>
+
+    <system:String x:Key="ResourceManager.BasicActions">基本操作</system:String>
+
+    <system:String x:Key="ResourceManager.Export">エクスポート</system:String>
+
+    <system:String x:Key="ResourceManager.Import">インポート</system:String>
+
+    <system:String x:Key="ResourceManager.Delete">削除</system:String>
+
+    <system:String x:Key="ResourceManager.Rename">名前変更</system:String>
+
+    <system:String x:Key="ResourceManager.ExtendedActions">拡張操作</system:String>
+
+    <system:String x:Key="CreateChatSession.Title">セッション作成...</system:String>
+
+    <system:String x:Key="CreateChatSession.MessageBoxTitle">セッション作成</system:String>
+
+    <system:String x:Key="CreateChatSession.Header">新規チャットセッションの作成</system:String>
+
+    <system:String x:Key="CreateChatSession.SessionName.Label">セッション名</system:String>
+
+    <system:String x:Key="CreateChatSession.FlowBinding.Label">セッションフローをバインド</system:String>
+
+    <system:String x:Key="CreateChatSession.History.Title">履歴セッション</system:String>
+
+    <system:String x:Key="CreateChatSession.History.Empty">表示する履歴セッションはまだありません。</system:String>
+
+    <system:String x:Key="CreateChatSession.Preview.PendingSession">作成予定のセッション</system:String>
+
+    <system:String x:Key="CreateChatSession.Agents.Title">関連エージェント</system:String>
+
+    <system:String x:Key="CreateChatSession.Agents.Description">これらのエージェントは現在のセッションフローに参加します。</system:String>
+
+    <system:String x:Key="CreateChatSession.Agents.Empty">現在のセッションフローにはエージェントノードが含まれていません。</system:String>
+
+    <system:String x:Key="CreateChatSession.Models.Title">関連言語モデル</system:String>
+
+    <system:String x:Key="CreateChatSession.Models.Description">現在のセッションフローが解決するすべてのモデルをまとめます。</system:String>
+
+    <system:String x:Key="CreateChatSession.Models.Empty">利用可能な言語モデルはまだ解決されていません。</system:String>
+
+    <system:String x:Key="CreateChatSession.FlowStatus.Title">セッションフローのステータス</system:String>
+
+    <system:String x:Key="CreateChatSession.FlowStatus.Description">セッションを作成する前に、現在のセッションフローを確認してください。</system:String>
+
+    <system:String x:Key="CreateChatSession.Validation.SessionNameRequired">セッション名を入力してください。</system:String>
+
+    <system:String x:Key="CreateChatSession.Validation.FlowRequired">まず新規セッションのセッションフローを選択してください。</system:String>
+
+    <system:String x:Key="CreateChatSession.Flow.NotSelected">セッションフローが選択されていません</system:String>
+
+    <system:String x:Key="CreateChatSession.Flow.HeaderFormat">セッションフロー: {0}</system:String>
+
+    <system:String x:Key="CreateChatSession.Flow.SelectPrompt">作成するチャットセッションをプレビューするためにセッションフローを選択してください。</system:String>
+
+    <system:String x:Key="CreateChatSession.Flow.NotSelectedStatus">セッションフロー未選択</system:String>
+
+    <system:String x:Key="CreateChatSession.Session.Unnamed">無題のセッション</system:String>
+
+
+    <system:String x:Key="ChatSessionControl.ContextMenu.Delete">削除</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextMenu.DeleteDescription">このメッセージを永久に削除し、エージェントのコンテキストから削除します。</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextMenu.Copy">コピー</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextMenu.CopyDescription">Markdown フォーマットとツール呼び出しを含む現在のメッセージをコピーします。</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextMenu.CopyMarkdown">Markdownとしてコピー</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextMenu.CopyMarkdownDescription">ツール呼び出しを除いて現在のメッセージをコピーします。</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextMenu.CopyPlainText">純粋なテキストとしてコピー</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextMenu.CopyPlainTextDescription">Markdown フォーマットやツール呼び出しを除いて現在のメッセージをコピーします。</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextMenu.Edit">編集</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextMenu.EditDescription">このメッセージを編集します。</system:String>
+
+    <system:String x:Key="ChatSessionControl.ToolWaiting">ツールの実行回填を待機中。</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextWindowUsage">コンテキストウィンドウの使用状況</system:String>
+
+    <system:String x:Key="ChatSessionControl.CancelExecution">実行をキャンセル</system:String>
+
+    <system:String x:Key="ChatSessionControl.DeleteSelected">選択した項目を削除</system:String>
+
+    <system:String x:Key="ChatSessionControl.Clear">クリア</system:String>
+
+    <system:String x:Key="ChatSessionControl.EmptyState">メッセージはまだありません。下にユーザーメッセージを入力し、送信してセッションフローを開始してください。</system:String>
+
+    <system:String x:Key="ChatSessionControl.AddImage">画像を追加</system:String>
+
+    <system:String x:Key="ChatSessionControl.AddClipboard">クリップボードを追加</system:String>
+
+    <system:String x:Key="ChatSessionControl.Voice">音声</system:String>
+
+    <system:String x:Key="ChatSessionControl.AddFile">ファイルを追加</system:String>
+
+    <system:String x:Key="ChatSessionControl.Send">送信</system:String>
+
+
+    <system:String x:Key="Common.Open">開く</system:String>
+
+    <system:String x:Key="Common.Save">保存</system:String>
+
+    <system:String x:Key="Common.Rename">名前変更</system:String>
+
+    <system:String x:Key="Common.None">なし</system:String>
+
+    <system:String x:Key="Common.NotConfigured">未設定</system:String>
+
+    <system:String x:Key="Common.Unavailable">利用不可</system:String>
+
+    <system:String x:Key="Common.LoadingEllipsis">読み込み中...</system:String>
+
+    <system:String x:Key="Common.LoadFailedFormat">読み込み失敗: {0}</system:String>
+
+    <system:String x:Key="Common.PanelReady">パネル準備完了</system:String>
+
+
+    <system:String x:Key="MainWindow.Title">Skyweaver Alpha Preview</system:String>
+
+    <system:String x:Key="Splash.Title">Skyweaver Preview</system:String>
+
+
+    <system:String x:Key="ToolInvocation.Status.ReceivingParameters">パラメータを受信中</system:String>
+
+    <system:String x:Key="ToolInvocation.Status.ParametersReceived">パラメータ受信完了、ツールの結果を待機中</system:String>
+
+    <system:String x:Key="ToolInvocation.Status.ToolResultReceived">ツールの結果を受信しました</system:String>
+
+    <system:String x:Key="ToolInvocation.Streaming">ストリーミング</system:String>
+
+    <system:String x:Key="ToolInvocation.WaitingForParameter">パラメータを待機中...</system:String>
+
+    <system:String x:Key="ToolInvocation.Result">結果</system:String>
+
+
+    <system:String x:Key="ShowLiveXaml.PreviewTitle">LiveXAML プレビュー</system:String>
+
+    <system:String x:Key="ShowLiveXaml.NoPreview">プレビューはまだありません。</system:String>
+
+
+    <system:String x:Key="WorkspaceNoteTemplate.ConfigurationTitle">WorkspaceNoteTemplate 設定</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.ConfigurationDescription">メモテンプレートツールのデフォルトプリセット、コンテキストメタデータ、およびサマリープレースホルダー行数を調整します。</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preset">プリセット</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.IncludeContextMetadata">Workspace / Session コンテキストを含める</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.IncludeContextMetadataHint">有効にすると、生成されるコンテンツに現在のワークスペースとセッションタイトルが含まれます。</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.DefaultTags">デフォルトタグ</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.SummaryBulletCount">サマリープレースホルダー行数</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.LivePreview">ライブプレビュー</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.PreviewHint">このプレビューは設定の変更に合わせて即座に更新されます。実際のツール呼び出しでも、タイトル、優先度、固定、タグを上書きできます。</system:String>
+
+
+    <system:String x:Key="LateralFileSystemTree.Title">ラテラルファイルシステムツリー</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Title.NumberedFormat">ラテラルファイルシステムツリー {0}</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Description">アプリケーションの LateralFS バックエンドに接続し、ラテラルフォルダ、継承、物理ファイルの使用状況を管理します。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.ConnectionStatus">接続ステータス</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.WorkingRoot">ワークルート</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.WorkingRoot.NotConfigured">ワークルートが設定されていません</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Backend.WorkingRootMissing">ワークルートが設定されていません。まず「ラテラルファイルシステム」設定ページで設定を完了してください。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Backend.Disabled">LateralFS のワークルートは設定されていますが、無効化されているため、作成、継承、マージ、削除のアクションは無効です。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Backend.Connected">LateralFS バックエンドに接続されました。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Selection.None">ラテラルフォルダが選択されていません</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Selection.BackendUnavailable">このシステムではラテラルファイルシステム仮想化バックエンドを起動できません。保存されたノードは表示できますが、作成、継承、マージ、削除のアクションは無効です。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Selection.WorkingRootMissing">まず「ラテラルファイルシステム」設定ページでワークルートを設定してください。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Selection.BackendDisabled">バックエンドは現在無効です。既存のノードは表示できますが、作成、マージ、削除のアクションは無効なままです。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Selection.NoNodes">ラテラルフォルダはまだ作成されていません。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Selection.SelectFolder">まず左側のキャンバスでラテラルフォルダを選択してください。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.SelectedNode.KindFormat">種類: {0}</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.SelectedNode.OwnerFormat">所有者: {0}</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.SelectedNode.ParentFormat">継承元: {0}</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.SelectedNode.VirtualRootFormat">仮想ルート: {0}</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.SelectedNode.ProjectionSourceFormat">投影元: {0}</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.CreateProjectionFolder">新規ラテラルフォルダ</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.CreateInheritanceFolder">ラテラルフォルダを継承</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Dialog.CreateProjectionPrompt">新しいラテラルフォルダを作成し、投影するフォルダを選択してください。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Dialog.CreateInheritancePrompt">現在のノードから継承し、デフォルトで親ノードを投影するラテラルフォルダを作成します。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Inherit">継承</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.DeleteFolder">ラテラルフォルダを削除</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Delete.HasChildrenFormat">ラテラルフォルダ "{0}" はダウンストリームへの継承関係があります。カスケード削除はまだサポートされていません。まず継承されている子フォルダを削除してください。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Delete.ConfirmFormat">ラテラルフォルダ "{0}" を削除しますか？</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.MergeFolder">元のフォルダにマージ</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Merge.ConfirmFormat">ラテラルフォルダ "{0}" を元のフォルダにマージしますか？
+
+元のフォルダ: {1}
+
+これにより、元のフォルダの内容が現在のラテラルフォルダのビューで完全に置き換えられます。元のフォルダに存在し、ラテラルフォルダに存在しないコンテンツは削除されます。成功すると、この LateralFS ノードと投影フォルダは削除されます。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Status.Connecting">ラテラルファイルシステムバックエンドに接続中...</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Status.CreatedFormat">ラテラルフォルダ "{0}" が作成されました。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Status.InheritedFormat">継承フォルダ "{1}"（継承元: "{0}"）が作成されました。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Status.DeletedFormat">ラテラルフォルダ "{0}" が削除されました。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Status.MergingFormat">ラテラルフォルダ "{0}" を元のフォルダにマージ中...</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Status.MergedFormat">"{0}" を元のフォルダにマージし、LateralFS ノードを削除しました。スナップショットには {1} 個のファイルと {2} 個のフォルダが含まれています。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Status.MergeFailedFormat">ラテラルフォルダ "{0}" のマージに失敗しました。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Status.LoadedButDisabledFormat">{0} 個のラテラルフォルダをロードしましたが、バックエンドは現在無効です。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Status.ConnectedNoNodes">LateralFS バックエンドに接続しましたが、ラテラルフォルダはまだ作成されていません。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Status.LoadedFormat">バックエンドから {0} 個のラテラルフォルダをロードしました。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Status.SourceChangedFormat">"{0}" の元のフォルダの変更を検出しました。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Validation.SelectInheritanceSource">まず継承元となるラテラルフォルダを選択してください。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Validation.EnableBackendFirst">ラテラルファイルシステムは現在無効です。作成、継承、マージ、削除を行う前に、設定ページで有効にしてください。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.FolderDetails">ラテラルフォルダ詳細</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.FileResourceTree">ファイルリソースツリー</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.HydratedSize">物理使用量</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.RefreshTree">ノードを更新</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.RefreshFileView">更新と統計</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.RefreshFileView.ToolTip">現在のラテラルフォルダの物理使用量を再同期およびカウントします。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.ReleaseLock">ロックを解除</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.LoadingFileTree">物理使用量をカウントし、ファイルツリーをロード中...</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Inspector.CountingSize">物理使用量をカウント中...</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Inspector.LoadingFileTree">ファイルツリーをロード中...</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Inspector.SummaryFormat">{0}/{1} 個のファイルを Hydrate しました。ディレクトリ: {2} 個</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Inspector.ReadFailed">このラテラルフォルダのファイルビューを読み込めません。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Inspector.SizeUnavailableButLoaded">物理使用量のカウントに失敗しましたが、ファイルビューはロードされました。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Inspector.SizeUnavailable">このラテラルフォルダの物理使用量をカウントできません。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Inspector.NotCounted">未カウント</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Inspector.SizeNotAutoCounted">物理使用量は自動的にはカウントされません。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Inspector.RootEntriesLoadedFormat">{0} 個のルートエントリをロードしました。物理使用量はカウントされていません。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Inspector.ManualRefreshHint">「更新と統計」をクリックすると、Hydrate カウント、ディレクトリ数、および物理使用量が更新されます。</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Inspector.SyncingCountingLoading">同期、物理使用量のカウント、およびファイルツリーをロード中...</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.Inspector.SyncingLoading">同期およびファイルツリーをロード中...</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.StorageNote.PlaceholderFilesFormat">プレースホルダー {0} 個</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.StorageNote.HydratedPlaceholdersFormat">Hydrate 済みのプレースホルダー {0} 個</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.StorageNote.FullFilesFormat">完全なファイル {0} 個</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.StorageNote.Estimated">一部の状態は推定値です</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.FileNode.DetailFormat">論理 {0}  ·  物理 {1}  ·  {2}</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.FileNode.State.FullDirectory">完全なディレクトリ</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.FileNode.State.FullFile">完全なファイル</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.FileNode.State.HydratedDirectoryPlaceholder">Hydrate 済みのディレクトリプレースホルダー</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.FileNode.State.HydratedFilePlaceholder">Hydrate 済みのファイルプレースホルダー</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.FileNode.State.DirectoryPlaceholder">ディレクトリプレースホルダー</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.FileNode.State.FilePlaceholder">ファイルプレースホルダー</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.FileNode.State.Tombstone">Tombstone</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.FileNode.State.Unknown">不明な状態</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.FileNode.State.Directory">ディレクトリ</system:String>
+
+    <system:String x:Key="LateralFileSystemTree.FileNode.State.File">ファイル</system:String>
+
+
+    <system:String x:Key="TextEditor.Title">テキストエディタ</system:String>
+
+    <system:String x:Key="TextEditor.Title.NumberedFormat">テキストエディタ {0}</system:String>
+
+    <system:String x:Key="TextEditor.New">新規</system:String>
+
+    <system:String x:Key="TextEditor.New.ToolTip">新規ドキュメント</system:String>
+
+    <system:String x:Key="TextEditor.Open">開く</system:String>
+
+    <system:String x:Key="TextEditor.Open.ToolTip">テキストファイルを開く</system:String>
+
+    <system:String x:Key="TextEditor.Save">保存</system:String>
+
+    <system:String x:Key="TextEditor.Save.ToolTip">現在のドキュメントを保存</system:String>
+
+    <system:String x:Key="TextEditor.SaveAs">名前を付けて保存</system:String>
+
+    <system:String x:Key="TextEditor.SaveAs.ToolTip">現在のドキュメントを別名で保存</system:String>
+
+    <system:String x:Key="TextEditor.Undo">元に戻す</system:String>
+
+    <system:String x:Key="TextEditor.Undo.ToolTip">元に戻す</system:String>
+
+    <system:String x:Key="TextEditor.Redo">やり直し</system:String>
+
+    <system:String x:Key="TextEditor.Redo.ToolTip">やり直し</system:String>
+
+    <system:String x:Key="TextEditor.Insert">挿入</system:String>
+
+    <system:String x:Key="TextEditor.InsertLink.ToolTip">リンクを挿入</system:String>
+
+    <system:String x:Key="TextEditor.InsertPicture.ToolTip">画像を挿入</system:String>
+
+    <system:String x:Key="TextEditor.Bold.ToolTip">太字</system:String>
+
+    <system:String x:Key="TextEditor.Italic.ToolTip">斜体</system:String>
+
+    <system:String x:Key="TextEditor.Underline.ToolTip">下線</system:String>
+
+    <system:String x:Key="TextEditor.TextColor.ToolTip">文字色</system:String>
+
+    <system:String x:Key="TextEditor.AlignLeft.ToolTip">左揃え</system:String>
+
+    <system:String x:Key="TextEditor.Justify.ToolTip">両端揃え</system:String>
+
+    <system:String x:Key="TextEditor.BulletedList.ToolTip">箇条書き</system:String>
+
+    <system:String x:Key="TextEditor.NumberedList.ToolTip">番号付きリスト</system:String>
+
+    <system:String x:Key="TextEditor.ParagraphStyle.ToolTip">段落スタイル</system:String>
+
+    <system:String x:Key="TextEditor.Font.ToolTip">フォント</system:String>
+
+    <system:String x:Key="TextEditor.FontSize.ToolTip">フォントサイズ</system:String>
+
+    <system:String x:Key="TextEditor.PageSettings.ToolTip">ページ設定</system:String>
+
+    <system:String x:Key="TextEditor.RefreshPreview.ToolTip">プレビュー更新</system:String>
+
+    <system:String x:Key="TextEditor.Zoom.ToolTip">ズーム</system:String>
+
+    <system:String x:Key="TextEditor.Zoom">ズーム</system:String>
+
+    <system:String x:Key="TextEditor.Paragraph">標準</system:String>
+
+    <system:String x:Key="TextEditor.Heading1">見出し 1</system:String>
+
+    <system:String x:Key="TextEditor.Heading2">見出し 2</system:String>
+
+    <system:String x:Key="TextEditor.CodeBlock">コードブロック</system:String>
+
+    <system:String x:Key="TextEditor.CurrentDocument.ToolTip">現在のドキュメント</system:String>
+
+    <system:String x:Key="TextEditor.Document">ドキュメント</system:String>
+
+    <system:String x:Key="TextEditor.Source">ソーステキスト</system:String>
+
+    <system:String x:Key="TextEditor.Outline">アウトライン</system:String>
+
+    <system:String x:Key="TextEditor.OutlineAndHelpers">アウトラインとヘルパー</system:String>
+
+    <system:String x:Key="TextEditor.MarkdownBackendPending">Markdown バックエンドは未接続です。</system:String>
+
+    <system:String x:Key="TextEditor.Pages">ページ</system:String>
+
+    <system:String x:Key="TextEditor.PrintablePages">印刷可能ページ</system:String>
+
+    <system:String x:Key="TextEditor.PrintablePagesOutlinePending">印刷用ページのアウトラインは未接続です。</system:String>
+
+    <system:String x:Key="TextEditor.Link">リンク</system:String>
+
+    <system:String x:Key="TextEditor.Picture">画像</system:String>
+
+    <system:String x:Key="TextEditor.Hyperlink">ハイパーリンク</system:String>
+
+    <system:String x:Key="TextEditor.Status.Ready">準備完了</system:String>
+
+    <system:String x:Key="TextEditor.Syntax.PlainText">プレーンテキスト</system:String>
+
+    <system:String x:Key="TextEditor.Status.Edited">編集済み</system:String>
+
+    <system:String x:Key="TextEditor.Document.Unsaved">未保存</system:String>
+
+    <system:String x:Key="TextEditor.DocumentSummaryFormat">{0} | {1} | {2}</system:String>
+
+    <system:String x:Key="TextEditor.HeaderStatusFormat">{0} | {1} | {2}</system:String>
+
+    <system:String x:Key="TextEditor.Status.Modified">変更あり</system:String>
+
+    <system:String x:Key="TextEditor.Status.Saved">保存済み</system:String>
+
+    <system:String x:Key="TextEditor.StatusTextFormat">{0} | {1}</system:String>
+
+    <system:String x:Key="TextEditor.WordCountFormat">{0} 行 | {1} 文字</system:String>
+
+    <system:String x:Key="TextEditor.LineColumnFormat">行 {0}, 列 {1}</system:String>
+
+    <system:String x:Key="TextEditor.Mode.Default">デフォルト</system:String>
+
+    <system:String x:Key="TextEditor.ModeSummary.PrintablePagesPending">Markdown リッチページモード - バックエンド未接続</system:String>
+
+    <system:String x:Key="TextEditor.ModeSummary.PlainTextFormat">テキスト/コードモード - 構文プロファイル: {0}</system:String>
+
+    <system:String x:Key="TextEditor.Status.NewDocument">新規ドキュメント</system:String>
+
+    <system:String x:Key="TextEditor.Dialog.OpenTitle">テキストファイルを開く</system:String>
+
+    <system:String x:Key="TextEditor.Dialog.FileFilter">テキストおよびコードファイル|*.txt;*.md;*.cs;*.xaml;*.xml;*.json;*.ps1;*.js;*.ts;*.html;*.css;*.ini;*.log|Skyweaver Markdown (*.smd)|*.smd|すべてのファイル (*.*)|*.*</system:String>
+
+    <system:String x:Key="TextEditor.Status.OpenCanceled">オープンがキャンセルされました</system:String>
+
+    <system:String x:Key="TextEditor.ConfirmUnsavedChanges">現在のドキュメントには保存されていない変更があります。先に保存しますか？</system:String>
+
+    <system:String x:Key="TextEditor.Status.OpenedFormat">{0} を開きました</system:String>
+
+    <system:String x:Key="TextEditor.Status.OpenFailed">オープンに失敗しました</system:String>
+
+    <system:String x:Key="TextEditor.Dialog.SaveTitle">テキストファイルを保存</system:String>
+
+    <system:String x:Key="TextEditor.Status.SaveCanceled">保存がキャンセルされました</system:String>
+
+    <system:String x:Key="TextEditor.Status.SavedFileFormat">{0} を保存しました</system:String>
+
+    <system:String x:Key="TextEditor.Status.SaveFailed">保存に失敗しました</system:String>
+
+
+    <system:String x:Key="WorkflowEditor.Title">セッションフローエディタ</system:String>
+
+    <system:String x:Key="WorkflowEditor.Title.NumberedFormat">セッションフローエディタ {0}</system:String>
+
+    <system:String x:Key="WorkflowEditor.Description">エージェントセッションフローのノードグラフ構造を編集し、ノード接続と実行パスを管理します。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Hint">開始ノードは「ユーザー入力」、終了ノードは「返却」に固定されています。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Graph.NotOpen">ノードグラフが開かれていません</system:String>
+
+    <system:String x:Key="WorkflowEditor.Graph.CurrentHeaderFormat">現在のノードグラフ: {0}</system:String>
+
+    <system:String x:Key="WorkflowEditor.AgentSummary.Format">{0} 個のエージェント設定が接続されています。エージェントノードの入力/出力タイプは「エージェント設定」ページに自動的に追従します。</system:String>
+
+    <system:String x:Key="WorkflowEditor.AgentSummary.Empty">利用可能なエージェント設定はありません。まず「エージェント設定」ページでエージェントを作成してください。</system:String>
+
+    <system:String x:Key="WorkflowEditor.InspectorTitleFormat">{0} 設定</system:String>
+
+    <system:String x:Key="WorkflowEditor.SelectedNodeHint.Agent">エージェントノードは、それが非表示エージェントであるかどうかを設定できます。</system:String>
+
+    <system:String x:Key="WorkflowEditor.SelectedNodeHint.LogicExecution">パススルー入力ポートを追加できます。各入力は自動的に対応する出力を生成します。</system:String>
+
+    <system:String x:Key="WorkflowEditor.SelectedNodeHint.NextLogicExecution">スマート入力ポートは接続後に自動的に型が決定され、次のスマート入力を追加します。</system:String>
+
+    <system:String x:Key="WorkflowEditor.SelectedNodeHint.Default">このノードにはまだ追加の設定がありません。</system:String>
+
+    <system:String x:Key="WorkflowEditor.PendingConnection.None">接続の開始点が選択されていません</system:String>
+
+    <system:String x:Key="WorkflowEditor.PendingConnection.Format">開始点: {0} / {1}</system:String>
+
+    <system:String x:Key="WorkflowEditor.AgentOption.None">利用可能なエージェント設定はありません</system:String>
+
+    <system:String x:Key="WorkflowEditor.Node.LogicAnd">AND</system:String>
+
+    <system:String x:Key="WorkflowEditor.Node.LogicOr">OR</system:String>
+
+    <system:String x:Key="WorkflowEditor.Node.LogicXor">XOR</system:String>
+
+    <system:String x:Key="WorkflowEditor.Node.LogicNot">NOT</system:String>
+
+    <system:String x:Key="WorkflowEditor.Node.Logic">論理演算</system:String>
+
+    <system:String x:Key="WorkflowEditor.Node.LogicExecution">論理実行</system:String>
+
+    <system:String x:Key="WorkflowEditor.Node.NextLogicExecution">次の論理実行のみ</system:String>
+
+    <system:String x:Key="WorkflowEditor.Node.UserInput">ユーザー入力</system:String>
+
+    <system:String x:Key="WorkflowEditor.Node.Return">返却</system:String>
+
+    <system:String x:Key="WorkflowEditor.Port.Input">入力</system:String>
+
+    <system:String x:Key="WorkflowEditor.Port.InputA">入力 A</system:String>
+
+    <system:String x:Key="WorkflowEditor.Port.InputB">入力 B</system:String>
+
+    <system:String x:Key="WorkflowEditor.Port.Result">結果</system:String>
+
+    <system:String x:Key="WorkflowEditor.Port.ConditionBoolean">条件 (Boolean)</system:String>
+
+    <system:String x:Key="WorkflowEditor.PortType.Xml">XML</system:String>
+
+    <system:String x:Key="WorkflowEditor.PortType.NaturalLanguage">自然言語</system:String>
+
+    <system:String x:Key="WorkflowEditor.Port.TypedInputFormat">{0} 入力 {1}</system:String>
+
+    <system:String x:Key="WorkflowEditor.Port.TypedOutputFormat">{0} 出力 {1}</system:String>
+
+    <system:String x:Key="WorkflowEditor.Port.NaturalLanguageInput">自然言語入力</system:String>
+
+    <system:String x:Key="WorkflowEditor.Port.NaturalLanguageOutput">自然言語出力</system:String>
+
+    <system:String x:Key="WorkflowEditor.Port.XmlFieldInput">XML フィールド入力</system:String>
+
+    <system:String x:Key="WorkflowEditor.Port.XmlInput">XML 入力</system:String>
+
+    <system:String x:Key="WorkflowEditor.Port.XmlOutput">XML 出力</system:String>
+
+    <system:String x:Key="WorkflowEditor.Port.SmartInput">スマート入力</system:String>
+
+    <system:String x:Key="WorkflowEditor.XmlField">XML フィールド</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.Saved">セッションフローが保存されました。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.LayoutSaved">セッションフローのレイアウトが保存されました。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.OutputPortSelectedFormat">選択された出力ポート: {0} / {1}。ターゲットの入力ポートをクリックしてください。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.SelectOutputPortFirst">最初に接続の開始点として出力ポートを選択してください。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.ConnectionUpdated">接続が更新されました。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.AgentCatalogRefreshed">エージェントカタログが更新されました。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.AgentNodesSynced">エージェント設定からエージェントノードが同期されました。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.AgentConfigurationLoadFailedFormat">エージェント設定の読み込みに失敗しました: {0}</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.NoAvailableAgents">利用可能なエージェント設定はありません。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.AgentNodeAddedFormat">エージェントノードを追加しました: {0}。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.LogicNodeAddedFormat">論理ノードを追加しました: {0}。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.LogicExecutionNodeAdded">論理実行ノードを追加しました。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.NextLogicExecutionNodeAdded">「次の論理実行のみ」ノードを追加しました。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.LogicExecutionPortsUpdated">論理実行ノードのポートが更新されました。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.NodeDeleted">ノードが削除されました。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.PortConfigurationSaved">ポート設定が保存されました。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.SourceMustBeOutput">接続の開始点は出力ポートである必要があります。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.TargetMustBeInput">接続のターゲットは入力ポートである必要があります。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.PortTypeMismatchFormat">端口タイプの不一致: {0} を {1} に接続することはできません。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.ConnectionAlreadyExists">この接続はすでに存在します。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.ConnectedFormat">接続済み: {0} -&amp;gt; {1}</system:String>
+
+    <system:String x:Key="WorkflowEditor.Status.SaveFailedFormat">セッションフローの保存に失敗しました: {0}</system:String>
+
+    <system:String x:Key="WorkflowEditor.GraphLibrary.Title">ノードグラフライブラリ</system:String>
+
+    <system:String x:Key="WorkflowEditor.GraphLibrary.Directory">ディレクトリ</system:String>
+
+    <system:String x:Key="WorkflowEditor.GraphLibrary.CurrentOpen">現在オープン中</system:String>
+
+    <system:String x:Key="WorkflowEditor.GraphLibrary.CurrentFile">現在のファイル</system:String>
+
+    <system:String x:Key="WorkflowEditor.GraphLibrary.OpenDirectory">ディレクトリを開く</system:String>
+
+    <system:String x:Key="WorkflowEditor.GraphLibrary.Empty">ノードグラフはまだありません。</system:String>
+
+    <system:String x:Key="WorkflowEditor.GraphLibrary.SummaryFormat">保存されたノードグラフ数: {0}。リストアイテムをダブルクリックして、上のエディタで開くことができます。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Graph.Dialog.OpenTitle">ノードグラフを開く</system:String>
+
+    <system:String x:Key="WorkflowEditor.Graph.Dialog.CreateTitle">新規ノードグラフ</system:String>
+
+    <system:String x:Key="WorkflowEditor.Graph.Dialog.CreatePrompt">新規ノードグラフの名前を入力してください。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Graph.Dialog.RenameTitle">ノードグラフの名前変更</system:String>
+
+    <system:String x:Key="WorkflowEditor.Graph.Dialog.RenamePrompt">新しいノードグラフの名前を入力してください。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Graph.Dialog.DeleteTitle">ノードグラフの削除</system:String>
+
+    <system:String x:Key="WorkflowEditor.AgentOption.StructuredMenuDescriptionFormat">入力フィールド {0}、出力フィールド {1}</system:String>
+
+    <system:String x:Key="WorkflowEditor.AgentOption.MenuDescriptionFormat">入力: {0}、出力: {1}</system:String>
+
+    <system:String x:Key="WorkflowEditor.AgentOption.CreateAgentFirst">最初にエージェント設定でエージェントを作成してください。</system:String>
+
+    <system:String x:Key="WorkflowEditor.AgentOption.Port.XmlInput">XML 入力</system:String>
+
+    <system:String x:Key="WorkflowEditor.AgentOption.Port.TextInput">テキスト入力</system:String>
+
+    <system:String x:Key="WorkflowEditor.AgentOption.Port.XmlOutput">XML 出力</system:String>
+
+    <system:String x:Key="WorkflowEditor.AgentOption.Port.TextOutput">テキスト出力</system:String>
+
+    <system:String x:Key="WorkflowEditor.AgentOption.PortType.Text">テキスト</system:String>
+
+    <system:String x:Key="WorkflowEditor.AgentOption.FieldCountFormat">{0} 入力 / {1} 出力</system:String>
+
+    <system:String x:Key="SessionFlowPayloadRouter.Validation.MultipleWholeDocumentPortsFormat">構造化入力は1つの完全なドキュメント XML エントリのみを持つことができます。競合するポート: {0}。</system:String>
+
+    <system:String x:Key="SessionFlowPayloadRouter.Validation.WholeDocumentPortConflictFormat">ポート "{0}" は完全なドキュメント XML 入力として宣言されており、同じ入力に対する他の XML フィールドポートと組み立てることはできません。</system:String>
+
+    <system:String x:Key="SessionFlowPayloadRouter.Validation.InvalidXmlFieldPathFormat">ポート "{0}" は有効な XML フィールドパスではありません。</system:String>
+
+    <system:String x:Key="SessionFlowPayloadRouter.Validation.ParentChildPathConflictFormat">XML 入力フィールドパス "{0}" と "{1}" が親パスと子パスとして重複しています。現在のインフラストラクチャは両方を同じ入力ドキュメントに組み立てることができません。</system:String>
+
+    <system:String x:Key="SessionFlowPayloadRouter.Validation.MissingRoot">構造化ペイロードにルートノードがありません。</system:String>
+
+    <system:String x:Key="SessionFlowPayloadRouter.Validation.ParseFailedFormat">结构化ペイロードの解析に失敗しました: {0}</system:String>
+
+    <system:String x:Key="WorkflowEditor.Graph.Validation.NameRequired">ノードグラフの名前を入力してください。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Graph.DefaultBaseName">セッションフローノードグラフ</system:String>
+
+    <system:String x:Key="WorkflowEditor.Graph.Delete.ConfirmFormat">ノードグラフ "{0}" を削除しますか？</system:String>
+
+    <system:String x:Key="WorkflowEditor.Graph.Status.CreatedAndOpenedFormat">ノードグラフ "{0}" を作成して開きました。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Graph.Status.LibraryRefreshed">ノードグラフライブラリが更新されました。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Graph.Status.CreatedAndSavedFormat">ノードグラフ "{0}" を作成して保存しました。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Graph.Status.OpenedFormat">ノードグラフ "{0}" を開きました。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Graph.Status.CurrentRenamedFormat">現在のノードグラフの名前を "{0}" に変更しました。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Graph.Status.RenamedFormat">ノードグラフの名前を "{0}" に変更しました。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Graph.Status.DeletedAndCreatedFormat">ノードグラフを削除し、新しい空白のノードグラフ "{0}" を作成しました。</system:String>
+
+    <system:String x:Key="WorkflowEditor.Graph.Status.DeletedFormat">ノードグラフ "{0}" を削除しました。</system:String>
+
+    <system:String x:Key="WorkflowEditor.GraphItem.ModifiedTimeMissing">更新日時が記録されていません</system:String>
+
+    <system:String x:Key="WorkflowEditor.GraphItem.TimestampFormat">yyyy-MM-dd HH:mm</system:String>
+
+    <system:String x:Key="WorkflowEditor.GraphItem.ModifiedTimeFormat">更新日時 {0}</system:String>
+
+    <system:String x:Key="WorkflowEditor.GraphItem.CreatedTimeMissing">作成日時が記録されていません</system:String>
+
+    <system:String x:Key="WorkflowEditor.GraphItem.CreatedTimeFormat">作成日時 {0}</system:String>
+
+    <system:String x:Key="WorkflowEditor.GraphItem.SummaryFormat">ノード {0} · 接続線 {1}</system:String>
+
+
+    <system:String x:Key="Common.ListSeparator.Semicolon">; </system:String>
+
+    <system:String x:Key="Common.ListSeparator.IdeographicComma">、</system:String>
+
+    <system:String x:Key="ChatSession.BoundFlow.Unbound">セッションフローがバインドされていません</system:String>
+
+
+    <system:String x:Key="FilmstripPanel.Title">フィルムストリップ</system:String>
+
+    <system:String x:Key="FilmstripPanel.Description">このパネルはモジュール化されており、将来的にサムネイルタイムライン、履歴スナップショット、または出力プレビューを表示できます。</system:String>
+
+    <system:String x:Key="NodeSettingsPanel.Title">ノードパラメータ</system:String>
+
+    <system:String x:Key="NodeSettingsPanel.Description">このパネルはメインウィンドウレイアウトから抽出されており、将来的にノードプロパティ、パラメータエディタ、および検証ステータスを表示できます。</system:String>
+
+    <system:String x:Key="SessionWorkspace.PlaceholderFormat">セッション '{0}' の内容がここに表示されます。</system:String>
+
+
+    <system:String x:Key="ShowLiveXaml.FilePath.Missing">(ファイルパスがまだありません)</system:String>
+
+    <system:String x:Key="ShowLiveXaml.Status.WaitingForClose">ShowLiveXAML 呼び出しのストリーミング完了を待機中。</system:String>
+
+    <system:String x:Key="ShowLiveXaml.Hint.WaitingForClose">ShowLiveXAML が完全な絶対 .xaml パスを返して終了した後、ここにプレビューが表示されます。</system:String>
+
+    <system:String x:Key="ShowLiveXaml.Status.WaitingForPath">XAML ファイルパスを待機中。</system:String>
+
+    <system:String x:Key="ShowLiveXaml.Hint.UseInitializePath">InitializeLiveXAML によって返された完全な絶対 .xaml パスを渡してください。</system:String>
+
+    <system:String x:Key="ShowLiveXaml.Status.StreamingArguments">ShowLiveXAML はまだ引数をストリーミングしています。</system:String>
+
+    <system:String x:Key="ShowLiveXaml.Hint.RenderAfterClose">ツール呼び出しが終了した後にプレビューがレンダリングされます。</system:String>
+
+    <system:String x:Key="ShowLiveXaml.Status.Rendered">LiveXAML プレビューの新しいインスタンスをレンダリングしました。</system:String>
+
+    <system:String x:Key="ShowLiveXaml.Hint.Rendered">ShowLiveXAML を呼び出すたびに、このツールカードに新しいプレビューインスタンスが作成されます。</system:String>
+
+    <system:String x:Key="ShowLiveXaml.Hint.FixAndRetry">ファイルを修正し、ShowLiveXAML を再度呼び出して新しいインスタンスをレンダリングしてください。</system:String>
+
+    <system:String x:Key="ShowLiveXaml.Status.InvalidPath">プレビューのパスが無効です。</system:String>
+
+    <system:String x:Key="ShowLiveXaml.Hint.ExactInitializePath">InitializeLiveXAML によって返された正確な完全 .xaml パスを使用してください。</system:String>
+
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.general.DisplayName">一般 (General)</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.general.Description">日常のタスクや一時的なメモに適したバランスの取れたテンプレート。</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.general.SummaryPrompt.1">ここに簡単なタスクの概要を追加してください</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.general.SummaryPrompt.2">ここに次のアクションを記録してください</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.general.SummaryPrompt.3">ここにリスクや障害となる要因を記録してください</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.planning.DisplayName">計画 (Planning)</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.planning.Description">マイルストーン、順序、およびオーナーシップに焦点を当てたテンプレート。</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.planning.SummaryPrompt.1">期待される成果を明確にしてください</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.planning.SummaryPrompt.2">マイルストーンやチェックポイントをリストアップしてください</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.planning.SummaryPrompt.3">依存関係やリスクを記録してください</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.investigation.DisplayName">調査 (Investigation)</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.investigation.Description">証拠、観察結果、および未解決の質問に焦点を当てたテンプレート。</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.investigation.SummaryPrompt.1">調査対象の質問を要約してください</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.investigation.SummaryPrompt.2">証拠や観察結果をリストアップしてください</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.investigation.SummaryPrompt.3">未解決の質問やフォローアップを記録してください</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preset.AdditionalSummaryPromptFormat">ここに追加の {0} の詳細 {1} を記録してください</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.DefaultTagsHint.Empty">空の場合はデフォルトで memo になります。</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.DefaultTagsHint.Format">デフォルトの Tags パラメータとして使用されます: {0}</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preview.PresetFormat">プリセット: {0}</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preview.ContextMetadataIncluded">Workspace / Session コンテキスト行が含まれます。</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preview.ContextMetadataExcluded">Workspace / Session コンテキスト行は含まれません。</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preview.DefaultTagsFormat">デフォルトタグ: {0}</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Preview.SummaryHeader">サマリープレースホルダー行数:</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Configuration.InvalidFormat">WorkspaceNoteTemplate 設定が無効です: {0}</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Tool.Description">ワークスペースのメモテンプレートを生成します。ホストはツールの設定を介して、デフォルト値、サマリーレイアウト、実行時動作を拡張できます。</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Tool.EffectiveDescriptionFormat">{0} のワークスペースメモテンプレートを生成します。デフォルトのタグは {1} で、コンテキストメタデータはデフォルトで {2} です。</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Tool.ContextMetadata.IncludedToken">含める</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Tool.ContextMetadata.ExcludedToken">含めない</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Tool.Parameter.Title.Description">メモのタイトル。</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Tool.Parameter.Priority.Description">タスクの優先度。値が大きいほど緊急度が高くなります。</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Tool.Parameter.Pin.Description">このメモを固定するかどうか。</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Tool.Parameter.Tags.Description">メモのタグの JSON 配列。省略した場合、ホストに保存されているデフォルトタグが使用されます。</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Tool.Parameter.Tags.ConfiguredDescription">メモのタグの JSON 配列。デフォルト値はホストに保存されているツール設定から取得されます。</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.InvocationField.Title">タイトル</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.InvocationField.Title.Placeholder">タイトルを入力中...</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.InvocationField.Priority">優先度</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.InvocationField.Priority.Placeholder">デフォルトの優先度</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.InvocationField.Pin">固定</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.InvocationField.Pin.Placeholder">デフォルトは固定解除</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.InvocationField.Tags">タグ</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.InvocationField.Tags.Placeholder">ツール設定のデフォルトタグ</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Execute.UntitledNote">無題のメモ</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Execute.PresetFormat">プリセット: {0}</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Execute.PriorityFormat">優先度: {0}</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Execute.PinnedFormat">固定: {0}</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Execute.TagsFormat">タグ: {0}</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Execute.SummaryHeader">サマリー:</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Execute.NotAvailable">該当なし</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Execute.WorkspaceFormat">ワークスペース: {0}</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Execute.SessionFormat">セッション: {0}</system:String>
+
+    <system:String x:Key="WorkspaceNoteTemplate.Execute.None">なし</system:String>
+
+
+    <system:String x:Key="AgentLanguageModelResolver.Failure.InterfaceIncompleteFormat">{0}: インターフェース設定が不完全です</system:String>
+
+    <system:String x:Key="AgentLanguageModelResolver.Failure.ModelErrorFormat">{0}: {1}</system:String>
+
+    <system:String x:Key="AgentLanguageModelResolver.Failure.NoCallableCandidates">呼び出し可能な候補言語モデルが利用できません。</system:String>
+
+    <system:String x:Key="AgentLanguageModelResolver.Failure.AttemptedInOrderFormat">順に試行: {0}</system:String>
+
+    <system:String x:Key="AgentLanguageModelResolver.Error.AgentCapabilityLayerNoAvailableModelFormat">エージェント "{0}" は機能レイヤー "{1}" にバインドされていますが、エラーのない利用可能な言語モデルが見つかりませんでした。{2}</system:String>
+
+    <system:String x:Key="AgentLanguageModelResolver.Error.CapabilityLayerNoCandidatesFormat">機能レイヤー "{0}" は候補言語モデルを解決できませんでした。{1}</system:String>
+
+    <system:String x:Key="AgentLanguageModelResolver.Error.CapabilityLayerNoAvailableModelFormat">機能レイヤー "{0}" にはエラーのない利用可能な言語モデルがありません。{1}</system:String>
+
+    <system:String x:Key="AgentLanguageModelResolver.Error.AgentContextModelMissingFormat">エージェント "{0}" はコンテキストウィンドウを計算するための言語モデルを解決できませんでした。</system:String>
+
+    <system:String x:Key="AgentLanguageModelResolver.Error.CapabilityLayerContextModelMissingFormat">機能レイヤー "{0}" はコンテキストウィンドウを計算するための言語モデルを解決できませんでした。</system:String>
+
+    <system:String x:Key="AgentLanguageModelResolver.Selection.NoLanguageModel">言語モデルが選択されていません</system:String>
+
+    <system:String x:Key="AgentLanguageModelResolver.Selection.NoCapabilityLayer">機能レイヤーが選択されていません</system:String>
+
+    <system:String x:Key="AgentLanguageModelResolver.Issue.AgentNoSpecificModel">エージェントに特定の言語モデルがバインドされていません。</system:String>
+
+    <system:String x:Key="AgentLanguageModelResolver.Issue.LanguageModelMissing">参照されている言語モデルが存在しません。</system:String>
+
+    <system:String x:Key="AgentLanguageModelResolver.Issue.CapabilityLayerNotSpecified">機能レイヤーが指定されていません。</system:String>
+
+    <system:String x:Key="AgentLanguageModelResolver.Issue.CapabilityLayerMissing">参照されている機能レイヤーが存在しません。</system:String>
+
+    <system:String x:Key="AgentLanguageModelResolver.Issue.LayerLanguageModelMissingFormat">機能レイヤー内の言語モデル参照 "{0}" が存在しません。</system:String>
+
+    <system:String x:Key="AgentLanguageModelResolver.Error.AgentModelInterfaceIncompleteFormat">エージェント "{0}" は言語モデル "{1}" にバインドされていますが、そのインターフェース設定が不完全です。</system:String>
+
+    <system:String x:Key="AgentLanguageModelResolver.Error.AgentCapabilityLayerNoCandidatesFormat">エージェント "{0}" は候補言語モデルを解決できない機能レイヤーにバインドされています。{1}</system:String>
+
+    <system:String x:Key="AgentLanguageModelResolver.Error.AgentSpecificModelMissingFormat">エージェント "{0}" は特定の言語モデルを解決できませんでした。{1}</system:String>
+
+    <system:String x:Key="AgentLanguageModelResolver.Display.UnnamedModelFormat">名前なしモデル ({0})</system:String>
+
+    <system:String x:Key="AgentLanguageModelResolver.Display.UnnamedCapabilityLayerFormat">名前なし機能レイヤー ({0})</system:String>
+
+
+    <system:String x:Key="CreateChatSession.Status.HistoryLoadFailedFormat">履歴セッションのロードに失敗しました: {0}</system:String>
+
+    <system:String x:Key="CreateChatSession.TimestampFormat">yyyy-MM-dd HH:mm</system:String>
+
+    <system:String x:Key="CreateChatSession.Flow.ReadFileFailed">現在のセッションフローファイルを読み込めません。</system:String>
+
+    <system:String x:Key="CreateChatSession.Flow.ReadFailed">読み込み失敗</system:String>
+
+    <system:String x:Key="CreateChatSession.Flow.SubtitleFormat">ファイル: {0} · 更新日時 {1}</system:String>
+
+    <system:String x:Key="CreateChatSession.Flow.Status.Unavailable">セッションフローのステータスを分析できません</system:String>
+
+    <system:String x:Key="CreateChatSession.Flow.Status.Ready">現在のセッションフローの準備ができています</system:String>
+
+    <system:String x:Key="CreateChatSession.Flow.Status.WarningsFormat">{0} 件の警告</system:String>
+
+    <system:String x:Key="CreateChatSession.Flow.Status.ErrorsFormat">{0} 件のエラー</system:String>
+
+    <system:String x:Key="CreateChatSession.Flow.Status.ErrorsAndWarningsFormat">{0} 件のエラー、{1} 件の警告</system:String>
+
+    <system:String x:Key="CreateChatSession.Issue.WaitingSelection.Title">選択待ち</system:String>
+
+    <system:String x:Key="CreateChatSession.Issue.WaitingSelection.Message">セッションフローを選択すると、エージェント、モデル、およびフローのステータスがここに表示されます。</system:String>
+
+    <system:String x:Key="CreateChatSession.Issue.ReadFailed.Title">読み込み不可</system:String>
+
+    <system:String x:Key="CreateChatSession.Issue.ReadFailed.Message">現在のセッションフローを読み込めません。</system:String>
+
+    <system:String x:Key="CreateChatSession.Issue.StatusUnavailable.Message">現在のセッションフローのステータス情報を生成できません。</system:String>
+
+    <system:String x:Key="CreateChatSession.Issue.Ready.Title">準備完了</system:String>
+
+    <system:String x:Key="CreateChatSession.Issue.Ready.Message">現在のセッションフローは正常にコンパイルされ、新しいチャットセッションを作成するために使用できます。</system:String>
+
+    <system:String x:Key="CreateChatSession.Issue.AdditionalHint.Title">追加のヒント</system:String>
+
+    <system:String x:Key="CreateChatSession.Issue.NodeMessageFormat">{0}: {1}</system:String>
+
+    <system:String x:Key="CreateChatSession.Issue.Severity.Error">エラー</system:String>
+
+    <system:String x:Key="CreateChatSession.Issue.Severity.Warning">警告</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.MissingDefinition">エージェントノードが AgentDefinition にバインドされていません。</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.DefinitionNotFoundFormat">AgentDefinition が見つかりません: {0}</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.IdFormat">ID: {0}</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.IdUnbound">ID: 未バインド</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.Mode.StructuredXml">構造化 XML</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.Mode.NaturalLanguage">自然言語</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.Mode.Unknown">未知のモード</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.SelectionMode.CapabilityLayer">機能レイヤー</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.SelectionMode.SpecificModel">特定のモデル</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.Unbound">未バインドのエージェント</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.UnboundStatus">未バインド</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.ModelSummary.Unresolved">現在、言語モデルを解決できません。</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.Status.ModelMissing">モデルが見つかりません</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.Status.EmptyLayer">空のレイヤー</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.Status.IncompleteConfiguration">不完全な設定</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.ModelSummary.LayerNoCandidatesFormat">機能レイヤー: {0} (候補モデルが解決されていません)</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.ModelSummary.LayerCandidatesFormat">機能レイヤー: {0} (候補 {1} 個)</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.ModelSummary.SpecificNotSelected">特定のモデル: 言語モデルが選択されていません。</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.ModelSummary.SpecificNotFoundFormat">特定のモデル: {0} が見つかりません。</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.ModelSummary.SpecificFormat">特定のモデル: {0}</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.Description.InputFormat">入力: {0}</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.Description.OutputFormat">出力: {0}</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.Description.StructuredXml">このエージェントは構造化 XML 入出力を使用します。</system:String>
+
+    <system:String x:Key="CreateChatSession.Agent.Description.NaturalLanguage">このエージェントは自然言語入出力を使用します。</system:String>
+
+    <system:String x:Key="CreateChatSession.Node.Unnamed">名前なしノード</system:String>
+
+    <system:String x:Key="CreateChatSession.Node.SummarySingleFormat">ノード: {0}</system:String>
+
+    <system:String x:Key="CreateChatSession.Node.SummaryMultipleFormat">ノード数: {0} ({1}{2})</system:String>
+
+    <system:String x:Key="CreateChatSession.Status.AgentConfigurationLoadFailedFormat">エージェント設定の読み込みに失敗しました: {0}</system:String>
+
+    <system:String x:Key="CreateChatSession.Status.LanguageModelConfigurationLoadFailedFormat">言語モデル設定の読み込みに失敗しました: {0}</system:String>
+
+    <system:String x:Key="CreateChatSession.Status.CapabilityLayerConfigurationLoadFailedFormat">機能レイヤー設定の読み込みに失敗しました: {0}</system:String>
+
+    <system:String x:Key="CreateChatSession.CapabilityLayer.NotSelected">功能レイヤーが選択されていません</system:String>
+
+    <system:String x:Key="CreateChatSession.CapabilityLayer.UnnamedFormat">名前なし機能レイヤー ({0})</system:String>
+
+    <system:String x:Key="CreateChatSession.Model.UnnamedFormat">名前なしモデル ({0})</system:String>
+
+    <system:String x:Key="CreateChatSession.Model.ModelIdFormat">モデル ID: {0}</system:String>
+
+    <system:String x:Key="CreateChatSession.Model.UsedBy.None">エージェントがまだ関連付けられていません</system:String>
+
+    <system:String x:Key="CreateChatSession.Model.UsedBy.AgentsFormat">エージェント: {0}</system:String>
+
+    <system:String x:Key="CreateChatSession.Model.Interface.Unknown">未知のインターフェース</system:String>
+
+    <system:String x:Key="CreateChatSession.Model.Source.Unspecified">ソース未    <system:String x:Key="Tool.GlobSearch.DisplayName">ファイル名検索</system:String>
+    <system:String x:Key="Tool.GlobSearch.Description">Glob パターンを使用してファイルを検索します。</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Pattern.DisplayName">Glob パターン</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Pattern.Description">ファイル名または相対パスの Glob パターン（*.cs、**/*.xaml など）。</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Pattern.Label">パターン</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Pattern.EmptyText">Glob パターンを待機中...</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Directory.DisplayName">検索ディレクトリ</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Directory.Description">検索対象のディレクトリパス。</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Directory.Label">ディレクトリ</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Directory.EmptyText">ディレクトリを待机中...</system:String>
+
+    <!-- Wget Tool -->
+    <system:String x:Key="Tool.Wget.DisplayName">Wget ダウンロード</system:String>
+    <system:String x:Key="Tool.Wget.Description">wget.exe を実行してファイルをダウンロードするか、応答を取得します。</system:String>
+    <system:String x:Key="Tool.Wget.Param.Arguments.DisplayName">引数</system:String>
+    <system:String x:Key="Tool.Wget.Param.Arguments.Description">wget に渡すコマンドライン引数。</system:String>
+    <system:String x:Key="Tool.Wget.Param.Arguments.Label">コマンドライン引数</system:String>
+    <system:String x:Key="Tool.Wget.Param.Arguments.EmptyText">wget 引数を待機中...</system:String>
+    <system:String x:Key="Tool.Wget.Param.WorkingDirectory.DisplayName">作業ディレクトリ</system:String>
+    <system:String x:Key="Tool.Wget.Param.WorkingDirectory.Description">wget を実行する作業ディレクトリ。</system:String>
+    <system:String x:Key="Tool.Wget.Param.WorkingDirectory.Label">作業ディレクトリ</system:String>
+    <system:String x:Key="Tool.Wget.Param.WorkingDirectory.EmptyText">デフォルトのワークスペース</system:String>
+    <system:String x:Key="Tool.Wget.Param.TimeoutSeconds.DisplayName">タイムアウト</system:String>
+    <system:String x:Key="Tool.Wget.Param.TimeoutSeconds.Description">ダウンロードのタイムアウト制限（秒）。</system:String>
+    <system:String x:Key="Tool.Wget.Param.TimeoutSeconds.Label">タイムアウト</system:String>
+    <system:String x:Key="Tool.Wget.Param.TimeoutSeconds.EmptyText">デフォルト 60 秒</system:String>
+
+    <!-- SWSniff Tool -->
+    <system:String x:Key="Tool.SWSniff.DisplayName">ネットワークホストスキャン</system:String>
+    <system:String x:Key="Tool.SWSniff.Description">ターゲットネットワーク内の IPv4 アドレスをスキャンして、アクティブなホストを見つけます。</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.Target.DisplayName">スキャン対象</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.Target.Description">スキャンする IPv4 サブネットまたはターゲット（例：192.168.1.0/24）。</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.Target.Label">スキャン対象</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.Target.EmptyText">IPv4 ターゲットを待機中...</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.TimeoutMilliseconds.DisplayName">タイムアウト</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.TimeoutMilliseconds.Description">単一 IP の Ping 応答の最大待機時間（ミリ秒）。</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.TimeoutMilliseconds.Label">タイムアウト (ミリ秒)</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.TimeoutMilliseconds.EmptyText">デフォルト 1000 ミリ秒</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.MaxConcurrency.DisplayName">同時実行数</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.MaxConcurrency.Description">スキャン中に許容される最大同時 Ping 数。</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.MaxConcurrency.Label">同時実行数</system:String>
+    <system:String x:Key="Tool.SWSniff.Param.MaxConcurrency.EmptyText">デフォルト 64</system:String>
+
+    <!-- Context Snapshot Tool -->
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.DisplayName">ランタイムコンテキストスナップショット</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Description">現在の Skyweaver ランタイムのコンテキスト情報を取得し、環境スナップショットを生成します。</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeProperties.DisplayName">属性を含む</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeProperties.Description">スナップショットに現在のシステム属性情報を含めるかどうか。</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeProperties.Label">属性を含む</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeProperties.EmptyText">デフォルト：含む</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeOperatingSystem.DisplayName">システム情報を含む</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeOperatingSystem.Description">スナップショットにオペレーティングシステムとバージョン情報を含めるかどうか。</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeOperatingSystem.Label">システム情報を含む</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeOperatingSystem.EmptyText">デフォルト：含む</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeFileSystem.DisplayName">ファイルシステムを含む</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeFileSystem.Description">スナップショットにディスクボリュームとドライブ情報を含めるかどうか。</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeFileSystem.Label">ファイルシステムを含む</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeFileSystem.EmptyText">デフォルト：含む</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeLateralFS.DisplayName">LateralFS を含む</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeLateralFS.Description">スナップショットに現在アクティブな LateralFS 投影ノードのリストを含めるかどうか。</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeLateralFS.Label">LateralFS を含む</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.IncludeLateralFS.EmptyText">デフォルト：含む</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.UppercaseLabels.DisplayName">ラベルを大文字にする</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.UppercaseLabels.Description">スナップショット内のフィールドラベルを強制的に大文字にするかどうか。</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.UppercaseLabels.Label">ラベル大文字</system:String>
+    <system:String x:Key="Tool.SkyweaverContextSnapshot.Param.UppercaseLabels.EmptyText">デフォルト：通常</system:String>
+
+    <!-- SharpSpray Tool -->
+    <system:String x:Key="Tool.SharpSpray.DisplayName">ドメインパスワードスプレー</system:String>
+    <system:String x:Key="Tool.SharpSpray.Description">Active Directory ドメインユーザーのパスワードスプレーセキュリティテストツール。</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Passwords.DisplayName">テストパスワード</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Passwords.Description">パスワードスプレーテスト用に入力された候補パスワード（カンマ区切り）。</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Passwords.Label">テストパスワード</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Passwords.EmptyText">スプレーするパスワードを待機中...</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.TargetDomain.DisplayName">ターゲットドメイン</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.TargetDomain.Description">テスト対象の Active Directory ターゲットドメイン名。</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.TargetDomain.Label">ターゲットドメイン</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.TargetDomain.EmptyText">ターゲットドメインを待機中...</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Delay.DisplayName">スプレー遅延</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Delay.Description">各試行間の遅延時間（ミリ秒）。</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Delay.Label">スプレー遅延</system:String>
+    <system:String x:Key="Tool.SharpSpray.Param.Delay.EmptyText">各試行間の遅延時間</system:String>
+
+    <!-- MergeLateralFS Tool -->
+    <system:String x:Key="Tool.MergeLateralFS.DisplayName">LateralFS 分岐ノードのマージ</system:String>
+    <system:String x:Key="Tool.MergeLateralFS.Description">LateralFS ノード内の編集された、またはローカル特有の変更をその投影ソースディレクトリにマージします。</system:String>
+    <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.DisplayName">ノード名</system:String>
+    <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.Description">マージする LateralFS ノード名。</system:String>
+    <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.Label">ノード名</system:String>
+    <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.EmptyText">デフォルトで最新のセッション所有ノード</system:String>
+
+    <!-- InitializeLiveXAML Tool -->
+    <system:String x:Key="Tool.InitializeLiveXAML.DisplayName">LiveXAML ビューの初期化</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Description">現在の ワークスペースで、新しい LiveXAML UI ビュー定義ファイルとコードビハインドを初期化します。</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Param.XAMLFileName.DisplayName">ファイル名</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Param.XAMLFileName.Description">作成する XAML ビューファイル名（例：MyView.xaml）。</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Param.XAMLFileName.Label">ファイル名</system:String>
+    <system:String x:Key="Tool.InitializeLiveXAML.Param.XAMLFileName.EmptyText">LiveXAML レイアウトファイル名を待機中...</system:String>
+
+    <!-- InheritLateralFS Tool -->
+    <system:String x:Key="Tool.InheritLateralFS.DisplayName">LateralFS 分岐ノードの継承</system:String>
+    <system:String x:Key="Tool.InheritLateralFS.Description">既存の親ノードから継承する子 LateralFS 分岐ノードを作成します。</system:String>
+    <system:String x:Key="Tool.InheritLateralFS.Param.NodeName.DisplayName">ノード名</system:String>
+    <system:String x:Key="Tool.InheritLateralFS.Param.NodeName.Description">継承元の親 LateralFS ノード名。</system:String>
+    <system:String x:Key="Tool.InheritLateralFS.Param.NodeName.Label">ノード名</system:String>
+    <system:String x:Key="Tool.InheritLateralFS.Param.NodeName.EmptyText">ノード名を待機中...</system:String>
+
+    <!-- ExecutePowershellCommand Tool -->
+    <system:String x:Key="Tool.ExecutePowershellCommand.DisplayName">PowerShell コマンド実行</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Description">ホスト上で実行する PowerShell コマンドラインを提案し実行します。</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.Command.DisplayName">コマンドライン</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.Command.Description">ホスト上で実行する PowerShell コマンドラインテキスト。</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.Command.Label">コマンドライン</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.Command.EmptyText">実行するコマンドを待機中...</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.WorkingDirectory.DisplayName">作業ディレクトリ</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.WorkingDirectory.Description">コマンド実行の作業ディレクトリ。</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.WorkingDirectory.Label">作業ディレクトリ</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.WorkingDirectory.EmptyText">デフォルトのワークスペース</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.TimeoutSeconds.DisplayName">タイムアウト</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.TimeoutSeconds.Description">コマンド実行のタイムアウト制限（秒）。</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.TimeoutSeconds.Label">タイムアウト</system:String>
+    <system:String x:Key="Tool.ExecutePowershellCommand.Param.TimeoutSeconds.EmptyText">デフォルト 600 秒</system:String>
+
+    <!-- EditFileSearchReplace Tool -->
+    <system:String x:Key="Tool.EditFileSearchReplace.DisplayName">ファイルコンテンツの検索と置換</system:String>
+    <system:String x:Key="Tool.EditFileSearchReplace.Description">ファイル内の特定のテキストブロックを正確に検索して置換します。</system:String>
+    <system:String x:Key="Tool.EditFileSearchReplace.Param.FilePath.DisplayName">ファイルパス</system:String>
+    <system:String x:Key="Tool.EditFileSearchReplace.Param.FilePath.Description">編集対象のファイル絶対パス。</system:String>
+    <system:String x:Key="Tool.EditFileSearchReplace.Param.FilePath.Label">ファイルパス</system:String>
+    <system:String x:Key="Tool.EditFileSearchReplace.Param.FilePath.EmptyText">ファイルパスを待机中...</system:String>
+    <system:String x:Key="Tool.EditFileSearchReplace.Param.Search.DisplayName">検索内容</system:String>
+    <system:String x:Key="Tool.EditFileSearchReplace.Param.Search.Description">検索および置換する正確なテキストブロック。</system:String>
+    <system:String x:Key="Tool.EditFileSearchReplace.Param.Search.Label">検索内容</system:String>
+    <system:String x:Key="Tool.EditFileSearchReplace.Param.Search.EmptyText">置換対象のテキストを待機中...</system:String>
+    <system:String x:Key="Tool.EditFileSearchReplace.Param.Replace.DisplayName">置換後テキスト</system:String>
+    <system:String x:Key="Tool.EditFileSearchReplace.Param.Replace.Description">置換後の新しいテキスト。</system:String>
+    <system:String x:Key="Tool.EditFileSearchReplace.Param.Replace.Label">置換後テキスト</system:String>
+    <system:String x:Key="Tool.EditFileSearchReplace.Param.Replace.EmptyText">空白の場合は一致部分を削除します</system:String>
+    <system:String x:Key="Tool.EditFileSearchReplace.Param.Encoding.DisplayName">エンコード</system:String>
+    <system:String x:Key="Tool.EditFileSearchReplace.Param.Encoding.Description">保存時のファイル文字エンコード。</system:String>
+    <system:String x:Key="Tool.EditFileSearchReplace.Param.Encoding.Label">エンコード</system:String>
+    <system:String x:Key="Tool.EditFileSearchReplace.Param.Encoding.EmptyText">デフォルトは自動検出付き utf-8</system:String>
+
+    <!-- EditFileRewrite Tool -->
+    <system:String x:Key="Tool.EditFileRewrite.DisplayName">ファイルコンテンツの書き換え</system:String>
+    <system:String x:Key="Tool.EditFileRewrite.Description">対象ファイルの全内容を完全に書き換え、または上書き保存します。</system:String>
+    <system:String x:Key="Tool.EditFileRewrite.Param.FilePath.DisplayName">ファイルパス</system:String>
+    <system:String x:Key="Tool.EditFileRewrite.Param.FilePath.Description">書き込み対象のファイル絶対パス。</system:String>
+    <system:String x:Key="Tool.EditFileRewrite.Param.FilePath.Label">ファイルパス</system:String>
+    <system:String x:Key="Tool.EditFileRewrite.Param.FilePath.EmptyText">ファイルパスを待机中...</system:String>
+    <system:String x:Key="Tool.EditFileRewrite.Param.Content.DisplayName">ファイル内容</system:String>
+    <system:String x:Key="Tool.EditFileRewrite.Param.Content.Description">書き込むファイル内容全体のテキスト。</system:String>
+    <system:String x:Key="Tool.EditFileRewrite.Param.Content.Label">ファイル内容</system:String>
+    <system:String x:Key="Tool.EditFileRewrite.Param.Content.EmptyText">書き込むファイル内容を待機中...</system:String>
+    <system:String x:Key="Tool.EditFileRewrite.Param.Encoding.DisplayName">エンコード</system:String>
+    <system:String x:Key="Tool.EditFileRewrite.Param.Encoding.Description">保存時のファイル文字エンコード。</system:String>
+    <system:String x:Key="Tool.EditFileRewrite.Param.Encoding.Label">エンコード</system:String>
+    <system:String x:Key="Tool.EditFileRewrite.Param.Encoding.EmptyText">デフォルトは自動検出付き utf-8</system:String>
+
+    <!-- EditFileAdvanced Tool -->
+    <system:String x:Key="Tool.EditFileAdvanced.DisplayName">高度なファイル編集</system:String>
+    <system:String x:Key="Tool.EditFileAdvanced.Description">対象ファイルの非連続な複数のテキストブロックを一括して置換・編集します。</system:String>
+    <system:String x:Key="Tool.EditFileAdvanced.Param.FilePath.DisplayName">ファイルパス</system:String>
+    <system:String x:Key="Tool.EditFileAdvanced.Param.FilePath.Description">編集対象のファイル絶対パス。</system:String>
+    <system:String x:Key="Tool.EditFileAdvanced.Param.FilePath.Label">ファイルパス</system:String>
+    <system:String x:Key="Tool.EditFileAdvanced.Param.FilePath.EmptyText">ファイルパスを待机中...</system:String>
+    <system:String x:Key="Tool.EditFileAdvanced.Param.EditText.DisplayName">編集テキスト</system:String>
+    <system:String x:Key="Tool.EditFileAdvanced.Param.EditText.Description">複数ブロックの編集手順を表す構造化編集テキスト。</system:String>
+    <system:String x:Key="Tool.EditFileAdvanced.Param.EditText.Label">編集テキスト</system:String>
+    <system:String x:Key="Tool.EditFileAdvanced.Param.EditText.EmptyText">編集用テキストを待机中...</system:String>
+    <system:String x:Key="Tool.EditFileAdvanced.Param.Encoding.DisplayName">エンコード</system:String>
+    <system:String x:Key="Tool.EditFileAdvanced.Param.Encoding.Description">保存時のファイル文字エンコード。</system:String>
+    <system:String x:Key="Tool.EditFileAdvanced.Param.Encoding.Label">エンコード</system:String>
+    <system:String x:Key="Tool.EditFileAdvanced.Param.Encoding.EmptyText">デフォルトは自動検出付き utf-8</system:String>
+
+    <!-- Curl Tool -->
+    <system:String x:Key="Tool.Curl.DisplayName">Curl リクエスト</system:String>
+    <system:String x:Key="Tool.Curl.Description">curl.exe を実行して HTTP リクエストを送信し、Web リソースにアクセスします。</system:String>
+    <system:String x:Key="Tool.Curl.Param.Arguments.DisplayName">引数</system:String>
+    <system:String x:Key="Tool.Curl.Param.Arguments.Description">curl に渡すコマンドライン引数。</system:String>
+    <system:String x:Key="Tool.Curl.Param.Arguments.Label">コマンドライン引数</system:String>
+    <system:String x:Key="Tool.Curl.Param.Arguments.EmptyText">curl 引数を待機中...</system:String>
+    <system:String x:Key="Tool.Curl.Param.WorkingDirectory.DisplayName">作業ディレクトリ</system:String>
+    <system:String x:Key="Tool.Curl.Param.WorkingDirectory.Description">curl を実行する作業ディレクトリ。</system:String>
+    <system:String x:Key="Tool.Curl.Param.WorkingDirectory.Label">作業ディレクトリ</system:String>
+    <system:String x:Key="Tool.Curl.Param.WorkingDirectory.EmptyText">デフォルトのワークスペース</system:String>
+    <system:String x:Key="Tool.Curl.Param.TimeoutSeconds.DisplayName">タイムアウト</system:String>
+    <system:String x:Key="Tool.Curl.Param.TimeoutSeconds.Description">要求のタイムアウト制限（秒）。</system:String>
+    <system:String x:Key="Tool.Curl.Param.TimeoutSeconds.Label">タイムアウト</system:String>
+    <system:String x:Key="Tool.Curl.Param.TimeoutSeconds.EmptyText">デフォルト 60 秒</system:String>
+
+    <!-- CreateLateralFS Tool -->
+    <system:String x:Key="Tool.CreateLateralFS.DisplayName">LateralFS 分岐ノードの作成</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Description">ワークスペースビューをマウントするための新しい LateralFS 投影分岐ノードを初期化します。</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.NodeName.DisplayName">ノード名</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.NodeName.Description">作成する LateralFS ノード名。</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.NodeName.Label">ノード名</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.NodeName.EmptyText">ノード名を待机中...</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.ProjectionSourceFolder.DisplayName">ソースフォルダ</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.ProjectionSourceFolder.Description">マウント投影のソースフォルダパス。</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.ProjectionSourceFolder.Label">ソースフォルダ</system:String>
+    <system:String x:Key="Tool.CreateLateralFS.Param.ProjectionSourceFolder.EmptyText">投影ソースフォルダパスを待機中...</system:String>
+
+    <!-- ShowLiveXAML Tool -->
+    <system:String x:Key="Tool.ShowLiveXAML.DisplayName">LiveXAML プレビューの描画</system:String>
+    <system:String x:Key="Tool.ShowLiveXAML.Description">既存の LiveXAML レイアウトプレビューを検証し、セッションカード内にリアルタイムでレンダリングします。</system:String>
+    <system:String x:Key="Tool.ShowLiveXAML.Param.XAMLFilePath.DisplayName">XAML ファイルパス</system:String>
+    <system:String x:Key="Tool.ShowLiveXAML.Param.XAMLFilePath.Description">レンダリングする .xaml レイアウトファイルの絶対パス。</system:String>
+    <system:String x:Key="Tool.ShowLiveXAML.Param.XAMLFilePath.Label">XAML ファイルパス</system:String>
+    <system:String x:Key="Tool.ShowLiveXAML.Param.XAMLFilePath.EmptyText">XAML ファイルパスを待机中...</system:String>
+
+    <!-- WorkspaceNoteTemplate Tool -->
+    <system:String x:Key="Tool.WorkspaceNoteTemplate.DisplayName">ワークスペースノートテンプレート</system:String>
+    <system:String x:Key="Tool.WorkspaceNoteTemplate.Description">ワークスペースのメモテンプレートを生成します。ホストはツールの設定を介して、デフォルト値、サマリーレイアウト、実行時動作を拡張できます。</system:String>
+</ResourceDictionary>�拡張できます。</system:String>
+
+    <system:String x:Key="AgentWizard.EmptyState.Title">エージェントウィザードのスケルトンが準備完了しました</system:String>
+
+    <system:String x:Key="AgentWizard.EmptyState.Description">このページは Controls に移動され、将来的に実際のウィザードフローを表示できます。</system:String>
+
+    <system:String x:Key="AgentWizard.EmptyState.Hint">将来的に、ステップの定義、フォームデータ、および検証結果を独立したモデルに分割することを検討してください。</system:String>
+
+    <system:String x:Key="FileManager.Title">ファイルマネージャー</system:String>
+
+    <system:String x:Key="FileManager.Title.NumberedFormat">ファイルマネージャー {0}</system:String>
+
+    <system:String x:Key="FileManager.Description">プロジェクトディレクトリの閲覧、フィルタリング、ファイル操作、およびプレビュー連携に適しています。</system:String>
+
+    <system:String x:Key="FileManager.Hint">将来的に、パス状態、ツールバーコマンド、および複数選択操作を拡張できます。</system:String>
+
+    <system:String x:Key="FileManager.EmptyState.Title">ファイルマネージャーのエントリが抽出されました</system:String>
+
+    <system:String x:Key="FileManager.EmptyState.Description">このページは現在 Controls にあり、将来的にファイルツリー、リスト、プレビュー領域、およびコマンドバーを直接接続できます。</system:String>
+
+    <system:String x:Key="FileManager.EmptyState.Hint">将来的に、パス状態、フィルター、および選択されたアイテムを独立したモデルに抽出することを検討してください。</system:String>
+
+
+    <system:String x:Key="ChatSessionControl.Stop">停止</system:String>
+
+    <system:String x:Key="ChatSessionControl.SessionTitleFallback">チャットセッション</system:String>
+
+    <system:String x:Key="ChatSessionControl.MessageCountFormat">メッセージ数: {0}</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.Ready">準備完了</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.Cancelled">キャンセル済み</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.Failed">失敗</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.Cancelling">現在の実行をキャンセル中...</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.RuntimeUnavailable">ランタイムが利用できません</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.RunningFlowFormat">実行中: {0}</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.ExecutionFailed">実行失敗</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.ExecutionCompleted">実行完了</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.ExecutionCancelled">実行キャンセル</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.NodeStartedFormat">ノード実行中: {0}</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.NodeCompletedFormat">ノード完了: {0}</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.AgentIterationStartedFormat">エージェント {0} イテレーション {1}</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.AgentStartedFormat">エージェント {0} 起動</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.AgentIterationCompletedFormat">エージェント {0} がイテレーション {1} を完了</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.AgentCompletedFormat">エージェント {0} 完了</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.PasteImageFailed">画像の貼り付け失敗</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.AddImageFailed">画像の追加失敗</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.AudioUnavailable">音声利用不可</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.AddAudioFailed">音声の追加失敗</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.ReadClipboardFailed">クリップボードの読み込み失敗</system:String>
+
+    <system:String x:Key="ChatSessionControl.Status.CopyFailed">コピー失敗</system:String>
+
+    <system:String x:Key="ChatSessionControl.BoundFlow.HeaderFormat">セッションフロー: {0}</system:String>
+
+    <system:String x:Key="ChatSessionControl.BoundFlow.SummaryFormat">現在のセッションフロー: {0}</system:String>
+
+    <system:String x:Key="ChatSessionControl.BoundFlow.UnboundSummary">セッションフローがバインドされていません。</system:String>
+
+    <system:String x:Key="ChatSessionControl.BoundFlow.ValidationSucceeded">バインドされたセッションフローは実行時検証に合格しました。</system:String>
+
+    <system:String x:Key="ChatSessionControl.BoundFlow.ValidationFailed">バインドされたセッションフローは実行時検証に合格しませんでした。</system:String>
+
+    <system:String x:Key="ChatSessionControl.Composer.Hint.Running">現在のターンが実行中です。</system:String>
+
+    <system:String x:Key="ChatSessionControl.Composer.Hint.Ready">Enter で送信、Ctrl+Enter または Shift+Enter で改行。</system:String>
+
+    <system:String x:Key="ChatSessionControl.Error.UnboundModel">このチャットビューは ChatSessionModel にバインドされていません。</system:String>
+
+    <system:String x:Key="ChatSessionControl.Error.UnboundRepository">このチャットビューは ChatSessionRepository にバインドされていません。</system:String>
+
+    <system:String x:Key="ChatSessionControl.Error.PastedImageUnboundModel">現在のビューが ChatSessionModel にバインドされていないため、貼り付けられた画像を保存できません。</system:String>
+
+    <system:String x:Key="ChatSessionControl.Error.LoadImageFailedFormat">画像 {0} を読み込めません: {1}</system:String>
+
+    <system:String x:Key="ChatSessionControl.Error.AddAudioFailedFormat">音声ファイル {0} を追加できません: {1}</system:String>
+
+    <system:String x:Key="ChatSessionControl.Error.WriteClipboardFailed">システムクリップボードに書き込めません。</system:String>
+
+    <system:String x:Key="ChatSessionControl.Dialog.ImageFilter">画像ファイル|*.png;*.jpg;*.jpeg;*.bmp;*.gif|すべてのファイル|*.*</system:String>
+
+    <system:String x:Key="ChatSessionControl.Dialog.AudioFilter">音声ファイル|*.wav;*.mp3;*.m4a;*.ogg;*.flac|すべてのファイル|*.*</system:String>
+
+    <system:String x:Key="ChatSessionControl.ToolConfirmation.PromptFormat">エージェント {0} が以下のツール呼び出しの実行許可を要求しています。確認後にのみ実行が継続されます。</system:String>
+
+    <system:String x:Key="ChatSessionControl.ToolConfirmation.MetadataFormat">ツール: {0}    イテレーション: {1}    呼び出し: {2}</system:String>
+
+    <system:String x:Key="ChatSessionControl.ToolConfirmation.Rejected">ユーザーはこのツール呼び出しを拒否しました。</system:String>
+
+    <system:String x:Key="ChatSessionControl.Edit.NotImplemented">消息編集機能はまだ実装されていません。このエントリポイントは一時的に予約されています。</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextWindow.Reading">コンテキストウィンドウを読み込み中。</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextWindow.Unavailable">コンテキストウィンドウは現在利用できません。</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextWindow.StatusUnavailable">コンテキスト --</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextWindow.StatusFormat">コンテキスト {0}</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextWindow.EstimatedFormat">推定 {0} / {1} トークン ({2})</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextWindow.RuntimeFormat">ランタイム {0} / {1} トークン ({2})</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextWindow.BeforeCompressionFormat">圧縮前 {0} トークン</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextWindow.StreamingEstimateFormat">ストリーミング推定 {0} / {1} トークン ({2})</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextWindow.InputOutputFormat">入力 {0} / 出力 {1} トークン</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextWindow.ModelFormat">モデル: {0}</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextWindow.DefaultUsageFormat">{0} / {1} トークン ({2})</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextWindow.ModelBottleneckFormat">モデル: {0}</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextWindow.AgentBottleneckFormat">ボトルネックエージェント: {0}</system:String>
+
+    <system:String x:Key="ChatSessionControl.ContextWindow.AgentModelBottleneckFormat">ボトルネックエージェント: {0} / {1}</system:String>
+
+    <system:String x:Key="ChatSessionControl.DisplayName.Assistant">Skyweaver アシスタント</system:String>
+
+    <system:String x:Key="ChatSessionControl.DisplayName.System">システム</system:String>
+
+    <system:String x:Key="ChatSessionControl.DisplayName.User">ユーザー</system:String>
+
+    <system:String x:Key="ChatSessionRuntime.ExecutionStarted.Ready">セッションフローのコンパイルとランタイムのプリフライトに合格しました。実行を開始します。</system:String>
+
+    <system:String x:Key="ChatSessionRuntime.ExecutionStarted.WithIssuesFormat">セッションフローのコンパイルが {0} 件のヒントまたは警告を伴って合格しました。実行を開始します。</system:String>
+
+    <system:String x:Key="ChatSessionRuntime.Preflight.AgentNodeMissingDefinitionFormat">エージェントノード "{0}" は AgentDefinition にバインドされていません。</system:String>
+
+    <system:String x:Key="ChatSessionRuntime.Preflight.AgentMissingFormat">エージェントノード "{0}" が参照するエージェント "{1}" が存在しません。</system:String>
+
+    <system:String x:Key="ChatSessionRuntime.Preflight.NoCandidateModelsFormat">エージェント "{0}" は利用可能な言語モデル候補を解決できませんでした。</system:String>
+
+    <system:String x:Key="ChatSessionRuntime.Preflight.CandidateModelsIncompleteFormat">エージェント "{0}" のすべての候補言語モデルはインターフェース設定が不完全です。</system:String>
+
+    <system:String x:Key="ChatSessionRuntime.CompilationFailed.NoReadableError">セッションフローのコンパイルに失敗しましたが、可読なエラーは返されませんでした。</system:String>
+
+    <system:String x:Key="ChatSessionTranscript.Title.ContextCompression">コンテキスト圧縮</system:String>
+
+    <system:String x:Key="ChatSessionTranscript.Title.ExecutionFailed">実行失敗</system:String>
+
+    <system:String x:Key="ChatSessionTranscript.Title.ExecutionCancelled">実行キャンセル</system:String>
+
+    <system:String x:Key="ChatSessionTranscript.ContextSummary.Empty">空のセッション。</system:String>
+
+    <system:String x:Key="ChatSessionTranscript.ContextSummary.Format">セッション記録 {0} 件、完了したターン数 {1} 回。</system:String>
+
+
+    <system:String x:Key="ChatMessage.TimestampFormat">HH:mm</system:String>
+
+    <system:String x:Key="Markdown.Table.ColumnFallbackFormat">第 {0} 列</system:String>
+
+    <system:String x:Key="ChatMessagePart.Badge.ToolCall">ツール呼び出し</system:String>
+
+    <system:String x:Key="ChatMessagePart.Badge.ToolOutput">ツール出力</system:String>
+
+    <system:String x:Key="ChatMessagePart.Badge.Image">画像</system:String>
+
+    <system:String x:Key="ChatMessagePart.Badge.Audio">音声</system:String>
+
+    <system:String x:Key="ChatMessagePart.Title.Reasoning">思考プロセス</system:String>
+
+    <system:String x:Key="ChatMessagePart.Badge.Reasoning">思考プロセス</system:String>
+
+    <system:String x:Key="ChatMessageClipboard.AudioMarkdownPrefix">[音声: </system:String>
+
+    <system:String x:Key="ChatMessageClipboard.ImagePlainPrefix">[画像] </system:String>
+
+    <system:String x:Key="ChatMessageClipboard.AudioPlainPrefix">[音声] </system:String>
+
+    <system:String x:Key="ToolInvocation.WaitingForParameterFallback">パラメータを待機中...</system:String>
+
+    <system:String x:Key="ToolInvocation.DefaultDescription">このツールは専用のパラメータ表示コントロールを提供していません。</system:String>
+
+
+    <system:String x:Key="WorkflowEditor.NodeKind.InputOutput">入力/出力</system:String>
+
+    <system:String x:Key="WorkflowEditor.NodeKind.Agent">エージェント</system:String>
+
+    <system:String x:Key="WorkflowEditor.NodeKind.Logic">論理演算</system:String>
+
+    <system:String x:Key="WorkflowEditor.NodeKind.LogicExecution">論理実行</system:String>
+
+    <system:String x:Key="WorkflowEditor.NodeKind.NextLogicExecution">次の論理実行のみ</system:String>
+
+    <system:String x:Key="WorkflowEditor.NodeKind.Node">ノード</system:String>
+
+    <system:String x:Key="WorkflowEditor.PortSummaryFormat">入力 {0} · 出力 {1}</system:String>
+
+    <system:String x:Key="WorkflowEditor.PortType.Smart">スマート</system:String>
+
+    <system:String x:Key="WorkflowEditor.PortType.XmlField">XMLフィールド</system:String>
+
+    <system:String x:Key="SessionFlowCompiler.Error.NodeIdMissing">ノード ID がないセッションフローノードが見つかりました。</system:String>
+
+    <system:String x:Key="SessionFlowCompiler.Error.NodeIdDuplicateFormat">ノード ID "{0}" が重複しています。</system:String>
+
+    <system:String x:Key="SessionFlowCompiler.Error.UserInputCountFormat">セッションフローには必ず1つの「ユーザー入力」ノードを含める必要があります。現在の数は {0} です。</system:String>
+
+    <system:String x:Key="SessionFlowCompiler.Error.ReturnCountFormat">セッションフローには必ず1つの「返却」ノードを含める必要があります。現在の数は {0} です。</system:String>
+
+    <system:String x:Key="SessionFlowCompiler.Error.ConnectionMissingSourceNodeFormat">接続 "{0}" は存在しないソースノード "{1}" を参照しています。</system:String>
+
+    <system:String x:Key="SessionFlowCompiler.Error.ConnectionMissingTargetNodeFormat">接続 "{0}" は存在しないターゲットノード "{1}" を参照しています。</system:String>
+
+    <system:String x:Key="SessionFlowCompiler.Error.ConnectionMissingSourcePortFormat">接続 "{0}" は存在しないソースポート "{1}" を参照しています。</system:String>
+
+    <system:String x:Key="SessionFlowCompiler.Error.ConnectionMissingTargetPortFormat">接続 "{0}" は存在しないターゲットポート "{1}" を参照しています。</system:String>
+
+    <system:String x:Key="SessionFlowCompiler.Error.ConnectionInvalidDirectionFormat">接続 "{0}" のポート方向が無効です。</system:String>
+
+    <system:String x:Key="SessionFlowCompiler.Error.ConnectionPortTypeMismatchFormat">接続 "{0}" のソースポートとターゲットポートのタイプが一致しません。</system:String>
+
+    <system:String x:Key="SessionFlowCompiler.Warning.AgentNodeUnboundFormat">エージェントノード "{0}" がエージェント ID にバインドされていません。</system:String>
+
+    <system:String x:Key="SessionFlowCompiler.Warning.UserInputNoOutput">「ユーザー入力」ノードに現在出力接続がありません。</system:String>
+
+    <system:String x:Key="SessionFlowCompiler.Warning.ReturnNoInput">「返却」ノードに現在入力接続がありません。</system:String>
+
+
+    <system:String x:Key="LoadToolKits.Description">ToolKit をロードし、その中のツールを以降のエージェントの反復処理で呼び出し可能にします。</system:String>
+
+    <system:String x:Key="LoadToolKits.Parameter.ToolKits.Description">ロードする ToolKit 名の JSON 配列。例: ["File Tools", "Note Tools"]。</system:String>
+
+    <system:String x:Key="LoadToolKits.PromptDescription.Empty">ToolKit をロードし、以降のエージェント反復処理で呼び出し可能にします。現在、利用可能な ToolKit はありません。</system:String>
+
+    <system:String x:Key="LoadToolKits.PromptDescription.Format">ToolKit をロードし、以降のエージェント反復処理で呼び出し可能にします。利用可能な ToolKit: {0}。呼び出し結果には、新しく利用可能になったツールとその説明が含まれます。</system:String>
+
+    <system:String x:Key="LoadToolKits.InvocationField.ToolKits">ToolKits</system:String>
+
+    <system:String x:Key="LoadToolKits.InvocationField.ToolKits.Placeholder">ToolKit 名を JSON 配列で入力</system:String>
+
+    <system:String x:Key="LoadToolKits.Error.NoToolKitsRequested">LoadToolKits には少なくとも1つの ToolKit 名が必要です。</system:String>
+
+    <system:String x:Key="LoadToolKits.Result.LoadedFormat">{0} 個の ToolKit をロードしました: {1}</system:String>
+
+    <system:String x:Key="LoadToolKits.Result.CallableHeader">次のエージェントの反復処理から呼び出し可能なツール:</system:String>
+
+    <system:String x:Key="LoadToolKits.Result.NoCallableTools">これらの ToolKit は現在、このエージェントに対して呼び出し可能なツールを追加しません。</system:String>
+
+    <system:String x:Key="LoadToolKits.Result.NoneLoaded">ロードされた ToolKit はありません。</system:String>
+
+    <system:String x:Key="LoadToolKits.Result.SkippedHeader">呼び出し可能リストに追加されなかった ToolKit メンバー:</system:String>
+
+    <system:String x:Key="LoadToolKits.Result.SkippedReason">これらのツールは通常、無効化されているか、現在のエージェントに許可されていないか、またはランタイムがサポートしていないホストの確認を必要とします。</system:String>
+
+    <system:String x:Key="LoadToolKits.Result.MissingHeader">見つからなかった ToolKit:</system:String>
+
+    <system:String x:Key="LoadToolKits.Result.AmbiguousHeader">名前が一意でなく、解決できなかった ToolKit:</system:String>
+
+    <system:String x:Key="ReadDirectoryRecursive.Description">ディレクトリを読み込み、構造化されたファイル一覧を返します。深さはオプションで、デフォルトは 1（通常のディレクトリ一覧）です。</system:String>
+
+    <system:String x:Key="ReadDirectoryRecursive.Parameter.Directory.Description">列挙するディレクトリパス。相対パスは現在のワークスペースを基準に解決されます。</system:String>
+
+    <system:String x:Key="ReadDirectoryRecursive.Parameter.Depth.Description">最大再帰深度。1 の場合は現在のディレクトリのみをリストします。省略した場合はデフォルトの 1 になります。</system:String>
+
+    <system:String x:Key="ReadDirectoryRecursive.InvocationField.Directory">ディレクトリ</system:String>
+
+    <system:String x:Key="ReadDirectoryRecursive.InvocationField.Directory.Placeholder">ディレクトリパスを入力中...</system:String>
+
+    <system:String x:Key="ReadDirectoryRecursive.InvocationField.Depth">深さ</system:String>
+
+    <system:String x:Key="ReadDirectoryRecursive.InvocationField.Depth.Placeholder">デフォルトの深さは 1 です</system:String>
+
+    <!-- Tool Localization -->
+    <system:String x:Key="Tool.FileSystemIO_CreateFile.DisplayName">ファイル作成</system:String>
+    <system:String x:Key="Tool.FileSystemIO_CreateFile.Description">新規の空ファイルを作成します。親ディレクトリが存在しない場合は自動的に作成されます。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_CreateFile.Param.FilePath.DisplayName">ファイルパス</system:String>
+    <system:String x:Key="Tool.FileSystemIO_CreateFile.Param.FilePath.Description">作成するファイルのパス。相対パスは現在のワークスペース基準で解決されます。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_CreateFile.Param.FilePath.Label">ファイル</system:String>
+    <system:String x:Key="Tool.FileSystemIO_CreateFile.Param.FilePath.EmptyText">ファイルパスを待機中...</system:String>
+
+    <system:String x:Key="Tool.FileSystemIO_DeleteFile.DisplayName">ファイル削除</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteFile.Description">指定されたファイルを削除します。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteFile.Param.FilePath.DisplayName">ファイルパス</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteFile.Param.FilePath.Description">削除するファイルのパス。相対パスは現在のワークスペース基準で解決されます。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteFile.Param.FilePath.Label">ファイル</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteFile.Param.FilePath.EmptyText">ファイルパスを待機中...</system:String>
+
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.DisplayName">ディレクトリ削除</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Description">指定されたディレクトリを削除します。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.DirectoryPath.DisplayName">ディレクトリパス</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.DirectoryPath.Description">削除するディレクトリのパス。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.DirectoryPath.Label">ディレクトリ</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.DirectoryPath.EmptyText">ディレクトリパスを待機中...</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.Recursive.DisplayName">再帰削除</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.Recursive.Description">すべてのサブディレクトリおよびファイルを再帰的に削除するかどうか。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.Recursive.Label">再帰的</system:String>
+    <system:String x:Key="Tool.FileSystemIO_DeleteDirectory.Param.Recursive.EmptyText">デフォルトは非再帰</system:String>
+
+    <system:String x:Key="Tool.FileSystemIO_NewDirectory.DisplayName">ディレクトリ作成</system:String>
+    <system:String x:Key="Tool.FileSystemIO_NewDirectory.Description">新規ディレクトリを作成します。必要に応じて中間ディレクトリも作成されます。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_NewDirectory.Param.DirectoryPath.DisplayName">ディレクトリパス</system:String>
+    <system:String x:Key="Tool.FileSystemIO_NewDirectory.Param.DirectoryPath.Description">作成するディレクトリのパス。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_NewDirectory.Param.DirectoryPath.Label">ディレクトリ</system:String>
+    <system:String x:Key="Tool.FileSystemIO_NewDirectory.Param.DirectoryPath.EmptyText">ディレクトリパスを待機中...</system:String>
+
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.DisplayName">名前変更・移動</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Description">ファイルまたはディレクトリの名前変更または移動を行います。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.SourcePath.DisplayName">移動元パス</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.SourcePath.Description">現在のファイルまたはディレクトリのパス。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.SourcePath.Label">移動元</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.SourcePath.EmptyText">移動元パスを待機中...</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.DestinationPath.DisplayName">移動先パス</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.DestinationPath.Description">新しいファイルまたはディレクトリのパス。</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.DestinationPath.Label">移動先</system:String>
+    <system:String x:Key="Tool.FileSystemIO_RenameFile.Param.DestinationPath.EmptyText">移動先パスを待機中...</system:String>
+
+    <system:String x:Key="Tool.ReadTextFile.DisplayName">テキストファイル読込</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Description">指定したテキストファイルの一部または全行を読み込んで返します。</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.FilePath.DisplayName">ファイルパス</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.FilePath.Description">読み込むテキストファイルのパス。</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.FilePath.Label">ファイル</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.FilePath.EmptyText">ファイルパスを待機中...</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.StartLine.DisplayName">開始行</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.StartLine.Description">読み込みを開始する行番号（1から開始）。</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.StartLine.Label">開始行</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.StartLine.EmptyText">デフォルトは1行目</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.EndLine.DisplayName">終了行</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.EndLine.Description">読み込みを終了する行番号（含む）。</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.EndLine.Label">終了行</system:String>
+    <system:String x:Key="Tool.ReadTextFile.Param.EndLine.EmptyText">デフォルトはファイル末尾まで</system:String>
+
+    <system:String x:Key="Tool.ReadDirectoryRecursive.DisplayName">再帰ディレクトリ読込</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Description">ディレクトリを読み込み、構造化されたファイル一覧を返します。</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Directory.DisplayName">ディレクトリパス</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Directory.Description">列挙するディレクトリパス。</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Directory.Label">ディレクトリ</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Directory.EmptyText">ディレクトリパスを待機中...</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Depth.DisplayName">再帰深さ</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Depth.Description">最大再帰深度。デフォルトは 1 です。</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Depth.Label">深さ</system:String>
+    <system:String x:Key="Tool.ReadDirectoryRecursive.Param.Depth.EmptyText">デフォルトの深さは 1 です</system:String>
+
+    <system:String x:Key="Tool.SpawnSubAgent.DisplayName">子エージェント起動</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Description">特定のサブタスクを実行するための子エージェントを起動します。</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.AgentId.DisplayName">子エージェント ID</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.AgentId.Description">起動する子エージェントの一意の識別子。</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.AgentId.Label">エージェント ID</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.AgentId.EmptyText">エージェント ID を待機中...</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.InputXml.DisplayName">入力 XML</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.InputXml.Description">子エージェントに渡すタスクパラメータの XML 構造。</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.InputXml.Label">入力 XML</system:String>
+    <system:String x:Key="Tool.SpawnSubAgent.Param.InputXml.EmptyText">入力データを待機中...</system:String>
+
+    <system:String x:Key="Tool.LoadToolKits.DisplayName">ツールキット読込</system:String>
+    <system:String x:Key="Tool.LoadToolKits.Description">ツールキットを読み込み、次回のエージェントイテレーションから呼び出し可能にします。</system:String>
+    <system:String x:Key="Tool.LoadToolKits.Param.ToolKits.DisplayName">ツールキット一覧</system:String>
+    <system:String x:Key="Tool.LoadToolKits.Param.ToolKits.Description">読み込むツールキット名の JSON 配列。</system:String>
+    <system:String x:Key="Tool.LoadToolKits.Param.ToolKits.Label">ツールキット</system:String>
+    <system:String x:Key="Tool.LoadToolKits.Param.ToolKits.EmptyText">ツールキットリストを入力中...</system:String>
+
+    <!-- AerialCity RAG Tools Localization -->
+    <system:String x:Key="Tool.InitializeAerialCityRAG.DisplayName">AerialCity RAG 初期化</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Description">対象フォルダの AerialCity RAG を初期化します。設定ファイルを生成し、ファイルを埋め込んでデータベースへインポートします。</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.TargetDirectory.DisplayName">対象ディレクトリ</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.TargetDirectory.Description">初期化する対象フォルダのパス。相対パスは現在のワークスペース基準で解決されます。</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.TargetDirectory.Label">対象ディレクトリ</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.TargetDirectory.EmptyText">対象ディレクトリパスを待機中...</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.Mode.DisplayName">インデックスモード</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.Mode.Description">オプションのインデックスモード（Code または Everything）。デフォルトは Code です。</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.Mode.Label">モード</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.Mode.EmptyText">Code</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.MaxFileBytes.DisplayName">最大ファイルサイズ</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.MaxFileBytes.Description">埋め込む単一ファイルの最大サイズ（バイト）。0 は制限なし。</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.MaxFileBytes.Label">最大ファイルバイト数</system:String>
+    <system:String x:Key="Tool.InitializeAerialCityRAG.Param.MaxFileBytes.EmptyText">デフォルト 10485760</system:String>
+
+    <system:String x:Key="Tool.UpdateAerialCityDB.DisplayName">AerialCity DB 更新</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Description">指定されたパスを含む初期化済みの AerialCity データベースを更新します。</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.FolderPath.DisplayName">更新パス</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.FolderPath.Description">更新するフォルダ、ファイル、または削除されたパス。初期化された対象フォルダ内である必要があります。</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.FolderPath.Label">パス</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.FolderPath.EmptyText">パスを待機中...</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.MaxFileBytes.DisplayName">最大ファイルサイズ</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.MaxFileBytes.Description">埋め込む単一ファイルの最大サイズ（バイト）。0 は制限なし。</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.MaxFileBytes.Label">最大ファイルバイト数</system:String>
+    <system:String x:Key="Tool.UpdateAerialCityDB.Param.MaxFileBytes.EmptyText">デフォルト 10485760</system:String>
+
+    <system:String x:Key="Tool.SemanticSearch.DisplayName">セマンティック検索</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Description">初期化済みの AerialCity データベースで、コサイン類似度を使用したベクトル検索を行います。</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.SearchPath.DisplayName">検索パス</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.SearchPath.Description">検索対象のフォルダまたはファイルパス。初期化されたフォルダ内である必要があります。</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.SearchPath.Label">検索パス</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.SearchPath.EmptyText">検索パスを待機中...</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.Query.DisplayName">クエリ</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.Query.Description">コサイン類似度で検索するためのセマンティッククエリテキスト。</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.Query.Label">クエリ</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.Query.EmptyText">セマンティッククエリを入力中...</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.TopK.DisplayName">最大結果数</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.TopK.Description">取得する最大件数。デフォルトは 10 です。</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.TopK.Label">最大結果数</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.TopK.EmptyText">デフォルト 10</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.MinScore.DisplayName">最小スコア</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.MinScore.Description">オプションの最小コサインスコア制限。</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.MinScore.Label">最小スコア</system:String>
+    <system:String x:Key="Tool.SemanticSearch.Param.MinScore.EmptyText">制限なし</system:String>
+
+    <system:String x:Key="Tool.KeywordSearch.DisplayName">キーワード検索</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Description">初期化済みの AerialCity データベースで、BM25 キーワードランキング検索を行います。</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.SearchPath.DisplayName">検索パス</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.SearchPath.Description">検索対象のフォルダまたはファイルパス。初期化されたフォルダ内である必要があります。</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.SearchPath.Label">検索パス</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.SearchPath.EmptyText">検索パスを待機中...</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.Query.DisplayName">クエリ</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.Query.Description">BM25 検索用のキーワードクエリテキスト。</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.Query.Label">クエリ</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.Query.EmptyText">キーワードクエリを入力中...</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.TopK.DisplayName">最大結果数</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.TopK.Description">取得する最大件数。デフォルトは 10 です。</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.TopK.Label">最大結果数</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.TopK.EmptyText">デフォルト 10</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.MinScore.DisplayName">最小スコア</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.MinScore.Description">オプションの最小 BM25 スコア制限。</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.MinScore.Label">最小スコア</system:String>
+    <system:String x:Key="Tool.KeywordSearch.Param.MinScore.EmptyText">制限なし</system:String>
+
+    <!-- General Search Tools -->
+    <system:String x:Key="Tool.GrepSearch.DisplayName">正規表現検索</system:String>
+    <system:String x:Key="Tool.GrepSearch.Description">テキストファイル内を正規表現パターンで検索します。</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Pattern.DisplayName">正規表現パターン</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Pattern.Description">検索する正規表現パターン。</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Pattern.Label">パターン</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Pattern.EmptyText">検索パターンを待機中...</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Directory.DisplayName">検索ディレクトリ</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Directory.Description">検索対象のディレクトリパス。</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Directory.Label">ディレクトリ</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Directory.EmptyText">ディレクトリを待機中...</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Context.DisplayName">前後行数</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Context.Description">マッチした行の前後何行を表示するか。デフォルトは 1 です。</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Context.Label">コンテキスト行数</system:String>
+    <system:String x:Key="Tool.GrepSearch.Param.Context.EmptyText">デフォルトは前後 1 行</system:String>
+
+    <system:String x:Key="Tool.GlobSearch.DisplayName">ファイル名検索</system:String>
+    <system:String x:Key="Tool.GlobSearch.Description">Glob パターンを使用してファイルを検索します。</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Pattern.DisplayName">Glob パターン</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Pattern.Description">ファイル名または相対パスの Glob パターン（*.cs、**/*.xaml など）。</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Pattern.Label">パターン</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Pattern.EmptyText">Glob パターンを待機中...</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Directory.DisplayName">検索ディレクトリ</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Directory.Description">検索対象のディレクトリパス。</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Directory.Label">ディレクトリ</system:String>
+    <system:String x:Key="Tool.GlobSearch.Param.Directory.EmptyText">ディレクトリを待机中...</system:String>
+</ResourceDictionary>

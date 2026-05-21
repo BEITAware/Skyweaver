@@ -144,7 +144,7 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="1">
-                    <TextBlock Text="{Binding State.ToolName}"
+                    <TextBlock Text="{Binding State.ToolDisplayName}"
                                FontFamily="Microsoft YaHei UI, Segoe UI"
                                FontSize="21"
                                FontWeight="Bold"
