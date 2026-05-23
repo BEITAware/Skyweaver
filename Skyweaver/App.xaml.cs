@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Windows;
 using Skyweaver.Controls.SkyweaverPreferencesControl.Services;
 using Skyweaver.Services.Localization;
+using Skyweaver.Services.Skylifter;
 using Skyweaver.Windows;
 
 namespace Skyweaver
@@ -14,8 +15,19 @@ namespace Skyweaver
     {
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+            var skyweaverExecutablePath = SkylifterLauncher.GetCurrentSkyweaverExecutablePath();
+            if (SkylifterLauncher.IsDaemonOnlyStartup(e.Args))
+            {
+                SkylifterLauncher.EnsureStarted(skyweaverExecutablePath);
+                Shutdown();
+                return;
+            }
+
             LocalizationRuntime.Instance.ApplyConfiguredLanguage();
             SkyweaverPreferencesRegistration.EnsureRegistered();
+            Skyweaver.Services.Notifications.NotificationService.Instance.ClearTransient();
+            SkylifterLauncher.EnsureStarted(skyweaverExecutablePath);
+            _ = SkylifterIpcClient.TryRegisterSkyweaverPathAsync(skyweaverExecutablePath);
 
             var splashWindow = new SplashWindow();
             splashWindow.Show();

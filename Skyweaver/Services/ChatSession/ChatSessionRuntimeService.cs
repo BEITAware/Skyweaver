@@ -159,12 +159,36 @@ namespace Skyweaver.Services.ChatSession
                     });
                 PersistSession(request.Session);
 
+                await PublishRuntimeEventAsync(
+                    new ChatSessionRuntimeEvent
+                    {
+                        Kind = ChatSessionRuntimeEventKind.UserMessageCommitted,
+                        SessionId = sessionId,
+                        SessionTitle = request.Session.Name,
+                        FlowName = request.Session.BoundFlowDisplayName
+                    },
+                    linkedCancellationSource.Token).ConfigureAwait(false);
+
+                var hostInjectedHistoryMessages = request.HostInjectedHistoryMessages
+                    .Where(message => message != null)
+                    .Select(message => message.Clone())
+                    .ToList();
+                if (request.HostInjectedHistoryMessageFactory != null)
+                {
+                    var generatedMessages = await request.HostInjectedHistoryMessageFactory(linkedCancellationSource.Token)
+                        .ConfigureAwait(false);
+                    hostInjectedHistoryMessages.AddRange((generatedMessages ?? Array.Empty<LanguageModelChatMessage>())
+                        .Where(message => message != null)
+                        .Select(message => message.Clone()));
+                }
+
                 var conversationHistory = ChatSessionTurnHistoryBuilder.BuildForNextTurn(
                     request.Session,
                     trimmedUserText,
                     userContentBlocks)
                     .Select(message => message.Clone())
                     .ToList();
+                conversationHistory.AddRange(hostInjectedHistoryMessages);
                 var reservedToolCallIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 var toolCallIdFactory = request.ToolCallIdFactory ??
                                         (() => ChatSessionToolCallIdGenerator.Create(request.Session, reservedToolCallIds));
@@ -354,6 +378,7 @@ namespace Skyweaver.Services.ChatSession
             {
                 ChatSessionRuntimeEventKind.TextDelta => false,
                 ChatSessionRuntimeEventKind.ReasoningDelta => false,
+                ChatSessionRuntimeEventKind.UserMessageCommitted => false,
                 ChatSessionRuntimeEventKind.ToolCallUpdated when runtimeEvent.ToolCallSnapshot?.IsInvocationClosed != true &&
                                                        runtimeEvent.ToolInvocation == null => false,
                 ChatSessionRuntimeEventKind.ToolProgressUpdated => false,

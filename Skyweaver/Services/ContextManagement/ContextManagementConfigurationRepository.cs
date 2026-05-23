@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using System.IO;
 using System.Xml.Linq;
@@ -39,7 +40,10 @@ namespace Skyweaver.Services.ContextManagement
                     MaxCompactionEnabled = (bool?)root.Element("MaxCompactionEnabled") ?? false,
                     LifeCycleEnabled = (bool?)root.Element("LifeCycleEnabled") ?? false,
                     LifeCycleRatioPercent = ReadDouble(root.Element("LifeCycleRatioPercent"), 100d),
-                    RnnOptimizedCompactionEnabled = (bool?)root.Element("RnnOptimizedCompactionEnabled") ?? false
+                    RnnOptimizedCompactionEnabled = (bool?)root.Element("RnnOptimizedCompactionEnabled") ?? false,
+                    MemoryEnabled = (bool?)root.Element("MemoryEnabled") ?? false,
+                    MemoryShareScope = ReadEnum(root.Element("MemoryShareScope"), MemoryShareScope.SessionFlow),
+                    MemoryRetrievalCount = (int?)root.Element("MemoryRetrievalCount") ?? 5
                 };
             }
         }
@@ -59,7 +63,10 @@ namespace Skyweaver.Services.ContextManagement
                         new XElement("MaxCompactionEnabled", configuration.MaxCompactionEnabled),
                         new XElement("LifeCycleEnabled", configuration.LifeCycleEnabled),
                         new XElement("LifeCycleRatioPercent", configuration.LifeCycleRatioPercent.ToString("0.##", CultureInfo.InvariantCulture)),
-                        new XElement("RnnOptimizedCompactionEnabled", configuration.RnnOptimizedCompactionEnabled)));
+                        new XElement("RnnOptimizedCompactionEnabled", configuration.RnnOptimizedCompactionEnabled),
+                        new XElement("MemoryEnabled", configuration.MemoryEnabled),
+                        new XElement("MemoryShareScope", configuration.MemoryShareScope.ToString()),
+                        new XElement("MemoryRetrievalCount", configuration.MemoryRetrievalCount)));
 
                 document.Save(ConfigurationFilePath);
             }
@@ -81,6 +88,12 @@ namespace Skyweaver.Services.ContextManagement
             return double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var value)
                 ? Math.Clamp(value, 10d, 500d)
                 : fallback;
+        }
+
+        private static T ReadEnum<T>(XElement? element, T fallback) where T : struct, Enum
+        {
+            var text = (string?)element;
+            return Enum.TryParse<T>(text, out var value) ? value : fallback;
         }
     }
 }

@@ -15,6 +15,7 @@
     <system:String x:Key="Preferences.Page.ChatSession">Chat Session</system:String>
     <system:String x:Key="Preferences.Page.ContextCompression">Compression</system:String>
     <system:String x:Key="Preferences.Page.SemanticSearch">Semantic Search</system:String>
+    <system:String x:Key="Preferences.Page.Memory">Memory</system:String>
     <system:String x:Key="Preferences.Page.Search">Search</system:String>
     <system:String x:Key="Preferences.Sidebar.Title">Preferences</system:String>
     <system:String x:Key="Preferences.BottomNav.LanguageModelConfiguration">Language Model Configuration</system:String>
@@ -452,6 +453,29 @@
     <system:String x:Key="ContextCompression.Instruction.1">1. Settings on this page are written immediately to ContextManagement.xml in the current configuration directory.</system:String>
     <system:String x:Key="ContextCompression.Instruction.2">2. Except for MinCompaction, current options only persist configuration; runtime behavior is not wired yet.</system:String>
 
+    <system:String x:Key="Memory.Page.Title">Memory</system:String>
+    <system:String x:Key="Memory.Page.Description">Configure the Skyweaver memory mechanism, allowing the agent to remember and share past session content.</system:String>
+    <system:String x:Key="Memory.Page.Hint">Changes are written to ContextManagement.xml immediately.</system:String>
+    <system:String x:Key="Memory.Enable.Label">Enable Memory</system:String>
+    <system:String x:Key="Memory.Enable.Hint">Enable Skyweaver memory mechanism: agents can remember your past conversation content. Memory is not 100% reliable.</system:String>
+    <system:String x:Key="Memory.ShareScope.Label">Memory Sharing Scope</system:String>
+    <system:String x:Key="Memory.ShareScope.Hint">Select the sharing scope of memory data across sessions/agents:
+- SessionFlow: Only shared within the current session flow.
+- Agent: Shared across all session flows of the same agent.
+- Application: Globally shared across all agents and sessions in the entire application.</system:String>
+    <system:String x:Key="Memory.ShareScope.SessionFlow">Session Flow</system:String>
+    <system:String x:Key="Memory.ShareScope.Agent">Agent</system:String>
+    <system:String x:Key="Memory.ShareScope.Application">Application</system:String>
+    <system:String x:Key="Memory.RetrievalCount.Label">Memory Retrieval Count</system:String>
+    <system:String x:Key="Memory.RetrievalCount.Hint">Set the number of historical memories to retrieve from the memory store each time.</system:String>
+    <system:String x:Key="Memory.Status.MemoryEnabledSaved">Enable Memory setting saved.</system:String>
+    <system:String x:Key="Memory.Status.ShareScopeSaved">Memory sharing scope saved.</system:String>
+    <system:String x:Key="Memory.Status.RetrievalCountSavedFormat">Memory retrieval count set to {0}.</system:String>
+    <system:String x:Key="Memory.Status.TriggeringPersistenceAndEmbedding">Memory: Triggering persistence and embedding...</system:String>
+    <system:String x:Key="Memory.Status.EmbeddingCompleted">Memory: Embedding completed.</system:String>
+    <system:String x:Key="Memory.Instruction.1">1. The memory mechanism extracts summaries and key facts from your interactive dialogues as memory vectors.</system:String>
+    <system:String x:Key="Memory.Instruction.2">2. Changes to the memory sharing scope affect the isolation level of historical memory loaded by the agent in new sessions.</system:String>
+
     <system:String x:Key="Common.Refresh">Refresh</system:String>
     <system:String x:Key="SemanticSearch.Page.Title">Semantic Search</system:String>
     <system:String x:Key="SemanticSearch.Page.Description">Configure whether AerialCity RAG tools are enabled and which embedding model is used for retrieval.</system:String>
@@ -563,6 +587,7 @@
     <system:String x:Key="MainWindow.Ribbon.ShowRuler">Show Ruler</system:String>
     <system:String x:Key="MainWindow.Ribbon.ShowConnections">Show Connections</system:String>
     <system:String x:Key="MainWindow.Status.Ready">Ready</system:String>
+    <system:String x:Key="MainWindow.Status.Welcome">Welcome to Skyweaver!</system:String>
     <system:String x:Key="MainWindow.Status.Zoom100">Zoom: 100%</system:String>
     <system:String x:Key="MainWindow.Status.NodeCount0">Nodes: 0</system:String>
 

@@ -28,6 +28,8 @@
 
     <system:String x:Key="Preferences.Page.SemanticSearch">セマンティック検索</system:String>
 
+    <system:String x:Key="Preferences.Page.Memory">記憶</system:String>
+
     <system:String x:Key="Preferences.Page.Search">検索</system:String>
 
     <system:String x:Key="Preferences.Sidebar.Title">設定</system:String>
@@ -889,6 +891,48 @@
     <system:String x:Key="ContextCompression.Instruction.1">1. このページの設定は、現在の設定ディレクトリの ContextManagement.xml に即座に書き込まれます。</system:String>
 
     <system:String x:Key="ContextCompression.Instruction.2">2. MinCompaction を除き、現在のオプションは設定の永続化のみを行い、実行時動作はまだ接続されていません。</system:String>
+
+
+    <system:String x:Key="Memory.Page.Title">記憶</system:String>
+
+    <system:String x:Key="Memory.Page.Description">Skyweaver 記憶メカニズムを設定し、エージェントが過去のセッション内容を記憶および共有できるようにします。</system:String>
+
+    <system:String x:Key="Memory.Page.Hint">変更は ContextManagement.xml に即座に書き込まれます。</system:String>
+
+    <system:String x:Key="Memory.Enable.Label">記憶を有効にする</system:String>
+
+    <system:String x:Key="Memory.Enable.Hint">Skyweaver記憶メカニズムを有効にする：エージェントは過去の対話内容を記憶できます。記憶は100%信頼できるわけではありません。</system:String>
+
+    <system:String x:Key="Memory.ShareScope.Label">記憶共有スコープ</system:String>
+
+    <system:String x:Key="Memory.ShareScope.Hint">記憶データのセッション間/エージェント間の共有スコープを選択します：
+- セッションフロー：現在のセッションフローの内部でのみ共有されます。
+- エージェント：同じエージェントのすべてのセッションフロー間で共有されます。
+- アプリケーション：アプリケーション全体のすべてのエージェントとセッションでグローバルに共有されます。</system:String>
+
+    <system:String x:Key="Memory.ShareScope.SessionFlow">セッションフロー</system:String>
+
+    <system:String x:Key="Memory.ShareScope.Agent">エージェント</system:String>
+
+    <system:String x:Key="Memory.ShareScope.Application">アプリケーション</system:String>
+
+    <system:String x:Key="Memory.RetrievalCount.Label">記憶取得数</system:String>
+
+    <system:String x:Key="Memory.RetrievalCount.Hint">記憶ストアから取得する過去の記憶の数を設定します。</system:String>
+
+    <system:String x:Key="Memory.Status.MemoryEnabledSaved">記憶の有効化設定が保存されました。</system:String>
+
+    <system:String x:Key="Memory.Status.ShareScopeSaved">記憶共有スコープが保存されました。</system:String>
+
+    <system:String x:Key="Memory.Status.RetrievalCountSavedFormat">記憶取得数が {0} に設定されました。</system:String>
+
+    <system:String x:Key="Memory.Status.TriggeringPersistenceAndEmbedding">記憶：永続化と埋め込みを実行中...</system:String>
+
+    <system:String x:Key="Memory.Status.EmbeddingCompleted">記憶：埋め込みが完了しました。</system:String>
+
+    <system:String x:Key="Memory.Instruction.1">1. 記憶メカニズムは、インタラクティブな対話のサマリーや主要なファクトを記憶ベクトルとして抽出します。</system:String>
+
+    <system:String x:Key="Memory.Instruction.2">2. 記憶共有スコープの変更は、新しいセッションでエージェントがロードする歴史的記憶の隔離レベルに影響します。</system:String>
 
 
     <system:String x:Key="Common.Refresh">更新</system:String>
@@ -2920,4 +2964,5 @@
     <system:String x:Key="Search.Status.VertexMaxResultsSavedFormat">Vertex AI の最大結果数が {0} に設定されました。</system:String>
     <system:String x:Key="Search.Status.VertexSearchModelSaved">Vertex AI 検索モデルが保存されました。</system:String>
     <system:String x:Key="Search.Status.SaveFailedFormat">保存に失敗しました: {0}</system:String>
+    <system:String x:Key="MainWindow.Status.Welcome">Skyweaverへようこそ！</system:String>
 </ResourceDictionary>

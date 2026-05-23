@@ -45,7 +45,7 @@ namespace Skyweaver.Tools
                     isRequired: false)
             ],
             defaultAgentPermission: SkyweaverToolDefaultAgentPermission.Allow,
-            supportsAsyncInvocation: false);
+            supportsAsyncInvocation: true);
 
         public SpawnSubAgentTool()
             : this(new AgentConfigurationRepository(new AgentConfigurationPathProvider()), new AgentLoopService())

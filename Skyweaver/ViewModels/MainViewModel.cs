@@ -1,3 +1,4 @@
+using Skyweaver.Controls.ChatSessionControl.ViewModels;
 using Skyweaver.Infrastructure.Mvvm;
 using Skyweaver.Services.ChatSession;
 using Skyweaver.Panels.DocumentWorkspace.ViewModels;
@@ -5,12 +6,15 @@ using Skyweaver.Panels.FileExplorer.ViewModels;
 using Skyweaver.Panels.Filmstrip.ViewModels;
 using Skyweaver.Panels.MultiFunctionArea.ViewModels;
 using Skyweaver.Panels.SessionList.ViewModels;
+using Skyweaver.Services.Skylifter;
 
 namespace Skyweaver.ViewModels
 {
     public class MainViewModel : ObservableObject
     {
         private readonly ChatSessionRepository _chatSessionRepository;
+
+        public Skyweaver.Services.Notifications.NotificationService NotificationService => Skyweaver.Services.Notifications.NotificationService.Instance;
 
         public SessionListPanelViewModel SessionListPanel { get; }
 
@@ -34,6 +38,50 @@ namespace Skyweaver.ViewModels
             FileExplorerPanel = new FileExplorerPanelViewModel();
             FilmstripPanel = new FilmstripPanelViewModel();
             MultiFunctionAreaPanel = new MultiFunctionAreaPanelViewModel();
+        }
+
+        public async Task HandleGuiClosingAsync()
+        {
+            var openSessionViewModels = DocumentWorkspacePanel.OpenedDocuments
+                .Select(document => document.ContentViewModel)
+                .OfType<ChatSessionControlViewModel>()
+                .Where(viewModel => !string.IsNullOrWhiteSpace(viewModel.SessionId))
+                .ToArray();
+
+            if (openSessionViewModels.Length == 0)
+            {
+                return;
+            }
+
+            foreach (var sessionViewModel in openSessionViewModels)
+            {
+                sessionViewModel.SaveSessionSnapshot();
+            }
+
+            var sessionIds = openSessionViewModels
+                .Select(viewModel => viewModel.SessionId)
+                .Where(sessionId => !string.IsNullOrWhiteSpace(sessionId))
+                .Select(sessionId => sessionId!)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            if (await SkylifterIpcClient.TryRunMemoryForClosedSessionsAsync(sessionIds).ConfigureAwait(true))
+            {
+                return;
+            }
+
+            var skyweaverExecutablePath = SkylifterLauncher.GetCurrentSkyweaverExecutablePath();
+            SkylifterLauncher.EnsureStarted(skyweaverExecutablePath);
+            _ = SkylifterIpcClient.TryRegisterSkyweaverPathAsync(skyweaverExecutablePath);
+            await Task.Delay(600).ConfigureAwait(true);
+
+            if (await SkylifterIpcClient.TryRunMemoryForClosedSessionsAsync(sessionIds).ConfigureAwait(true))
+            {
+                return;
+            }
+
+            await Task.WhenAll(openSessionViewModels.Select(viewModel =>
+                viewModel.GenerateMemoryForClosedSessionAsync())).ConfigureAwait(true);
         }
     }
 }

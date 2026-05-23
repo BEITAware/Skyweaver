@@ -58,6 +58,21 @@ namespace Skyweaver.Services.ChatSession
             return sessions;
         }
 
+        public ChatSessionModel? LoadBySessionId(string? sessionId)
+        {
+            var normalizedSessionId = sessionId?.Trim() ?? string.Empty;
+            if (normalizedSessionId.Length == 0)
+            {
+                return null;
+            }
+
+            return LoadAll().FirstOrDefault(session =>
+                string.Equals(
+                    session.SessionId?.Trim(),
+                    normalizedSessionId,
+                    StringComparison.OrdinalIgnoreCase));
+        }
+
         public ChatSessionModel Create(string sessionName, ChatSessionFlowBinding? flowBinding = null)
         {
             EnsureRootFolder();

@@ -118,6 +118,11 @@ namespace Skyweaver.Panels.DocumentWorkspace.ViewModels
                     : OpenedDocuments[Math.Min(removedIndex, OpenedDocuments.Count - 1)];
             }
 
+            if (document.ContentViewModel is IWorkspaceDocumentCloseAware closeAware)
+            {
+                closeAware.OnWorkspaceDocumentClosed();
+            }
+
             DocumentClosed?.Invoke(document);
         }
 

@@ -31,7 +31,56 @@ namespace Skyweaver.Services.AgentLoop
             int PartIndex,
             int ToolCallIndex,
             SkyweaverToolInvocation Invocation,
-            Task<SkyweaverToolResult> ExecutionTask);
+            Task<SkyweaverToolResult> ExecutionTask,
+            AsyncToolProgressTracker ProgressTracker);
+
+        private sealed record AsyncToolProgressSnapshot(
+            string ToolCallId,
+            string ToolName,
+            bool IsPending,
+            bool IsCompleted,
+            int Version,
+            DateTimeOffset? ObservedAtUtc,
+            SkyweaverToolProgressUpdate? Progress);
+
+        private sealed class AsyncToolProgressTracker
+        {
+            private readonly object _syncRoot = new();
+            private int _version;
+            private DateTimeOffset? _observedAtUtc;
+            private SkyweaverToolProgressUpdate? _latestProgress;
+
+            public void Update(SkyweaverToolProgressUpdate progress)
+            {
+                ArgumentNullException.ThrowIfNull(progress);
+
+                lock (_syncRoot)
+                {
+                    _latestProgress = progress.Normalize();
+                    _observedAtUtc = DateTimeOffset.UtcNow;
+                    _version++;
+                }
+            }
+
+            public AsyncToolProgressSnapshot CreateSnapshot(
+                string toolCallId,
+                string toolName,
+                bool isPending,
+                bool isCompleted)
+            {
+                lock (_syncRoot)
+                {
+                    return new AsyncToolProgressSnapshot(
+                        toolCallId,
+                        toolName,
+                        isPending,
+                        isCompleted,
+                        _version,
+                        _observedAtUtc,
+                        _latestProgress);
+                }
+            }
+        }
 
         private sealed record AsyncToolFlushResult(
             IReadOnlyList<AgentToolBackfill> ToolBackfills,
@@ -323,6 +372,7 @@ namespace Skyweaver.Services.AgentLoop
             var iterations = new List<AgentLoopIteration>();
             var pendingAsyncToolExecutions = new List<PendingAsyncToolExecution>();
             var completedAsyncToolResultsById = new Dictionary<string, SkyweaverToolReturnPayload>(StringComparer.OrdinalIgnoreCase);
+            var completedAsyncToolProgressById = new Dictionary<string, AsyncToolProgressSnapshot>(StringComparer.OrdinalIgnoreCase);
             string? lastModelId = null;
             AgentLoopFinalOutput? latestPassdownOutput = null;
             var minCompactionAttemptState = new MinCompactionAttemptState();
@@ -335,6 +385,7 @@ namespace Skyweaver.Services.AgentLoop
                     request,
                     pendingAsyncToolExecutions,
                     completedAsyncToolResultsById,
+                    completedAsyncToolProgressById,
                     turnHistory,
                     iterationNumber,
                     onEventAsync,
@@ -435,6 +486,7 @@ namespace Skyweaver.Services.AgentLoop
                         activeToolKitKeys,
                         pendingAsyncToolExecutions,
                         completedAsyncToolResultsById,
+                        completedAsyncToolProgressById,
                         debugRunContext,
                         iterationNumber,
                         latestPassdownOutput,
@@ -719,6 +771,7 @@ namespace Skyweaver.Services.AgentLoop
             IReadOnlyCollection<string> activeToolKitKeys,
             IList<PendingAsyncToolExecution> pendingAsyncToolExecutions,
             IDictionary<string, SkyweaverToolReturnPayload> completedAsyncToolResultsById,
+            IDictionary<string, AsyncToolProgressSnapshot> completedAsyncToolProgressById,
             AgentLoopDebugRunContext? debugRunContext,
             int iterationNumber,
             AgentLoopFinalOutput? latestPassdownOutput,
@@ -941,6 +994,7 @@ namespace Skyweaver.Services.AgentLoop
                             activeToolKitKeys,
                             pendingAsyncToolExecutions,
                             completedAsyncToolResultsById,
+                            completedAsyncToolProgressById,
                             toolCallIdsByIndex,
                             toolCallIdFactory,
                             iterationNumber,
@@ -1155,6 +1209,7 @@ namespace Skyweaver.Services.AgentLoop
             IReadOnlyCollection<string> activeToolKitKeys,
             IList<PendingAsyncToolExecution> pendingAsyncToolExecutions,
             IDictionary<string, SkyweaverToolReturnPayload> completedAsyncToolResultsById,
+            IDictionary<string, AsyncToolProgressSnapshot> completedAsyncToolProgressById,
             IDictionary<int, string> toolCallIdsByIndex,
             Func<string> toolCallIdFactory,
             int iterationNumber,
@@ -1245,6 +1300,7 @@ namespace Skyweaver.Services.AgentLoop
                                     invocation,
                                     pendingAsyncToolExecutions,
                                     completedAsyncToolResultsById,
+                                    completedAsyncToolProgressById,
                                     cancellationToken).ConfigureAwait(false);
                                 var payload = _toolManager.CreateToolReturnPayload(
                                     SkyweaverBuiltInToolNames.WaitForAsyncTools,
@@ -1261,6 +1317,45 @@ namespace Skyweaver.Services.AgentLoop
                                 var failurePayload = _toolManager.CreateErrorToolReturnPayload(
                                     SkyweaverBuiltInToolNames.WaitForAsyncTools,
                                     $"WaitForAsyncTools execution failed: {ex.Message}",
+                                    toolCallId);
+                                backfill = CreateBackfill(partIndex, part.ToolCallIndex, [failurePayload], toolCallId);
+                            }
+                        }
+                    }
+                    else if (IsGetAsyncToolProgress(invocation.ToolName))
+                    {
+                        if (invocation.IsAsyncInvocation)
+                        {
+                            var failurePayload = _toolManager.CreateErrorToolReturnPayload(
+                                SkyweaverBuiltInToolNames.GetAsyncToolProgress,
+                                "GetAsyncToolProgress cannot be invoked asynchronously.",
+                                toolCallId);
+                            backfill = CreateBackfill(
+                                partIndex,
+                                part.ToolCallIndex,
+                                [failurePayload],
+                                toolCallId);
+                        }
+                        else
+                        {
+                            try
+                            {
+                                var result = ExecuteGetAsyncToolProgress(
+                                    invocation,
+                                    pendingAsyncToolExecutions,
+                                    completedAsyncToolResultsById,
+                                    completedAsyncToolProgressById);
+                                var payload = _toolManager.CreateToolReturnPayload(
+                                    SkyweaverBuiltInToolNames.GetAsyncToolProgress,
+                                    result,
+                                    toolCallId);
+                                backfill = CreateBackfill(partIndex, part.ToolCallIndex, [payload], toolCallId);
+                            }
+                            catch (Exception ex)
+                            {
+                                var failurePayload = _toolManager.CreateErrorToolReturnPayload(
+                                    SkyweaverBuiltInToolNames.GetAsyncToolProgress,
+                                    $"GetAsyncToolProgress execution failed: {ex.Message}",
                                     toolCallId);
                                 backfill = CreateBackfill(partIndex, part.ToolCallIndex, [failurePayload], toolCallId);
                             }
@@ -1377,6 +1472,7 @@ namespace Skyweaver.Services.AgentLoop
                             activeToolKitKeys,
                             pendingAsyncToolExecutions,
                             completedAsyncToolResultsById,
+                            completedAsyncToolProgressById,
                             toolCallId,
                             iterationNumber,
                             partIndex,
@@ -1439,6 +1535,7 @@ namespace Skyweaver.Services.AgentLoop
             AgentLoopRequest request,
             IList<PendingAsyncToolExecution> pendingAsyncToolExecutions,
             IDictionary<string, SkyweaverToolReturnPayload> completedAsyncToolResultsById,
+            IDictionary<string, AsyncToolProgressSnapshot> completedAsyncToolProgressById,
             ICollection<LanguageModelChatMessage> turnHistory,
             int iterationNumber,
             Func<AgentLoopRuntimeEvent, CancellationToken, ValueTask>? onEventAsync,
@@ -1447,6 +1544,7 @@ namespace Skyweaver.Services.AgentLoop
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(pendingAsyncToolExecutions);
             ArgumentNullException.ThrowIfNull(completedAsyncToolResultsById);
+            ArgumentNullException.ThrowIfNull(completedAsyncToolProgressById);
             ArgumentNullException.ThrowIfNull(turnHistory);
 
             if (pendingAsyncToolExecutions.Count == 0)
@@ -1498,6 +1596,12 @@ namespace Skyweaver.Services.AgentLoop
                 }
 
                 completedAsyncToolResultsById[execution.ToolCallId] = payload;
+                completedAsyncToolProgressById[execution.ToolCallId] =
+                    execution.ProgressTracker.CreateSnapshot(
+                        execution.ToolCallId,
+                        execution.Invocation.ToolName,
+                        isPending: false,
+                        isCompleted: true);
                 var backfill = CreateBackfill(
                     execution.PartIndex,
                     execution.ToolCallIndex,
@@ -2517,6 +2621,11 @@ namespace Skyweaver.Services.AgentLoop
             return string.Equals(toolName, SkyweaverBuiltInToolNames.WaitForAsyncTools, StringComparison.OrdinalIgnoreCase);
         }
 
+        private static bool IsGetAsyncToolProgress(string toolName)
+        {
+            return string.Equals(toolName, SkyweaverBuiltInToolNames.GetAsyncToolProgress, StringComparison.OrdinalIgnoreCase);
+        }
+
         private static bool IsLoadToolKits(string toolName)
         {
             return string.Equals(toolName, SkyweaverBuiltInToolNames.LoadToolKits, StringComparison.OrdinalIgnoreCase);
@@ -2577,15 +2686,31 @@ namespace Skyweaver.Services.AgentLoop
             int toolCallIndex,
             string toolCallId,
             string? modelId,
-            Func<AgentLoopRuntimeEvent, CancellationToken, ValueTask>? onEventAsync)
+            Func<AgentLoopRuntimeEvent, CancellationToken, ValueTask>? onEventAsync,
+            Action<SkyweaverToolProgressUpdate>? progressSink = null)
         {
-            if (onEventAsync == null)
+            if (onEventAsync == null && progressSink == null)
             {
                 return runtimeToolContext;
             }
 
             return runtimeToolContext.WithToolProgressReporter(async (progress, cancellationToken) =>
             {
+                var normalizedProgress = progress.Normalize();
+                try
+                {
+                    progressSink?.Invoke(normalizedProgress);
+                }
+                catch
+                {
+                    // Progress bookkeeping must not fail the tool itself.
+                }
+
+                if (onEventAsync == null)
+                {
+                    return;
+                }
+
                 try
                 {
                     await PublishAsync(
@@ -2599,7 +2724,7 @@ namespace Skyweaver.Services.AgentLoop
                             ToolCallIndex = toolCallIndex,
                             ToolCallId = toolCallId,
                             ToolInvocation = invocation,
-                            ToolProgress = progress.Normalize()
+                            ToolProgress = normalizedProgress
                         },
                         cancellationToken).ConfigureAwait(false);
                 }
@@ -2698,6 +2823,7 @@ namespace Skyweaver.Services.AgentLoop
             IReadOnlyCollection<string> activeToolKitKeys,
             IList<PendingAsyncToolExecution> pendingAsyncToolExecutions,
             IDictionary<string, SkyweaverToolReturnPayload> completedAsyncToolResultsById,
+            IDictionary<string, AsyncToolProgressSnapshot> completedAsyncToolProgressById,
             string toolCallId,
             int iterationNumber,
             int partIndex,
@@ -2724,11 +2850,20 @@ namespace Skyweaver.Services.AgentLoop
                     authorization.ErrorMessage ?? $"Tool '{invocation.ToolName}' cannot be executed.",
                     toolCallId);
                 completedAsyncToolResultsById[toolCallId] = failurePayload;
+                completedAsyncToolProgressById[toolCallId] = new AsyncToolProgressSnapshot(
+                    toolCallId,
+                    invocation.ToolName,
+                    IsPending: false,
+                    IsCompleted: true,
+                    Version: 0,
+                    ObservedAtUtc: null,
+                    Progress: null);
                 return CreateBackfill(partIndex, toolCallIndex, [failurePayload], toolCallId);
             }
 
             try
             {
+                var progressTracker = new AsyncToolProgressTracker();
                 var progressToolContext = CreateToolProgressContext(
                     runtimeToolContext,
                     invocation,
@@ -2737,7 +2872,8 @@ namespace Skyweaver.Services.AgentLoop
                     toolCallIndex,
                     toolCallId,
                     modelId,
-                    onEventAsync);
+                    onEventAsync,
+                    progressTracker.Update);
                 var executionTask = _toolManager.ExecuteAsync(
                     invocation.ToolName,
                     invocation.RawArguments,
@@ -2751,7 +2887,8 @@ namespace Skyweaver.Services.AgentLoop
                     partIndex,
                     toolCallIndex,
                     invocation,
-                    executionTask));
+                    executionTask,
+                    progressTracker));
 
                 var acknowledgmentPayload = _toolManager.CreateToolReturnPayload(
                     invocation.ToolName,
@@ -2770,6 +2907,14 @@ namespace Skyweaver.Services.AgentLoop
                     $"Async tool scheduling failed: {ex.Message}",
                     toolCallId);
                 completedAsyncToolResultsById[toolCallId] = failurePayload;
+                completedAsyncToolProgressById[toolCallId] = new AsyncToolProgressSnapshot(
+                    toolCallId,
+                    invocation.ToolName,
+                    IsPending: false,
+                    IsCompleted: true,
+                    Version: 0,
+                    ObservedAtUtc: null,
+                    Progress: null);
                 return CreateBackfill(partIndex, toolCallIndex, [failurePayload], toolCallId);
             }
         }
@@ -2778,6 +2923,7 @@ namespace Skyweaver.Services.AgentLoop
             SkyweaverToolInvocation invocation,
             IList<PendingAsyncToolExecution> pendingAsyncToolExecutions,
             IDictionary<string, SkyweaverToolReturnPayload> completedAsyncToolResultsById,
+            IDictionary<string, AsyncToolProgressSnapshot> completedAsyncToolProgressById,
             CancellationToken cancellationToken)
         {
             var registration = _toolManager.GetRegisteredTools(resolveIcons: false).FirstOrDefault(item =>
@@ -2802,6 +2948,11 @@ namespace Skyweaver.Services.AgentLoop
                 pendingAsyncToolExecutions,
                 completedAsyncToolResultsById,
                 cancellationToken).ConfigureAwait(false);
+            var progressSnapshots = ResolveAsyncToolProgressSnapshots(
+                waitedToolCallIds,
+                pendingAsyncToolExecutions,
+                completedAsyncToolResultsById,
+                completedAsyncToolProgressById);
 
             var summary = waitedToolCallIds.Count == 1
                 ? $"Waited for async tool {waitedToolCallIds[0]} to complete."
@@ -2812,8 +2963,214 @@ namespace Skyweaver.Services.AgentLoop
                 new Dictionary<string, object?>
                 {
                     ["requestedToolCallIds"] = new JArray(requestedToolCallIds),
-                    ["completedToolCallIds"] = new JArray(waitedToolCallIds)
+                    ["completedToolCallIds"] = new JArray(waitedToolCallIds),
+                    ["progressSnapshots"] = BuildAsyncToolProgressSnapshotJson(progressSnapshots)
                 });
+        }
+
+        private SkyweaverToolResult ExecuteGetAsyncToolProgress(
+            SkyweaverToolInvocation invocation,
+            IList<PendingAsyncToolExecution> pendingAsyncToolExecutions,
+            IDictionary<string, SkyweaverToolReturnPayload> completedAsyncToolResultsById,
+            IDictionary<string, AsyncToolProgressSnapshot> completedAsyncToolProgressById)
+        {
+            var registration = _toolManager.GetRegisteredTools(resolveIcons: false).FirstOrDefault(item =>
+                string.Equals(item.Definition.Name, invocation.ToolName, StringComparison.OrdinalIgnoreCase));
+
+            if (registration == null)
+            {
+                return SkyweaverToolResult.Failure($"Tool not found: {invocation.ToolName}");
+            }
+
+            var arguments = SkyweaverToolArguments.Bind(registration.Definition.Parameters, invocation.RawArguments);
+            var requestedToolCallIds = ExtractRequestedToolCallIds(
+                arguments.GetJson(SkyweaverBuiltInToolNames.GetAsyncToolProgressParameter));
+            if (requestedToolCallIds.Count == 0)
+            {
+                return SkyweaverToolResult.Failure(
+                    "GetAsyncToolProgress requires at least one ToolCallId.");
+            }
+
+            var missingToolCallIds = requestedToolCallIds
+                .Where(toolCallId =>
+                    !completedAsyncToolResultsById.ContainsKey(toolCallId) &&
+                    !completedAsyncToolProgressById.ContainsKey(toolCallId) &&
+                    !pendingAsyncToolExecutions.Any(execution =>
+                        string.Equals(execution.ToolCallId, toolCallId, StringComparison.OrdinalIgnoreCase)))
+                .ToArray();
+            if (missingToolCallIds.Length > 0)
+            {
+                return SkyweaverToolResult.Failure(
+                    $"Unknown async tool call id(s): {string.Join(", ", missingToolCallIds)}",
+                    new Dictionary<string, object?>
+                    {
+                        ["requestedToolCallIds"] = new JArray(requestedToolCallIds),
+                        ["missingToolCallIds"] = new JArray(missingToolCallIds)
+                    });
+            }
+
+            var progressSnapshots = ResolveAsyncToolProgressSnapshots(
+                requestedToolCallIds,
+                pendingAsyncToolExecutions,
+                completedAsyncToolResultsById,
+                completedAsyncToolProgressById);
+            var content = BuildAsyncToolProgressContent(progressSnapshots);
+            return SkyweaverToolResult.Success(
+                content,
+                new Dictionary<string, object?>
+                {
+                    ["requestedToolCallIds"] = new JArray(requestedToolCallIds),
+                    ["progressSnapshots"] = BuildAsyncToolProgressSnapshotJson(progressSnapshots)
+                });
+        }
+
+        private static IReadOnlyList<AsyncToolProgressSnapshot> ResolveAsyncToolProgressSnapshots(
+            IReadOnlyList<string> requestedToolCallIds,
+            IList<PendingAsyncToolExecution> pendingAsyncToolExecutions,
+            IDictionary<string, SkyweaverToolReturnPayload> completedAsyncToolResultsById,
+            IDictionary<string, AsyncToolProgressSnapshot> completedAsyncToolProgressById)
+        {
+            var snapshots = new List<AsyncToolProgressSnapshot>(requestedToolCallIds.Count);
+            foreach (var toolCallId in requestedToolCallIds)
+            {
+                var pendingExecution = pendingAsyncToolExecutions.FirstOrDefault(execution =>
+                    string.Equals(execution.ToolCallId, toolCallId, StringComparison.OrdinalIgnoreCase));
+                if (pendingExecution != null)
+                {
+                    var isCompleted = pendingExecution.ExecutionTask.IsCompleted;
+                    snapshots.Add(pendingExecution.ProgressTracker.CreateSnapshot(
+                        pendingExecution.ToolCallId,
+                        pendingExecution.Invocation.ToolName,
+                        isPending: !isCompleted,
+                        isCompleted: isCompleted));
+                    continue;
+                }
+
+                if (completedAsyncToolProgressById.TryGetValue(toolCallId, out var completedSnapshot))
+                {
+                    snapshots.Add(completedSnapshot);
+                    continue;
+                }
+
+                if (completedAsyncToolResultsById.TryGetValue(toolCallId, out var completedResult))
+                {
+                    snapshots.Add(new AsyncToolProgressSnapshot(
+                        toolCallId,
+                        completedResult.ToolName,
+                        IsPending: false,
+                        IsCompleted: true,
+                        Version: 0,
+                        ObservedAtUtc: null,
+                        Progress: null));
+                }
+            }
+
+            return snapshots;
+        }
+
+        private static string BuildAsyncToolProgressContent(IReadOnlyList<AsyncToolProgressSnapshot> snapshots)
+        {
+            if (snapshots.Count == 0)
+            {
+                return "No async tool progress snapshots are available.";
+            }
+
+            var builder = new StringBuilder();
+            builder.AppendLine("Async tool progress snapshots:");
+            foreach (var snapshot in snapshots)
+            {
+                builder.Append("- ");
+                builder.Append(snapshot.ToolCallId);
+                if (!string.IsNullOrWhiteSpace(snapshot.ToolName))
+                {
+                    builder.Append(" (");
+                    builder.Append(snapshot.ToolName);
+                    builder.Append(')');
+                }
+
+                builder.Append(": ");
+                builder.Append(snapshot.IsCompleted ? "completed" : snapshot.IsPending ? "running" : "accepted");
+                builder.Append("; ");
+                builder.Append(FormatAsyncToolProgress(snapshot));
+                builder.AppendLine();
+            }
+
+            return builder.ToString().TrimEnd();
+        }
+
+        private static string FormatAsyncToolProgress(AsyncToolProgressSnapshot snapshot)
+        {
+            var progress = snapshot.Progress;
+            if (progress == null || snapshot.Version <= 0)
+            {
+                return "no progress reported yet";
+            }
+
+            var fragments = new List<string>();
+            if (!string.IsNullOrWhiteSpace(progress.Phase))
+            {
+                fragments.Add($"phase={progress.Phase}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(progress.StatusText))
+            {
+                fragments.Add($"status={progress.StatusText}");
+            }
+
+            if (progress.CompletedItems.HasValue || progress.TotalItems.HasValue)
+            {
+                fragments.Add($"items={progress.CompletedItems?.ToString() ?? "?"}/{progress.TotalItems?.ToString() ?? "?"}");
+            }
+
+            if (progress.ProgressFraction is double fraction)
+            {
+                fragments.Add($"fraction={Math.Round(fraction * 100d, 1)}%");
+            }
+
+            if (progress.ActiveItems.Count > 0)
+            {
+                fragments.Add($"active={string.Join(", ", progress.ActiveItems.Take(6))}");
+            }
+
+            fragments.Add($"version={snapshot.Version}");
+            return string.Join("; ", fragments);
+        }
+
+        private static JArray BuildAsyncToolProgressSnapshotJson(
+            IReadOnlyList<AsyncToolProgressSnapshot> snapshots)
+        {
+            return new JArray(snapshots.Select(CreateAsyncToolProgressSnapshotJson));
+        }
+
+        private static JObject CreateAsyncToolProgressSnapshotJson(AsyncToolProgressSnapshot snapshot)
+        {
+            var item = new JObject
+            {
+                ["toolCallId"] = snapshot.ToolCallId,
+                ["toolName"] = snapshot.ToolName,
+                ["isPending"] = snapshot.IsPending,
+                ["isCompleted"] = snapshot.IsCompleted,
+                ["progressVersion"] = snapshot.Version
+            };
+
+            if (snapshot.ObservedAtUtc is DateTimeOffset observedAtUtc)
+            {
+                item["observedAtUtc"] = observedAtUtc.ToString("O");
+            }
+
+            if (snapshot.Progress is not SkyweaverToolProgressUpdate progress)
+            {
+                return item;
+            }
+
+            item["phase"] = progress.Phase;
+            item["statusText"] = progress.StatusText;
+            item["completedItems"] = progress.CompletedItems.HasValue ? new JValue(progress.CompletedItems.Value) : JValue.CreateNull();
+            item["totalItems"] = progress.TotalItems.HasValue ? new JValue(progress.TotalItems.Value) : JValue.CreateNull();
+            item["progressFraction"] = progress.ProgressFraction.HasValue ? new JValue(progress.ProgressFraction.Value) : JValue.CreateNull();
+            item["progressIsCompleted"] = progress.IsCompleted;
+            item["activeItems"] = new JArray(progress.ActiveItems);
+            return item;
         }
 
         private static async Task<IReadOnlyList<string>> WaitForAsyncToolCallsAsync(

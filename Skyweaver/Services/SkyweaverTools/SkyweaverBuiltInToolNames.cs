@@ -10,6 +10,10 @@ namespace Skyweaver.Services.SkyweaverTools
 
         public const string WaitForAsyncToolsParameter = "ToolCallIds";
 
+        public const string GetAsyncToolProgress = "GetAsyncToolProgress";
+
+        public const string GetAsyncToolProgressParameter = "ToolCallIds";
+
         public const string LoadToolKits = "LoadToolKits";
 
         public const string CompactToolCalls = "CompactToolCalls";

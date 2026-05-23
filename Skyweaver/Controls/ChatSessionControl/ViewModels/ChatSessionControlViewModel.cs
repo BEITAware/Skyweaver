@@ -10,15 +10,17 @@ using Skyweaver.Controls.ChatSessionControl.Services;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
 using Skyweaver.Infrastructure.Mvvm;
 using Skyweaver.Models.ChatSession;
+using Skyweaver.Panels.DocumentWorkspace.Contracts;
 using Skyweaver.Services.AgentLoop;
 using Skyweaver.Services.ChatSession;
 using Skyweaver.Services;
 using Skyweaver.Services.Localization;
+using Skyweaver.Services.Memory;
 using Skyweaver.Windows;
 
 namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 {
-    public sealed class ChatSessionControlViewModel : ObservableObject
+    public sealed class ChatSessionControlViewModel : ObservableObject, IWorkspaceDocumentCloseAware
     {
         private const string UserAvatarPath = "pack://application:,,,/Resources/image.png";
         private const string AssistantAvatarPath = "pack://application:,,,/Resources/GuideBot.png";
@@ -32,6 +34,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         private readonly ChatComposerImageAttachmentService _composerImageAttachmentService;
         private readonly ToolInvocationPresentationService _toolInvocationPresentationService;
         private readonly ChatSessionPresentationProjector _presentationProjector;
+        private readonly MemoryService _memoryService;
         private readonly string _sessionFlowValidationSummary;
 
         private string _draftMessageText = string.Empty;
@@ -55,6 +58,8 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         public string SessionTitle { get; }
 
         public string? SessionSubtitle { get; }
+
+        public string? SessionId => _sessionModel?.SessionId;
 
         public bool HasBoundSessionFlow => _sessionModel?.HasBoundFlow == true;
 
@@ -201,6 +206,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             _composerImageAttachmentService = new ChatComposerImageAttachmentService();
             _toolInvocationPresentationService = new ToolInvocationPresentationService();
             _presentationProjector = new ChatSessionPresentationProjector();
+            _memoryService = new MemoryService();
             _flowBindingService = new ChatSessionFlowBindingService();
             _sessionFlowValidationSummary = BuildSessionFlowValidationSummary(sessionModel);
 
@@ -288,15 +294,21 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             ExecutionStatusText = LF("ChatSessionControl.Status.RunningFlowFormat", "正在运行：{0}", BoundSessionFlowName);
             await Task.Yield();
 
+            var sessionModel = _sessionModel!;
             ChatSessionRuntimeResult? runtimeResult = null;
             try
             {
                 runtimeResult = await _runtimeService.ExecuteTurnAsync(
                     new ChatSessionRuntimeRequest
                     {
-                        Session = _sessionModel,
+                        Session = sessionModel,
                         UserText = trimmedText,
                         UserContentBlocks = userContentBlocks,
+                        HostInjectedHistoryMessageFactory = ct => _memoryService.RetrieveBackfillMessagesAsync(
+                            sessionModel,
+                            trimmedText,
+                            userContentBlocks,
+                            ct),
                         ToolConfirmationCallback = ConfirmToolInvocationAsync
                     },
                     HandleRuntimeEventAsync,
@@ -1057,6 +1069,41 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             }
 
             _chatSessionRepository.Save(_sessionModel);
+        }
+
+        public void SaveSessionSnapshot()
+        {
+            if (_sessionModel == null)
+            {
+                return;
+            }
+
+            try
+            {
+                _chatSessionRepository?.Save(_sessionModel);
+            }
+            catch
+            {
+                // Memory generation can still use the in-memory session if final persistence is unavailable.
+            }
+        }
+
+        public void QueueMemoryForClosedSession()
+        {
+            _ = GenerateMemoryForClosedSessionAsync();
+        }
+
+        public Task GenerateMemoryForClosedSessionAsync()
+        {
+            return _sessionModel == null
+                ? Task.CompletedTask
+                : _memoryService.GenerateForClosedSessionAsync(_sessionModel);
+        }
+
+        public void OnWorkspaceDocumentClosed()
+        {
+            SaveSessionSnapshot();
+            QueueMemoryForClosedSession();
         }
 
         private void AddSystemStatusMessage(string content, string title)

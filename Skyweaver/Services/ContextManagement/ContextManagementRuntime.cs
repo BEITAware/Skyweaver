@@ -61,7 +61,10 @@ namespace Skyweaver.Services.ContextManagement
                 MaxCompactionEnabled = configuration.MaxCompactionEnabled,
                 LifeCycleEnabled = configuration.LifeCycleEnabled,
                 LifeCycleRatioPercent = configuration.LifeCycleRatioPercent,
-                RnnOptimizedCompactionEnabled = configuration.RnnOptimizedCompactionEnabled
+                RnnOptimizedCompactionEnabled = configuration.RnnOptimizedCompactionEnabled,
+                MemoryEnabled = configuration.MemoryEnabled,
+                MemoryShareScope = configuration.MemoryShareScope,
+                MemoryRetrievalCount = configuration.MemoryRetrievalCount
             };
         }
     }

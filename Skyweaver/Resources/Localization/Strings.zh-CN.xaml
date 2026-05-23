@@ -15,6 +15,7 @@
     <system:String x:Key="Preferences.Page.ChatSession">聊天会话</system:String>
     <system:String x:Key="Preferences.Page.ContextCompression">压缩</system:String>
     <system:String x:Key="Preferences.Page.SemanticSearch">语义搜索</system:String>
+    <system:String x:Key="Preferences.Page.Memory">记忆</system:String>
     <system:String x:Key="Preferences.Sidebar.Title">首选项</system:String>
     <system:String x:Key="Preferences.BottomNav.LanguageModelConfiguration">语言模型配置</system:String>
     <system:String x:Key="Preferences.BottomNav.EmbeddingModelConfiguration">嵌入模型配置</system:String>
@@ -451,6 +452,29 @@
     <system:String x:Key="ContextCompression.Instruction.1">1. 此页设置会立即写入当前配置文件目录中的 ContextManagement.xml。</system:String>
     <system:String x:Key="ContextCompression.Instruction.2">2. 除 MinCompaction 外，当前选项只负责持久化配置，运行时行为尚未接入。</system:String>
 
+    <system:String x:Key="Memory.Page.Title">记忆</system:String>
+    <system:String x:Key="Memory.Page.Description">配置 Skyweaver 记忆机制，允许代理记忆并共享以往的会话内容。</system:String>
+    <system:String x:Key="Memory.Page.Hint">修改后会立即写入 ContextManagement.xml。</system:String>
+    <system:String x:Key="Memory.Enable.Label">启用记忆</system:String>
+    <system:String x:Key="Memory.Enable.Hint">启用Skyweaver记忆机制：代理可以记住您以往的会话内容。记忆不是100%可靠的。</system:String>
+    <system:String x:Key="Memory.ShareScope.Label">记忆共享范围</system:String>
+    <system:String x:Key="Memory.ShareScope.Hint">选择记忆数据的跨会话/跨代理共享范围：
+- 会话流：仅在当前会话流内部共享。
+- 代理：在同一代理的所有会话流中共享。
+- 应用程序：在整个应用程序的所有代理和会话中全局共享。</system:String>
+    <system:String x:Key="Memory.ShareScope.SessionFlow">会话流</system:String>
+    <system:String x:Key="Memory.ShareScope.Agent">代理</system:String>
+    <system:String x:Key="Memory.ShareScope.Application">应用程序</system:String>
+    <system:String x:Key="Memory.RetrievalCount.Label">记忆取回数量</system:String>
+    <system:String x:Key="Memory.RetrievalCount.Hint">设置每次从记忆库中检索和取回的历史记忆条数。</system:String>
+    <system:String x:Key="Memory.Status.MemoryEnabledSaved">启用记忆设置已保存。</system:String>
+    <system:String x:Key="Memory.Status.ShareScopeSaved">记忆共享范围已保存。</system:String>
+    <system:String x:Key="Memory.Status.RetrievalCountSavedFormat">记忆取回数量已设为 {0}。</system:String>
+    <system:String x:Key="Memory.Status.TriggeringPersistenceAndEmbedding">记忆：正在触发持久化和嵌入...</system:String>
+    <system:String x:Key="Memory.Status.EmbeddingCompleted">记忆：嵌入完成。</system:String>
+    <system:String x:Key="Memory.Instruction.1">1. 记忆机制会将您的交互对话摘要和关键事实提取为记忆载体。</system:String>
+    <system:String x:Key="Memory.Instruction.2">2. 记忆共享范围的变更会影响代理在新会话中加载历史记忆的隔离度。</system:String>
+
     <system:String x:Key="Common.Refresh">刷新</system:String>
     <system:String x:Key="SemanticSearch.Page.Title">语义搜索</system:String>
     <system:String x:Key="SemanticSearch.Page.Description">配置 AerialCity RAG 工具的启用状态与检索时使用的嵌入模型。</system:String>
@@ -562,6 +586,7 @@
     <system:String x:Key="MainWindow.Ribbon.ShowRuler">显示标尺</system:String>
     <system:String x:Key="MainWindow.Ribbon.ShowConnections">显示连接线</system:String>
     <system:String x:Key="MainWindow.Status.Ready">就绪</system:String>
+    <system:String x:Key="MainWindow.Status.Welcome">欢迎使用Skyweaver！</system:String>
     <system:String x:Key="MainWindow.Status.Zoom100">缩放: 100%</system:String>
     <system:String x:Key="MainWindow.Status.NodeCount0">节点: 0</system:String>
 

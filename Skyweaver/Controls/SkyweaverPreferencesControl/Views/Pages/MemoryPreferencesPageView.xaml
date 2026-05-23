@@ -1,0 +1,194 @@
+<UserControl x:Class="Skyweaver.Controls.SkyweaverPreferencesControl.Views.Pages.MemoryPreferencesPageView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:Skyweaver.Controls.ContextManagementConfigurationControl.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewModels:MemoryPreferencesPageViewModel, IsDesignTimeCreatable=True}"
+             d:DesignHeight="720"
+             d:DesignWidth="900">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Skyweaver;component/Resources/Controls/CascadePreferenceImplicitStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="PreferenceSectionTitleStyle" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#FF61D1F0"/>
+                <Setter Property="FontFamily" Value="{DynamicResource AeroFontFamily}"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+            </Style>
+
+            <Style x:Key="PreferenceLabelStyle" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#FFF4FAFF"/>
+                <Setter Property="FontFamily" Value="{DynamicResource AeroFontFamily}"/>
+                <Setter Property="FontSize" Value="12.5"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+
+            <Style x:Key="PreferenceMetaStyle" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#B9DBEEFF"/>
+                <Setter Property="FontFamily" Value="{DynamicResource AeroFontFamily}"/>
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+            </Style>
+
+            <Style x:Key="PreferenceValueStyle" TargetType="TextBlock" BasedOn="{StaticResource PreferenceMetaStyle}">
+                <Setter Property="Foreground" Value="#EAF8FFFF"/>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="16,10,16,20">
+            <!-- 标题和说明 -->
+            <TextBlock Text="{Binding Title}"
+                       Style="{StaticResource PreferenceSectionTitleStyle}"/>
+            <TextBlock Margin="0,4,0,12"
+                       Text="{Binding Description}"
+                       Style="{StaticResource PreferenceMetaStyle}"/>
+
+            <Grid Margin="0,12,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="18"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="18"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="18"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="170"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Checkbox选项：启用记忆 -->
+                <TextBlock Grid.Row="0"
+                           Grid.Column="0"
+                           Text="{DynamicResource Memory.Enable.Label}"
+                           Style="{StaticResource PreferenceLabelStyle}"/>
+                <StackPanel Grid.Row="0"
+                            Grid.Column="1">
+                    <CheckBox IsChecked="{Binding MemoryEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              Content="{DynamicResource Memory.Enable.Label}"/>
+                    <TextBlock Margin="0,6,0,0"
+                               Text="{DynamicResource Memory.Enable.Hint}"
+                               Style="{StaticResource PreferenceMetaStyle}"/>
+                </StackPanel>
+
+                <!-- ComboBox选项：记忆共享范围 -->
+                <TextBlock Grid.Row="2"
+                           Grid.Column="0"
+                           Text="{DynamicResource Memory.ShareScope.Label}"
+                           Style="{StaticResource PreferenceLabelStyle}"/>
+                <StackPanel Grid.Row="2"
+                            Grid.Column="1"
+                            IsEnabled="{Binding MemoryEnabled}">
+                    <ComboBox ItemsSource="{Binding MemoryShareScopes}"
+                              SelectedValue="{Binding SelectedShareScope, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              SelectedValuePath="Scope"
+                              DisplayMemberPath="DisplayName"/>
+                    <TextBlock Margin="0,6,0,0"
+                               Text="{DynamicResource Memory.ShareScope.Hint}"
+                               Style="{StaticResource PreferenceMetaStyle}"/>
+                </StackPanel>
+
+                <!-- Slider选项：记忆取回数量 -->
+                <TextBlock Grid.Row="4"
+                           Grid.Column="0"
+                           Text="{DynamicResource Memory.RetrievalCount.Label}"
+                           Style="{StaticResource PreferenceLabelStyle}"/>
+                <StackPanel Grid.Row="4"
+                            Grid.Column="1"
+                            IsEnabled="{Binding MemoryEnabled}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="64"/>
+                        </Grid.ColumnDefinitions>
+                        <Slider Grid.Column="0"
+                                Minimum="0"
+                                Maximum="30"
+                                TickFrequency="1"
+                                IsSnapToTickEnabled="True"
+                                HorizontalAlignment="Stretch"
+                                Value="{Binding MemoryRetrievalCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Grid.Column="1"
+                                   Margin="12,0,0,0"
+                                   VerticalAlignment="Center"
+                                   Text="{Binding MemoryRetrievalCount}"
+                                   Style="{StaticResource PreferenceValueStyle}"/>
+                    </Grid>
+                    <TextBlock Margin="0,6,0,0"
+                               Text="{DynamicResource Memory.RetrievalCount.Hint}"
+                               Style="{StaticResource PreferenceMetaStyle}"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- 配置文件状态 -->
+            <Border Margin="0,18,0,0"
+                    Height="1"
+                    Background="#30FFFFFF"/>
+
+            <TextBlock Margin="0,18,0,0"
+                       Text="{DynamicResource Common.ConfigurationStatus}"
+                       Style="{StaticResource PreferenceSectionTitleStyle}"/>
+
+            <Grid Margin="0,12,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="170"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0"
+                           Grid.Column="0"
+                           Text="{DynamicResource Common.ConfigurationFile}"
+                           Style="{StaticResource PreferenceLabelStyle}"/>
+                <TextBlock Grid.Row="0"
+                           Grid.Column="1"
+                           Text="{Binding ConfigurationFilePath}"
+                           Style="{StaticResource PreferenceValueStyle}"/>
+
+                <TextBlock Grid.Row="2"
+                           Grid.Column="0"
+                           Text="{DynamicResource Common.RecentStatus}"
+                           Style="{StaticResource PreferenceLabelStyle}"/>
+                <TextBlock Grid.Row="2"
+                           Grid.Column="1"
+                           Text="{Binding StatusMessage}"
+                           Style="{StaticResource PreferenceValueStyle}"/>
+            </Grid>
+
+            <!-- 操作按钮 -->
+            <StackPanel Margin="0,16,0,0"
+                        Orientation="Horizontal">
+                <Button MinWidth="132"
+                        Content="{DynamicResource Common.OpenConfigurationDirectory}"
+                        Command="{Binding OpenConfigurationDirectoryCommand}"/>
+            </StackPanel>
+
+            <Border Margin="0,18,0,0"
+                    Height="1"
+                    Background="#30FFFFFF"/>
+
+            <TextBlock Margin="0,18,0,0"
+                       Text="{DynamicResource Common.Instructions}"
+                       Style="{StaticResource PreferenceSectionTitleStyle}"/>
+
+            <TextBlock Margin="0,12,0,0"
+                       Text="{DynamicResource Memory.Instruction.1}"
+                       Style="{StaticResource PreferenceMetaStyle}"/>
+            <TextBlock Margin="0,6,0,0"
+                       Text="{DynamicResource Memory.Instruction.2}"
+                       Style="{StaticResource PreferenceMetaStyle}"/>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

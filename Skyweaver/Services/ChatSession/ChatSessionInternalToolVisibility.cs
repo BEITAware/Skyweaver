@@ -12,9 +12,13 @@ namespace Skyweaver.Services.ChatSession
                 toolName?.Trim(),
                 SkyweaverBuiltInToolNames.Passdown,
                 StringComparison.OrdinalIgnoreCase) ||
-                   string.Equals(
-                       toolName?.Trim(),
-                       SkyweaverBuiltInToolNames.WaitForAsyncTools,
+                string.Equals(
+                    toolName?.Trim(),
+                    SkyweaverBuiltInToolNames.WaitForAsyncTools,
+                StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(
+                    toolName?.Trim(),
+                    SkyweaverBuiltInToolNames.GetAsyncToolProgress,
                 StringComparison.OrdinalIgnoreCase);
         }
 
@@ -81,7 +85,9 @@ namespace Skyweaver.Services.ChatSession
             return xml.IndexOf($"{attributeName}=\"{SkyweaverBuiltInToolNames.Passdown}\"", StringComparison.OrdinalIgnoreCase) >= 0 ||
                    xml.IndexOf($"{attributeName}='{SkyweaverBuiltInToolNames.Passdown}'", StringComparison.OrdinalIgnoreCase) >= 0 ||
                    xml.IndexOf($"{attributeName}=\"{SkyweaverBuiltInToolNames.WaitForAsyncTools}\"", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                   xml.IndexOf($"{attributeName}='{SkyweaverBuiltInToolNames.WaitForAsyncTools}'", StringComparison.OrdinalIgnoreCase) >= 0;
+                   xml.IndexOf($"{attributeName}='{SkyweaverBuiltInToolNames.WaitForAsyncTools}'", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   xml.IndexOf($"{attributeName}=\"{SkyweaverBuiltInToolNames.GetAsyncToolProgress}\"", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   xml.IndexOf($"{attributeName}='{SkyweaverBuiltInToolNames.GetAsyncToolProgress}'", StringComparison.OrdinalIgnoreCase) >= 0;
         }
     }
 }

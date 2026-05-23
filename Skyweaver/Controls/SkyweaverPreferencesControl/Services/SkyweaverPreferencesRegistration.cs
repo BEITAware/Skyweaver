@@ -98,6 +98,16 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.Services
                     Order = 30
                 });
 
+                registry.RegisterPage("context-management", new PreferencePageInfo
+                {
+                    Id = "preferences-memory",
+                    DisplayName = "记忆",
+                    DisplayNameResourceKey = "Preferences.Page.Memory",
+                    ViewType = typeof(MemoryPreferencesPageView),
+                    ViewModelType = typeof(MemoryPreferencesPageViewModel),
+                    Order = 40
+                });
+
                 s_isRegistered = true;
             }
         }

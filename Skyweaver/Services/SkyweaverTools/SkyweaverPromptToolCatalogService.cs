@@ -48,7 +48,7 @@ namespace Skyweaver.Services.SkyweaverTools
             var exposeAerialCityRagTools = AerialCityRagAvailability.AreToolsAvailable();
 
             foreach (var registration in _toolManager.GetRegisteredTools(resolveIcons: false)
-                         .Where(item => item.RequiresAgentPermission && item.Definition.SupportsAsyncInvocation)
+                         .Where(item => item.RequiresAgentPermission)
                          .OrderBy(item => item.Definition.Name, StringComparer.OrdinalIgnoreCase))
             {
                 if (AerialCityRagAvailability.IsAerialCityRagTool(registration.Definition.Name) &&

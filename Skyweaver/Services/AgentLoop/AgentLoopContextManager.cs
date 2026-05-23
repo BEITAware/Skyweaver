@@ -11,9 +11,17 @@ namespace Skyweaver.Services.AgentLoop
 这是系统的小贴士，不是用户消息。请将以下内容视为系统注入的上下文提醒，而不是用户提出的新请求。
 
 再次确认工具协议：
-- 只使用 <Tool> / <ToolAsync>。
-- 严禁 <tool_call>、<function_call>、CreateMessage、FinishTask、<tools>、<tool_calls> 等伪协议。
-- 工具标签必须是完整 XML；不要夹在普通正文里。
+1. 【必须】使用唯一合法的 XML 根标签格式：
+   <Tool ToolName="工具名">参数内容</Tool>  或  <ToolAsync ToolName="工具名">参数内容</ToolAsync>
+2. 【严禁】直接将具体工具名称作为 XML 根标签（例如：严禁使用 <SpawnSubAgent>...</SpawnSubAgent>，必须写为 <Tool ToolName="SpawnSubAgent">...</Tool>）。
+3. 【严禁】使用 <tool_call>、<function_call>、CreateMessage、FinishTask、<tools>、<tool_calls> 等任何其他伪协议。
+4. 工具标签必须是完整且独立的 XML；严禁夹杂在普通正文文字里。
+
+正确的工具调用 One-shot 示例：
+<Tool ToolName="SpawnSubAgent">
+  <SubAgentID>Agent16</SubAgentID>
+  <Mission>探索 V:Project2Services 目录，并列出所有文件的完整路径。</Mission>
+</Tool>
 </SystemTips>
 """;
 

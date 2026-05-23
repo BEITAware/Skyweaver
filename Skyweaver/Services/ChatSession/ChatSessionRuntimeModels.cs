@@ -28,7 +28,8 @@ namespace Skyweaver.Services.ChatSession
         ExecutionFailed = 15,
         ExecutionCancelled = 16,
         ReasoningDelta = 17,
-        ToolProgressUpdated = 18
+        ToolProgressUpdated = 18,
+        UserMessageCommitted = 19
     }
 
     public sealed class ChatSessionRuntimeRequest
@@ -39,6 +40,11 @@ namespace Skyweaver.Services.ChatSession
 
         public IReadOnlyList<LanguageModelChatContentBlock> UserContentBlocks { get; init; } =
             Array.Empty<LanguageModelChatContentBlock>();
+
+        public IReadOnlyList<LanguageModelChatMessage> HostInjectedHistoryMessages { get; init; } =
+            Array.Empty<LanguageModelChatMessage>();
+
+        public Func<CancellationToken, Task<IReadOnlyList<LanguageModelChatMessage>>>? HostInjectedHistoryMessageFactory { get; init; }
 
         public bool EnableGemmaThoughtCompatibility { get; init; } = true;
 
