@@ -1,27 +1,30 @@
 using System;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using Skyweaver.Controls.ShellChatSessionControl.ViewModels;
+using Skyweaver.Services.ShellIntegration;
 
 namespace Skyweaver.Windows
 {
-    /// <summary>
-    /// ShellChatWindow.xaml 的交互逻辑
-    /// </summary>
     public partial class ShellChatWindow : Window
     {
         private readonly ShellChatSessionControlViewModel _viewModel;
 
         public ShellChatWindow()
+            : this(ShellChatStartupContext.Empty)
+        {
+        }
+
+        public ShellChatWindow(ShellChatStartupContext startupContext)
         {
             InitializeComponent();
 
-            // 实例化 ViewModel 并进行 DataContext 绑定
-            _viewModel = new ShellChatSessionControlViewModel();
+            _viewModel = new ShellChatSessionControlViewModel(startupContext);
             ChatControl.DataContext = _viewModel;
-
-            // 订阅 ViewModel 中请求关闭的事件
             _viewModel.RequestClose += ViewModel_RequestClose;
 
             Loaded += ShellChatWindow_Loaded;
@@ -29,57 +32,101 @@ namespace Skyweaver.Windows
 
         private void ShellChatWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            // 将窗口智能定位在屏幕的右侧偏下位置（避开系统任务栏）
             PositionWindowOnScreenRightBottom();
+            ChatControl.FocusComposer();
         }
 
-        /// <summary>
-        /// 将窗口定位在屏幕的右下角
-        /// </summary>
         private void PositionWindowOnScreenRightBottom()
         {
             try
             {
-                // 获取主屏幕工作区（不包含任务栏）
-                double screenWidth = SystemParameters.WorkArea.Width;
-                double screenHeight = SystemParameters.WorkArea.Height;
-
-                // 设置窗口位置，距离右边缘 30 像素，下边缘 30 像素
-                this.Left = screenWidth - this.Width - 30;
-                this.Top = screenHeight - this.Height - 30;
+                var screenWidth = SystemParameters.WorkArea.Width;
+                var screenHeight = SystemParameters.WorkArea.Height;
+                Left = screenWidth - Width - 30;
+                Top = screenHeight - Height - 30;
             }
             catch (Exception)
             {
-                // 降级使用屏幕中心
-                this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                WindowStartupLocation = WindowStartupLocation.CenterScreen;
             }
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            // 允许通过拖拽窗口的任意背景区域来移动窗口
-            if (e.ButtonState == MouseButtonState.Pressed)
+            if (e.ButtonState == MouseButtonState.Pressed &&
+                e.OriginalSource is DependencyObject source &&
+                !IsInteractiveChild(source))
             {
-                this.DragMove();
+                DragMove();
             }
         }
 
-        private void Window_Deactivated(object sender, EventArgs e)
+        private static bool IsInteractiveChild(DependencyObject source)
         {
-            // 当窗口失去焦点（例如用户点击了桌面的其它应用），直接关闭窗口，表现为轻量级 Shell 菜单呼出行为
-            try
+            var current = source;
+            while (current != null)
             {
-                this.Close();
+                if (current is TextBoxBase or ButtonBase or ListBoxItem or ScrollBar)
+                {
+                    return true;
+                }
+
+                current = VisualTreeHelper.GetParent(current);
             }
-            catch
-            {
-                // 忽略已关闭或正在关闭的异常
-            }
+
+            return false;
         }
 
+        private bool _isClosing = false;
         private void ViewModel_RequestClose()
         {
-            this.Close();
+            if (_isClosing) return;
+            _isClosing = true;
+
+            var sb = new Storyboard();
+            
+            var opacityAnim = new DoubleAnimation
+            {
+                To = 0,
+                Duration = TimeSpan.FromSeconds(0.2),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+            };
+            Storyboard.SetTarget(opacityAnim, this);
+            Storyboard.SetTargetProperty(opacityAnim, new PropertyPath(Window.OpacityProperty));
+            sb.Children.Add(opacityAnim);
+
+            var scaleXAnim = new DoubleAnimation
+            {
+                To = 0.75,
+                Duration = TimeSpan.FromSeconds(0.25),
+                EasingFunction = new BackEase { EasingMode = EasingMode.EaseIn, Amplitude = 0.4 }
+            };
+            Storyboard.SetTargetName(scaleXAnim, "RootScale");
+            Storyboard.SetTargetProperty(scaleXAnim, new PropertyPath(ScaleTransform.ScaleXProperty));
+            sb.Children.Add(scaleXAnim);
+
+            var scaleYAnim = new DoubleAnimation
+            {
+                To = 0.75,
+                Duration = TimeSpan.FromSeconds(0.25),
+                EasingFunction = new BackEase { EasingMode = EasingMode.EaseIn, Amplitude = 0.4 }
+            };
+            Storyboard.SetTargetName(scaleYAnim, "RootScale");
+            Storyboard.SetTargetProperty(scaleYAnim, new PropertyPath(ScaleTransform.ScaleYProperty));
+            sb.Children.Add(scaleYAnim);
+
+            var translateYAnim = new DoubleAnimation
+            {
+                To = 60,
+                Duration = TimeSpan.FromSeconds(0.25),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
+            };
+            Storyboard.SetTargetName(translateYAnim, "RootTranslate");
+            Storyboard.SetTargetProperty(translateYAnim, new PropertyPath(TranslateTransform.YProperty));
+            sb.Children.Add(translateYAnim);
+
+            sb.Completed += (s, e) => Close();
+            sb.Begin(this);
         }
 
         private void BackgroundChrome_SizeChanged(object sender, SizeChangedEventArgs e)

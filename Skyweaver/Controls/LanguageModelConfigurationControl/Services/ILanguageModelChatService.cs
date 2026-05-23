@@ -7,16 +7,19 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
         Task<LanguageModelChatResponse> GetResponseAsync(
             LanguageModelDefinition model,
             IReadOnlyList<LanguageModelChatMessage> messages,
-            CancellationToken cancellationToken = default);
+            CancellationToken cancellationToken = default,
+            Func<LanguageModelMediaProcessingProgress, CancellationToken, ValueTask>? mediaProcessingProgress = null);
 
         Task<int> CountTokensAsync(
             LanguageModelDefinition model,
             IReadOnlyList<LanguageModelChatMessage> messages,
-            CancellationToken cancellationToken = default);
+            CancellationToken cancellationToken = default,
+            Func<LanguageModelMediaProcessingProgress, CancellationToken, ValueTask>? mediaProcessingProgress = null);
 
         IAsyncEnumerable<LanguageModelStreamingChatUpdate> GetStreamingResponseAsync(
             LanguageModelDefinition model,
             IReadOnlyList<LanguageModelChatMessage> messages,
-            CancellationToken cancellationToken = default);
+            CancellationToken cancellationToken = default,
+            Func<LanguageModelMediaProcessingProgress, CancellationToken, ValueTask>? mediaProcessingProgress = null);
     }
 }

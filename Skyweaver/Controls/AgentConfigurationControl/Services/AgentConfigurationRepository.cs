@@ -49,7 +49,9 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
                         SubAgentIntroduction = ((string?)agentElement.Element("SubAgentIntroduction") ?? string.Empty),
                         LanguageModelSelectionMode = ParseLanguageModelSelectionMode((string?)agentElement.Element("LanguageModelSelectionMode")),
                         SelectedLanguageModelKey = ((string?)agentElement.Element("SelectedLanguageModelKey") ?? string.Empty).Trim(),
-                        SelectedCapabilityLayerKey = ((string?)agentElement.Element("SelectedCapabilityLayerKey") ?? string.Empty).Trim()
+                        SelectedCapabilityLayerKey = ((string?)agentElement.Element("SelectedCapabilityLayerKey") ?? string.Empty).Trim(),
+                        IsPersonaEnabled = ParseBool((string?)agentElement.Element("IsPersonaEnabled"), false),
+                        SelectedPersonaId = ((string?)agentElement.Element("SelectedPersonaId") ?? string.Empty).Trim()
                     };
 
                     var defaultToolKitElements = agentElement.Element("DefaultToolKits")?.Elements("ToolKit") ?? Enumerable.Empty<XElement>();
@@ -112,6 +114,8 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
                                 new XElement("LanguageModelSelectionMode", definition.LanguageModelSelectionMode),
                                 new XElement("SelectedLanguageModelKey", definition.SelectedLanguageModelKey ?? string.Empty),
                                 new XElement("SelectedCapabilityLayerKey", definition.SelectedCapabilityLayerKey ?? string.Empty),
+                                new XElement("IsPersonaEnabled", definition.IsPersonaEnabled),
+                                new XElement("SelectedPersonaId", definition.SelectedPersonaId ?? string.Empty),
                                 new XElement("DefaultToolKits",
                                     definition.DefaultToolKits
                                         .Where(toolKit => !string.IsNullOrWhiteSpace(toolKit.ToolKitKey))

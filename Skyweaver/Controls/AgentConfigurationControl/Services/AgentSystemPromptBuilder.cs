@@ -1,5 +1,6 @@
 using System.Text;
 using Skyweaver.Controls.AgentConfigurationControl.Models;
+using Skyweaver.Controls.PersonaSettingsControl.Services;
 using Skyweaver.Services.SkyweaverTools;
 
 namespace Skyweaver.Controls.AgentConfigurationControl.Services
@@ -7,20 +8,24 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
     public sealed class AgentSystemPromptBuilder
     {
         private readonly AgentConfigurationRepository _configurationRepository;
+        private readonly PersonaConfigurationRepository _personaRepository;
         private readonly SkyweaverPromptToolCatalogService _promptToolCatalogService;
 
         public AgentSystemPromptBuilder()
             : this(
                 new AgentConfigurationRepository(new AgentConfigurationPathProvider()),
+                new PersonaConfigurationRepository(),
                 new SkyweaverPromptToolCatalogService())
         {
         }
 
         public AgentSystemPromptBuilder(
             AgentConfigurationRepository configurationRepository,
+            PersonaConfigurationRepository personaRepository,
             SkyweaverPromptToolCatalogService promptToolCatalogService)
         {
             _configurationRepository = configurationRepository ?? throw new ArgumentNullException(nameof(configurationRepository));
+            _personaRepository = personaRepository ?? throw new ArgumentNullException(nameof(personaRepository));
             _promptToolCatalogService = promptToolCatalogService ?? throw new ArgumentNullException(nameof(promptToolCatalogService));
         }
 
@@ -73,6 +78,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
 
             AppendIdentitySection(builder, agent);
             AppendInstructionSection(builder, agent);
+            AppendPersonaSection(builder, agent);
             AppendInputOutputSection(builder, agent);
             AppendPassdownSection(builder, agent, isSubAgent);
             AppendExternalToolSection(builder, externalTools, supportsHostToolConfirmation);
@@ -125,6 +131,24 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
                 builder.AppendLine(systemPrompt);
             }
 
+            builder.AppendLine();
+        }
+
+        private void AppendPersonaSection(StringBuilder builder, AgentDefinition agent)
+        {
+            if (!agent.IsPersonaEnabled || string.IsNullOrWhiteSpace(agent.SelectedPersonaId))
+            {
+                return;
+            }
+
+            var persona = _personaRepository.Load().FirstOrDefault(candidate =>
+                string.Equals(candidate.Id, agent.SelectedPersonaId, StringComparison.OrdinalIgnoreCase));
+            if (persona == null)
+            {
+                return;
+            }
+
+            builder.AppendLine(PersonaPromptFormatter.BuildPersonaInstruction(persona));
             builder.AppendLine();
         }
 

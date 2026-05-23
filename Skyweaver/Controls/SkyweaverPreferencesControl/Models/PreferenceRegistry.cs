@@ -35,6 +35,13 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.Models
                 },
                 new()
                 {
+                    Id = "multimodal",
+                    DisplayName = "多模态",
+                    DisplayNameResourceKey = "Preferences.Group.Multimodal",
+                    IsExpanded = true
+                },
+                new()
+                {
                     Id = "about-skyweaver",
                     DisplayName = "关于Skyweaver",
                     DisplayNameResourceKey = "Preferences.Group.AboutSkyweaver",

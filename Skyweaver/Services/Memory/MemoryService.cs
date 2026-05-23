@@ -1,11 +1,13 @@
 using System.Globalization;
 using System.IO;
+using System.Net;
 using System.Text;
 using System.Xml.Linq;
 using AerialCity;
 using AerialCity.Core.Primitives;
 using AerialCity.Core.Storage;
 using AerialCity.Database;
+using AerialCity.Embedding;
 using AerialCity.Retrieval;
 using Skyweaver.Controls.EmbeddingModelConfigurationControl.Models;
 using Skyweaver.Controls.EmbeddingModelConfigurationControl.Services;
@@ -28,6 +30,10 @@ namespace Skyweaver.Services.Memory
         private const int RetrievalCandidateCount = 120;
         private const string MemoryCollectionName = "Skyweaver.Memory.Blocks";
         private const string VectorsDatabaseName = "Vectors";
+        private const string PreservedContentStartToken = "<SkyweaverPreservedContent";
+        private const string PreservedContentEndToken = "</SkyweaverPreservedContent>";
+        private const string EscapedPreservedContentStartToken = "&lt;SkyweaverPreservedContent";
+        private const string EscapedPreservedContentEndToken = "&lt;/SkyweaverPreservedContent&gt;";
 
         private static readonly Encoding Utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
         private static readonly SemaphoreSlim s_vectorDatabaseGate = new(1, 1);
@@ -92,7 +98,9 @@ namespace Skyweaver.Services.Memory
                 layout.EnsureCreated();
                 var documentFileName = CreateSessionMemoryFileName(session);
                 var documentPath = Path.Combine(layout.ChatSessionsPath, documentFileName);
-                var blocks = BuildMemoryBlocks(session, documentFileName, documentPath);
+                var hasEmbeddingModel = TryResolveSelectedEmbeddingModel(out var model, out var modelError);
+                var includeImageBlocks = hasEmbeddingModel && model?.SupportsMultimodalEmbedding == true;
+                var blocks = BuildMemoryBlocks(session, documentFileName, documentPath, includeImageBlocks);
 
                 NotificationService.Instance.UpdatePermanent(notificationId, "Memory: writing natural-language transcript...", 0.12d);
                 PrepareReplacementPath(documentPath);
@@ -100,11 +108,11 @@ namespace Skyweaver.Services.Memory
 
                 if (blocks.Count == 0)
                 {
-                    NotificationService.Instance.UpdatePermanent(notificationId, "Memory: no natural-language blocks found.", 1d);
+                    NotificationService.Instance.UpdatePermanent(notificationId, "Memory: no embeddable memory blocks found.", 1d);
                     return;
                 }
 
-                if (!TryResolveSelectedEmbeddingModel(out var model, out var modelError) || model == null)
+                if (!hasEmbeddingModel || model == null)
                 {
                     NotificationService.Instance.ShowTransient($"Memory saved without vectors: {modelError}");
                     return;
@@ -123,18 +131,33 @@ namespace Skyweaver.Services.Memory
                         $"Memory: embedding block {index + 1} / {blocks.Count}...",
                         progress);
 
-                    var segment = new Segment(SegmentKind.TextPassage, block.Content)
+                    var segment = new Segment(ResolveSegmentKind(block), block.Content)
                     {
-                        SourceUri = documentPath,
+                        SourceUri = block.Kind == MemoryBlockKind.Image
+                            ? block.ResourcePath ?? documentPath
+                            : documentPath,
                         CollectionName = MemoryCollectionName,
                         Metadata = CreateSegmentMetadata(block)
                     };
 
+                    var embeddingInput = await CreateEmbeddingInputForMemoryBlockAsync(model, block, cancellationToken)
+                        .ConfigureAwait(false);
+                    if (embeddingInput == null)
+                    {
+                        continue;
+                    }
+
                     var embedding = await _embeddingModelService
-                        .EmbedTextAsync(model, block.Content, cancellationToken)
+                        .EmbedAsync(model, embeddingInput, cancellationToken)
                         .ConfigureAwait(false);
                     segment.Embedding = embedding.Vector;
                     embeddedSegments.Add(segment);
+                }
+
+                if (embeddedSegments.Count == 0)
+                {
+                    NotificationService.Instance.UpdatePermanent(notificationId, "Memory: no vectors were produced.", 1d);
+                    return;
                 }
 
                 NotificationService.Instance.UpdatePermanent(notificationId, "Memory: opening vector database...", 0.82d);
@@ -191,12 +214,6 @@ namespace Skyweaver.Services.Memory
                 return Array.Empty<LanguageModelChatMessage>();
             }
 
-            var queryText = BuildQueryText(userText, userContentBlocks);
-            if (queryText.Length == 0)
-            {
-                return Array.Empty<LanguageModelChatMessage>();
-            }
-
             var currentAgent = TryResolveNextTriggeredAgent(session, userText, userContentBlocks);
             if (configuration.MemoryShareScope == MemoryShareScope.Agent && currentAgent == null)
             {
@@ -210,8 +227,19 @@ namespace Skyweaver.Services.Memory
 
             try
             {
+                var queryInput = await CreateQueryEmbeddingInputAsync(
+                        model,
+                        userText,
+                        userContentBlocks,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+                if (queryInput == null)
+                {
+                    return Array.Empty<LanguageModelChatMessage>();
+                }
+
                 var queryEmbedding = await _embeddingModelService
-                    .EmbedTextAsync(model, queryText, cancellationToken)
+                    .EmbedAsync(model, queryInput, cancellationToken)
                     .ConfigureAwait(false);
 
                 var layout = MemoryLayout.CreateDefault();
@@ -276,7 +304,8 @@ namespace Skyweaver.Services.Memory
         private static IReadOnlyList<MemoryBlock> BuildMemoryBlocks(
             ChatSessionModel session,
             string documentFileName,
-            string documentPath)
+            string documentPath,
+            bool includeImageBlocks)
         {
             var entriesById = session.Transcript.Entries
                 .Where(entry => !string.IsNullOrWhiteSpace(entry.EntryId))
@@ -301,6 +330,7 @@ namespace Skyweaver.Services.Memory
                     {
                         BlockId = $"turn-{turn.TurnNumber:D6}-user",
                         BlockIndex = ++blockIndex,
+                        Kind = MemoryBlockKind.Text,
                         TurnId = turn.TurnId,
                         TurnNumber = turn.TurnNumber,
                         Content = userContent,
@@ -318,6 +348,43 @@ namespace Skyweaver.Services.Memory
                     });
                 }
 
+                if (includeImageBlocks && userEntry != null)
+                {
+                    AddImageMemoryBlocks(
+                        blocks,
+                        userEntry,
+                        $"turn-{turn.TurnNumber:D6}-user-image",
+                        ref blockIndex,
+                        turn.TurnNumber,
+                        "User",
+                        null,
+                        "User",
+                        counterpart,
+                        session,
+                        documentFileName,
+                        documentPath,
+                        turn.StartedAtUtc);
+                }
+
+                if (userEntry != null)
+                {
+                    AddPreservedContentMemoryBlocks(
+                        blocks,
+                        userEntry,
+                        $"turn-{turn.TurnNumber:D6}-user-preserved",
+                        ref blockIndex,
+                        turn.TurnNumber,
+                        "User",
+                        null,
+                        "User",
+                        counterpart,
+                        session,
+                        documentFileName,
+                        documentPath,
+                        turn.StartedAtUtc,
+                        includeImageBlocks);
+                }
+
                 var assistantContent = BuildAssistantTurnText(assistantEntries);
                 if (assistantContent.Length > 0)
                 {
@@ -325,6 +392,7 @@ namespace Skyweaver.Services.Memory
                     {
                         BlockId = $"turn-{turn.TurnNumber:D6}-assistant",
                         BlockIndex = ++blockIndex,
+                        Kind = MemoryBlockKind.Text,
                         TurnId = turn.TurnId,
                         TurnNumber = turn.TurnNumber,
                         Content = assistantContent,
@@ -340,9 +408,330 @@ namespace Skyweaver.Services.Memory
                         CreatedAtUtc = firstAssistant?.TimestampUtc ?? turn.CompletedAtUtc ?? turn.StartedAtUtc
                     });
                 }
+
+                if (includeImageBlocks)
+                {
+                    var assistantImageIndex = 0;
+                    foreach (var assistantEntry in assistantEntries)
+                    {
+                        var assistantIdentity = CreateAgentIdentity(assistantEntry);
+                        AddImageMemoryBlocks(
+                            blocks,
+                            assistantEntry,
+                            $"turn-{turn.TurnNumber:D6}-assistant-image-{++assistantImageIndex:D3}",
+                            ref blockIndex,
+                            turn.TurnNumber,
+                            "Agent",
+                            assistantIdentity,
+                            assistantIdentity?.AgentName ?? "Assistant",
+                            null,
+                            session,
+                            documentFileName,
+                            documentPath,
+                            assistantEntry.TimestampUtc);
+                    }
+                }
+
+                var assistantPreservedIndex = 0;
+                foreach (var assistantEntry in assistantEntries)
+                {
+                    var assistantIdentity = CreateAgentIdentity(assistantEntry);
+                    AddPreservedContentMemoryBlocks(
+                        blocks,
+                        assistantEntry,
+                        $"turn-{turn.TurnNumber:D6}-assistant-preserved-{++assistantPreservedIndex:D3}",
+                        ref blockIndex,
+                        turn.TurnNumber,
+                        "Agent",
+                        assistantIdentity,
+                        assistantIdentity?.AgentName ?? "Assistant",
+                        null,
+                        session,
+                        documentFileName,
+                        documentPath,
+                        assistantEntry.TimestampUtc,
+                        includeImageBlocks);
+                }
             }
 
             return blocks;
+        }
+
+        private static void AddImageMemoryBlocks(
+            ICollection<MemoryBlock> target,
+            ChatSessionTranscriptEntry entry,
+            string blockIdPrefix,
+            ref int blockIndex,
+            int turnNumber,
+            string authorKind,
+            MemoryAgentIdentity? author,
+            string authorName,
+            MemoryAgentIdentity? counterpart,
+            ChatSessionModel session,
+            string documentFileName,
+            string documentPath,
+            DateTime createdAtUtc)
+        {
+            ArgumentNullException.ThrowIfNull(target);
+            ArgumentNullException.ThrowIfNull(entry);
+
+            var imageIndex = 0;
+            foreach (var imageBlock in entry.Blocks.Where(block => block.Kind == ChatSessionTranscriptBlockKind.Image))
+            {
+                var resourcePath = Normalize(imageBlock.ResourcePath ?? imageBlock.Content);
+                if (resourcePath.Length == 0)
+                {
+                    continue;
+                }
+
+                var mediaType = ResolveImageMediaType(resourcePath, imageBlock.MediaType);
+                var content = BuildPreservedResourceXml("Image", resourcePath, mediaType);
+                if (content.Length == 0)
+                {
+                    continue;
+                }
+
+                target.Add(new MemoryBlock
+                {
+                    BlockId = $"{blockIdPrefix}-{++imageIndex:D3}",
+                    BlockIndex = ++blockIndex,
+                    Kind = MemoryBlockKind.Image,
+                    TurnId = entry.TurnId,
+                    TurnNumber = turnNumber,
+                    Content = content,
+                    AuthorKind = authorKind,
+                    AuthorAgentId = author?.AgentId,
+                    AuthorName = authorName,
+                    CounterpartAgentId = counterpart?.AgentId,
+                    CounterpartAgentName = counterpart?.AgentName,
+                    SessionId = session.SessionId,
+                    SessionName = session.Name,
+                    SessionFlowId = session.FlowBinding.GraphId,
+                    SessionFlowName = session.BoundFlowDisplayName,
+                    DocumentFileName = documentFileName,
+                    DocumentPath = documentPath,
+                    ResourcePath = resourcePath,
+                    MediaType = mediaType,
+                    CreatedAtUtc = createdAtUtc
+                });
+            }
+        }
+
+        private static void AddPreservedContentMemoryBlocks(
+            ICollection<MemoryBlock> target,
+            ChatSessionTranscriptEntry entry,
+            string blockIdPrefix,
+            ref int blockIndex,
+            int turnNumber,
+            string authorKind,
+            MemoryAgentIdentity? author,
+            string authorName,
+            MemoryAgentIdentity? counterpart,
+            ChatSessionModel session,
+            string documentFileName,
+            string documentPath,
+            DateTime createdAtUtc,
+            bool includeImageBlocks)
+        {
+            ArgumentNullException.ThrowIfNull(target);
+            ArgumentNullException.ThrowIfNull(entry);
+
+            var preservedIndex = 0;
+            foreach (var block in entry.Blocks.Where(block => block.Kind is ChatSessionTranscriptBlockKind.Text
+                         or ChatSessionTranscriptBlockKind.StructuredXml
+                         or ChatSessionTranscriptBlockKind.ResourceReference))
+            {
+                foreach (var preservedContent in ExtractPreservedMemoryContents(block.Content))
+                {
+                    if (preservedContent.Kind == MemoryBlockKind.Document ||
+                        preservedContent.Kind == MemoryBlockKind.Image && !includeImageBlocks)
+                    {
+                        continue;
+                    }
+
+                    target.Add(new MemoryBlock
+                    {
+                        BlockId = $"{blockIdPrefix}-{++preservedIndex:D3}",
+                        BlockIndex = ++blockIndex,
+                        Kind = preservedContent.Kind,
+                        TurnId = entry.TurnId,
+                        TurnNumber = turnNumber,
+                        Content = preservedContent.Content,
+                        AuthorKind = authorKind,
+                        AuthorAgentId = author?.AgentId,
+                        AuthorName = authorName,
+                        CounterpartAgentId = counterpart?.AgentId,
+                        CounterpartAgentName = counterpart?.AgentName,
+                        SessionId = session.SessionId,
+                        SessionName = session.Name,
+                        SessionFlowId = session.FlowBinding.GraphId,
+                        SessionFlowName = session.BoundFlowDisplayName,
+                        DocumentFileName = documentFileName,
+                        DocumentPath = documentPath,
+                        ResourcePath = preservedContent.Path,
+                        MediaType = preservedContent.MediaType,
+                        CreatedAtUtc = createdAtUtc
+                    });
+                }
+            }
+        }
+
+        private static IReadOnlyList<PreservedMemoryContent> ExtractPreservedMemoryContents(string? content)
+        {
+            var normalizedContent = content ?? string.Empty;
+            if (normalizedContent.Length == 0)
+            {
+                return Array.Empty<PreservedMemoryContent>();
+            }
+
+            var results = new List<PreservedMemoryContent>();
+            var cursor = 0;
+            while (cursor < normalizedContent.Length)
+            {
+                if (!TryFindNextPreservedContent(
+                        normalizedContent,
+                        cursor,
+                        out var matchStart,
+                        out var matchEnd,
+                        out var isEscaped))
+                {
+                    break;
+                }
+
+                var rawFragment = normalizedContent[matchStart..matchEnd];
+                var fragment = isEscaped
+                    ? WebUtility.HtmlDecode(rawFragment)
+                    : rawFragment;
+                if (TryCreatePreservedMemoryContent(fragment, out var preservedContent))
+                {
+                    results.Add(preservedContent);
+                }
+
+                cursor = matchEnd;
+            }
+
+            return results;
+        }
+
+        private static bool TryFindNextPreservedContent(
+            string content,
+            int startIndex,
+            out int matchStart,
+            out int matchEnd,
+            out bool isEscaped)
+        {
+            matchStart = -1;
+            matchEnd = -1;
+            isEscaped = false;
+
+            var literalIndex = content.IndexOf(PreservedContentStartToken, startIndex, StringComparison.OrdinalIgnoreCase);
+            var escapedIndex = content.IndexOf(EscapedPreservedContentStartToken, startIndex, StringComparison.OrdinalIgnoreCase);
+            if (literalIndex < 0 && escapedIndex < 0)
+            {
+                return false;
+            }
+
+            isEscaped = escapedIndex >= 0 && (literalIndex < 0 || escapedIndex < literalIndex);
+            matchStart = isEscaped ? escapedIndex : literalIndex;
+            var endToken = isEscaped ? EscapedPreservedContentEndToken : PreservedContentEndToken;
+            var endIndex = content.IndexOf(endToken, matchStart, StringComparison.OrdinalIgnoreCase);
+            if (endIndex < 0)
+            {
+                matchStart = -1;
+                return false;
+            }
+
+            matchEnd = endIndex + endToken.Length;
+            return true;
+        }
+
+        private static bool TryCreatePreservedMemoryContent(
+            string fragment,
+            out PreservedMemoryContent content)
+        {
+            content = default;
+            if (SkyweaverPreservedTextContentXml.TryParse(fragment, out var textContent))
+            {
+                var text = Normalize(textContent.Text);
+                if (text.Length == 0)
+                {
+                    return false;
+                }
+
+                content = new PreservedMemoryContent(
+                    MemoryBlockKind.Text,
+                    SkyweaverPreservedTextContentXml.Build(
+                        text,
+                        textContent.Name,
+                        textContent.Path,
+                        textContent.MediaType),
+                    textContent.Path,
+                    textContent.MediaType);
+                return true;
+            }
+
+            try
+            {
+                var root = XElement.Parse(fragment, LoadOptions.PreserveWhitespace);
+                if (!string.Equals(root.Name.LocalName, "SkyweaverPreservedContent", StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
+                var resourceElement = root.Elements().FirstOrDefault();
+                if (resourceElement == null)
+                {
+                    return false;
+                }
+
+                var elementName = resourceElement.Name.LocalName;
+                if (string.Equals(elementName, "Document", StringComparison.OrdinalIgnoreCase))
+                {
+                    content = new PreservedMemoryContent(MemoryBlockKind.Document, fragment, null, null);
+                    return true;
+                }
+
+                if (!string.Equals(elementName, "Image", StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
+                var path = GetAttributeValue(resourceElement, "Path");
+                if (string.IsNullOrWhiteSpace(path))
+                {
+                    return false;
+                }
+
+                var mediaType = GetAttributeValue(resourceElement, "MediaType")
+                    ?? GetAttributeValue(resourceElement, "MimeType");
+                var resolvedMediaType = ResolveImageMediaType(path, mediaType);
+                if (resolvedMediaType.Length == 0)
+                {
+                    return false;
+                }
+
+                content = new PreservedMemoryContent(
+                    MemoryBlockKind.Image,
+                    BuildPreservedResourceXml("Image", path, resolvedMediaType),
+                    path,
+                    resolvedMediaType);
+                return true;
+            }
+            catch (Exception ex) when (ex is System.Xml.XmlException or InvalidOperationException)
+            {
+                return false;
+            }
+        }
+
+        private static string? GetAttributeValue(XElement element, string attributeName)
+        {
+            return element.Attributes()
+                .FirstOrDefault(attribute => string.Equals(
+                    attribute.Name.LocalName,
+                    attributeName,
+                    StringComparison.OrdinalIgnoreCase))
+                ?.Value
+                ?.Trim();
         }
 
         private static bool IsAssistantMemoryEntry(ChatSessionTranscriptEntry entry)
@@ -378,7 +767,7 @@ namespace Skyweaver.Services.Memory
         {
             var parts = entry.Blocks
                 .Where(block => block.Kind is ChatSessionTranscriptBlockKind.Text or ChatSessionTranscriptBlockKind.Code)
-                .Select(block => block.Content?.Trim() ?? string.Empty)
+                .Select(block => RemovePreservedContentFragments(block.Content))
                 .Where(content => content.Length > 0)
                 .ToArray();
 
@@ -420,6 +809,7 @@ namespace Skyweaver.Services.Memory
                             "Block",
                             new XAttribute("Id", block.BlockId),
                             new XAttribute("Index", block.BlockIndex),
+                            new XAttribute("Kind", block.Kind.ToString()),
                             new XAttribute("TurnId", block.TurnId),
                             new XAttribute("TurnNumber", block.TurnNumber),
                             new XAttribute("AuthorKind", block.AuthorKind),
@@ -427,6 +817,8 @@ namespace Skyweaver.Services.Memory
                             OptionalAttribute("AuthorName", block.AuthorName),
                             OptionalAttribute("CounterpartAgentId", block.CounterpartAgentId),
                             OptionalAttribute("CounterpartAgentName", block.CounterpartAgentName),
+                            OptionalAttribute("ResourcePath", block.ResourcePath),
+                            OptionalAttribute("MediaType", block.MediaType),
                             new XElement("Content", block.Content))))));
 
             var tempPath = $"{documentPath}.tmp";
@@ -454,10 +846,12 @@ namespace Skyweaver.Services.Memory
                 ["memoryKind"] = "ChatSessionBlock",
                 ["memoryBlockId"] = block.BlockId,
                 ["memoryBlockIndex"] = block.BlockIndex,
+                ["memoryBlockKind"] = block.Kind.ToString(),
                 ["memoryTurnId"] = block.TurnId,
                 ["memoryTurnNumber"] = block.TurnNumber,
                 ["memoryContent"] = block.Content,
                 ["sourceContent"] = block.Content,
+                ["sourceKind"] = block.Kind == MemoryBlockKind.Image ? "Image" : "Text",
                 ["memoryAuthorKind"] = block.AuthorKind,
                 ["memoryAuthorName"] = block.AuthorName,
                 ["memorySessionId"] = block.SessionId,
@@ -472,7 +866,309 @@ namespace Skyweaver.Services.Memory
             AddIfPresent(metadata, "memoryAuthorAgentId", block.AuthorAgentId);
             AddIfPresent(metadata, "memoryCounterpartAgentId", block.CounterpartAgentId);
             AddIfPresent(metadata, "memoryCounterpartAgentName", block.CounterpartAgentName);
+            AddIfPresent(metadata, "memoryResourcePath", block.ResourcePath);
+            AddIfPresent(metadata, "memoryMediaType", block.MediaType);
             return metadata;
+        }
+
+        private static async Task<EmbeddingInput?> CreateEmbeddingInputForMemoryBlockAsync(
+            EmbeddingModelDefinition model,
+            MemoryBlock block,
+            CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(model);
+            ArgumentNullException.ThrowIfNull(block);
+
+            return block.Kind switch
+            {
+                MemoryBlockKind.Text => CreateTextEmbeddingInput(block.Content, block.DocumentPath),
+                MemoryBlockKind.Image when model.SupportsMultimodalEmbedding =>
+                    await CreateImageEmbeddingInputAsync(
+                            block.ResourcePath,
+                            block.MediaType,
+                            block.Content,
+                            data: null,
+                            cancellationToken)
+                        .ConfigureAwait(false),
+                _ => null
+            };
+        }
+
+        private static async Task<EmbeddingInput?> CreateQueryEmbeddingInputAsync(
+            EmbeddingModelDefinition model,
+            string userText,
+            IReadOnlyList<LanguageModelChatContentBlock>? userContentBlocks,
+            CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(model);
+
+            var parts = new List<EmbeddingContentPart>();
+            var queryText = BuildQueryText(userText, userContentBlocks);
+            if (queryText.Length > 0)
+            {
+                parts.Add(new EmbeddingContentPart { Text = queryText });
+            }
+
+            if (userContentBlocks != null)
+            {
+                var preservedText = userContentBlocks
+                    .Where(block => block.Kind is LanguageModelChatContentBlockKind.Text
+                        or LanguageModelChatContentBlockKind.HostPreservedContent)
+                    .SelectMany(block => ExtractPreservedMemoryContents(block.Content))
+                    .Where(content => content.Kind == MemoryBlockKind.Text)
+                    .Select(content => ResolveTextForEmbedding(content.Content))
+                    .Where(text => text.Length > 0)
+                    .ToArray();
+                if (preservedText.Length > 0)
+                {
+                    parts.Add(new EmbeddingContentPart
+                    {
+                        Text = string.Join(Environment.NewLine + Environment.NewLine, preservedText)
+                    });
+                }
+
+                if (model.SupportsMultimodalEmbedding)
+                {
+                    foreach (var imageBlock in userContentBlocks.Where(block => block.Kind == LanguageModelChatContentBlockKind.Image))
+                    {
+                        var path = imageBlock.ResourcePath ?? imageBlock.Content;
+                        var preservedContent = BuildPreservedResourceXml(
+                            "Image",
+                            path,
+                            ResolveImageMediaType(path, imageBlock.MediaType));
+                        var imageInput = await CreateImageEmbeddingInputAsync(
+                                path,
+                                imageBlock.MediaType,
+                                preservedContent,
+                                imageBlock.Data,
+                                cancellationToken)
+                            .ConfigureAwait(false);
+                        if (imageInput == null)
+                        {
+                            continue;
+                        }
+
+                        parts.AddRange(imageInput.Parts);
+                    }
+
+                    foreach (var preservedImage in userContentBlocks
+                                 .Where(block => block.Kind is LanguageModelChatContentBlockKind.Text
+                                     or LanguageModelChatContentBlockKind.HostPreservedContent)
+                                 .SelectMany(block => ExtractPreservedMemoryContents(block.Content))
+                                 .Where(content => content.Kind == MemoryBlockKind.Image))
+                    {
+                        var imageInput = await CreateImageEmbeddingInputAsync(
+                                preservedImage.Path,
+                                preservedImage.MediaType,
+                                preservedImage.Content,
+                                data: null,
+                                cancellationToken)
+                            .ConfigureAwait(false);
+                        if (imageInput == null)
+                        {
+                            continue;
+                        }
+
+                        parts.AddRange(imageInput.Parts);
+                    }
+                }
+            }
+
+            return parts.Count == 0
+                ? null
+                : new EmbeddingInput { Parts = parts };
+        }
+
+        private static EmbeddingInput? CreateTextEmbeddingInput(string content, string? sourceUri)
+        {
+            var normalizedContent = ResolveTextForEmbedding(content);
+            return normalizedContent.Length == 0
+                ? null
+                : EmbeddingInput.FromText(normalizedContent, sourceUri);
+        }
+
+        private static string ResolveTextForEmbedding(string? content)
+        {
+            var normalizedContent = Normalize(content);
+            if (normalizedContent.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            return SkyweaverPreservedTextContentXml.TryParse(normalizedContent, out var preservedText)
+                ? Normalize(preservedText.Text)
+                : normalizedContent;
+        }
+
+        private static async Task<EmbeddingInput?> CreateImageEmbeddingInputAsync(
+            string? pathOrUri,
+            string? mediaType,
+            string? text,
+            byte[]? data,
+            CancellationToken cancellationToken)
+        {
+            var sourceUri = Normalize(pathOrUri);
+            if (sourceUri.Length == 0 && data is not { Length: > 0 })
+            {
+                return null;
+            }
+
+            var resolvedMediaType = ResolveImageMediaType(sourceUri, mediaType);
+            if (resolvedMediaType.Length == 0)
+            {
+                return null;
+            }
+
+            byte[] binary;
+            if (data is { Length: > 0 })
+            {
+                binary = data.ToArray();
+            }
+            else
+            {
+                if (!TryResolveLocalPath(sourceUri, out var localPath) ||
+                    !LanguageModelMediaResourcePolicy.CanReadLocalMediaFile(
+                        localPath,
+                        LanguageModelChatContentBlockKind.Image,
+                        resolvedMediaType,
+                        out resolvedMediaType,
+                        out _))
+                {
+                    return null;
+                }
+
+                try
+                {
+                    binary = await File.ReadAllBytesAsync(localPath, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
+                {
+                    return null;
+                }
+            }
+
+            if (binary.Length == 0)
+            {
+                return null;
+            }
+
+            var part = new EmbeddingContentPart
+            {
+                Text = Normalize(text),
+                Binary = binary.AsMemory(),
+                MimeType = resolvedMediaType,
+                SourceUri = sourceUri,
+                Name = ResolveResourceName(sourceUri),
+                Metadata =
+                {
+                    ["memoryContentKind"] = "Image"
+                }
+            };
+            return new EmbeddingInput { Parts = [part] };
+        }
+
+        private static SegmentKind ResolveSegmentKind(MemoryBlock block)
+        {
+            return block.Kind switch
+            {
+                MemoryBlockKind.Image => SegmentKind.Image,
+                MemoryBlockKind.Document => SegmentKind.Custom,
+                _ => SegmentKind.TextPassage
+            };
+        }
+
+        private static string BuildPreservedResourceXml(
+            string elementName,
+            string? path,
+            string? mediaType)
+        {
+            var normalizedPath = Normalize(path);
+            if (normalizedPath.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            var element = new XElement(
+                elementName,
+                new XAttribute("Path", normalizedPath));
+            var normalizedMediaType = Normalize(mediaType);
+            if (normalizedMediaType.Length > 0)
+            {
+                element.Add(new XAttribute("MediaType", normalizedMediaType));
+            }
+
+            return new XElement("SkyweaverPreservedContent", element).ToString(SaveOptions.DisableFormatting);
+        }
+
+        private static string ResolveImageMediaType(string? pathOrUri, string? declaredMediaType)
+        {
+            if (LanguageModelMediaResourcePolicy.TryNormalizeMediaType(
+                    LanguageModelChatContentBlockKind.Image,
+                    pathOrUri,
+                    declaredMediaType,
+                    out var normalizedMediaType))
+            {
+                return normalizedMediaType;
+            }
+
+            var fallback = Normalize(declaredMediaType);
+            return fallback.StartsWith("image/", StringComparison.OrdinalIgnoreCase)
+                ? fallback
+                : string.Empty;
+        }
+
+        private static bool TryResolveLocalPath(string pathOrUri, out string localPath)
+        {
+            localPath = string.Empty;
+            var normalized = Normalize(pathOrUri);
+            if (normalized.Length == 0)
+            {
+                return false;
+            }
+
+            if (Uri.TryCreate(normalized, UriKind.Absolute, out var uri))
+            {
+                if (!uri.IsFile)
+                {
+                    return false;
+                }
+
+                localPath = uri.LocalPath;
+                return true;
+            }
+
+            try
+            {
+                localPath = Path.GetFullPath(normalized);
+                return true;
+            }
+            catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+            {
+                return false;
+            }
+        }
+
+        private static string ResolveResourceName(string? pathOrUri)
+        {
+            var normalized = Normalize(pathOrUri);
+            if (normalized.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            try
+            {
+                if (Uri.TryCreate(normalized, UriKind.Absolute, out var uri) && uri.IsFile)
+                {
+                    return Path.GetFileName(uri.LocalPath);
+                }
+
+                return Path.GetFileName(normalized);
+            }
+            catch (ArgumentException)
+            {
+                return string.Empty;
+            }
         }
 
         private bool TryResolveSelectedEmbeddingModel(
@@ -889,14 +1585,29 @@ namespace Skyweaver.Services.Memory
                 new XComment("Relevant memory from previous conversations between you and the user. This preserved content block is injected by Skyweaver and is only visible to the LLM. The user must never see this block directly."),
                 memoryElement);
             var xml = root.ToString(SaveOptions.DisableFormatting);
+            var contentBlocks = new List<LanguageModelChatContentBlock>
+            {
+                LanguageModelChatContentBlock.CreateHostPreservedContent(xml)
+            };
+            contentBlocks.AddRange(results
+                .Select(result => result.Segment.Content)
+                .Where(IsPreservedContentXml)
+                .Select(LanguageModelChatContentBlock.CreateHostPreservedContent));
 
             return new LanguageModelChatMessage(
                 LanguageModelChatRole.User,
-                new[] { LanguageModelChatContentBlock.CreateHostPreservedContent(xml) })
+                contentBlocks)
             {
                 AuthorName = "Skyweaver Memory",
                 IsHostInjectedTail = true
             };
+        }
+
+        private static bool IsPreservedContentXml(string? value)
+        {
+            return Normalize(value).StartsWith(
+                "<SkyweaverPreservedContent",
+                StringComparison.OrdinalIgnoreCase);
         }
 
         private static string BuildQueryText(
@@ -914,11 +1625,41 @@ namespace Skyweaver.Services.Memory
             {
                 parts.AddRange(userContentBlocks
                     .Where(block => block.Kind == LanguageModelChatContentBlockKind.Text)
-                    .Select(block => Normalize(block.Content))
+                    .Select(block => RemovePreservedContentFragments(block.Content))
                     .Where(content => content.Length > 0));
             }
 
             return string.Join(Environment.NewLine + Environment.NewLine, parts).Trim();
+        }
+
+        private static string RemovePreservedContentFragments(string? content)
+        {
+            var normalizedContent = content ?? string.Empty;
+            if (normalizedContent.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            var builder = new StringBuilder(normalizedContent.Length);
+            var cursor = 0;
+            while (cursor < normalizedContent.Length)
+            {
+                if (!TryFindNextPreservedContent(
+                        normalizedContent,
+                        cursor,
+                        out var matchStart,
+                        out var matchEnd,
+                        out _))
+                {
+                    builder.Append(normalizedContent[cursor..]);
+                    break;
+                }
+
+                builder.Append(normalizedContent[cursor..matchStart]);
+                cursor = matchEnd;
+            }
+
+            return Normalize(builder.ToString());
         }
 
         private static string CreateSessionMemoryFileName(ChatSessionModel session)
@@ -1052,6 +1793,7 @@ namespace Skyweaver.Services.Memory
         {
             public string BlockId { get; init; } = string.Empty;
             public int BlockIndex { get; init; }
+            public MemoryBlockKind Kind { get; init; } = MemoryBlockKind.Text;
             public string TurnId { get; init; } = string.Empty;
             public int TurnNumber { get; init; }
             public string Content { get; init; } = string.Empty;
@@ -1066,10 +1808,25 @@ namespace Skyweaver.Services.Memory
             public string SessionFlowName { get; init; } = string.Empty;
             public string DocumentFileName { get; init; } = string.Empty;
             public string DocumentPath { get; init; } = string.Empty;
+            public string? ResourcePath { get; init; }
+            public string? MediaType { get; init; }
             public DateTime CreatedAtUtc { get; init; }
         }
 
+        private enum MemoryBlockKind
+        {
+            Text = 0,
+            Image = 1,
+            Document = 2
+        }
+
         private sealed record MemoryAgentIdentity(string AgentId, string AgentName);
+
+        private readonly record struct PreservedMemoryContent(
+            MemoryBlockKind Kind,
+            string Content,
+            string? Path,
+            string? MediaType);
 
         private sealed class MemoryFlowConnectionState
         {

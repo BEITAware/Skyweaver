@@ -347,6 +347,8 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
 
                     case LanguageModelChatContentBlockKind.Image:
                     case LanguageModelChatContentBlockKind.Audio:
+                    case LanguageModelChatContentBlockKind.Video:
+                    case LanguageModelChatContentBlockKind.Document:
                         var mediaPart = await TryCreateMediaPartAsync(
                                 settings,
                                 block,
@@ -375,10 +377,16 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             CancellationToken cancellationToken)
         {
             var mediaType = NormalizeMediaType(block.MediaType, block.ResourcePath ?? block.Content, block.Kind);
+            if (mediaType.Length == 0)
+            {
+                return null;
+            }
+
             var localPath = ResolveLocalPath(block);
 
-            if (TryGetInlineBytes(block, localPath, out var bytes) && bytes.Length > 0)
+            if (block.Data is { Length: > 0 } providedBytes)
             {
+                var bytes = providedBytes.ToArray();
                 var estimatedEncodedBytes = EstimateBase64Length(bytes.Length);
                 if (estimatedEncodedBytes <= inlineBudget.RemainingBytes)
                 {
@@ -410,6 +418,44 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 };
             }
 
+            if (!string.IsNullOrWhiteSpace(localPath) && File.Exists(localPath))
+            {
+                var fileInfo = new FileInfo(localPath);
+                var estimatedEncodedBytes = EstimateBase64Length(fileInfo.Length);
+                if (estimatedEncodedBytes <= inlineBudget.RemainingBytes &&
+                    TryReadInlineFileBytes(block, localPath, out var bytes) &&
+                    bytes.Length > 0)
+                {
+                    inlineBudget.RemainingBytes -= estimatedEncodedBytes > int.MaxValue
+                        ? inlineBudget.RemainingBytes
+                        : (int)estimatedEncodedBytes;
+                    return new GooglePart
+                    {
+                        InlineData = new GoogleInlineData
+                        {
+                            MimeType = mediaType,
+                            Data = Convert.ToBase64String(bytes)
+                        }
+                    };
+                }
+
+                var fileReference = await UploadLocalFileAsync(
+                        settings,
+                        localPath,
+                        mediaType,
+                        BuildUploadDisplayName(block, localPath),
+                        BuildUploadCacheKey(block, localPath),
+                        cancellationToken).ConfigureAwait(false);
+                return new GooglePart
+                {
+                    FileData = new GoogleFileData
+                    {
+                        MimeType = fileReference.MediaType,
+                        FileUri = fileReference.FileUri
+                    }
+                };
+            }
+
             return null;
         }
 
@@ -430,19 +476,24 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             return trimmedPath;
         }
 
-        private static bool TryGetInlineBytes(
+        private static bool TryReadInlineFileBytes(
             LanguageModelChatContentBlock block,
             string? localPath,
             out byte[] bytes)
         {
-            if (block.Data is { Length: > 0 } providedBytes)
-            {
-                bytes = providedBytes.ToArray();
-                return true;
-            }
-
             if (!string.IsNullOrWhiteSpace(localPath) && File.Exists(localPath))
             {
+                if (!LanguageModelMediaResourcePolicy.CanReadLocalMediaFile(
+                        localPath,
+                        block.Kind,
+                        block.MediaType,
+                        out _,
+                        out _))
+                {
+                    bytes = Array.Empty<byte>();
+                    return false;
+                }
+
                 bytes = File.ReadAllBytes(localPath);
                 return true;
             }
@@ -456,6 +507,67 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             return s_uploadedFileCache.TryGetValue(cacheKey, out var cachedReference)
                 ? cachedReference
                 : null;
+        }
+
+        private static async Task<UploadedGoogleFileReference> UploadLocalFileAsync(
+            GoogleLanguageModelSettings settings,
+            string localPath,
+            string mediaType,
+            string displayName,
+            string cacheKey,
+            CancellationToken cancellationToken)
+        {
+            var cachedReference = TryGetCachedUploadedFile(cacheKey);
+            if (cachedReference != null)
+            {
+                return cachedReference;
+            }
+
+            var fileInfo = new FileInfo(localPath);
+            using var startRequest = new HttpRequestMessage(
+                HttpMethod.Post,
+                BuildApiUri(settings, "upload/v1beta/files"));
+            startRequest.Headers.Add("x-goog-api-key", settings.ApiKey);
+            startRequest.Headers.Add("X-Goog-Upload-Protocol", "resumable");
+            startRequest.Headers.Add("X-Goog-Upload-Command", "start");
+            startRequest.Headers.Add("X-Goog-Upload-Header-Content-Length", fileInfo.Length.ToString(CultureInfo.InvariantCulture));
+            startRequest.Headers.Add("X-Goog-Upload-Header-Content-Type", mediaType);
+            startRequest.Content = new StringContent(
+                JsonSerializer.Serialize(new { file = new Dictionary<string, string> { ["display_name"] = displayName } }),
+                Encoding.UTF8,
+                "application/json");
+
+            using var startResponse = await s_httpClient.SendAsync(
+                    startRequest,
+                    HttpCompletionOption.ResponseHeadersRead,
+                    cancellationToken).ConfigureAwait(false);
+            await EnsureSuccessAsync(startResponse, cancellationToken).ConfigureAwait(false);
+
+            if (!TryGetHeaderValue(startResponse, "X-Goog-Upload-URL", out var uploadUrl))
+            {
+                throw new InvalidOperationException("Google Files API did not return an upload URL.");
+            }
+
+            await using var stream = File.OpenRead(localPath);
+            using var uploadRequest = new HttpRequestMessage(HttpMethod.Post, uploadUrl);
+            uploadRequest.Headers.Add("X-Goog-Upload-Offset", "0");
+            uploadRequest.Headers.Add("X-Goog-Upload-Command", "upload, finalize");
+            uploadRequest.Content = new StreamContent(stream);
+            uploadRequest.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(mediaType);
+
+            using var uploadResponse = await s_httpClient.SendAsync(
+                    uploadRequest,
+                    HttpCompletionOption.ResponseContentRead,
+                    cancellationToken).ConfigureAwait(false);
+            using var document = await ReadJsonDocumentAsync(uploadResponse, cancellationToken).ConfigureAwait(false);
+
+            var fileReference = await ParseUploadedFileReferenceAsync(
+                    settings,
+                    document.RootElement,
+                    mediaType,
+                    cancellationToken).ConfigureAwait(false);
+            s_uploadedFileCache[cacheKey] = fileReference;
+            return fileReference;
         }
 
         private static async Task<UploadedGoogleFileReference> UploadFileAsync(
@@ -826,9 +938,13 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 return Path.GetFileName(localPath);
             }
 
-            return block.Kind == LanguageModelChatContentBlockKind.Audio
-                ? "audio"
-                : "image";
+            return block.Kind switch
+            {
+                LanguageModelChatContentBlockKind.Audio => "audio",
+                LanguageModelChatContentBlockKind.Video => "video",
+                LanguageModelChatContentBlockKind.Document => "document",
+                _ => "image"
+            };
         }
 
         private static string BuildUploadCacheKey(
@@ -844,6 +960,15 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             }
 
             return $"{mediaType}|{Convert.ToHexString(SHA256.HashData(bytes))}";
+        }
+
+        private static string BuildUploadCacheKey(
+            LanguageModelChatContentBlock block,
+            string localPath)
+        {
+            var mediaType = NormalizeMediaType(block.MediaType, block.ResourcePath ?? block.Content, block.Kind);
+            var fileInfo = new FileInfo(localPath);
+            return $"{localPath}|{fileInfo.Length}|{fileInfo.LastWriteTimeUtc.Ticks}|{mediaType}";
         }
 
         private static Uri BuildApiUri(GoogleLanguageModelSettings settings, string relativePath)
@@ -875,59 +1000,13 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             string? pathOrUri,
             LanguageModelChatContentBlockKind kind)
         {
-            if (!string.IsNullOrWhiteSpace(mediaType))
-            {
-                return mediaType.Trim();
-            }
-
-            var extension = Path.GetExtension(pathOrUri ?? string.Empty).ToLowerInvariant();
-            if (string.Equals(extension, ".jpg", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(extension, ".jpeg", StringComparison.OrdinalIgnoreCase))
-            {
-                return "image/jpeg";
-            }
-
-            if (string.Equals(extension, ".gif", StringComparison.OrdinalIgnoreCase))
-            {
-                return "image/gif";
-            }
-
-            if (string.Equals(extension, ".webp", StringComparison.OrdinalIgnoreCase))
-            {
-                return "image/webp";
-            }
-
-            if (string.Equals(extension, ".bmp", StringComparison.OrdinalIgnoreCase))
-            {
-                return "image/bmp";
-            }
-
-            if (string.Equals(extension, ".wav", StringComparison.OrdinalIgnoreCase))
-            {
-                return "audio/wav";
-            }
-
-            if (string.Equals(extension, ".mp3", StringComparison.OrdinalIgnoreCase))
-            {
-                return "audio/mpeg";
-            }
-
-            if (string.Equals(extension, ".m4a", StringComparison.OrdinalIgnoreCase))
-            {
-                return "audio/mp4";
-            }
-
-            if (string.Equals(extension, ".ogg", StringComparison.OrdinalIgnoreCase))
-            {
-                return "audio/ogg";
-            }
-
-            if (string.Equals(extension, ".flac", StringComparison.OrdinalIgnoreCase))
-            {
-                return "audio/flac";
-            }
-
-            return kind == LanguageModelChatContentBlockKind.Audio ? "audio/wav" : "image/png";
+            return LanguageModelMediaResourcePolicy.TryNormalizeMediaType(
+                kind,
+                pathOrUri,
+                mediaType,
+                out var normalizedMediaType)
+                ? normalizedMediaType
+                : string.Empty;
         }
 
         private static GoogleLanguageModelSettings GetSettings(LanguageModelDefinition model)
@@ -1033,6 +1112,16 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
         }
 
         private static int EstimateBase64Length(int byteCount)
+        {
+            if (byteCount <= 0)
+            {
+                return 0;
+            }
+
+            return ((byteCount + 2) / 3) * 4;
+        }
+
+        private static long EstimateBase64Length(long byteCount)
         {
             if (byteCount <= 0)
             {

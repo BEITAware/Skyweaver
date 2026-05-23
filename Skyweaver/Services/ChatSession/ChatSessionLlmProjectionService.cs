@@ -273,6 +273,44 @@ namespace Skyweaver.Services.ChatSession
                 return true;
             }
 
+            if (block.Kind == ChatSessionTranscriptBlockKind.Video)
+            {
+                var resourcePath = Normalize(block.ResourcePath ?? block.Content);
+                if (resourcePath.Length == 0)
+                {
+                    reason = "Video block has no resource path.";
+                    return false;
+                }
+
+                message = new LanguageModelChatMessage(
+                    role,
+                    [LanguageModelChatContentBlock.CreateVideo(resourcePath, block.MediaType)])
+                {
+                    AuthorName = ResolveAuthor(entry, role)
+                };
+                reason = "Video block included.";
+                return true;
+            }
+
+            if (block.Kind == ChatSessionTranscriptBlockKind.Document)
+            {
+                var resourcePath = Normalize(block.ResourcePath ?? block.Content);
+                if (resourcePath.Length == 0)
+                {
+                    reason = "Document block has no resource path.";
+                    return false;
+                }
+
+                message = new LanguageModelChatMessage(
+                    role,
+                    [LanguageModelChatContentBlock.CreateDocument(resourcePath, block.MediaType)])
+                {
+                    AuthorName = ResolveAuthor(entry, role)
+                };
+                reason = "Document block included.";
+                return true;
+            }
+
             var content = BuildTextContent(entry, block);
             if (content.Length == 0)
             {
@@ -341,12 +379,19 @@ namespace Skyweaver.Services.ChatSession
                     entry.ToolCallId);
             }
 
-            return block.Kind switch
+            if (block.Kind == ChatSessionTranscriptBlockKind.Code)
             {
-                ChatSessionTranscriptBlockKind.Code => BuildCodeBlock(block, content),
-                ChatSessionTranscriptBlockKind.ResourceReference => EnsurePreservedContentWrapper(content),
-                _ => PrefixTitle(block.Title, content)
-            };
+                return BuildCodeBlock(block, content);
+            }
+
+            if (block.Kind == ChatSessionTranscriptBlockKind.ResourceReference)
+            {
+                return SkyweaverPreservedTextContentXml.TryParse(content, out var textContent)
+                    ? textContent.Text
+                    : EnsurePreservedContentWrapper(content);
+            }
+
+            return PrefixTitle(block.Title, content);
         }
 
         private static string BuildCodeBlock(ChatSessionTranscriptBlock block, string content)
@@ -538,6 +583,8 @@ namespace Skyweaver.Services.ChatSession
                 {
                     LanguageModelChatContentBlockKind.Image => BuildResourceKey("image", block.ResourcePath ?? block.Content),
                     LanguageModelChatContentBlockKind.Audio => BuildResourceKey("audio", block.ResourcePath ?? block.Content),
+                    LanguageModelChatContentBlockKind.Video => BuildResourceKey("video", block.ResourcePath ?? block.Content),
+                    LanguageModelChatContentBlockKind.Document => BuildResourceKey("document", block.ResourcePath ?? block.Content),
                     LanguageModelChatContentBlockKind.HostPreservedContent => BuildResourceKey("host", block.Content),
                     _ => string.Empty
                 })
@@ -559,6 +606,8 @@ namespace Skyweaver.Services.ChatSession
                 {
                     ChatSessionTranscriptBlockKind.Image => BuildResourceKey("image", block.ResourcePath ?? block.Content),
                     ChatSessionTranscriptBlockKind.Audio => BuildResourceKey("audio", block.ResourcePath ?? block.Content),
+                    ChatSessionTranscriptBlockKind.Video => BuildResourceKey("video", block.ResourcePath ?? block.Content),
+                    ChatSessionTranscriptBlockKind.Document => BuildResourceKey("document", block.ResourcePath ?? block.Content),
                     ChatSessionTranscriptBlockKind.ResourceReference => BuildResourceKey("host", block.Content),
                     _ => string.Empty
                 })

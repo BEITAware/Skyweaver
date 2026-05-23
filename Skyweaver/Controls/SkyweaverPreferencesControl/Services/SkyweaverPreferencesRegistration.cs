@@ -48,6 +48,16 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.Services
                     Order = 10
                 });
 
+                registry.RegisterPage("files-system", new PreferencePageInfo
+                {
+                    Id = "preferences-shell-integration",
+                    DisplayName = "Shell 集成",
+                    DisplayNameResourceKey = "Preferences.Page.ShellIntegration",
+                    ViewType = typeof(ShellIntegrationPreferencesPageView),
+                    ViewModelType = typeof(ShellIntegrationPreferencesPageViewModel),
+                    Order = 15
+                });
+
                 registry.RegisterPage("presentation-ui", new PreferencePageInfo
                 {
                     Id = "preferences-localization",
@@ -106,6 +116,16 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.Services
                     ViewType = typeof(MemoryPreferencesPageView),
                     ViewModelType = typeof(MemoryPreferencesPageViewModel),
                     Order = 40
+                });
+
+                registry.RegisterPage("multimodal", new PreferencePageInfo
+                {
+                    Id = "preferences-multimodal-document",
+                    DisplayName = "文档",
+                    DisplayNameResourceKey = "Preferences.Page.MultimodalDocument",
+                    ViewType = typeof(DocumentPreferencesPageView),
+                    ViewModelType = typeof(DocumentPreferencesPageViewModel),
+                    Order = 10
                 });
 
                 s_isRegistered = true;

@@ -29,7 +29,8 @@ namespace Skyweaver.Services.ChatSession
         ExecutionCancelled = 16,
         ReasoningDelta = 17,
         ToolProgressUpdated = 18,
-        UserMessageCommitted = 19
+        UserMessageCommitted = 19,
+        MediaProcessingProgressUpdated = 20
     }
 
     public sealed class ChatSessionRuntimeRequest
@@ -123,6 +124,8 @@ namespace Skyweaver.Services.ChatSession
         public IReadOnlyList<SkyweaverToolReturnPayload> ToolReturns { get; init; } = Array.Empty<SkyweaverToolReturnPayload>();
 
         public SkyweaverToolProgressUpdate? ToolProgress { get; init; }
+
+        public AgentLoopMediaProcessingProgress? MediaProcessingProgress { get; init; }
 
         public AgentLoopContextCompressionInfo? ContextCompression { get; init; }
 

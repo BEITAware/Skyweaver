@@ -898,6 +898,179 @@
             </Grid>
         </DataTemplate>
 
+        <RadialGradientBrush x:Key="MediaResourceCardBackgroundBrush"
+                             RadiusX="1.012"
+                             RadiusY="0.918"
+                             Center="0.5,0.98"
+                             GradientOrigin="0.5,0.98">
+            <GradientStop Color="#C5C9CACA" Offset="0"/>
+            <GradientStop Color="#34445E7C" Offset="1"/>
+            <RadialGradientBrush.RelativeTransform>
+                <TransformGroup>
+                    <SkewTransform CenterX="0.5" CenterY="0.98" AngleX="5"/>
+                    <RotateTransform CenterX="0.5" CenterY="0.98" Angle="70"/>
+                </TransformGroup>
+            </RadialGradientBrush.RelativeTransform>
+        </RadialGradientBrush>
+
+        <LinearGradientBrush x:Key="MediaResourceCardHighlightBrush"
+                             StartPoint="0.04,0.18"
+                             EndPoint="1.04,0.92">
+            <GradientStop Color="#00FFFFFF" Offset="0"/>
+            <GradientStop Color="#36FFFFFF" Offset="0.28"/>
+            <GradientStop Color="#00FFFFFF" Offset="0.52"/>
+            <GradientStop Color="#30FFFFFF" Offset="0.74"/>
+            <GradientStop Color="#02FFFFFF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <DataTemplate x:Key="MediaResourceMessagePartTemplate" DataType="{x:Type models:ChatMessagePartModel}">
+            <Border MinWidth="260"
+                    MaxWidth="520"
+                    HorizontalAlignment="Left"
+                    Background="{StaticResource MediaResourceCardBackgroundBrush}"
+                    BorderBrush="#6793F2FF"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="12">
+                <Grid>
+                    <Border Background="{StaticResource MediaResourceCardHighlightBrush}"
+                            Opacity="0.95"
+                            CornerRadius="7"
+                            IsHitTestVisible="False"/>
+                    <Grid Margin="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="46"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Width="36"
+                                Height="42"
+                                CornerRadius="4"
+                                Background="#EEFAFDFF"
+                                BorderBrush="#AA182433"
+                                BorderThickness="1"
+                                VerticalAlignment="Top">
+                            <Grid>
+                                <Path Data="M 25,0 L 36,11 L 25,11 Z"
+                                      Fill="#FFC8E7F0"
+                                      HorizontalAlignment="Right"
+                                      VerticalAlignment="Top"/>
+                                <TextBlock Text="{Binding BadgeText}"
+                                           Margin="3,14,3,0"
+                                           TextAlignment="Center"
+                                           Foreground="#FF152635"
+                                           FontSize="8"
+                                           FontWeight="Bold"
+                                           TextTrimming="CharacterEllipsis"/>
+                            </Grid>
+                        </Border>
+
+                        <StackPanel Grid.Column="1">
+                            <DockPanel LastChildFill="True">
+                                <Border DockPanel.Dock="Right"
+                                        Background="#22000000"
+                                        BorderBrush="#55E7FBFF"
+                                        BorderThickness="1"
+                                        CornerRadius="5"
+                                        Padding="6,2"
+                                        Margin="8,0,0,0">
+                                    <TextBlock Text="{Binding ProgressPhase}"
+                                               Foreground="#FFEAFDFF"
+                                               FontSize="10"
+                                               FontWeight="SemiBold">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasProgress}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Border>
+                                <TextBlock Text="{Binding Title}"
+                                           Foreground="#FFF6FEFF"
+                                           FontWeight="SemiBold"
+                                           FontSize="13"
+                                           TextWrapping="NoWrap"
+                                           TextTrimming="CharacterEllipsis"/>
+                            </DockPanel>
+
+                            <TextBlock Text="{Binding ResourcePath}"
+                                       Margin="0,4,0,0"
+                                       Foreground="#DCEAF9FF"
+                                       FontSize="11"
+                                       TextWrapping="NoWrap"
+                                       TextTrimming="CharacterEllipsis"/>
+
+                            <StackPanel Margin="0,9,0,0">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasProgress}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <Grid>
+                                    <TextBlock Text="{Binding ProgressStatusText}"
+                                               Foreground="#FFF8FEFF"
+                                               FontSize="11"
+                                               TextWrapping="Wrap"
+                                               Margin="0,0,58,0"/>
+                                    <TextBlock Text="{Binding ProgressCountText}"
+                                               HorizontalAlignment="Right"
+                                               Foreground="#B8FFFFFF"
+                                               FontSize="11">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasProgressCount}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+                                <ProgressBar Margin="0,6,0,0"
+                                             Height="5"
+                                             Minimum="0"
+                                             Maximum="1"
+                                             Value="{Binding ProgressValue, Mode=OneWay}"
+                                             IsIndeterminate="{Binding IsProgressIndeterminate, Mode=OneWay}"/>
+                                <ItemsControl ItemsSource="{Binding ProgressActiveItems}" Margin="0,5,0,0">
+                                    <ItemsControl.Style>
+                                        <Style TargetType="ItemsControl">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding HasProgressActiveItems}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ItemsControl.Style>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}"
+                                                       Foreground="#B8FFFFFF"
+                                                       FontSize="10"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
         <DataTemplate x:Key="ReasoningMessagePartTemplate" DataType="{x:Type models:ChatMessagePartModel}">
             <Grid>
                 <Expander IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
@@ -982,6 +1155,7 @@
                                                ToolOutputTemplate="{StaticResource ToolOutputMessagePartTemplate}"
                                                StructuredXmlTemplate="{StaticResource StructuredXmlMessagePartTemplate}"
                                                ImageTemplate="{StaticResource ImageMessagePartTemplate}"
+                                               MediaResourceTemplate="{StaticResource MediaResourceMessagePartTemplate}"
                                                ReasoningTemplate="{StaticResource ReasoningMessagePartTemplate}"/>
 
         <DataTemplate x:Key="BubbleMessageContentTemplate" DataType="{x:Type models:ChatMessageModel}">
@@ -1400,9 +1574,16 @@
                                     </StackPanel>
                                 </Button>
 
+                                <Button Command="{Binding AddVideoCommand}" Style="{StaticResource MediaToolbarButtonStyle}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/imagealt.png" Width="20" Height="20" Margin="0,0,5,0"/>
+                                        <TextBlock Text="{DynamicResource ChatSessionControl.AddVideo}" VerticalAlignment="Center" FontSize="12"/>
+                                    </StackPanel>
+                                </Button>
+
                                 <Rectangle Width="1" Height="20" Fill="#33FFFFFF" Margin="5,0"/>
 
-                                <Button Style="{StaticResource MediaToolbarButtonStyle}">
+                                <Button Command="{Binding AddDocumentCommand}" Style="{StaticResource MediaToolbarButtonStyle}">
                                     <StackPanel Orientation="Horizontal">
                                         <Image Source="pack://application:,,,/Skyweaver;component/Resources/imgpp.png" Width="20" Height="20" Margin="0,0,5,0"/>
                                         <TextBlock Text="{DynamicResource ChatSessionControl.AddFile}" VerticalAlignment="Center" FontSize="12"/>

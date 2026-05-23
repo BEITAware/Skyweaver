@@ -511,6 +511,8 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
 
                     case LanguageModelChatContentBlockKind.Image:
                     case LanguageModelChatContentBlockKind.Audio:
+                    case LanguageModelChatContentBlockKind.Video:
+                    case LanguageModelChatContentBlockKind.Document:
                         if (TryCreateDataContent(block, out var dataContent) && dataContent != null)
                         {
                             contents.Add(dataContent);
@@ -537,6 +539,10 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
         {
             dataContent = null;
             var mediaType = NormalizeMediaType(block.MediaType, block.ResourcePath ?? block.Content, block.Kind);
+            if (mediaType.Length == 0)
+            {
+                return false;
+            }
 
             if (block.Data is { Length: > 0 } bytes)
             {
@@ -546,6 +552,16 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
 
             var path = block.ResourcePath ?? block.Content;
             if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            {
+                return false;
+            }
+
+            if (!LanguageModelMediaResourcePolicy.CanReadLocalMediaFile(
+                    path,
+                    block.Kind,
+                    block.MediaType,
+                    out mediaType,
+                    out _))
             {
                 return false;
             }
@@ -567,9 +583,13 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 return false;
             }
 
-            uriContent = new UriContent(
-                uri,
-                NormalizeMediaType(block.MediaType, rawUri, block.Kind));
+            var mediaType = NormalizeMediaType(block.MediaType, rawUri, block.Kind);
+            if (mediaType.Length == 0)
+            {
+                return false;
+            }
+
+            uriContent = new UriContent(uri, mediaType);
             return true;
         }
 
@@ -578,24 +598,13 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             string? pathOrUri,
             LanguageModelChatContentBlockKind kind)
         {
-            if (!string.IsNullOrWhiteSpace(mediaType))
-            {
-                return mediaType.Trim();
-            }
-
-            var extension = Path.GetExtension(pathOrUri ?? string.Empty).ToLowerInvariant();
-            return extension switch
-            {
-                ".jpg" or ".jpeg" => "image/jpeg",
-                ".gif" => "image/gif",
-                ".webp" => "image/webp",
-                ".bmp" => "image/bmp",
-                ".wav" => "audio/wav",
-                ".mp3" => "audio/mpeg",
-                ".m4a" => "audio/mp4",
-                ".ogg" => "audio/ogg",
-                _ => kind == LanguageModelChatContentBlockKind.Audio ? "audio/wav" : "image/png"
-            };
+            return LanguageModelMediaResourcePolicy.TryNormalizeMediaType(
+                kind,
+                pathOrUri,
+                mediaType,
+                out var normalizedMediaType)
+                ? normalizedMediaType
+                : string.Empty;
         }
 
         private static string ExtractReasoningText(IEnumerable<AIContent>? contents)

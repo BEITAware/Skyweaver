@@ -16,40 +16,64 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             ResolveAdapter(model).Validate(model);
         }
 
-        public Task<LanguageModelChatResponse> GetResponseAsync(
+        public async Task<LanguageModelChatResponse> GetResponseAsync(
             LanguageModelDefinition model,
             IReadOnlyList<LanguageModelChatMessage> messages,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            Func<LanguageModelMediaProcessingProgress, CancellationToken, ValueTask>? mediaProcessingProgress = null)
         {
             ArgumentNullException.ThrowIfNull(model);
             ArgumentNullException.ThrowIfNull(messages);
 
-            var projectedMessages = LanguageModelChatTransportProjection.ProjectMessages(messages);
-            return ResolveAdapter(model).GetResponseAsync(model, projectedMessages, cancellationToken);
+            var projectedMessages = await LanguageModelChatTransportProjection.ProjectMessagesAsync(
+                    messages,
+                    model,
+                    mediaProcessingProgress,
+                    cancellationToken)
+                .ConfigureAwait(false);
+            return await ResolveAdapter(model).GetResponseAsync(model, projectedMessages, cancellationToken).ConfigureAwait(false);
         }
 
-        public Task<int> CountTokensAsync(
+        public async Task<int> CountTokensAsync(
             LanguageModelDefinition model,
             IReadOnlyList<LanguageModelChatMessage> messages,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            Func<LanguageModelMediaProcessingProgress, CancellationToken, ValueTask>? mediaProcessingProgress = null)
         {
             ArgumentNullException.ThrowIfNull(model);
             ArgumentNullException.ThrowIfNull(messages);
 
-            var projectedMessages = LanguageModelChatTransportProjection.ProjectMessages(messages);
-            return ResolveAdapter(model).CountTokensAsync(model, projectedMessages, cancellationToken);
+            var projectedMessages = await LanguageModelChatTransportProjection.ProjectMessagesAsync(
+                    messages,
+                    model,
+                    mediaProcessingProgress,
+                    cancellationToken)
+                .ConfigureAwait(false);
+            return await ResolveAdapter(model).CountTokensAsync(model, projectedMessages, cancellationToken).ConfigureAwait(false);
         }
 
-        public IAsyncEnumerable<LanguageModelStreamingChatUpdate> GetStreamingResponseAsync(
+        public async IAsyncEnumerable<LanguageModelStreamingChatUpdate> GetStreamingResponseAsync(
             LanguageModelDefinition model,
             IReadOnlyList<LanguageModelChatMessage> messages,
-            CancellationToken cancellationToken = default)
+            [System.Runtime.CompilerServices.EnumeratorCancellation]
+            CancellationToken cancellationToken = default,
+            Func<LanguageModelMediaProcessingProgress, CancellationToken, ValueTask>? mediaProcessingProgress = null)
         {
             ArgumentNullException.ThrowIfNull(model);
             ArgumentNullException.ThrowIfNull(messages);
 
-            var projectedMessages = LanguageModelChatTransportProjection.ProjectMessages(messages);
-            return ResolveAdapter(model).GetStreamingResponseAsync(model, projectedMessages, cancellationToken);
+            var projectedMessages = await LanguageModelChatTransportProjection.ProjectMessagesAsync(
+                    messages,
+                    model,
+                    mediaProcessingProgress,
+                    cancellationToken)
+                .ConfigureAwait(false);
+            await foreach (var update in ResolveAdapter(model)
+                               .GetStreamingResponseAsync(model, projectedMessages, cancellationToken)
+                               .ConfigureAwait(false))
+            {
+                yield return update;
+            }
         }
 
         private static ILanguageModelInterfaceAdapter ResolveAdapter(LanguageModelDefinition model)

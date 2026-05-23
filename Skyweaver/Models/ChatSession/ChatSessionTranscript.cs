@@ -87,14 +87,16 @@ namespace Skyweaver.Models.ChatSession
         Code = 2,
         Image = 3,
         Audio = 4,
-        File = 5,
-        ToolInvocationXml = 6,
-        ToolOutputXml = 7,
-        ReasoningText = 8,
-        StatusText = 9,
-        ErrorText = 10,
-        ResourceReference = 11,
-        CompressedSummary = 12
+        Video = 5,
+        Document = 6,
+        File = 7,
+        ToolInvocationXml = 8,
+        ToolOutputXml = 9,
+        ReasoningText = 10,
+        StatusText = 11,
+        ErrorText = 12,
+        ResourceReference = 13,
+        CompressedSummary = 14
     }
 
     public sealed class ChatSessionTranscript

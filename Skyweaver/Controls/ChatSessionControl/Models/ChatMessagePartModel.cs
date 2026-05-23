@@ -148,8 +148,57 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
         public SkyweaverToolProgressUpdate? ToolProgress
         {
             get => _toolProgress;
-            set => SetProperty(ref _toolProgress, value?.Normalize());
+            set
+            {
+                if (SetProperty(ref _toolProgress, value?.Normalize()))
+                {
+                    OnPropertyChanged(nameof(HasProgress));
+                    OnPropertyChanged(nameof(ProgressPhase));
+                    OnPropertyChanged(nameof(ProgressStatusText));
+                    OnPropertyChanged(nameof(ProgressValue));
+                    OnPropertyChanged(nameof(IsProgressIndeterminate));
+                    OnPropertyChanged(nameof(ProgressCountText));
+                    OnPropertyChanged(nameof(HasProgressCount));
+                    OnPropertyChanged(nameof(HasProgressActiveItems));
+                    OnPropertyChanged(nameof(ProgressActiveItems));
+                }
+            }
         }
+
+        public bool HasProgress => ToolProgress != null;
+
+        public string ProgressPhase => ToolProgress?.Phase ?? string.Empty;
+
+        public string ProgressStatusText => ToolProgress?.StatusText ?? string.Empty;
+
+        public double ProgressValue => ToolProgress?.ProgressFraction ?? 0d;
+
+        public bool IsProgressIndeterminate => ToolProgress?.ProgressFraction == null && ToolProgress?.IsCompleted != true;
+
+        public bool HasProgressCount => ToolProgress?.CompletedItems != null || ToolProgress?.TotalItems != null;
+
+        public string ProgressCountText
+        {
+            get
+            {
+                if (ToolProgress == null)
+                {
+                    return string.Empty;
+                }
+
+                return (ToolProgress.CompletedItems, ToolProgress.TotalItems) switch
+                {
+                    (int completed, int total) when total > 0 => $"{completed}/{total}",
+                    (int completed, _) => completed.ToString(),
+                    (_, int total) when total > 0 => $"0/{total}",
+                    _ => string.Empty
+                };
+            }
+        }
+
+        public IReadOnlyList<string> ProgressActiveItems => ToolProgress?.ActiveItems ?? Array.Empty<string>();
+
+        public bool HasProgressActiveItems => ProgressActiveItems.Count > 0;
 
         public bool HasToolResult => !string.IsNullOrWhiteSpace(ToolResultContent);
 
@@ -266,6 +315,16 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
         public static ChatMessagePartModel CreateAudio(string path, string? title = null)
         {
             return new ChatMessagePartModel(ChatMessagePartType.Audio, path, title, badgeText: L("ChatMessagePart.Badge.Audio", "音频"), resourcePath: path);
+        }
+
+        public static ChatMessagePartModel CreateVideo(string path, string? title = null)
+        {
+            return new ChatMessagePartModel(ChatMessagePartType.Video, path, title, badgeText: L("ChatMessagePart.Badge.Video", "Video"), resourcePath: path);
+        }
+
+        public static ChatMessagePartModel CreateDocument(string path, string? title = null)
+        {
+            return new ChatMessagePartModel(ChatMessagePartType.Document, path, title, badgeText: L("ChatMessagePart.Badge.Document", "Document"), resourcePath: path);
         }
 
         public static ChatMessagePartModel CreateReasoning(

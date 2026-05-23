@@ -51,6 +51,19 @@ namespace Skyweaver.Services.AgentLoop
         public Func<AgentToolConfirmationRequest, CancellationToken, Task<AgentToolConfirmationResult>>? ToolConfirmationCallback { get; init; }
     }
 
+    public sealed class AgentLoopMediaProcessingProgress
+    {
+        public LanguageModelMediaProcessingProgress Progress { get; init; } = new();
+
+        public AgentLoopMediaProcessingProgress Normalize()
+        {
+            return new AgentLoopMediaProcessingProgress
+            {
+                Progress = Progress.Normalize()
+            };
+        }
+    }
+
     public sealed class AgentToolConfirmationRequest
     {
         public AgentDefinition Agent { get; init; } = null!;
@@ -307,7 +320,8 @@ namespace Skyweaver.Services.AgentLoop
         ContextCompressionApplied = 8,
         FinalOutputProduced = 9,
         IterationCompleted = 10,
-        ToolProgressUpdated = 11
+        ToolProgressUpdated = 11,
+        MediaProcessingProgressUpdated = 12
     }
 
     public sealed class AgentLoopRuntimeEvent
@@ -345,6 +359,8 @@ namespace Skyweaver.Services.AgentLoop
         public IReadOnlyList<SkyweaverToolReturnPayload> ToolReturns { get; init; } = Array.Empty<SkyweaverToolReturnPayload>();
 
         public SkyweaverToolProgressUpdate? ToolProgress { get; init; }
+
+        public AgentLoopMediaProcessingProgress? MediaProcessingProgress { get; init; }
 
         public AgentLoopFinalOutput? FinalOutput { get; init; }
 

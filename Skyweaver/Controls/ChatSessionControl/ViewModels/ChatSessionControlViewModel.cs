@@ -188,6 +188,10 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
         public ICommand AddAudioCommand { get; }
 
+        public ICommand AddVideoCommand { get; }
+
+        public ICommand AddDocumentCommand { get; }
+
         public ICommand AddClipboardCommand { get; }
 
         public ChatSessionControlViewModel(
@@ -230,6 +234,8 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                 attachment => attachment != null && !IsExecutionActive);
             AddImageCommand = new RelayCommand(AddImage, () => !IsExecutionActive);
             AddAudioCommand = new RelayCommand(AddAudio, () => !IsExecutionActive);
+            AddVideoCommand = new RelayCommand(AddVideo, () => !IsExecutionActive);
+            AddDocumentCommand = new RelayCommand(AddDocument, () => !IsExecutionActive);
             AddClipboardCommand = new RelayCommand(AddClipboard, () => !IsExecutionActive);
 
             Messages.CollectionChanged += OnMessagesCollectionChanged;
@@ -276,13 +282,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             }
 
             var userContentBlocks = pendingImages
-                .Select(image => image.IsAudio
-                    ? LanguageModelChatContentBlock.CreateAudio(
-                        image.ResourcePath,
-                        image.MediaType)
-                    : LanguageModelChatContentBlock.CreateImage(
-                        image.ResourcePath,
-                        image.MediaType))
+                .Select(CreateContentBlockForAttachment)
                 .ToArray();
 
             DraftMessageText = string.Empty;
@@ -504,6 +504,8 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                 ChatSessionRuntimeEventKind.ExecutionCompleted => L("ChatSessionControl.Status.ExecutionCompleted", "执行已完成"),
                 ChatSessionRuntimeEventKind.ExecutionFailed => L("ChatSessionControl.Status.ExecutionFailed", "执行失败"),
                 ChatSessionRuntimeEventKind.ExecutionCancelled => L("ChatSessionControl.Status.ExecutionCancelled", "执行已取消"),
+                ChatSessionRuntimeEventKind.MediaProcessingProgressUpdated when !string.IsNullOrWhiteSpace(runtimeEvent.MediaProcessingProgress?.Progress.StatusText) =>
+                    runtimeEvent.MediaProcessingProgress!.Progress.StatusText,
                 ChatSessionRuntimeEventKind.ToolProgressUpdated when !string.IsNullOrWhiteSpace(runtimeEvent.ToolProgress?.StatusText) =>
                     runtimeEvent.ToolProgress!.StatusText,
                 _ => ExecutionStatusText
@@ -524,6 +526,95 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             {
                 ApplyRuntimeTokenUsageStatus(runtimeEvent.TokenUsage);
             }
+        }
+
+        private void AddVideo()
+        {
+            AddMediaFiles(
+                L("ChatSessionControl.Dialog.VideoFilter", "Video Files|*.mp4;*.mpeg;*.mpg;*.mov;*.avi;*.webm;*.mkv|All Files|*.*"),
+                L("ChatSessionControl.Status.VideoUnavailable", "视频不可用"),
+                L("ChatSessionControl.Status.AddVideoFailed", "添加视频失败"),
+                "ChatSessionControl.Error.AddVideoFailedFormat",
+                "无法添加视频文件 {0}: {1}");
+        }
+
+        private void AddDocument()
+        {
+            AddMediaFiles(
+                L("ChatSessionControl.Dialog.FileFilter", "Files|*.pdf;*.txt;*.md;*.csv;*.html;*.htm;*.json;*.xml;*.xaml;*.cs;*.csproj;*.sln;*.props;*.targets;*.js;*.jsx;*.ts;*.tsx;*.css;*.scss;*.less;*.ps1;*.psm1;*.psd1;*.bat;*.cmd;*.sh;*.py;*.java;*.cpp;*.cc;*.cxx;*.c;*.h;*.hpp;*.sql;*.ini;*.cfg;*.conf;*.log;*.yaml;*.yml;*.toml;*.smd;*.doc;*.docx;*.ppt;*.pptx;*.xls;*.xlsx|All Files|*.*"),
+                L("ChatSessionControl.Status.FileUnavailable", "文件不可用"),
+                L("ChatSessionControl.Status.AddFileFailed", "添加文件失败"),
+                "ChatSessionControl.Error.AddFileFailedFormat",
+                "无法添加文件 {0}: {1}");
+        }
+
+        private void AddMediaFiles(
+            string filter,
+            string unavailableTitle,
+            string failureTitle,
+            string failureFormatKey,
+            string failureFallbackFormat)
+        {
+            if (_sessionModel == null)
+            {
+                AddSystemStatusMessage(
+                    L("ChatSessionControl.Error.UnboundModel", "此聊天视图未绑定到 ChatSessionModel。"),
+                    unavailableTitle);
+                return;
+            }
+
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = filter,
+                Multiselect = true
+            };
+
+            if (openFileDialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            foreach (var fileName in openFileDialog.FileNames)
+            {
+                try
+                {
+                    PendingComposerImages.Add(_composerImageAttachmentService.SaveMediaFile(_sessionModel, fileName));
+                }
+                catch (Exception ex)
+                {
+                    AddSystemStatusMessage(
+                        LF(failureFormatKey, failureFallbackFormat, fileName, ex.Message),
+                        failureTitle);
+                }
+            }
+        }
+
+        private static LanguageModelChatContentBlock CreateContentBlockForAttachment(ChatComposerAttachmentModel attachment)
+        {
+            if (attachment.IsText)
+            {
+                return LanguageModelChatContentBlock.CreateHostPreservedContent(
+                    attachment.PreservedContentXml ??
+                    SkyweaverPreservedTextContentXml.Build(
+                        string.Empty,
+                        attachment.DisplayName,
+                        attachment.ResourcePath,
+                        attachment.MediaType));
+            }
+
+            if (attachment.IsAudio)
+            {
+                return LanguageModelChatContentBlock.CreateAudio(attachment.ResourcePath, attachment.MediaType);
+            }
+
+            if (attachment.IsVideo)
+            {
+                return LanguageModelChatContentBlock.CreateVideo(attachment.ResourcePath, attachment.MediaType);
+            }
+
+            return attachment.IsDocument
+                ? LanguageModelChatContentBlock.CreateDocument(attachment.ResourcePath, attachment.MediaType)
+                : LanguageModelChatContentBlock.CreateImage(attachment.ResourcePath, attachment.MediaType);
         }
 
         private Task<AgentToolConfirmationResult> ConfirmToolInvocationAsync(
@@ -939,6 +1030,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         {
             return (runtimeEvent.Kind is ChatSessionRuntimeEventKind.TextDelta
                     or ChatSessionRuntimeEventKind.ReasoningDelta
+                    or ChatSessionRuntimeEventKind.MediaProcessingProgressUpdated
                     or ChatSessionRuntimeEventKind.ToolProgressUpdated) ||
                 runtimeEvent.Kind == ChatSessionRuntimeEventKind.ToolCallUpdated &&
                 runtimeEvent.ToolCallSnapshot?.IsInvocationClosed != true &&

@@ -112,16 +112,35 @@
                     </StackPanel>
                 </Grid>
 
-                <TextBlock Grid.Row="1"
+                <StackPanel Grid.Row="1"
+                            Margin="0,0,0,12">
+                    <TextBlock Text="{DynamicResource LanguageModelConfiguration.InputModalities}"
+                               FontWeight="SemiBold"/>
+                    <WrapPanel Margin="0,6,0,0">
+                        <CheckBox Margin="0,0,16,0"
+                                  IsChecked="{Binding EnableImageInput, UpdateSourceTrigger=PropertyChanged}"
+                                  Content="{DynamicResource LanguageModelConfiguration.InputModalities.Image}"/>
+                        <CheckBox Margin="0,0,16,0"
+                                  IsChecked="{Binding EnableAudioInput, UpdateSourceTrigger=PropertyChanged}"
+                                  Content="{DynamicResource LanguageModelConfiguration.InputModalities.Audio}"/>
+                        <CheckBox Margin="0,0,16,0"
+                                  IsChecked="{Binding EnableVideoInput, UpdateSourceTrigger=PropertyChanged}"
+                                  Content="{DynamicResource LanguageModelConfiguration.InputModalities.Video}"/>
+                        <CheckBox IsChecked="{Binding EnableDocumentInput, UpdateSourceTrigger=PropertyChanged}"
+                                  Content="{DynamicResource LanguageModelConfiguration.InputModalities.Document}"/>
+                    </WrapPanel>
+                </StackPanel>
+
+                <TextBlock Grid.Row="2"
                            Text="{Binding DataContext.InterfaceSettingsSectionTitle, RelativeSource={RelativeSource AncestorType=UserControl}}"
                            FontWeight="SemiBold"
                            FontSize="13"/>
 
-                <ContentControl Grid.Row="2"
+                <ContentControl Grid.Row="3"
                                 Margin="0,10,0,0"
                                 Content="{Binding InterfaceSettings}"/>
 
-                <Grid Grid.Row="3"
+                <Grid Grid.Row="4"
                       Margin="0,12,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>

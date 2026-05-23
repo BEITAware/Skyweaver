@@ -43,10 +43,19 @@ namespace Skyweaver.Tools
         private static readonly UTF8Encoding s_utf8WithoutBom = new(false);
         private static readonly UTF32Encoding s_utf32LittleEndian = new(false, true);
         private static readonly UTF32Encoding s_utf32BigEndian = new(true, true);
+        private const long MaximumWholeTextFileBytes = 10L * 1024 * 1024;
+        private static readonly HashSet<string> s_nonTextExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".exe", ".dll", ".sys", ".msi", ".com", ".scr", ".bin", ".dat",
+            ".iso", ".img", ".zip", ".7z", ".rar", ".tar", ".gz", ".bz2", ".xz",
+            ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".ico",
+            ".mp3", ".wav", ".m4a", ".ogg", ".flac", ".mp4", ".mov", ".avi", ".mkv",
+            ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx"
+        };
 
         private static readonly SkyweaverToolDefinition s_definition = new(
             ToolName,
-            "Reads a whole text file and returns the full content. FilePath may be a normal absolute or relative path, or a LateralFS\\NodeName\\relative\\file.ext shortcut. Encoding is optional; utf-8 is preferred by default, and the tool automatically switches to a clearly detected non-UTF-8 encoding when safe detection succeeds.",
+            "Reads a whole text file and returns the full content. FilePath may be a normal absolute or relative path, or a LateralFS\\NodeName\\relative\\file.ext shortcut. Encoding is optional; utf-8 is preferred by default, and the tool automatically switches to a clearly detected non-UTF-8 encoding when safe detection succeeds. Executables, binary/media/document containers, and files over 10 MiB are rejected instead of being loaded into memory.",
             "Script",
             [
                 new SkyweaverToolParameterDefinition(
@@ -69,7 +78,7 @@ namespace Skyweaver.Tools
         {
             ArgumentNullException.ThrowIfNull(context);
 
-            return "Reads a whole text file and returns the full content. FilePath may be a normal absolute or relative path, or a LateralFS\\NodeName\\relative\\file.ext shortcut; the shortcut resolves to that node's virtual folder and rejects '..' traversal outside the node. Encoding is optional and defaults to utf-8 with safe auto-detection of non-UTF-8 UTF BOMs and strong UTF-16 or UTF-32 zero-byte patterns.";
+            return "Reads a whole text file and returns the full content. FilePath may be a normal absolute or relative path, or a LateralFS\\NodeName\\relative\\file.ext shortcut; the shortcut resolves to that node's virtual folder and rejects '..' traversal outside the node. Encoding is optional and defaults to utf-8 with safe auto-detection of non-UTF-8 UTF BOMs and strong UTF-16 or UTF-32 zero-byte patterns. Do not use this tool for executables, binary/media/document containers, or files over 10 MiB; pass their path or use a purpose-built tool instead.";
         }
 
         public FrameworkElement? CreateInvocationPresentation(SkyweaverToolInvocationPresentationContext context)
@@ -132,6 +141,27 @@ namespace Skyweaver.Tools
                             characterCount: null,
                             lineCount: null,
                             byteCount: null));
+                }
+
+                var textFileValidationError = ValidateWholeTextFileCandidate(
+                    targetPath.ResolvedPath,
+                    out var candidateByteCount);
+                if (!string.IsNullOrWhiteSpace(textFileValidationError))
+                {
+                    return SkyweaverToolResult.Failure(
+                        textFileValidationError,
+                        BuildData(
+                            targetPath,
+                            requestedEncodingName: null,
+                            requestedEncodingWasDefault: true,
+                            effectiveEncodingName: null,
+                            isAutoDetected: false,
+                            detectedEncodingName: null,
+                            detectionReason: null,
+                            encodingNotice: null,
+                            characterCount: null,
+                            lineCount: null,
+                            byteCount: candidateByteCount));
                 }
 
                 var fileBytes = await File.ReadAllBytesAsync(targetPath.ResolvedPath, cancellationToken).ConfigureAwait(false);
@@ -267,6 +297,32 @@ namespace Skyweaver.Tools
                 ["lineCount"] = lineCount,
                 ["byteCount"] = byteCount
             };
+        }
+
+        private static string? ValidateWholeTextFileCandidate(string resolvedPath, out long? byteCount)
+        {
+            byteCount = null;
+            var extension = Path.GetExtension(resolvedPath);
+            if (s_nonTextExtensions.Contains(extension))
+            {
+                return $"Refusing to read a non-text file as text: {resolvedPath}. Pass the path only or use a purpose-built tool for this file type.";
+            }
+
+            try
+            {
+                var fileInfo = new FileInfo(resolvedPath);
+                byteCount = fileInfo.Length;
+                if (fileInfo.Length > MaximumWholeTextFileBytes)
+                {
+                    return $"Refusing to read a large file into the chat transcript: {resolvedPath} ({fileInfo.Length} bytes; limit {MaximumWholeTextFileBytes} bytes). Pass the path only or use a targeted search/summary workflow.";
+                }
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+            {
+                return $"Failed to inspect text file before reading: {ex.Message}";
+            }
+
+            return null;
         }
 
         private static ReadTargetPath ResolveReadTargetPath(string requestedPath, string? workspacePath)

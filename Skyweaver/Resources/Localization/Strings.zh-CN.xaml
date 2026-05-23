@@ -8,14 +8,17 @@
     <system:String x:Key="Preferences.Group.FilesSystem">文件与系统</system:String>
     <system:String x:Key="Preferences.Group.PresentationUi">呈现与界面</system:String>
     <system:String x:Key="Preferences.Group.ContextManagement">上下文管理</system:String>
+    <system:String x:Key="Preferences.Group.Multimodal">多模态</system:String>
     <system:String x:Key="Preferences.Group.AboutSkyweaver">关于Skyweaver</system:String>
     <system:String x:Key="Preferences.Page.DirectoryLocations">目录位置</system:String>
     <system:String x:Key="Preferences.Page.LateralFileSystem">侧向文件系统配置</system:String>
+    <system:String x:Key="Preferences.Page.ShellIntegration">Shell 集成</system:String>
     <system:String x:Key="Preferences.Page.Localization">本地化</system:String>
     <system:String x:Key="Preferences.Page.ChatSession">聊天会话</system:String>
     <system:String x:Key="Preferences.Page.ContextCompression">压缩</system:String>
     <system:String x:Key="Preferences.Page.SemanticSearch">语义搜索</system:String>
     <system:String x:Key="Preferences.Page.Memory">记忆</system:String>
+    <system:String x:Key="Preferences.Page.MultimodalDocument">文档</system:String>
     <system:String x:Key="Preferences.Sidebar.Title">首选项</system:String>
     <system:String x:Key="Preferences.BottomNav.LanguageModelConfiguration">语言模型配置</system:String>
     <system:String x:Key="Preferences.BottomNav.EmbeddingModelConfiguration">嵌入模型配置</system:String>
@@ -81,6 +84,11 @@
     <system:String x:Key="LanguageModelConfiguration.EditorTitle">语言模型配置</system:String>
     <system:String x:Key="LanguageModelConfiguration.EmptySelection">从左侧选择一个语言模型后，在这里统一编辑它的配置。</system:String>
     <system:String x:Key="LanguageModelConfiguration.ContextWindowTokens">上下文窗口 Token</system:String>
+    <system:String x:Key="LanguageModelConfiguration.InputModalities">输入模态</system:String>
+    <system:String x:Key="LanguageModelConfiguration.InputModalities.Image">图片</system:String>
+    <system:String x:Key="LanguageModelConfiguration.InputModalities.Audio">音频</system:String>
+    <system:String x:Key="LanguageModelConfiguration.InputModalities.Video">视频</system:String>
+    <system:String x:Key="LanguageModelConfiguration.InputModalities.Document">文档</system:String>
     <system:String x:Key="LanguageModelConfiguration.InterfaceSettings.Default">接口配置</system:String>
     <system:String x:Key="LanguageModelConfiguration.InterfaceSettings.Format">{0} 接口配置</system:String>
     <system:String x:Key="LanguageModelConfiguration.TestModel">测试模型</system:String>
@@ -429,6 +437,31 @@
     <system:String x:Key="LateralFileSystem.Status.WorkingRootSaved">工作根目录已保存。</system:String>
     <system:String x:Key="LateralFileSystem.Browse.WorkingRoot">选择侧向文件系统工作根目录</system:String>
 
+    <system:String x:Key="ShellIntegration.Page.Title">Shell 集成</system:String>
+    <system:String x:Key="ShellIntegration.Page.Description">将 Skyweaver 集成到文件资源管理器右键菜单。</system:String>
+    <system:String x:Key="ShellIntegration.Page.Hint">启用后会写入当前用户的资源管理器右键菜单注册表项。</system:String>
+    <system:String x:Key="ShellIntegration.Enabled.Label">Shell 集成</system:String>
+    <system:String x:Key="ShellIntegration.Enabled.Content">启用Shell集成</system:String>
+    <system:String x:Key="ShellIntegration.Enabled.Description">将Skyweaver集成到文件资源管理器中。可以更方便地使用Skyweaver。</system:String>
+    <system:String x:Key="ShellIntegration.SessionFlow.Label">使用的会话流</system:String>
+    <system:String x:Key="ShellIntegration.SessionFlow.Description">从文件资源管理器唤起 Shell Chat 时默认使用此会话流，后续会把所选文件或目录作为上下文交给它。</system:String>
+    <system:String x:Key="ShellIntegration.SessionFlow.None">未指定</system:String>
+    <system:String x:Key="ShellIntegration.SessionFlow.NoneDescription">暂不为 Shell Chat 预设会话流。</system:String>
+    <system:String x:Key="ShellIntegration.SessionFlow.MissingFormat">{0}（未找到）</system:String>
+    <system:String x:Key="ShellIntegration.Registration.Label">右键菜单</system:String>
+    <system:String x:Key="ShellIntegration.Registration.Registered">资源管理器右键菜单已注册。</system:String>
+    <system:String x:Key="ShellIntegration.Registration.NotRegistered">资源管理器右键菜单未注册。</system:String>
+    <system:String x:Key="ShellIntegration.Status.Enabled">Shell 集成已启用，右键菜单已注册。</system:String>
+    <system:String x:Key="ShellIntegration.Status.Disabled">Shell 集成已禁用，右键菜单已移除。</system:String>
+    <system:String x:Key="ShellIntegration.Status.SessionFlowSaved">Shell Chat 使用的会话流已保存。</system:String>
+    <system:String x:Key="ShellIntegration.Status.SessionFlowsLoaded">会话流列表已重新加载。</system:String>
+    <system:String x:Key="ShellIntegration.Status.LoadSessionFlowsFailedFormat">加载会话流失败：{0}</system:String>
+    <system:String x:Key="ShellIntegration.Status.ApplyFailedFormat">更新右键菜单失败：{0}</system:String>
+    <system:String x:Key="ShellIntegration.Menu.Text">问问Skyweaver...</system:String>
+    <system:String x:Key="ShellIntegration.Instruction.1">启用后会为文件、文件多选、目录和资源管理器空白处添加 Skyweaver 右键菜单。</system:String>
+    <system:String x:Key="ShellIntegration.Instruction.2">当前版本点击菜单项会直接弹出 Shell Chat 窗口，所选路径会在后续版本接入会话流。</system:String>
+    <system:String x:Key="ShellIntegration.Instruction.3">注册写入当前用户配置，不需要管理员权限。</system:String>
+
     <system:String x:Key="ContextCompression.Page.Title">压缩</system:String>
     <system:String x:Key="ContextCompression.Page.Description">配置上下文压缩与上下文生命周期相关的保留开关。</system:String>
     <system:String x:Key="ContextCompression.Page.Hint">修改后会立即写入 ContextManagement.xml。</system:String>
@@ -571,6 +604,18 @@
     <system:String x:Key="Search.Status.VertexMaxResultsSavedFormat">Vertex AI 搜索结果数已设为 {0}。</system:String>
     <system:String x:Key="Search.Status.VertexSearchModelSaved">Vertex AI 搜索模式已保存。</system:String>
     <system:String x:Key="Search.Status.SaveFailedFormat">保存失败：{0}</system:String>
+
+    <system:String x:Key="Multimodal.Document.Page.Title">文档</system:String>
+    <system:String x:Key="Multimodal.Document.Page.Description">配置多模态文档处理，例如文档字符识别与硬件加速方案。</system:String>
+    <system:String x:Key="Multimodal.Document.Page.Hint">修改后会立即写入 MultimodalPreferences.xml。</system:String>
+    <system:String x:Key="Multimodal.Document.EnableOcr.Label">启用文档字符识别</system:String>
+    <system:String x:Key="Multimodal.Document.EnableOcr.Content">启用文档字符识别 (OCR)</system:String>
+    <system:String x:Key="Multimodal.Document.EnableOcr.Hint">允许在处理文档时自动识别图像或PDF中的文本字符。</system:String>
+    <system:String x:Key="Multimodal.Document.HardwareSolution.Label">硬件方案</system:String>
+    <system:String x:Key="Multimodal.Document.HardwareSolution.Hint">选择文档识别运算所使用的硬件加速方案：CPU 或 GPU。</system:String>
+    <system:String x:Key="Multimodal.Document.Status.Loaded">多模态配置已加载。</system:String>
+    <system:String x:Key="Multimodal.Document.Status.EnableOcrSaved">启用文档字符识别设置已保存。</system:String>
+    <system:String x:Key="Multimodal.Document.Status.HardwareSolutionSaved">硬件方案已保存为 {0}。</system:String>
 
     <system:String x:Key="MainWindow.Ribbon.StatusTab">状态</system:String>
     <system:String x:Key="MainWindow.Ribbon.ViewTab">视图</system:String>
@@ -717,12 +762,35 @@
     <system:String x:Key="ChatSessionControl.Clear">清空</system:String>
     <system:String x:Key="ChatSessionControl.EmptyState">这里还没有消息，可以先在下方输入一条用户消息，然后发送并让会话流开始执行。</system:String>
     <system:String x:Key="ChatSessionControl.AddImage">添加图片</system:String>
+    <system:String x:Key="ChatSessionControl.AddVideo">添加视频</system:String>
     <system:String x:Key="ChatSessionControl.AddClipboard">添加剪贴板</system:String>
     <system:String x:Key="ChatSessionControl.Voice">语音</system:String>
     <system:String x:Key="ChatSessionControl.AddFile">添加文件</system:String>
     <system:String x:Key="ChatSessionControl.Send">发送</system:String>
 
     <system:String x:Key="ShellChat.Window.Title">Shell 聊天</system:String>
+    <system:String x:Key="ShellChat.Title">Skyweaver Shell</system:String>
+    <system:String x:Key="ShellChat.Tooltip.Close">关闭</system:String>
+    <system:String x:Key="ShellChat.NoToolCalls">暂无工具调用</system:String>
+    <system:String x:Key="ShellChat.InputPlaceholder">问问 Skyweaver...</system:String>
+    <system:String x:Key="ShellChat.Status.Ready">就绪</system:String>
+    <system:String x:Key="ShellChat.Status.Unavailable">Shell 聊天不可用</system:String>
+    <system:String x:Key="ShellChat.Status.SessionCreateFailed">创建会话失败</system:String>
+    <system:String x:Key="ShellChat.Button.Stop">停止</system:String>
+    <system:String x:Key="ShellChat.Error.NoSession">没有可用的 Shell 聊天会话。</system:String>
+    <system:String x:Key="ShellChat.Status.RuntimeUnavailable">运行时不可用</system:String>
+    <system:String x:Key="ShellChat.Status.Running">正在运行</system:String>
+    <system:String x:Key="ShellChat.Status.ExecutionFailed">执行失败</system:String>
+    <system:String x:Key="ShellChat.Status.Cancelled">已取消</system:String>
+    <system:String x:Key="ShellChat.Status.Failed">已失败</system:String>
+    <system:String x:Key="ShellChat.Status.Completed">已完成</system:String>
+    <system:String x:Key="ShellChat.Status.Cancelling">正在取消...</system:String>
+    <system:String x:Key="ShellChat.DisplayName.System">系统</system:String>
+    <system:String x:Key="ShellChat.Status.NodeStartedFormat">正在运行 {0}</system:String>
+    <system:String x:Key="ShellChat.ToolConfirmation.PromptFormat">代理 {0} 请求运行此工具调用。</system:String>
+    <system:String x:Key="ShellChat.ToolConfirmation.MetadataFormat">工具: {0}    轮次: {1}    调用: {2}</system:String>
+    <system:String x:Key="ShellChat.ToolConfirmation.Rejected">工具调用已被用户拒绝。</system:String>
+    <system:String x:Key="ShellChat.Status.FlowReadyFormat">就绪: {0}</system:String>
     <system:String x:Key="ShellChat.Button.Send">发送</system:String>
 
     <system:String x:Key="Common.Open">打开</system:String>
@@ -1273,11 +1341,17 @@
     <system:String x:Key="ChatMessagePart.Badge.ToolOutput">工具输出</system:String>
     <system:String x:Key="ChatMessagePart.Badge.Image">图片</system:String>
     <system:String x:Key="ChatMessagePart.Badge.Audio">音频</system:String>
+    <system:String x:Key="ChatMessagePart.Badge.Video">视频</system:String>
+    <system:String x:Key="ChatMessagePart.Badge.Document">文档</system:String>
     <system:String x:Key="ChatMessagePart.Title.Reasoning">推理过程</system:String>
     <system:String x:Key="ChatMessagePart.Badge.Reasoning">推理过程</system:String>
     <system:String x:Key="ChatMessageClipboard.AudioMarkdownPrefix">[音频：</system:String>
+    <system:String x:Key="ChatMessageClipboard.VideoMarkdownPrefix">[视频：</system:String>
+    <system:String x:Key="ChatMessageClipboard.DocumentMarkdownPrefix">[文档：</system:String>
     <system:String x:Key="ChatMessageClipboard.ImagePlainPrefix">[图片] </system:String>
     <system:String x:Key="ChatMessageClipboard.AudioPlainPrefix">[音频] </system:String>
+    <system:String x:Key="ChatMessageClipboard.VideoPlainPrefix">[视频] </system:String>
+    <system:String x:Key="ChatMessageClipboard.DocumentPlainPrefix">[文档] </system:String>
     <system:String x:Key="ToolInvocation.WaitingForParameterFallback">等待参数...</system:String>
     <system:String x:Key="ToolInvocation.DefaultDescription">该工具未提供专用参数呈现控件。</system:String>
 

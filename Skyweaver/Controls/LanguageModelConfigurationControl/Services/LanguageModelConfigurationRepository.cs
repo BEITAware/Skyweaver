@@ -40,7 +40,11 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                         InterfaceType = LanguageModelInterfaceCatalog.NormalizeInterfaceType(
                             (string?)element.Element("InterfaceType") ??
                             (string?)element.Element("InterfaceSettings")?.Attribute("Type")),
-                        ContextWindowTokens = ParseInt((string?)element.Element("ContextWindowTokens"), LanguageModelDefinition.DefaultContextWindowTokens)
+                        ContextWindowTokens = ParseInt((string?)element.Element("ContextWindowTokens"), LanguageModelDefinition.DefaultContextWindowTokens),
+                        EnableImageInput = ParseBool((string?)element.Element("EnableImageInput"), true),
+                        EnableAudioInput = ParseBool((string?)element.Element("EnableAudioInput"), true),
+                        EnableVideoInput = ParseBool((string?)element.Element("EnableVideoInput"), true),
+                        EnableDocumentInput = ParseBool((string?)element.Element("EnableDocumentInput"), true)
                     })
                     .Select(definition =>
                     {
@@ -68,6 +72,10 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                             new XElement("DisplayName", definition.DisplayName),
                             new XElement("InterfaceType", definition.InterfaceType),
                             new XElement("ContextWindowTokens", definition.EffectiveContextWindowTokens),
+                            new XElement("EnableImageInput", definition.EnableImageInput),
+                            new XElement("EnableAudioInput", definition.EnableAudioInput),
+                            new XElement("EnableVideoInput", definition.EnableVideoInput),
+                            new XElement("EnableDocumentInput", definition.EnableDocumentInput),
                             SaveInterfaceSettings(definition.InterfaceSettings)))));
 
                 document.Save(ConfigurationFilePath);

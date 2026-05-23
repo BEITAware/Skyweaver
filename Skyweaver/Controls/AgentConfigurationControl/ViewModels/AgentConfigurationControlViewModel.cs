@@ -12,6 +12,8 @@ using Skyweaver.Controls.AgentConfigurationControl.Models;
 using Skyweaver.Controls.AgentConfigurationControl.Services;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Models;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
+using Skyweaver.Controls.PersonaSettingsControl.Models;
+using Skyweaver.Controls.PersonaSettingsControl.Services;
 using Skyweaver.Infrastructure.Mvvm;
 using Skyweaver.Services;
 using Skyweaver.Services.Localization;
@@ -25,6 +27,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
 
         private readonly AgentConfigurationPathProvider _pathProvider;
         private readonly AgentConfigurationRepository _configurationRepository;
+        private readonly PersonaConfigurationRepository _personaRepository;
         private readonly LanguageModelConfigurationRepository _languageModelRepository;
         private readonly CapabilityLayerConfigurationRepository _capabilityLayerRepository;
         private readonly AgentSystemPromptBuilder _agentSystemPromptBuilder = new();
@@ -33,6 +36,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
         private readonly Dictionary<string, ToolRegistrationSnapshot> _toolRegistrationMap = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, LanguageModelDefinition> _languageModelMap = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, CapabilityLayerDefinition> _capabilityLayerMap = new(StringComparer.OrdinalIgnoreCase);
+        private readonly HashSet<string> _availablePersonaIds = new(StringComparer.OrdinalIgnoreCase);
         private int _suspendPersistenceCounter;
         private AgentDefinition? _selectedAgent;
         private XmlElementNodeDefinition? _selectedInputNode;
@@ -86,6 +90,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
         {
             _pathProvider = new AgentConfigurationPathProvider();
             _configurationRepository = new AgentConfigurationRepository(_pathProvider);
+            _personaRepository = new PersonaConfigurationRepository();
             var languageModelPathProvider = new LanguageModelConfigurationPathProvider();
             _languageModelRepository = new LanguageModelConfigurationRepository(languageModelPathProvider);
             _capabilityLayerRepository = new CapabilityLayerConfigurationRepository(languageModelPathProvider);
@@ -112,6 +117,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                     L("AgentConfiguration.Status.AllToolsRequireConfirmation", "已将当前代理的全部工具权限设为需确认。")),
                 () => SelectedAgent != null);
             ReloadLanguageModelCatalogCommand = new RelayCommand(ReloadLanguageModelCatalog);
+            ReloadPersonasCommand = new RelayCommand(ReloadPersonas);
             AddInputRootNodeCommand = new RelayCommand(AddInputRootNode, () => SelectedAgent != null);
             AddOutputRootNodeCommand = new RelayCommand(AddOutputRootNode, () => SelectedAgent != null);
             AddInputChildNodeCommand = new RelayCommand(AddInputChildNode, () => SelectedInputNode != null);
@@ -151,6 +157,8 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
         public ObservableCollection<AgentConfigurationReferenceOption> AvailableCapabilityLayers { get; } = new();
 
         public ObservableCollection<AgentConfigurationReferenceOption> AvailableToolKits { get; } = new();
+
+        public ObservableCollection<AgentConfigurationReferenceOption> AvailablePersonas { get; } = new();
 
         public string ConfigurationFilePath => _configurationRepository.ConfigurationFilePath;
 
@@ -280,6 +288,8 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
 
         public ICommand ReloadLanguageModelCatalogCommand { get; }
 
+        public ICommand ReloadPersonasCommand { get; }
+
         public ICommand AddInputRootNodeCommand { get; }
 
         public ICommand AddOutputRootNodeCommand { get; }
@@ -313,6 +323,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                     Agents.Clear();
                     RefreshRegisteredToolsInternal();
                     RefreshLanguageModelCatalogInternal();
+                    RefreshPersonasInternal();
 
                     var definitions = _configurationRepository.Load();
                     if (definitions.Count == 0)
@@ -331,6 +342,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                     }
 
                     SelectedAgent = Agents.FirstOrDefault();
+                    RefreshPersonasInternal();
                 }
 
                 PersistAll(L("AgentConfiguration.Status.Loaded", "代理配置已加载。"));
@@ -341,6 +353,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                 {
                     Agents.Clear();
                     RefreshRegisteredToolsInternal();
+                    RefreshPersonasInternal();
 
                     var fallbackAgent = CreateDefaultAgent();
                     SyncToolPermissions(fallbackAgent);
@@ -492,6 +505,14 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             StatusMessage = string.IsNullOrWhiteSpace(_languageModelCatalogErrorMessage)
                 ? L("AgentConfiguration.Status.LanguageModelCatalogRefreshed", "语言模型目录已刷新。")
                 : LF("AgentConfiguration.Status.LanguageModelCatalogRefreshFailedFormat", "语言模型目录刷新失败：{0}", _languageModelCatalogErrorMessage);
+        }
+
+        private void ReloadPersonas()
+        {
+            RefreshPersonasInternal();
+            PersistAll(AvailablePersonas.Count == 0
+                ? "尚未配置任何 Persona。"
+                : $"已刷新 Persona 列表，共 {AvailablePersonas.Count} 个。");
         }
 
         private void BuildPromptPreview()
@@ -827,6 +848,13 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             }
 
             if (sender == SelectedAgent &&
+                (string.Equals(e.PropertyName, nameof(AgentDefinition.IsPersonaEnabled), StringComparison.Ordinal) ||
+                 string.Equals(e.PropertyName, nameof(AgentDefinition.SelectedPersonaId), StringComparison.Ordinal)))
+            {
+                ResetPromptBuildPreview();
+            }
+
+            if (sender == SelectedAgent &&
                 (string.Equals(e.PropertyName, nameof(AgentDefinition.RuntimeRole), StringComparison.Ordinal) ||
                  string.Equals(e.PropertyName, nameof(AgentDefinition.CanRunAsSubAgent), StringComparison.Ordinal)))
             {
@@ -1058,6 +1086,8 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
                 AvatarPath = AgentDefinition.DefaultAvatarPath,
                 SystemPrompt = string.Empty,
                 IsStructuredXmlIO = false,
+                IsPersonaEnabled = false,
+                SelectedPersonaId = AvailablePersonas.FirstOrDefault()?.Key ?? string.Empty,
                 InputDescription = L("AgentConfiguration.DefaultInputDescription", "用户发送的聊天消息"),
                 OutputDescription = L("AgentConfiguration.DefaultOutputDescription", "无，无需调用Passdown工具"),
                 RuntimeRole = AgentRuntimeRole.MainOnly
@@ -1186,6 +1216,33 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
 
             _languageModelCatalogErrorMessage = string.Join("；", errorMessages.Where(message => !string.IsNullOrWhiteSpace(message)));
             OnPropertyChanged(nameof(SelectedAgentLanguageModelBindingSummary));
+        }
+
+        private void RefreshPersonasInternal()
+        {
+            AvailablePersonas.Clear();
+            _availablePersonaIds.Clear();
+
+            try
+            {
+                foreach (var persona in _personaRepository.Load()
+                             .Where(item => !item.IsAddPlaceholder && !string.IsNullOrWhiteSpace(item.Id))
+                             .OrderBy(item => GetPersonaDisplayName(item), StringComparer.OrdinalIgnoreCase))
+                {
+                    _availablePersonaIds.Add(persona.Id);
+                    AvailablePersonas.Add(new AgentConfigurationReferenceOption(persona.Id, GetPersonaDisplayName(persona)));
+                }
+            }
+            catch
+            {
+                AvailablePersonas.Clear();
+                _availablePersonaIds.Clear();
+            }
+
+            foreach (var agent in Agents)
+            {
+                NormalizePersonaSelection(agent);
+            }
         }
 
         private void SyncToolPermissions(AgentDefinition agent)
@@ -1435,6 +1492,34 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             return LF("AgentConfiguration.CapabilityLayerOptionFormat", "{0}（{1} 个候选）", GetCapabilityLayerDisplayName(layer), candidateCount);
         }
 
+        private static string GetPersonaDisplayName(PersonaModel persona)
+        {
+            var displayName = persona.Name?.Trim() ?? string.Empty;
+            if (displayName.Length > 0)
+            {
+                return displayName;
+            }
+
+            var id = persona.Id?.Trim() ?? string.Empty;
+            return id.Length == 0 ? "未命名 Persona" : $"未命名 Persona ({GetShortKey(id)})";
+        }
+
+        private void NormalizePersonaSelection(AgentDefinition agent)
+        {
+            if (AvailablePersonas.Count == 0)
+            {
+                agent.SelectedPersonaId = string.Empty;
+                agent.IsPersonaEnabled = false;
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(agent.SelectedPersonaId) ||
+                !_availablePersonaIds.Contains(agent.SelectedPersonaId))
+            {
+                agent.SelectedPersonaId = AvailablePersonas[0].Key;
+            }
+        }
+
         private static string GetShortKey(string? key)
         {
             var normalizedKey = (key ?? string.Empty).Trim();
@@ -1515,6 +1600,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.ViewModels
             }
 
             RefreshLanguageModelCatalogInternal();
+            RefreshPersonasInternal();
         }
 
         private static string L(string resourceKey, string fallback)

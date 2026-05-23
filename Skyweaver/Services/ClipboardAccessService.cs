@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Skyweaver.Services.Localization;
 
@@ -54,18 +55,39 @@ namespace Skyweaver.Services
                         return null;
                     }
 
-                    return Clipboard.GetImage();
+                    var clipboardImage = Clipboard.GetImage();
+                    return clipboardImage == null
+                        ? null
+                        : CreateThreadSafeImageSnapshot(clipboardImage);
                 },
                 out BitmapSource? result,
                 out errorMessage);
 
-            if (result?.CanFreeze == true)
-            {
-                result.Freeze();
-            }
-
             image = result;
             return succeeded && result != null;
+        }
+
+        private static BitmapSource CreateThreadSafeImageSnapshot(BitmapSource source)
+        {
+            var snapshotSource = source.Format.BitsPerPixel > 0
+                ? source
+                : new FormatConvertedBitmap(source, PixelFormats.Pbgra32, null, 0);
+            var bytesPerPixelStride = checked((snapshotSource.PixelWidth * snapshotSource.Format.BitsPerPixel + 7) / 8);
+            var pixelBuffer = new byte[checked(bytesPerPixelStride * snapshotSource.PixelHeight)];
+
+            snapshotSource.CopyPixels(pixelBuffer, bytesPerPixelStride, 0);
+
+            var snapshot = BitmapSource.Create(
+                snapshotSource.PixelWidth,
+                snapshotSource.PixelHeight,
+                snapshotSource.DpiX > 0 ? snapshotSource.DpiX : 96,
+                snapshotSource.DpiY > 0 ? snapshotSource.DpiY : 96,
+                snapshotSource.Format,
+                snapshotSource.Palette,
+                pixelBuffer,
+                bytesPerPixelStride);
+            snapshot.Freeze();
+            return snapshot;
         }
 
         private static bool TryExecute<T>(

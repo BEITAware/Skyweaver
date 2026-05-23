@@ -22,6 +22,8 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Models
         private AgentLanguageModelSelectionMode _languageModelSelectionMode = AgentLanguageModelSelectionMode.SpecificLanguageModel;
         private string _selectedLanguageModelKey = string.Empty;
         private string _selectedCapabilityLayerKey = string.Empty;
+        private bool _isPersonaEnabled;
+        private string _selectedPersonaId = string.Empty;
 
         public AgentDefinition()
         {
@@ -133,6 +135,18 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Models
             set => SetProperty(ref _selectedCapabilityLayerKey, value?.Trim() ?? string.Empty);
         }
 
+        public bool IsPersonaEnabled
+        {
+            get => _isPersonaEnabled;
+            set => SetProperty(ref _isPersonaEnabled, value);
+        }
+
+        public string SelectedPersonaId
+        {
+            get => _selectedPersonaId;
+            set => SetProperty(ref _selectedPersonaId, value?.Trim() ?? string.Empty);
+        }
+
         public ObservableCollection<AgentToolPermissionDefinition> ToolPermissions { get; } = new();
 
         public ObservableCollection<AgentToolKitSelectionDefinition> DefaultToolKits { get; } = new();
@@ -194,7 +208,9 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Models
                 SubAgentIntroduction = SubAgentIntroduction,
                 LanguageModelSelectionMode = LanguageModelSelectionMode,
                 SelectedLanguageModelKey = SelectedLanguageModelKey,
-                SelectedCapabilityLayerKey = SelectedCapabilityLayerKey
+                SelectedCapabilityLayerKey = SelectedCapabilityLayerKey,
+                IsPersonaEnabled = IsPersonaEnabled,
+                SelectedPersonaId = SelectedPersonaId
             };
 
             foreach (var toolKit in DefaultToolKits)

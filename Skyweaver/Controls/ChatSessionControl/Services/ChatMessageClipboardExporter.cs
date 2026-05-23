@@ -111,6 +111,22 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
                         .Append(')');
                     break;
 
+                case ChatMessagePartType.Video:
+                    builder.Append(L("ChatMessageClipboard.VideoMarkdownPrefix", "[视频："))
+                        .Append(ResolveMediaAltText(part, "video"))
+                        .Append("](")
+                        .Append(ResolveMediaPath(part))
+                        .Append(')');
+                    break;
+
+                case ChatMessagePartType.Document:
+                    builder.Append(L("ChatMessageClipboard.DocumentMarkdownPrefix", "[文档："))
+                        .Append(ResolveMediaAltText(part, "document"))
+                        .Append("](")
+                        .Append(ResolveMediaPath(part))
+                        .Append(')');
+                    break;
+
                 default:
                     builder.Append(part.Content);
                     break;
@@ -136,6 +152,14 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
 
                 case ChatMessagePartType.Audio:
                     builder.Append(L("ChatMessageClipboard.AudioPlainPrefix", "[音频] ")).Append(ResolveMediaPath(part));
+                    break;
+
+                case ChatMessagePartType.Video:
+                    builder.Append(L("ChatMessageClipboard.VideoPlainPrefix", "[视频] ")).Append(ResolveMediaPath(part));
+                    break;
+
+                case ChatMessagePartType.Document:
+                    builder.Append(L("ChatMessageClipboard.DocumentPlainPrefix", "[文档] ")).Append(ResolveMediaPath(part));
                     break;
 
                 default:

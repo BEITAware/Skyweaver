@@ -382,6 +382,7 @@ namespace Skyweaver.Services.ChatSession
                 ChatSessionRuntimeEventKind.ToolCallUpdated when runtimeEvent.ToolCallSnapshot?.IsInvocationClosed != true &&
                                                        runtimeEvent.ToolInvocation == null => false,
                 ChatSessionRuntimeEventKind.ToolProgressUpdated => false,
+                ChatSessionRuntimeEventKind.MediaProcessingProgressUpdated => false,
                 ChatSessionRuntimeEventKind.AgentIterationStarted or
                     ChatSessionRuntimeEventKind.AgentIterationCompleted or
                     ChatSessionRuntimeEventKind.NodeStarted => false,

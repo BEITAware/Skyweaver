@@ -6,16 +6,45 @@
         xmlns:shell="clr-namespace:Skyweaver.Controls.ShellChatSessionControl.Views"
         mc:Ignorable="d"
         Title="{DynamicResource ShellChat.Window.Title}"
-        Height="700"
-        Width="430"
+        Height="560"
+        Width="800"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
         WindowStartupLocation="Manual"
         Topmost="True"
         ShowInTaskbar="False"
-        MouseLeftButtonDown="Window_MouseLeftButtonDown"
-        Deactivated="Window_Deactivated">
+        Opacity="0"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown">
+
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Window.Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.35">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseOut" />
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetName="RootScale" Storyboard.TargetProperty="ScaleX" From="0.75" To="1" Duration="0:0:0.55">
+                        <DoubleAnimation.EasingFunction>
+                            <BackEase EasingMode="EaseOut" Amplitude="0.65"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetName="RootScale" Storyboard.TargetProperty="ScaleY" From="0.75" To="1" Duration="0:0:0.55">
+                        <DoubleAnimation.EasingFunction>
+                            <BackEase EasingMode="EaseOut" Amplitude="0.65"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                    <DoubleAnimation Storyboard.TargetName="RootTranslate" Storyboard.TargetProperty="Y" From="60" To="0" Duration="0:0:0.45">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
 
     <Window.Resources>
         <!-- 降低不透明度的深蓝紫渐变背景底色 -->
@@ -56,18 +85,14 @@
         </DrawingBrush>
     </Window.Resources>
 
-    <Grid Margin="16">
-        <!-- 窗口全局向上渐隐的 Alpha 遮罩（包含边框、背景及所有子控件） -->
-        <Grid.OpacityMask>
-            <LinearGradientBrush StartPoint="0,1" EndPoint="0,0">
-                <GradientStop Color="#FFFFFFFF" Offset="0"/>
-                <GradientStop Color="#FFFFFFFF" Offset="0.52"/>
-                <GradientStop Color="#99FFFFFF" Offset="0.68"/>
-                <GradientStop Color="#22FFFFFF" Offset="0.84"/>
-                <GradientStop Color="#00000000" Offset="0.94"/>
-                <GradientStop Color="#00000000" Offset="1"/>
-            </LinearGradientBrush>
-        </Grid.OpacityMask>
+    <Grid x:Name="RootGrid" Margin="16" RenderTransformOrigin="0.9,0.9">
+        <Grid.RenderTransform>
+            <TransformGroup>
+                <ScaleTransform x:Name="RootScale" ScaleX="0.75" ScaleY="0.75" />
+                <TranslateTransform x:Name="RootTranslate" Y="60" />
+            </TransformGroup>
+        </Grid.RenderTransform>
+
 
         <!-- 窗口整体阴影和发光效果 -->
         <Border CornerRadius="16" Background="Transparent">
@@ -126,10 +151,30 @@
                 </Border>
 
                 <!-- 6. 主内容区域：嵌入 Shell 聊天会话控件 -->
-                <Grid Margin="12,8,12,4">
+                <Grid Margin="0,0,0,0">
                     <shell:ShellChatSessionControl x:Name="ChatControl"/>
                 </Grid>
             </Grid>
+        </Border>
+
+        <!-- 大尺寸超椭圆头像，突破主玻璃窗口边界 -->
+        <Border Width="84" Height="84" 
+                HorizontalAlignment="Left" VerticalAlignment="Top" 
+                Margin="-12,-12,0,0" 
+                Background="#20101530"
+                CornerRadius="28"
+                BorderBrush="#60FFFFFF" BorderThickness="1.5"
+                RenderTransformOrigin="0.5,0.5">
+            <Border.RenderTransform>
+                <RotateTransform Angle="-30"/>
+            </Border.RenderTransform>
+            <Border.Effect>
+                <DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="4" Opacity="0.6"/>
+            </Border.Effect>
+            <Border CornerRadius="26" Margin="3" ClipToBounds="True" Background="#60000000">
+                <Image Source="{Binding DataContext.ActiveAgentAvatarPath, ElementName=ChatControl}"
+                       Stretch="UniformToFill"/>
+            </Border>
         </Border>
     </Grid>
 </Window>

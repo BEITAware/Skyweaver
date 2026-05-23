@@ -13,7 +13,9 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
         Text = 0,
         Image = 1,
         Audio = 2,
-        HostPreservedContent = 3
+        Video = 3,
+        Document = 4,
+        HostPreservedContent = 5
     }
 
     public sealed class LanguageModelChatContentBlock
@@ -80,6 +82,32 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
         {
             return new LanguageModelChatContentBlock(
                 LanguageModelChatContentBlockKind.Audio,
+                path ?? string.Empty,
+                mediaType,
+                path,
+                data);
+        }
+
+        public static LanguageModelChatContentBlock CreateVideo(
+            string path,
+            string? mediaType = null,
+            byte[]? data = null)
+        {
+            return new LanguageModelChatContentBlock(
+                LanguageModelChatContentBlockKind.Video,
+                path ?? string.Empty,
+                mediaType,
+                path,
+                data);
+        }
+
+        public static LanguageModelChatContentBlock CreateDocument(
+            string path,
+            string? mediaType = null,
+            byte[]? data = null)
+        {
+            return new LanguageModelChatContentBlock(
+                LanguageModelChatContentBlockKind.Document,
                 path ?? string.Empty,
                 mediaType,
                 path,
@@ -178,6 +206,8 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 LanguageModelChatContentBlockKind.Text => block.Content,
                 LanguageModelChatContentBlockKind.Image => BuildPreservedResourceXml("Image", block.ResourcePath ?? block.Content),
                 LanguageModelChatContentBlockKind.Audio => BuildPreservedResourceXml("Audio", block.ResourcePath ?? block.Content),
+                LanguageModelChatContentBlockKind.Video => BuildPreservedResourceXml("Video", block.ResourcePath ?? block.Content),
+                LanguageModelChatContentBlockKind.Document => BuildPreservedResourceXml("Document", block.ResourcePath ?? block.Content),
                 LanguageModelChatContentBlockKind.HostPreservedContent => block.Content,
                 _ => block.Content
             };
@@ -206,6 +236,51 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
         public int? InputTokenCount { get; init; }
 
         public int? TotalTokenCount { get; init; }
+    }
+
+    public sealed class LanguageModelMediaProcessingProgress
+    {
+        public LanguageModelChatContentBlockKind Kind { get; init; }
+
+        public string ResourcePath { get; init; } = string.Empty;
+
+        public string? MediaType { get; init; }
+
+        public string Phase { get; init; } = string.Empty;
+
+        public string StatusText { get; init; } = string.Empty;
+
+        public int? CompletedItems { get; init; }
+
+        public int? TotalItems { get; init; }
+
+        public double? ProgressFraction { get; init; }
+
+        public bool IsCompleted { get; init; }
+
+        public IReadOnlyList<string> ActiveItems { get; init; } = Array.Empty<string>();
+
+        public LanguageModelMediaProcessingProgress Normalize()
+        {
+            return new LanguageModelMediaProcessingProgress
+            {
+                Kind = Kind,
+                ResourcePath = ResourcePath?.Trim() ?? string.Empty,
+                MediaType = string.IsNullOrWhiteSpace(MediaType) ? null : MediaType.Trim(),
+                Phase = Phase?.Trim() ?? string.Empty,
+                StatusText = StatusText?.Trim() ?? string.Empty,
+                CompletedItems = CompletedItems,
+                TotalItems = TotalItems,
+                ProgressFraction = ProgressFraction is double value && !double.IsNaN(value) && !double.IsInfinity(value)
+                    ? Math.Clamp(value, 0d, 1d)
+                    : null,
+                IsCompleted = IsCompleted,
+                ActiveItems = ActiveItems
+                    .Where(item => !string.IsNullOrWhiteSpace(item))
+                    .Select(item => item.Trim())
+                    .ToArray()
+            };
+        }
     }
 
     public sealed class LanguageModelStreamingContentDebugItem

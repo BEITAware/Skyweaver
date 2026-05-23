@@ -22,6 +22,8 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
 
         public DataTemplate? ImageTemplate { get; set; }
 
+        public DataTemplate? MediaResourceTemplate { get; set; }
+
         public DataTemplate? ReasoningTemplate { get; set; }
 
         public override DataTemplate? SelectTemplate(object item, DependencyObject container)
@@ -41,7 +43,10 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                 ChatMessagePartType.ToolOutput => ToolOutputTemplate ?? StatusTemplate,
                 ChatMessagePartType.StructuredXml => StructuredXmlTemplate ?? TextTemplate,
                 ChatMessagePartType.Image => ImageTemplate ?? StatusTemplate ?? TextTemplate,
-                ChatMessagePartType.Audio => StatusTemplate ?? TextTemplate,
+                ChatMessagePartType.Audio => MediaResourceTemplate ?? StatusTemplate ?? TextTemplate,
+                ChatMessagePartType.Video => MediaResourceTemplate ?? StatusTemplate ?? TextTemplate,
+                ChatMessagePartType.Document => MediaResourceTemplate ?? StatusTemplate ?? TextTemplate,
+                ChatMessagePartType.TextAttachment => MediaResourceTemplate ?? StatusTemplate ?? TextTemplate,
                 ChatMessagePartType.HostPreservedContent => StructuredXmlTemplate ?? TextTemplate,
                 ChatMessagePartType.Reasoning => ReasoningTemplate ?? StatusTemplate ?? TextTemplate,
                 ChatMessagePartType.Tool => ToolOutputTemplate ?? StatusTemplate,

@@ -141,6 +141,8 @@ namespace Skyweaver.Services.ChatSession
         {
             if (block.Kind is ChatSessionTranscriptBlockKind.Image
                 or ChatSessionTranscriptBlockKind.Audio
+                or ChatSessionTranscriptBlockKind.Video
+                or ChatSessionTranscriptBlockKind.Document
                 or ChatSessionTranscriptBlockKind.File
                 or ChatSessionTranscriptBlockKind.ResourceReference)
             {
@@ -198,18 +200,23 @@ namespace Skyweaver.Services.ChatSession
             ChatSessionTranscriptEntry entry,
             ChatSessionTranscriptBlock block)
         {
-            var partType = ToPartType(block.Kind, entry.Kind);
+            var partType = ToPartType(block, entry.Kind);
             var isCollapsible = IsCollapsible(entry, block);
             var part = new ChatMessagePartModel(
                 partType,
-                block.Content,
+                ResolvePresentationContent(block),
                 ResolvePartTitle(entry, block),
                 block.Language,
-                GetBadgeText(block.Kind, entry.Kind),
+                ResolveBadgeText(block, entry.Kind),
                 entry.Status == ChatSessionEntryStatus.Streaming,
                 entry.ToolCallId,
                 entry.AgentId,
-                block.Kind is ChatSessionTranscriptBlockKind.Image or ChatSessionTranscriptBlockKind.Audio
+                partType == ChatMessagePartType.TextAttachment
+                    ? ResolvePreservedTextPath(block)
+                    : block.Kind is ChatSessionTranscriptBlockKind.Image
+                        or ChatSessionTranscriptBlockKind.Audio
+                        or ChatSessionTranscriptBlockKind.Video
+                        or ChatSessionTranscriptBlockKind.Document
                     ? block.ResourcePath ?? block.Content
                     : block.ResourcePath,
                 IsUserVisible(entry),
@@ -245,6 +252,17 @@ namespace Skyweaver.Services.ChatSession
             part.ToolResultPresentationKind = ResolvePresentationKind(toolOutputEntry, toolOutputBlock);
         }
 
+        private static string ResolvePresentationContent(ChatSessionTranscriptBlock block)
+        {
+            if (block.Kind == ChatSessionTranscriptBlockKind.ResourceReference &&
+                SkyweaverPreservedTextContentXml.TryParse(block.Content, out var textContent))
+            {
+                return textContent.Text;
+            }
+
+            return block.Content;
+        }
+
         private static string? ResolvePartTitle(
             ChatSessionTranscriptEntry entry,
             ChatSessionTranscriptBlock block)
@@ -254,11 +272,17 @@ namespace Skyweaver.Services.ChatSession
                 return string.IsNullOrWhiteSpace(block.Title) ? "思考" : block.Title;
             }
 
+            if (block.Kind == ChatSessionTranscriptBlockKind.ResourceReference &&
+                SkyweaverPreservedTextContentXml.TryParse(block.Content, out var textContent))
+            {
+                return textContent.DisplayName;
+            }
+
             return block.Title;
         }
 
         private static ChatMessagePartType ToPartType(
-            ChatSessionTranscriptBlockKind blockKind,
+            ChatSessionTranscriptBlock block,
             ChatSessionTranscriptEntryKind entryKind)
         {
             if (entryKind == ChatSessionTranscriptEntryKind.ToolCall)
@@ -271,7 +295,13 @@ namespace Skyweaver.Services.ChatSession
                 return ChatMessagePartType.ToolOutput;
             }
 
-            return blockKind switch
+            if (block.Kind == ChatSessionTranscriptBlockKind.ResourceReference &&
+                SkyweaverPreservedTextContentXml.IsTextContent(block.Content))
+            {
+                return ChatMessagePartType.TextAttachment;
+            }
+
+            return block.Kind switch
             {
                 ChatSessionTranscriptBlockKind.Code => ChatMessagePartType.Code,
                 ChatSessionTranscriptBlockKind.StructuredXml => ChatMessagePartType.StructuredXml,
@@ -279,11 +309,33 @@ namespace Skyweaver.Services.ChatSession
                 ChatSessionTranscriptBlockKind.ToolOutputXml => ChatMessagePartType.ToolOutput,
                 ChatSessionTranscriptBlockKind.Image => ChatMessagePartType.Image,
                 ChatSessionTranscriptBlockKind.Audio => ChatMessagePartType.Audio,
+                ChatSessionTranscriptBlockKind.Video => ChatMessagePartType.Video,
+                ChatSessionTranscriptBlockKind.Document => ChatMessagePartType.Document,
                 ChatSessionTranscriptBlockKind.ReasoningText => ChatMessagePartType.Reasoning,
                 ChatSessionTranscriptBlockKind.StatusText or ChatSessionTranscriptBlockKind.ErrorText => ChatMessagePartType.Status,
                 ChatSessionTranscriptBlockKind.ResourceReference => ChatMessagePartType.HostPreservedContent,
                 _ => ChatMessagePartType.Text
             };
+        }
+
+        private static string? ResolvePreservedTextPath(ChatSessionTranscriptBlock block)
+        {
+            return SkyweaverPreservedTextContentXml.TryParse(block.Content, out var textContent)
+                ? textContent.Path
+                : block.ResourcePath;
+        }
+
+        private static string? ResolveBadgeText(
+            ChatSessionTranscriptBlock block,
+            ChatSessionTranscriptEntryKind entryKind)
+        {
+            if (block.Kind == ChatSessionTranscriptBlockKind.ResourceReference &&
+                SkyweaverPreservedTextContentXml.IsTextContent(block.Content))
+            {
+                return "Text";
+            }
+
+            return GetBadgeText(block.Kind, entryKind);
         }
 
         private static string? GetBadgeText(
@@ -303,6 +355,8 @@ namespace Skyweaver.Services.ChatSession
                     ChatSessionTranscriptBlockKind.StructuredXml => "XML",
                     ChatSessionTranscriptBlockKind.Image => "图片",
                     ChatSessionTranscriptBlockKind.Audio => "音频",
+                    ChatSessionTranscriptBlockKind.Video => "视频",
+                    ChatSessionTranscriptBlockKind.Document => "文档",
                     ChatSessionTranscriptBlockKind.Code => "代码",
                     _ => null
                 }

@@ -14,11 +14,15 @@
 
     <system:String x:Key="Preferences.Group.ContextManagement">コンテキスト管理</system:String>
 
+    <system:String x:Key="Preferences.Group.Multimodal">マルチモーダル</system:String>
+
     <system:String x:Key="Preferences.Group.AboutSkyweaver">Skyweaverについて</system:String>
 
     <system:String x:Key="Preferences.Page.DirectoryLocations">ディレクトリの場所</system:String>
 
     <system:String x:Key="Preferences.Page.LateralFileSystem">ラテラルファイルシステム</system:String>
+
+    <system:String x:Key="Preferences.Page.ShellIntegration">Shell 連携</system:String>
 
     <system:String x:Key="Preferences.Page.Localization">言語設定</system:String>
 
@@ -31,6 +35,8 @@
     <system:String x:Key="Preferences.Page.Memory">記憶</system:String>
 
     <system:String x:Key="Preferences.Page.Search">検索</system:String>
+
+    <system:String x:Key="Preferences.Page.MultimodalDocument">ドキュメント</system:String>
 
     <system:String x:Key="Preferences.Sidebar.Title">設定</system:String>
 
@@ -159,6 +165,16 @@
     <system:String x:Key="LanguageModelConfiguration.EmptySelection">左側で言語モデルを選択すると、ここで設定を編集できます。</system:String>
 
     <system:String x:Key="LanguageModelConfiguration.ContextWindowTokens">コンテキストウィンドウのトークン数</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.InputModalities">入力モダリティ</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.InputModalities.Image">画像</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.InputModalities.Audio">音声</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.InputModalities.Video">動画</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.InputModalities.Document">ドキュメント</system:String>
 
     <system:String x:Key="LanguageModelConfiguration.InterfaceSettings.Default">インターフェース設定</system:String>
 
@@ -847,6 +863,53 @@
 
     <system:String x:Key="LateralFileSystem.Browse.WorkingRoot">ラテラルファイルシステムワークルートフォルダを選択</system:String>
 
+    <system:String x:Key="ShellIntegration.Page.Title">Shell 連携</system:String>
+
+    <system:String x:Key="ShellIntegration.Page.Description">Skyweaver をエクスプローラーのコンテキストメニューに統合します。</system:String>
+
+    <system:String x:Key="ShellIntegration.Page.Hint">有効にすると、現在のユーザーのレジストリにエクスプローラーメニュー項目を書き込みます。</system:String>
+
+    <system:String x:Key="ShellIntegration.Enabled.Label">Shell 連携</system:String>
+
+    <system:String x:Key="ShellIntegration.Enabled.Content">Shell 連携を有効化</system:String>
+
+    <system:String x:Key="ShellIntegration.Enabled.Description">Skyweaver をエクスプローラーに統合し、ファイルやフォルダーから使いやすくします。</system:String>
+
+    <system:String x:Key="ShellIntegration.SessionFlow.Label">使用するセッションフロー</system:String>
+
+    <system:String x:Key="ShellIntegration.SessionFlow.Description">エクスプローラーから Shell Chat を起動したときの既定のセッションフローです。選択したファイルやフォルダーは今後のバージョンで渡されます。</system:String>
+
+    <system:String x:Key="ShellIntegration.SessionFlow.None">未指定</system:String>
+
+    <system:String x:Key="ShellIntegration.SessionFlow.NoneDescription">Shell Chat にセッションフローを事前選択しません。</system:String>
+
+    <system:String x:Key="ShellIntegration.SessionFlow.MissingFormat">{0} (見つかりません)</system:String>
+
+    <system:String x:Key="ShellIntegration.Registration.Label">コンテキストメニュー</system:String>
+
+    <system:String x:Key="ShellIntegration.Registration.Registered">エクスプローラーのコンテキストメニューは登録済みです。</system:String>
+
+    <system:String x:Key="ShellIntegration.Registration.NotRegistered">エクスプローラーのコンテキストメニューは未登録です。</system:String>
+
+    <system:String x:Key="ShellIntegration.Status.Enabled">Shell 連携を有効化し、コンテキストメニューを登録しました。</system:String>
+
+    <system:String x:Key="ShellIntegration.Status.Disabled">Shell 連携を無効化し、コンテキストメニューを削除しました。</system:String>
+
+    <system:String x:Key="ShellIntegration.Status.SessionFlowSaved">Shell Chat で使用するセッションフローを保存しました。</system:String>
+
+    <system:String x:Key="ShellIntegration.Status.SessionFlowsLoaded">セッションフロー一覧を再読み込みしました。</system:String>
+
+    <system:String x:Key="ShellIntegration.Status.LoadSessionFlowsFailedFormat">セッションフローの読み込みに失敗しました: {0}</system:String>
+
+    <system:String x:Key="ShellIntegration.Status.ApplyFailedFormat">コンテキストメニューの更新に失敗しました: {0}</system:String>
+
+    <system:String x:Key="ShellIntegration.Menu.Text">问问Skyweaver...</system:String>
+
+    <system:String x:Key="ShellIntegration.Instruction.1">有効にすると、ファイル、複数ファイル選択、フォルダー、エクスプローラーの空白部分に Skyweaver メニューを追加します。</system:String>
+
+    <system:String x:Key="ShellIntegration.Instruction.2">現在のバージョンではメニュー項目から Shell Chat ウィンドウを開きます。選択パスは今後セッションフローに接続されます。</system:String>
+
+    <system:String x:Key="ShellIntegration.Instruction.3">登録はユーザー単位で、管理者権限は不要です。</system:String>
 
     <system:String x:Key="ContextCompression.Page.Title">圧縮</system:String>
 
@@ -1153,6 +1216,24 @@
 
     <system:String x:Key="Tabs.AgentWizard.Description">ステップバイステップのウィザードを使用して、新しいエージェント、役割、行動テンプレートを素早く設定します。</system:String>
 
+    <system:String x:Key="Tabs.PersonaSettings.Title">ペルソナ設定</system:String>
+
+    <system:String x:Key="Tabs.PersonaSettings.Description">AIの呼称、ユーザーへの呼称、口調、応答速度などのペルソナを設定します。</system:String>
+
+    <system:String x:Key="PersonaSettings.AgentName">Agent 呼称</system:String>
+
+    <system:String x:Key="PersonaSettings.UserName">ユーザーへの呼称</system:String>
+
+    <system:String x:Key="PersonaSettings.Tone">口調</system:String>
+
+    <system:String x:Key="PersonaSettings.ModalParticles">語尾・口癖</system:String>
+
+    <system:String x:Key="PersonaSettings.ResponseSpeed">応答傾向</system:String>
+
+    <system:String x:Key="PersonaSettings.Prompt">ペルソナプロンプト</system:String>
+
+    <system:String x:Key="PersonaSettings.ConfigTitle">設定パネル</system:String>
+
     <system:String x:Key="Tabs.Placeholder.NoContentFormat">タブ '{0}' にはまだコンテンツがありません。</system:String>
 
     <system:String x:Key="DocumentWorkspace.Placeholder.Default">ドキュメントの内容がここに表示されます...</system:String>
@@ -1306,6 +1387,8 @@
     <system:String x:Key="ChatSessionControl.EmptyState">メッセージはまだありません。下にユーザーメッセージを入力し、送信してセッションフローを開始してください。</system:String>
 
     <system:String x:Key="ChatSessionControl.AddImage">画像を追加</system:String>
+
+    <system:String x:Key="ChatSessionControl.AddVideo">動画を追加</system:String>
 
     <system:String x:Key="ChatSessionControl.AddClipboard">クリップボードを追加</system:String>
 
@@ -2238,6 +2321,28 @@
 
 
     <system:String x:Key="ShellChat.Window.Title">Shell チャット</system:String>
+    <system:String x:Key="ShellChat.Title">Skyweaver Shell</system:String>
+    <system:String x:Key="ShellChat.Tooltip.Close">閉じる</system:String>
+    <system:String x:Key="ShellChat.NoToolCalls">ツール呼び出しはまだありません</system:String>
+    <system:String x:Key="ShellChat.InputPlaceholder">Skyweaver に尋ねる...</system:String>
+    <system:String x:Key="ShellChat.Status.Ready">準備完了</system:String>
+    <system:String x:Key="ShellChat.Status.Unavailable">Shell チャットは利用できません</system:String>
+    <system:String x:Key="ShellChat.Status.SessionCreateFailed">セッションの作成に失敗しました</system:String>
+    <system:String x:Key="ShellChat.Button.Stop">停止</system:String>
+    <system:String x:Key="ShellChat.Error.NoSession">利用可能な Shell チャットセッションはありません。</system:String>
+    <system:String x:Key="ShellChat.Status.RuntimeUnavailable">ランタイムは利用できません</system:String>
+    <system:String x:Key="ShellChat.Status.Running">実行中</system:String>
+    <system:String x:Key="ShellChat.Status.ExecutionFailed">実行に失敗しました</system:String>
+    <system:String x:Key="ShellChat.Status.Cancelled">キャンセル済み</system:String>
+    <system:String x:Key="ShellChat.Status.Failed">失敗しました</system:String>
+    <system:String x:Key="ShellChat.Status.Completed">完了しました</system:String>
+    <system:String x:Key="ShellChat.Status.Cancelling">キャンセル中...</system:String>
+    <system:String x:Key="ShellChat.DisplayName.System">システム</system:String>
+    <system:String x:Key="ShellChat.Status.NodeStartedFormat">{0} を実行中</system:String>
+    <system:String x:Key="ShellChat.ToolConfirmation.PromptFormat">エージェント {0} がこのツール呼び出しの実行を求めています。</system:String>
+    <system:String x:Key="ShellChat.ToolConfirmation.MetadataFormat">ツール: {0}    イテレーション: {1}    呼び出し: {2}</system:String>
+    <system:String x:Key="ShellChat.ToolConfirmation.Rejected">ツール呼び出しはユーザーによって拒否されました。</system:String>
+    <system:String x:Key="ShellChat.Status.FlowReadyFormat">準備完了: {0}</system:String>
 
     <system:String x:Key="ShellChat.Button.Send">送信</system:String>
 
@@ -2398,15 +2503,27 @@
 
     <system:String x:Key="ChatMessagePart.Badge.Audio">音声</system:String>
 
+    <system:String x:Key="ChatMessagePart.Badge.Video">動画</system:String>
+
+    <system:String x:Key="ChatMessagePart.Badge.Document">ドキュメント</system:String>
+
     <system:String x:Key="ChatMessagePart.Title.Reasoning">思考プロセス</system:String>
 
     <system:String x:Key="ChatMessagePart.Badge.Reasoning">思考プロセス</system:String>
 
     <system:String x:Key="ChatMessageClipboard.AudioMarkdownPrefix">[音声: </system:String>
 
+    <system:String x:Key="ChatMessageClipboard.VideoMarkdownPrefix">[動画: </system:String>
+
+    <system:String x:Key="ChatMessageClipboard.DocumentMarkdownPrefix">[ドキュメント: </system:String>
+
     <system:String x:Key="ChatMessageClipboard.ImagePlainPrefix">[画像] </system:String>
 
     <system:String x:Key="ChatMessageClipboard.AudioPlainPrefix">[音声] </system:String>
+
+    <system:String x:Key="ChatMessageClipboard.VideoPlainPrefix">[動画] </system:String>
+
+    <system:String x:Key="ChatMessageClipboard.DocumentPlainPrefix">[ドキュメント] </system:String>
 
     <system:String x:Key="ToolInvocation.WaitingForParameterFallback">パラメータを待機中...</system:String>
 
@@ -2968,5 +3085,17 @@
     <system:String x:Key="Search.Status.VertexMaxResultsSavedFormat">Vertex AI の最大結果数が {0} に設定されました。</system:String>
     <system:String x:Key="Search.Status.VertexSearchModelSaved">Vertex AI 検索モデルが保存されました。</system:String>
     <system:String x:Key="Search.Status.SaveFailedFormat">保存に失敗しました: {0}</system:String>
+
+    <system:String x:Key="Multimodal.Document.Page.Title">ドキュメント</system:String>
+    <system:String x:Key="Multimodal.Document.Page.Description">OCR（文字認識）やハードウェアアクセラレーションなど、マルチモーダルなドキュメント処理設定を構成します。</system:String>
+    <system:String x:Key="Multimodal.Document.Page.Hint">変更はすぐに MultimodalPreferences.xml に書き込まれます。</system:String>
+    <system:String x:Key="Multimodal.Document.EnableOcr.Label">ドキュメント文字認識を有効化</system:String>
+    <system:String x:Key="Multimodal.Document.EnableOcr.Content">ドキュメント文字認識 (OCR) を有効にする</system:String>
+    <system:String x:Key="Multimodal.Document.EnableOcr.Hint">ドキュメント処理中に画像またはPDF内のテキスト文字を自動的に認識することを許可します。</system:String>
+    <system:String x:Key="Multimodal.Document.HardwareSolution.Label">ハードウェア構成</system:String>
+    <system:String x:Key="Multimodal.Document.HardwareSolution.Hint">ドキュメント認識計算に使用するハードウェアアクセラレーションスキーム（CPU または GPU）を選択します。</system:String>
+    <system:String x:Key="Multimodal.Document.Status.Loaded">マルチモーダル設定が読み込まれました。</system:String>
+    <system:String x:Key="Multimodal.Document.Status.EnableOcrSaved">ドキュメント文字認識の有効化設定が保存されました。</system:String>
+    <system:String x:Key="Multimodal.Document.Status.HardwareSolutionSaved">ハードウェア構成が {0} に保存されました。</system:String>
     <system:String x:Key="MainWindow.Status.Welcome">Skyweaverへようこそ！</system:String>
 </ResourceDictionary>

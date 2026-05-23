@@ -856,7 +856,20 @@ namespace Skyweaver.Services.AgentLoop
                     await foreach (var update in _chatService.GetStreamingResponseAsync(
                                        candidate,
                                        preparedSnapshot.PreparedMessages.Select(message => message.Clone()).ToArray(),
-                                       cancellationToken).ConfigureAwait(false))
+                                       cancellationToken,
+                                       (progress, ct) => PublishAsync(
+                                           onEventAsync,
+                                           new AgentLoopRuntimeEvent
+                                           {
+                                               Kind = AgentLoopRuntimeEventKind.MediaProcessingProgressUpdated,
+                                               IterationNumber = iterationNumber,
+                                               ModelId = modelId,
+                                               MediaProcessingProgress = new AgentLoopMediaProcessingProgress
+                                               {
+                                                   Progress = progress
+                                               }
+                                           },
+                                           ct)).ConfigureAwait(false))
                     {
                         if (!string.IsNullOrWhiteSpace(update.ModelId))
                         {

@@ -412,6 +412,10 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.ViewModels
                 DisplayName = BuildDuplicatedDisplayName(source.DisplayName),
                 InterfaceType = source.InterfaceType,
                 ContextWindowTokens = source.EffectiveContextWindowTokens,
+                EnableImageInput = source.EnableImageInput,
+                EnableAudioInput = source.EnableAudioInput,
+                EnableVideoInput = source.EnableVideoInput,
+                EnableDocumentInput = source.EnableDocumentInput,
                 InterfaceSettings = CloneInterfaceSettings(source.InterfaceSettings)
             };
         }

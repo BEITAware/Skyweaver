@@ -12,7 +12,10 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
         StructuredXml = 7,
         Image = 8,
         Audio = 9,
-        HostPreservedContent = 10,
-        Reasoning = 11
+        Video = 10,
+        Document = 11,
+        HostPreservedContent = 12,
+        Reasoning = 13,
+        TextAttachment = 14
     }
 }

@@ -17,6 +17,10 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Models
         private LanguageModelInterfaceSettings _interfaceSettings =
             LanguageModelInterfaceCatalog.CreateInterfaceSettings(LanguageModelInterfaceCatalog.DefaultInterfaceType);
         private int _contextWindowTokens = DefaultContextWindowTokens;
+        private bool _enableImageInput = true;
+        private bool _enableAudioInput = true;
+        private bool _enableVideoInput = true;
+        private bool _enableDocumentInput = true;
         private string _testResponse = string.Empty;
         private bool _isTesting;
         private bool _canCancelTest;
@@ -106,6 +110,30 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Models
                     NotifyDerivedStateChanged();
                 }
             }
+        }
+
+        public bool EnableImageInput
+        {
+            get => _enableImageInput;
+            set => SetProperty(ref _enableImageInput, value);
+        }
+
+        public bool EnableAudioInput
+        {
+            get => _enableAudioInput;
+            set => SetProperty(ref _enableAudioInput, value);
+        }
+
+        public bool EnableVideoInput
+        {
+            get => _enableVideoInput;
+            set => SetProperty(ref _enableVideoInput, value);
+        }
+
+        public bool EnableDocumentInput
+        {
+            get => _enableDocumentInput;
+            set => SetProperty(ref _enableDocumentInput, value);
         }
 
         public bool IsFullyConfigured =>

@@ -1,5 +1,7 @@
 using System.Net;
 using System.Xml.Linq;
+using Skyweaver.Controls.LanguageModelConfigurationControl.Models;
+using Skyweaver.Services.ChatSession;
 
 namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
 {
@@ -10,8 +12,11 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
         private const string EscapedStartToken = "&lt;SkyweaverPreservedContent";
         private const string EscapedEndToken = "&lt;/SkyweaverPreservedContent&gt;";
 
-        public static IReadOnlyList<LanguageModelChatMessage> ProjectMessages(
-            IReadOnlyList<LanguageModelChatMessage> messages)
+        public static async Task<IReadOnlyList<LanguageModelChatMessage>> ProjectMessagesAsync(
+            IReadOnlyList<LanguageModelChatMessage> messages,
+            LanguageModelDefinition? model = null,
+            Func<LanguageModelMediaProcessingProgress, CancellationToken, ValueTask>? mediaProcessingProgress = null,
+            CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(messages);
 
@@ -23,13 +28,23 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             var projected = new LanguageModelChatMessage[messages.Count];
             for (var index = 0; index < messages.Count; index++)
             {
-                projected[index] = ProjectMessage(messages[index]);
+                cancellationToken.ThrowIfCancellationRequested();
+                projected[index] = await ProjectMessageAsync(
+                        messages[index],
+                        model,
+                        mediaProcessingProgress,
+                        cancellationToken)
+                    .ConfigureAwait(false);
             }
 
             return projected;
         }
 
-        private static LanguageModelChatMessage ProjectMessage(LanguageModelChatMessage message)
+        private static async Task<LanguageModelChatMessage> ProjectMessageAsync(
+            LanguageModelChatMessage message,
+            LanguageModelDefinition? model,
+            Func<LanguageModelMediaProcessingProgress, CancellationToken, ValueTask>? mediaProcessingProgress,
+            CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(message);
 
@@ -42,6 +57,43 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             var projectedBlocks = new List<LanguageModelChatContentBlock>(message.ContentBlocks.Count);
             foreach (var block in message.ContentBlocks)
             {
+                if (block.Kind == LanguageModelChatContentBlockKind.Image && model?.EnableImageInput == false)
+                {
+                    projectedBlocks.Add(LanguageModelChatContentBlock.CreateHostPreservedContent(
+                        BuildPreservedResourceXml("Image", block)));
+                    changed = true;
+                    continue;
+                }
+
+                if (block.Kind == LanguageModelChatContentBlockKind.Audio && model?.EnableAudioInput == false)
+                {
+                    projectedBlocks.Add(LanguageModelChatContentBlock.CreateHostPreservedContent(
+                        BuildPreservedResourceXml("Audio", block)));
+                    changed = true;
+                    continue;
+                }
+
+                if (block.Kind == LanguageModelChatContentBlockKind.Video && model?.EnableVideoInput == false)
+                {
+                    projectedBlocks.Add(LanguageModelChatContentBlock.CreateHostPreservedContent(
+                        BuildPreservedResourceXml("Video", block)));
+                    changed = true;
+                    continue;
+                }
+
+                if (block.Kind == LanguageModelChatContentBlockKind.Document && model?.EnableDocumentInput == false)
+                {
+                    projectedBlocks.AddRange(await LanguageModelDocumentProjectionFallback.ProjectDocumentAsync(
+                            block,
+                            BuildPreservedResourceXml("Document", block),
+                            model.EnableImageInput,
+                            mediaProcessingProgress,
+                            cancellationToken)
+                        .ConfigureAwait(false));
+                    changed = true;
+                    continue;
+                }
+
                 if (!block.IsTextLike ||
                     string.IsNullOrEmpty(block.Content) ||
                     !MayContainPreservedContent(block.Content))
@@ -50,7 +102,13 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                     continue;
                 }
 
-                if (!TryExpandTextLikeBlock(block, out var expandedBlocks))
+                var expandedBlocks = await ExpandTextLikeBlockAsync(
+                        block,
+                        model,
+                        mediaProcessingProgress,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+                if (expandedBlocks == null)
                 {
                     projectedBlocks.Add(block.Clone());
                     continue;
@@ -71,17 +129,18 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 : message.Clone();
         }
 
-        private static bool TryExpandTextLikeBlock(
+        private static async Task<IReadOnlyList<LanguageModelChatContentBlock>?> ExpandTextLikeBlockAsync(
             LanguageModelChatContentBlock source,
-            out IReadOnlyList<LanguageModelChatContentBlock> expandedBlocks)
+            LanguageModelDefinition? model,
+            Func<LanguageModelMediaProcessingProgress, CancellationToken, ValueTask>? mediaProcessingProgress,
+            CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(source);
 
             var content = source.Content;
             if (string.IsNullOrEmpty(content))
             {
-                expandedBlocks = [source.Clone()];
-                return false;
+                return null;
             }
 
             var projectedBlocks = new List<LanguageModelChatContentBlock>();
@@ -104,7 +163,31 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 AppendTextBlock(projectedBlocks, source.Kind, content[cursor..matchStart]);
 
                 var rawFragment = content[matchStart..matchEnd];
-                if (TryCreateNativeResourceBlock(rawFragment, isEscaped, out var resourceBlock) &&
+                cancellationToken.ThrowIfCancellationRequested();
+                var normalizedFragment = isEscaped
+                    ? WebUtility.HtmlDecode(rawFragment)
+                    : rawFragment;
+                if (SkyweaverPreservedTextContentXml.TryParse(normalizedFragment, out var preservedText))
+                {
+                    AppendTextBlock(projectedBlocks, LanguageModelChatContentBlockKind.Text, preservedText.Text);
+                    foundResource = true;
+                    cursor = matchEnd;
+                    continue;
+                }
+
+                var expandedPreservedDocument = await TryExpandPreservedDocumentFallbackAsync(
+                    rawFragment,
+                    isEscaped,
+                    model,
+                    mediaProcessingProgress,
+                    cancellationToken).ConfigureAwait(false);
+                if (expandedPreservedDocument != null &&
+                    expandedPreservedDocument.Count > 0)
+                {
+                    projectedBlocks.AddRange(expandedPreservedDocument);
+                    foundResource = true;
+                }
+                else if (TryCreateNativeResourceBlock(rawFragment, isEscaped, model, out var resourceBlock) &&
                     resourceBlock != null)
                 {
                     projectedBlocks.Add(resourceBlock);
@@ -120,12 +203,10 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
 
             if (!foundResource)
             {
-                expandedBlocks = [source.Clone()];
-                return false;
+                return null;
             }
 
-            expandedBlocks = projectedBlocks.ToArray();
-            return true;
+            return projectedBlocks.ToArray();
         }
 
         private static void AppendTextBlock(
@@ -183,6 +264,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
         private static bool TryCreateNativeResourceBlock(
             string rawFragment,
             bool isEscaped,
+            LanguageModelDefinition? model,
             out LanguageModelChatContentBlock? resourceBlock)
         {
             resourceBlock = null;
@@ -222,13 +304,83 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                     ?? GetAttributeValue(resourceElement, "MimeType");
                 if (string.Equals(resourceElement.Name.LocalName, "Image", StringComparison.OrdinalIgnoreCase))
                 {
-                    resourceBlock = LanguageModelChatContentBlock.CreateImage(path, mediaType);
+                    if (model?.EnableImageInput == false)
+                    {
+                        return false;
+                    }
+
+                    if (!LanguageModelMediaResourcePolicy.TryNormalizeMediaType(
+                            LanguageModelChatContentBlockKind.Image,
+                            path,
+                            mediaType,
+                            out var normalizedMediaType))
+                    {
+                        return false;
+                    }
+
+                    resourceBlock = LanguageModelChatContentBlock.CreateImage(path, normalizedMediaType);
                     return true;
                 }
 
                 if (string.Equals(resourceElement.Name.LocalName, "Audio", StringComparison.OrdinalIgnoreCase))
                 {
-                    resourceBlock = LanguageModelChatContentBlock.CreateAudio(path, mediaType);
+                    if (model?.EnableAudioInput == false)
+                    {
+                        return false;
+                    }
+
+                    if (!LanguageModelMediaResourcePolicy.TryNormalizeMediaType(
+                            LanguageModelChatContentBlockKind.Audio,
+                            path,
+                            mediaType,
+                            out var normalizedMediaType))
+                    {
+                        return false;
+                    }
+
+                    resourceBlock = LanguageModelChatContentBlock.CreateAudio(path, normalizedMediaType);
+                    return true;
+                }
+
+                if (string.Equals(resourceElement.Name.LocalName, "Video", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (model?.EnableVideoInput == false)
+                    {
+                        return false;
+                    }
+
+                    if (!LanguageModelMediaResourcePolicy.TryNormalizeMediaType(
+                            LanguageModelChatContentBlockKind.Video,
+                            path,
+                            mediaType,
+                            out var normalizedMediaType))
+                    {
+                        return false;
+                    }
+
+                    resourceBlock = LanguageModelChatContentBlock.CreateVideo(path, normalizedMediaType);
+                    return true;
+                }
+
+                if (string.Equals(resourceElement.Name.LocalName, "Document", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (!LanguageModelMediaResourcePolicy.TryNormalizeMediaType(
+                            LanguageModelChatContentBlockKind.Document,
+                            path,
+                            mediaType,
+                            out var normalizedMediaType))
+                    {
+                        return false;
+                    }
+
+                    var documentBlock = LanguageModelChatContentBlock.CreateDocument(path, normalizedMediaType);
+                    if (model?.EnableDocumentInput == false)
+                    {
+                        resourceBlock = LanguageModelChatContentBlock.CreateHostPreservedContent(normalizedFragment);
+                        return true;
+                    }
+
+                    resourceBlock = documentBlock;
                     return true;
                 }
 
@@ -237,6 +389,74 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             catch
             {
                 return false;
+            }
+        }
+
+        private static async Task<IReadOnlyList<LanguageModelChatContentBlock>?> TryExpandPreservedDocumentFallbackAsync(
+            string rawFragment,
+            bool isEscaped,
+            LanguageModelDefinition? model,
+            Func<LanguageModelMediaProcessingProgress, CancellationToken, ValueTask>? mediaProcessingProgress,
+            CancellationToken cancellationToken)
+        {
+            if (model?.EnableDocumentInput != false)
+            {
+                return null;
+            }
+
+            try
+            {
+                var normalizedFragment = isEscaped
+                    ? WebUtility.HtmlDecode(rawFragment)
+                    : rawFragment;
+                var preservedContent = XElement.Parse(normalizedFragment, LoadOptions.PreserveWhitespace);
+                if (!string.Equals(
+                        preservedContent.Name.LocalName,
+                        "SkyweaverPreservedContent",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    return null;
+                }
+
+                var resourceElement = preservedContent.Elements().SingleOrDefault();
+                if (resourceElement == null ||
+                    !string.Equals(resourceElement.Name.LocalName, "Document", StringComparison.OrdinalIgnoreCase))
+                {
+                    return null;
+                }
+
+                var path = GetAttributeValue(resourceElement, "Path");
+                if (string.IsNullOrWhiteSpace(path))
+                {
+                    return null;
+                }
+
+                var mediaType = GetAttributeValue(resourceElement, "MediaType")
+                    ?? GetAttributeValue(resourceElement, "MimeType");
+                if (!LanguageModelMediaResourcePolicy.TryNormalizeMediaType(
+                        LanguageModelChatContentBlockKind.Document,
+                        path,
+                        mediaType,
+                        out var normalizedMediaType))
+                {
+                    return null;
+                }
+
+                var documentBlock = LanguageModelChatContentBlock.CreateDocument(path, normalizedMediaType);
+                return await LanguageModelDocumentProjectionFallback.ProjectDocumentAsync(
+                        documentBlock,
+                        normalizedFragment,
+                        model.EnableImageInput,
+                        mediaProcessingProgress,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex) when (ex is System.Xml.XmlException
+                or InvalidOperationException
+                or ArgumentException
+                or FormatException)
+            {
+                return null;
             }
         }
 
@@ -258,6 +478,26 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
 
             return content.IndexOf(LiteralStartToken, StringComparison.OrdinalIgnoreCase) >= 0 ||
                    content.IndexOf(EscapedStartToken, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static string BuildPreservedResourceXml(string elementName, LanguageModelChatContentBlock block)
+        {
+            var path = block.ResourcePath ?? block.Content;
+            var normalizedPath = string.IsNullOrWhiteSpace(path) ? string.Empty : path.Trim();
+            if (normalizedPath.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            var element = new XElement(
+                elementName,
+                new XAttribute("Path", normalizedPath));
+            if (!string.IsNullOrWhiteSpace(block.MediaType))
+            {
+                element.Add(new XAttribute("MediaType", block.MediaType.Trim()));
+            }
+
+            return new XElement("SkyweaverPreservedContent", element).ToString(SaveOptions.DisableFormatting);
         }
     }
 }

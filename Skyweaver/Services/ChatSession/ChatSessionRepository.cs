@@ -159,6 +159,11 @@ namespace Skyweaver.Services.ChatSession
                 CreatedAtUtc = ParseDateTime((string?)metadataElement?.Element("CreatedAtUtc")),
                 UpdatedAtUtc = ParseDateTime((string?)metadataElement?.Element("UpdatedAtUtc")),
                 MetadataNote = (string?)metadataElement?.Element("Note") ?? string.Empty,
+                IsShellSession = ParseBool((string?)metadataElement?.Element("IsShellSession")) ||
+                                 string.Equals(
+                                     ((string?)metadataElement?.Element("SessionKind") ?? string.Empty).Trim(),
+                                     "Shell",
+                                     StringComparison.OrdinalIgnoreCase),
                 SessionFilePath = sessionFilePath,
                 SessionFolderPath = Path.GetDirectoryName(sessionFilePath) ?? string.Empty,
                 ResourcesFolderPath = Path.Combine(
@@ -195,6 +200,7 @@ namespace Skyweaver.Services.ChatSession
                         new XElement("UpdatedAtUtc", session.UpdatedAtUtc.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture)),
                         new XElement("IconPath", session.IconPath),
                         new XElement("Note", session.MetadataNote),
+                        session.IsShellSession ? new XElement("IsShellSession", true) : null,
                         new XElement(
                             "BoundSessionFlow",
                             new XElement("GraphId", session.FlowBinding.GraphId),
@@ -585,6 +591,18 @@ namespace Skyweaver.Services.ChatSession
             return long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)
                 ? parsed
                 : null;
+        }
+
+        private static bool ParseBool(string? value)
+        {
+            var normalized = value?.Trim() ?? string.Empty;
+            if (bool.TryParse(normalized, out var parsed))
+            {
+                return parsed;
+            }
+
+            return string.Equals(normalized, "1", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(normalized, "yes", StringComparison.OrdinalIgnoreCase);
         }
 
         private static TEnum ParseEnum<TEnum>(string? value, TEnum fallback)

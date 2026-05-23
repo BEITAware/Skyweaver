@@ -19,6 +19,8 @@ namespace Skyweaver.Models.ChatSession
 
         public string MetadataNote { get; set; } = string.Empty;
 
+        public bool IsShellSession { get; set; }
+
         public ChatSessionFlowBinding FlowBinding { get; } = new();
 
         public ChatSessionTranscript Transcript { get; } = new();

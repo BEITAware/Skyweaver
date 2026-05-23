@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.IO;
 using System.Text.Json;
 using System.Xml.Linq;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
@@ -133,6 +134,10 @@ namespace Skyweaver.Services.ChatSession
 
                     case ChatSessionRuntimeEventKind.ToolProgressUpdated:
                         UpsertToolProgress(session, runtimeEvent);
+                        break;
+
+                    case ChatSessionRuntimeEventKind.MediaProcessingProgressUpdated:
+                        UpsertMediaProcessingProgress(session, runtimeEvent);
                         break;
 
                     case ChatSessionRuntimeEventKind.ContextCompressionApplied:
@@ -426,6 +431,32 @@ namespace Skyweaver.Services.ChatSession
 
             ApplyToolProgressMetadata(block, progress);
             Touch(transcript, entry);
+        }
+
+        private void UpsertMediaProcessingProgress(ChatSessionModel session, ChatSessionRuntimeEvent runtimeEvent)
+        {
+            var progress = runtimeEvent.MediaProcessingProgress?.Normalize().Progress;
+            if (progress == null || string.IsNullOrWhiteSpace(progress.ResourcePath))
+            {
+                return;
+            }
+
+            var transcript = session.Transcript;
+            var turn = GetOrCreateActiveTurn(session);
+            var block = transcript.Entries
+                .Where(entry =>
+                    string.Equals(entry.TurnId, turn.TurnId, StringComparison.OrdinalIgnoreCase) &&
+                    entry.Kind == ChatSessionTranscriptEntryKind.UserMessage)
+                .SelectMany(entry => entry.Blocks)
+                .FirstOrDefault(block => IsMatchingMediaBlock(block, progress));
+            if (block == null)
+            {
+                return;
+            }
+
+            ApplyMediaProcessingProgressMetadata(block, progress);
+            block.Touch();
+            transcript.Touch();
         }
 
         private void AppendContextCompression(ChatSessionModel session, ChatSessionRuntimeEvent runtimeEvent)
@@ -834,6 +865,20 @@ namespace Skyweaver.Services.ChatSession
                     ResourcePath = source.ResourcePath ?? source.Content,
                     MediaType = source.MediaType
                 },
+                LanguageModelChatContentBlockKind.Video => new ChatSessionTranscriptBlock
+                {
+                    Kind = ChatSessionTranscriptBlockKind.Video,
+                    Content = source.ResourcePath ?? source.Content,
+                    ResourcePath = source.ResourcePath ?? source.Content,
+                    MediaType = source.MediaType
+                },
+                LanguageModelChatContentBlockKind.Document => new ChatSessionTranscriptBlock
+                {
+                    Kind = ChatSessionTranscriptBlockKind.Document,
+                    Content = source.ResourcePath ?? source.Content,
+                    ResourcePath = source.ResourcePath ?? source.Content,
+                    MediaType = source.MediaType
+                },
                 LanguageModelChatContentBlockKind.HostPreservedContent => new ChatSessionTranscriptBlock
                 {
                     Kind = ChatSessionTranscriptBlockKind.ResourceReference,
@@ -980,6 +1025,87 @@ namespace Skyweaver.Services.ChatSession
                 block.Metadata,
                 SkyweaverToolProgressMetadataKeys.ActiveItems,
                 JsonSerializer.Serialize(progress.ActiveItems));
+        }
+
+        private static void ApplyMediaProcessingProgressMetadata(
+            ChatSessionTranscriptBlock block,
+            LanguageModelMediaProcessingProgress progress)
+        {
+            SetMetadata(block.Metadata, SkyweaverToolProgressMetadataKeys.Phase, progress.Phase);
+            SetMetadata(block.Metadata, SkyweaverToolProgressMetadataKeys.StatusText, progress.StatusText);
+            SetMetadata(
+                block.Metadata,
+                SkyweaverToolProgressMetadataKeys.CompletedItems,
+                progress.CompletedItems?.ToString(CultureInfo.InvariantCulture));
+            SetMetadata(
+                block.Metadata,
+                SkyweaverToolProgressMetadataKeys.TotalItems,
+                progress.TotalItems?.ToString(CultureInfo.InvariantCulture));
+            SetMetadata(
+                block.Metadata,
+                SkyweaverToolProgressMetadataKeys.ProgressFraction,
+                progress.ProgressFraction?.ToString("R", CultureInfo.InvariantCulture));
+            SetMetadata(
+                block.Metadata,
+                SkyweaverToolProgressMetadataKeys.IsCompleted,
+                progress.IsCompleted ? "true" : "false");
+            SetMetadata(
+                block.Metadata,
+                SkyweaverToolProgressMetadataKeys.ActiveItems,
+                JsonSerializer.Serialize(progress.ActiveItems));
+        }
+
+        private static bool IsMatchingMediaBlock(
+            ChatSessionTranscriptBlock block,
+            LanguageModelMediaProcessingProgress progress)
+        {
+            var expectedKind = progress.Kind switch
+            {
+                LanguageModelChatContentBlockKind.Image => ChatSessionTranscriptBlockKind.Image,
+                LanguageModelChatContentBlockKind.Audio => ChatSessionTranscriptBlockKind.Audio,
+                LanguageModelChatContentBlockKind.Video => ChatSessionTranscriptBlockKind.Video,
+                LanguageModelChatContentBlockKind.Document => ChatSessionTranscriptBlockKind.Document,
+                _ => ChatSessionTranscriptBlockKind.File
+            };
+            if (block.Kind != expectedKind)
+            {
+                return false;
+            }
+
+            return PathsEqual(block.ResourcePath, progress.ResourcePath) ||
+                   PathsEqual(block.Content, progress.ResourcePath);
+        }
+
+        private static bool PathsEqual(string? left, string? right)
+        {
+            var normalizedLeft = NormalizePath(left);
+            var normalizedRight = NormalizePath(right);
+            return normalizedLeft.Length > 0 &&
+                   normalizedRight.Length > 0 &&
+                   string.Equals(normalizedLeft, normalizedRight, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string NormalizePath(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return string.Empty;
+            }
+
+            var normalized = value.Trim();
+            if (Uri.TryCreate(normalized, UriKind.Absolute, out var uri) && uri.IsFile)
+            {
+                normalized = uri.LocalPath;
+            }
+
+            try
+            {
+                return Path.GetFullPath(normalized);
+            }
+            catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+            {
+                return normalized;
+            }
         }
 
         private static void SetMetadata(

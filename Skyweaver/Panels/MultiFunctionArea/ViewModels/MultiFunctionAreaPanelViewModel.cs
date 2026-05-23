@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Skyweaver.Controls.AgentConfigurationControl.ViewModels;
 using Skyweaver.Controls.AgentConfigurationControl.Views;
@@ -21,6 +21,8 @@ using Skyweaver.Controls.ToolConfigurationControl.ViewModels;
 using Skyweaver.Controls.ToolConfigurationControl.Views;
 using Skyweaver.Controls.WorkflowEditorControl.ViewModels;
 using Skyweaver.Controls.WorkflowEditorControl.Views;
+using Skyweaver.Controls.PersonaSettingsControl.ViewModels;
+using Skyweaver.Controls.PersonaSettingsControl.Views;
 using Skyweaver.Infrastructure.Mvvm;
 using Skyweaver.Panels.DocumentWorkspace.Models;
 using Skyweaver.Panels.DocumentWorkspace.ViewModels;
@@ -92,6 +94,7 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
             public const string AgentConfiguration = "agent-configuration";
             public const string TextEditor = "text-editor";
             public const string AgentWizard = "agent-wizard";
+            public const string PersonaSettings = "persona-settings";
         }
 
         private IReadOnlyList<MultiFunctionTabDefinition> CreateDefinitions()
@@ -207,6 +210,17 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
                     IconPath = "pack://application:,,,/Resources/GuideBot.png",
                     MaxCount = 1,
                     ContentFactory = _ => CreateAgentWizardView()
+                },
+                new()
+                {
+                    TypeKey = TabTypes.PersonaSettings,
+                    TitleResourceKey = "Tabs.PersonaSettings.Title",
+                    Title = L("Tabs.PersonaSettings.Title", "Persona 设定"),
+                    DescriptionResourceKey = "Tabs.PersonaSettings.Description",
+                    Description = L("Tabs.PersonaSettings.Description", "配置 AI 人格，包括称呼、语气以及反应速度等个性化指令。"),
+                    IconPath = "pack://application:,,,/Resources/GuideBot.png",
+                    MaxCount = 1,
+                    ContentFactory = _ => CreatePersonaSettingsView()
                 }
             };
         }
@@ -403,6 +417,14 @@ namespace Skyweaver.Panels.MultiFunctionArea.ViewModels
             return new AgentWizardControl
             {
                 DataContext = new AgentWizardControlViewModel()
+            };
+        }
+
+        private static PersonaSettingsControl CreatePersonaSettingsView()
+        {
+            return new PersonaSettingsControl
+            {
+                DataContext = new PersonaSettingsControlViewModel()
             };
         }
     }
