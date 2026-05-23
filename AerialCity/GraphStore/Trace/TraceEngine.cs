@@ -142,7 +142,8 @@ internal sealed class TraceEngine
         // For now, we rely on node.SegmentId matching
         // We iterate through nodes via edges starting from any known entry
         // TODO: Add a dedicated segment→node lookup index
-        return null; // Will be wired up when collection manages nodes
+        var node = _index.GetNode(segmentId);
+        return node?.Id;
     }
 
     private (List<TraceHit> hits, List<GraphEdge> edges) TraverseIncoming(

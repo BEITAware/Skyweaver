@@ -61,6 +61,56 @@ public sealed class AerialDatabase : IAsyncDisposable
         _logger = logger;
     }
 
+    /// <summary>Reads a segment by ID from this database.</summary>
+    public Task<Segment?> ReadSegmentAsync(AerialId id, CancellationToken ct = default) =>
+        Storage.ReadSegmentAsync(id, ct);
+
+    /// <summary>Enumerates all segment IDs stored in this database.</summary>
+    public IAsyncEnumerable<AerialId> ListSegmentIdsAsync(CancellationToken ct = default) =>
+        Storage.ListSegmentIdsAsync(ct);
+
+    /// <summary>Returns outgoing graph edges for a stored segment ID.</summary>
+    public IReadOnlyList<GraphEdge> GetOutgoingEdges(AerialId segmentId, EdgeKind? kind = null) =>
+        kind.HasValue ? GraphIndex.GetOutgoing(segmentId, kind.Value) : GraphIndex.GetOutgoing(segmentId);
+
+    /// <summary>Returns incoming graph edges for a stored segment ID.</summary>
+    public IReadOnlyList<GraphEdge> GetIncomingEdges(AerialId segmentId, EdgeKind? kind = null) =>
+        kind.HasValue ? GraphIndex.GetIncoming(segmentId, kind.Value) : GraphIndex.GetIncoming(segmentId);
+
+    /// <summary>
+    /// Adds a relationship edge and persists it when source and target vectors are available.
+    /// </summary>
+    public async Task AddEdgeAsync(
+        AerialId sourceSegmentId,
+        AerialId targetSegmentId,
+        EdgeKind kind,
+        float weight = 1.0f,
+        IReadOnlyDictionary<string, object>? metadata = null,
+        EmbeddingVector? sourceVector = null,
+        EmbeddingVector? targetVector = null,
+        CancellationToken ct = default)
+    {
+        var edge = CreateGraphEdge(sourceSegmentId, targetSegmentId, kind, weight, metadata);
+        GraphIndex.AddEdge(edge);
+
+        var resolvedSourceVector = sourceVector;
+        if (!resolvedSourceVector.HasValue)
+            resolvedSourceVector = (await Storage.ReadSegmentAsync(sourceSegmentId, ct).ConfigureAwait(false))?.Embedding;
+
+        var resolvedTargetVector = targetVector;
+        if (!resolvedTargetVector.HasValue)
+            resolvedTargetVector = (await Storage.ReadSegmentAsync(targetSegmentId, ct).ConfigureAwait(false))?.Embedding;
+
+        if (resolvedSourceVector.HasValue && resolvedTargetVector.HasValue)
+        {
+            await Storage.WriteGraphEdgeAsync(
+                edge,
+                resolvedSourceVector.Value,
+                resolvedTargetVector.Value,
+                ct).ConfigureAwait(false);
+        }
+    }
+
     /// <summary>Creates a new collection with the given schema.</summary>
     internal void CreateCollection(CollectionSchema schema)
     {
@@ -128,8 +178,7 @@ public sealed class AerialDatabase : IAsyncDisposable
     /// <summary>Adds a relationship edge between two segments.</summary>
     internal void AddEdge(AerialId sourceSegmentId, AerialId targetSegmentId, EdgeKind kind, float weight = 1.0f)
     {
-        var edge = new GraphEdge(sourceSegmentId, targetSegmentId, kind) { Weight = weight };
-        GraphIndex.AddEdge(edge);
+        AddEdgeAsync(sourceSegmentId, targetSegmentId, kind, weight).GetAwaiter().GetResult();
     }
 
     private static string GetLabel(Segment s) =>
@@ -142,8 +191,34 @@ public sealed class AerialDatabase : IAsyncDisposable
 
         Bm25.AddDocument(segment);
 
-        var node = new GraphNode(segment.Id) { Label = GetLabel(segment) };
+        var node = new GraphNode(segment.Id, segment.Id) { Label = GetLabel(segment) };
         GraphIndex.AddNode(node);
+    }
+
+    internal void IndexGraphEdge(GraphEdge edge)
+    {
+        GraphIndex.AddEdge(edge);
+    }
+
+    private static GraphEdge CreateGraphEdge(
+        AerialId sourceSegmentId,
+        AerialId targetSegmentId,
+        EdgeKind kind,
+        float weight,
+        IReadOnlyDictionary<string, object>? metadata)
+    {
+        var edge = new GraphEdge(sourceSegmentId, targetSegmentId, kind)
+        {
+            Weight = Math.Clamp(weight, 0.0f, 1.0f)
+        };
+
+        if (metadata is not null)
+        {
+            foreach (var (key, value) in metadata)
+                edge.Properties[key] = value;
+        }
+
+        return edge;
     }
 
     private static Segment CreateReplacementSegment(AerialId id, Segment existing, Segment updated) =>

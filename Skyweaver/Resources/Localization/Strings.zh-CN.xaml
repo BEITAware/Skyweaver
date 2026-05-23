@@ -18,7 +18,7 @@
     <system:String x:Key="Preferences.Page.ContextCompression">压缩</system:String>
     <system:String x:Key="Preferences.Page.SemanticSearch">语义搜索</system:String>
     <system:String x:Key="Preferences.Page.Memory">记忆</system:String>
-    <system:String x:Key="Preferences.Page.MultimodalDocument">文档</system:String>
+    <system:String x:Key="Preferences.Page.Document">文档</system:String>
     <system:String x:Key="Preferences.Sidebar.Title">首选项</system:String>
     <system:String x:Key="Preferences.BottomNav.LanguageModelConfiguration">语言模型配置</system:String>
     <system:String x:Key="Preferences.BottomNav.EmbeddingModelConfiguration">嵌入模型配置</system:String>
@@ -605,17 +605,21 @@
     <system:String x:Key="Search.Status.VertexSearchModelSaved">Vertex AI 搜索模式已保存。</system:String>
     <system:String x:Key="Search.Status.SaveFailedFormat">保存失败：{0}</system:String>
 
-    <system:String x:Key="Multimodal.Document.Page.Title">文档</system:String>
-    <system:String x:Key="Multimodal.Document.Page.Description">配置多模态文档处理，例如文档字符识别与硬件加速方案。</system:String>
-    <system:String x:Key="Multimodal.Document.Page.Hint">修改后会立即写入 MultimodalPreferences.xml。</system:String>
-    <system:String x:Key="Multimodal.Document.EnableOcr.Label">启用文档字符识别</system:String>
-    <system:String x:Key="Multimodal.Document.EnableOcr.Content">启用文档字符识别 (OCR)</system:String>
-    <system:String x:Key="Multimodal.Document.EnableOcr.Hint">允许在处理文档时自动识别图像或PDF中的文本字符。</system:String>
-    <system:String x:Key="Multimodal.Document.HardwareSolution.Label">硬件方案</system:String>
-    <system:String x:Key="Multimodal.Document.HardwareSolution.Hint">选择文档识别运算所使用的硬件加速方案：CPU 或 GPU。</system:String>
-    <system:String x:Key="Multimodal.Document.Status.Loaded">多模态配置已加载。</system:String>
-    <system:String x:Key="Multimodal.Document.Status.EnableOcrSaved">启用文档字符识别设置已保存。</system:String>
-    <system:String x:Key="Multimodal.Document.Status.HardwareSolutionSaved">硬件方案已保存为 {0}。</system:String>
+    <system:String x:Key="Document.Page.Title">文档</system:String>
+    <system:String x:Key="Document.Page.Description">配置文档解析和字符识别首选项，优化多模态处理能力。</system:String>
+    <system:String x:Key="Document.Page.Hint">修改后会立即写入 Multimodal.xml。</system:String>
+    <system:String x:Key="Document.EnableOcr.Label">启用文档字符识别</system:String>
+    <system:String x:Key="Document.EnableOcr.Content">运行光学字符识别 (OCR)</system:String>
+    <system:String x:Key="Document.EnableOcr.Hint">启用后，系统将自动识别并提取导入的图像与扫描版 PDF 中的文本字符。</system:String>
+    <system:String x:Key="Document.HardwareOption.Label">硬件方案</system:String>
+    <system:String x:Key="Document.HardwareOption.Hint">选择进行文档字符识别（OCR）计算时使用的硬件加速方案。</system:String>
+    <system:String x:Key="Document.HardwareOption.Cpu">CPU (中央处理器)</system:String>
+    <system:String x:Key="Document.HardwareOption.Gpu">GPU (图形处理器)</system:String>
+    <system:String x:Key="Document.Status.Loaded">文档首选项已加载。</system:String>
+    <system:String x:Key="Document.Status.OcrSaved">启用文档字符识别设置已保存。</system:String>
+    <system:String x:Key="Document.Status.HardwareOptionSaved">硬件方案已设为 {0}。</system:String>
+    <system:String x:Key="Document.Instruction.1">1. 启用文档字符识别（OCR）可以显著提升对扫描件或图片格式文档的理解质量，但会消耗额外的计算资源。</system:String>
+    <system:String x:Key="Document.Instruction.2">2. GPU 模式需要系统配备兼容的显卡加速硬件和对应的驱动，若不支持则会自动降级至 CPU 运行。</system:String>
 
     <system:String x:Key="MainWindow.Ribbon.StatusTab">状态</system:String>
     <system:String x:Key="MainWindow.Ribbon.ViewTab">视图</system:String>

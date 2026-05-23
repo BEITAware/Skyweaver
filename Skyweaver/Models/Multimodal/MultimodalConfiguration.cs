@@ -1,22 +1,29 @@
+using System;
 using Skyweaver.Infrastructure.Mvvm;
 
 namespace Skyweaver.Models.Multimodal
 {
+    public enum OcrHardwareOption
+    {
+        CPU,
+        GPU
+    }
+
     public sealed class MultimodalConfiguration : ObservableObject
     {
-        private bool _enableDocumentCharacterRecognition = false;
-        private string _hardwareSolution = "CPU"; // "CPU" or "GPU"
+        private bool _enableOcr;
+        private OcrHardwareOption _hardwareOption = OcrHardwareOption.CPU;
 
-        public bool EnableDocumentCharacterRecognition
+        public bool EnableOcr
         {
-            get => _enableDocumentCharacterRecognition;
-            set => SetProperty(ref _enableDocumentCharacterRecognition, value);
+            get => _enableOcr;
+            set => SetProperty(ref _enableOcr, value);
         }
 
-        public string HardwareSolution
+        public OcrHardwareOption HardwareOption
         {
-            get => _hardwareSolution;
-            set => SetProperty(ref _hardwareSolution, value?.Trim() ?? "CPU");
+            get => _hardwareOption;
+            set => SetProperty(ref _hardwareOption, value);
         }
     }
 }

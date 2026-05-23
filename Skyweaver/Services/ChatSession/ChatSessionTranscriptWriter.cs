@@ -33,6 +33,8 @@ namespace Skyweaver.Services.ChatSession
 
             lock (_syncRoot)
             {
+                lock (session.Transcript.SyncRoot)
+                {
                 var transcript = session.Transcript;
                 var turn = new ChatSessionTurnRecord
                 {
@@ -87,6 +89,7 @@ namespace Skyweaver.Services.ChatSession
                 _activeTurnIds[session.SessionId] = turn.TurnId;
                 session.ContextSummary = BuildContextSummary(session);
                 return turn;
+                }
             }
         }
 
@@ -97,6 +100,8 @@ namespace Skyweaver.Services.ChatSession
 
             lock (_syncRoot)
             {
+                lock (session.Transcript.SyncRoot)
+                {
                 switch (runtimeEvent.Kind)
                 {
                     case ChatSessionRuntimeEventKind.ExecutionStarted:
@@ -165,8 +170,26 @@ namespace Skyweaver.Services.ChatSession
                         break;
                 }
 
-                session.ContextSummary = BuildContextSummary(session);
+                if (ShouldRefreshContextSummary(runtimeEvent))
+                {
+                    session.ContextSummary = BuildContextSummary(session);
+                }
+                }
             }
+        }
+
+        private static bool ShouldRefreshContextSummary(ChatSessionRuntimeEvent runtimeEvent)
+        {
+            return runtimeEvent.Kind switch
+            {
+                ChatSessionRuntimeEventKind.TextDelta => false,
+                ChatSessionRuntimeEventKind.ReasoningDelta => false,
+                ChatSessionRuntimeEventKind.ToolProgressUpdated => false,
+                ChatSessionRuntimeEventKind.MediaProcessingProgressUpdated => false,
+                ChatSessionRuntimeEventKind.ToolCallUpdated when runtimeEvent.ToolCallSnapshot?.IsInvocationClosed != true &&
+                                                               runtimeEvent.ToolInvocation == null => false,
+                _ => true
+            };
         }
 
         public void CompleteTurn(ChatSessionModel session, ChatSessionRuntimeResult result)
@@ -176,6 +199,8 @@ namespace Skyweaver.Services.ChatSession
 
             lock (_syncRoot)
             {
+                lock (session.Transcript.SyncRoot)
+                {
                 if (result.IsCancelled)
                 {
                     CancelTurnCore(session, result.FailureReason ?? "执行已取消。");
@@ -190,6 +215,7 @@ namespace Skyweaver.Services.ChatSession
                 }
 
                 session.ContextSummary = BuildContextSummary(session);
+                }
             }
         }
 
@@ -199,8 +225,11 @@ namespace Skyweaver.Services.ChatSession
 
             lock (_syncRoot)
             {
+                lock (session.Transcript.SyncRoot)
+                {
                 FailTurnCore(session, message);
                 session.ContextSummary = BuildContextSummary(session);
+                }
             }
         }
 
@@ -210,8 +239,11 @@ namespace Skyweaver.Services.ChatSession
 
             lock (_syncRoot)
             {
+                lock (session.Transcript.SyncRoot)
+                {
                 CancelTurnCore(session, message);
                 session.ContextSummary = BuildContextSummary(session);
+                }
             }
         }
 
@@ -330,7 +362,12 @@ namespace Skyweaver.Services.ChatSession
                 runtimeEvent.Message);
             if (content.Length > 0)
             {
-                content = AgentLoopCompactionStore.EnsureToolCallIdInToolInvocationXml(content, toolCallId);
+                if (runtimeEvent.ToolCallSnapshot?.IsInvocationClosed == true ||
+                    runtimeEvent.ToolInvocation != null)
+                {
+                    content = AgentLoopCompactionStore.EnsureToolCallIdInToolInvocationXml(content, toolCallId);
+                }
+
                 var block = entry.Blocks.FirstOrDefault()
                     ?? AddBlock(entry, ChatSessionTranscriptBlockKind.ToolInvocationXml, content);
                 block.Content = content;

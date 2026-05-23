@@ -32,11 +32,11 @@
 
     <system:String x:Key="Preferences.Page.SemanticSearch">セマンティック検索</system:String>
 
+    <system:String x:Key="Preferences.Page.Document">ドキュメント</system:String>
+
     <system:String x:Key="Preferences.Page.Memory">記憶</system:String>
 
     <system:String x:Key="Preferences.Page.Search">検索</system:String>
-
-    <system:String x:Key="Preferences.Page.MultimodalDocument">ドキュメント</system:String>
 
     <system:String x:Key="Preferences.Sidebar.Title">設定</system:String>
 
@@ -1086,6 +1086,38 @@
     <system:String x:Key="Search.Status.VertexCredentialsSaved">Vertex AI 認証情報 JSON が保存されました。</system:String>
     <system:String x:Key="Search.Status.VertexApiKeySaved">Vertex AI API キーが保存されました。</system:String>
     <system:String x:Key="Search.Status.SaveFailedFormat">保存に失敗しました: {0}</system:String>
+
+
+    <system:String x:Key="Document.Page.Title">ドキュメント</system:String>
+
+    <system:String x:Key="Document.Page.Description">ドキュメントの解析と文字認識の環境設定を構成し、マルチモーダル処理能力を最適化します。</system:String>
+
+    <system:String x:Key="Document.Page.Hint">変更は Multimodal.xml に即座に書き込まれます。</system:String>
+
+    <system:String x:Key="Document.EnableOcr.Label">ドキュメント文字認識を有効化</system:String>
+
+    <system:String x:Key="Document.EnableOcr.Content">光学文字認識 (OCR) を実行する</system:String>
+
+    <system:String x:Key="Document.EnableOcr.Hint">有効にすると、システムはインポートされた画像やスキャンされたPDFからテキスト文字を自動的に識別して抽出します。</system:String>
+
+    <system:String x:Key="Document.HardwareOption.Label">ハードウェアスキーム</system:String>
+
+    <system:String x:Key="Document.HardwareOption.Hint">ドキュメント文字認識 (OCR) 計算時に使用するハードウェアアクセラレーションスキームを選択します。</system:String>
+
+    <system:String x:Key="Document.HardwareOption.Cpu">CPU (中央処理装置)</system:String>
+
+    <system:String x:Key="Document.HardwareOption.Gpu">GPU (画像処理装置)</system:String>
+
+    <system:String x:Key="Document.Status.Loaded">ドキュメント設定が読み込まれました。</system:String>
+
+    <system:String x:Key="Document.Status.OcrSaved">ドキュメント文字認識の有効化設定が保存されました。</system:String>
+
+    <system:String x:Key="Document.Status.HardwareOptionSaved">ハードウェアスキームが {0} に設定されました。</system:String>
+
+    <system:String x:Key="Document.Instruction.1">1. ドキュメント文字認識 (OCR) を有効にすると、スキャン文書や画像形式のドキュメントの理解品質が大幅に向上しますが、追加の計算リソースを消費します。</system:String>
+
+    <system:String x:Key="Document.Instruction.2">2. GPU モードでは、システムに互換性のあるグラフィックスアクセラレーションハードウェアと対応するランタイムが搭載されている必要があります。サポートされていない場合、自動的に CPU 実行にダウングレードされます。</system:String>
+
 
     <system:String x:Key="MainWindow.Ribbon.StatusTab">ステータス</system:String>
 
@@ -3085,17 +3117,5 @@
     <system:String x:Key="Search.Status.VertexMaxResultsSavedFormat">Vertex AI の最大結果数が {0} に設定されました。</system:String>
     <system:String x:Key="Search.Status.VertexSearchModelSaved">Vertex AI 検索モデルが保存されました。</system:String>
     <system:String x:Key="Search.Status.SaveFailedFormat">保存に失敗しました: {0}</system:String>
-
-    <system:String x:Key="Multimodal.Document.Page.Title">ドキュメント</system:String>
-    <system:String x:Key="Multimodal.Document.Page.Description">OCR（文字認識）やハードウェアアクセラレーションなど、マルチモーダルなドキュメント処理設定を構成します。</system:String>
-    <system:String x:Key="Multimodal.Document.Page.Hint">変更はすぐに MultimodalPreferences.xml に書き込まれます。</system:String>
-    <system:String x:Key="Multimodal.Document.EnableOcr.Label">ドキュメント文字認識を有効化</system:String>
-    <system:String x:Key="Multimodal.Document.EnableOcr.Content">ドキュメント文字認識 (OCR) を有効にする</system:String>
-    <system:String x:Key="Multimodal.Document.EnableOcr.Hint">ドキュメント処理中に画像またはPDF内のテキスト文字を自動的に認識することを許可します。</system:String>
-    <system:String x:Key="Multimodal.Document.HardwareSolution.Label">ハードウェア構成</system:String>
-    <system:String x:Key="Multimodal.Document.HardwareSolution.Hint">ドキュメント認識計算に使用するハードウェアアクセラレーションスキーム（CPU または GPU）を選択します。</system:String>
-    <system:String x:Key="Multimodal.Document.Status.Loaded">マルチモーダル設定が読み込まれました。</system:String>
-    <system:String x:Key="Multimodal.Document.Status.EnableOcrSaved">ドキュメント文字認識の有効化設定が保存されました。</system:String>
-    <system:String x:Key="Multimodal.Document.Status.HardwareSolutionSaved">ハードウェア構成が {0} に保存されました。</system:String>
     <system:String x:Key="MainWindow.Status.Welcome">Skyweaverへようこそ！</system:String>
 </ResourceDictionary>

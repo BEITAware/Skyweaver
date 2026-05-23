@@ -74,8 +74,8 @@
                                  ContentSource="Icon" 
                                  HorizontalAlignment="Center" 
                                  VerticalAlignment="Center" 
-                                 Width="20" 
-                                 Height="20" 
+                                 Width="24" 
+                                 Height="24" 
                                  Margin="3"/>
 
                 <!-- 菜单项内容 -->
@@ -162,8 +162,8 @@
                                                                 ContentSource="Icon" 
                                                                 HorizontalAlignment="Center" 
                                                                 VerticalAlignment="Center" 
-                                                                Width="20" 
-                                                                Height="20" 
+                                                                Width="24" 
+                                                                Height="24" 
                                                                 Margin="3"/>
 
                                                 <!-- 菜单项内容 -->

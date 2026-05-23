@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using AerialCity.Core.Primitives;
 using AerialCity.Core.Storage;
+using AerialCity.GraphStore.Model;
 
 namespace AerialCity.Storage;
 
@@ -14,6 +15,7 @@ public sealed class MemoryStorageEngine : IStorageEngine
 {
     private readonly ConcurrentDictionary<AerialId, byte[]> _segments = new();
     private readonly ConcurrentDictionary<string, byte[]> _blobs = new();
+    private readonly ConcurrentDictionary<AerialId, GraphEdge> _graphEdges = new();
 
     public Task WriteSegmentAsync(Segment segment, CancellationToken ct = default)
     {
@@ -50,6 +52,26 @@ public sealed class MemoryStorageEngine : IStorageEngine
 
     public Task<ReadOnlyMemory<byte>?> ReadBlobAsync(string name, CancellationToken ct = default) =>
         Task.FromResult<ReadOnlyMemory<byte>?>(_blobs.TryGetValue(name, out var data) ? data : null);
+
+    public Task WriteGraphEdgeAsync(
+        GraphEdge edge,
+        EmbeddingVector sourceVector,
+        EmbeddingVector targetVector,
+        CancellationToken ct = default)
+    {
+        _graphEdges[edge.Id] = edge;
+        return Task.CompletedTask;
+    }
+
+    public async IAsyncEnumerable<GraphEdge> ListGraphEdgesAsync(
+        [EnumeratorCancellation] CancellationToken ct = default)
+    {
+        foreach (var edge in _graphEdges.Values)
+        {
+            ct.ThrowIfCancellationRequested();
+            yield return edge;
+        }
+    }
 
     public Task FlushAsync(CancellationToken ct = default) => Task.CompletedTask;
 

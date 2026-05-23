@@ -1,4 +1,5 @@
 using AerialCity.Core.Primitives;
+using AerialCity.GraphStore.Model;
 
 namespace AerialCity.Core.Storage;
 
@@ -25,6 +26,16 @@ public interface IStorageEngine : IAsyncDisposable
 
     /// <summary>Reads a named blob. Returns null if not found.</summary>
     Task<ReadOnlyMemory<byte>?> ReadBlobAsync(string name, CancellationToken ct = default);
+
+    /// <summary>Writes a vector-backed graph edge to persistent storage.</summary>
+    Task WriteGraphEdgeAsync(
+        GraphEdge edge,
+        EmbeddingVector sourceVector,
+        EmbeddingVector targetVector,
+        CancellationToken ct = default);
+
+    /// <summary>Enumerates persistent graph edges known to the store.</summary>
+    IAsyncEnumerable<GraphEdge> ListGraphEdgesAsync(CancellationToken ct = default);
 
     /// <summary>Flushes all pending writes to durable storage.</summary>
     Task FlushAsync(CancellationToken ct = default);

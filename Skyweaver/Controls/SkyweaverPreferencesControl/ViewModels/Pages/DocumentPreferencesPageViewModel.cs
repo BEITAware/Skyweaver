@@ -6,107 +6,92 @@ using System.Windows.Input;
 using Skyweaver.Commands;
 using Skyweaver.Infrastructure.Mvvm;
 using Skyweaver.Models.Multimodal;
-using Skyweaver.Services.Directories;
-using Skyweaver.Services.Localization;
 using Skyweaver.Services.Multimodal;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
 {
-    /// <summary>
-    /// 文档首选项页面视图模型，用于管理多模态文档处理的配置。
-    /// </summary>
     public sealed class DocumentPreferencesPageViewModel : ObservableObject
     {
+        private readonly MultimodalRuntime _runtime;
         private readonly MultimodalConfiguration _configuration;
         private string _statusMessage;
 
         public DocumentPreferencesPageViewModel()
         {
-            _configuration = MultimodalRuntime.Instance.GetConfiguration();
-            _statusMessage = L("Multimodal.Document.Status.Loaded", "多模态配置已加载。");
+            _runtime = MultimodalRuntime.Instance;
+            _configuration = _runtime.GetConfiguration();
+            _statusMessage = L("Document.Status.Loaded", "文档首选项已加载。");
 
             OpenConfigurationDirectoryCommand = new RelayCommand(OpenConfigurationDirectory);
             LocalizationRuntime.Instance.LanguageChanged += (_, _) => RefreshLocalizedText();
         }
 
-        /// <summary>
-        /// 页面标题。
-        /// </summary>
-        public string Title => L("Multimodal.Document.Page.Title", "文档");
+        public string Title => L("Document.Page.Title", "文档");
 
-        /// <summary>
-        /// 页面描述。
-        /// </summary>
-        public string Description => L("Multimodal.Document.Page.Description", "配置多模态文档处理，例如文档字符识别与硬件加速方案。");
+        public string Description => L("Document.Page.Description", "配置文档解析和字符识别首选项，优化多模态处理能力。");
 
-        /// <summary>
-        /// 硬件计算方案选项列表。
-        /// </summary>
-        public IEnumerable<string> HardwareSolutions => new[] { "CPU", "GPU" };
+        public string Hint => L("Document.Page.Hint", "修改后会立即写入 Multimodal.xml。");
 
-        /// <summary>
-        /// 是否启用文档字符识别。
-        /// </summary>
-        public bool EnableDocumentCharacterRecognition
+        public string ConfigurationFilePath => _runtime.ConfigurationFilePath;
+
+        public bool EnableOcr
         {
-            get => _configuration.EnableDocumentCharacterRecognition;
+            get => _configuration.EnableOcr;
             set
             {
-                if (_configuration.EnableDocumentCharacterRecognition == value)
+                if (_configuration.EnableOcr == value)
                 {
                     return;
                 }
 
-                _configuration.EnableDocumentCharacterRecognition = value;
+                _configuration.EnableOcr = value;
                 OnPropertyChanged();
-                PersistConfiguration(L("Multimodal.Document.Status.EnableOcrSaved", "启用文档字符识别设置已保存。"));
+                PersistConfiguration(L("Document.Status.OcrSaved", "启用文档字符识别设置已保存。"));
             }
         }
 
-        /// <summary>
-        /// 硬件方案。
-        /// </summary>
-        public string HardwareSolution
+        public OcrHardwareOption SelectedHardwareOption
         {
-            get => _configuration.HardwareSolution;
+            get => _configuration.HardwareOption;
             set
             {
-                var trimmedValue = value?.Trim() ?? "CPU";
-                if (_configuration.HardwareSolution == trimmedValue)
+                if (_configuration.HardwareOption == value)
                 {
                     return;
                 }
 
-                _configuration.HardwareSolution = trimmedValue;
+                _configuration.HardwareOption = value;
                 OnPropertyChanged();
-                PersistConfiguration(string.Format(L("Multimodal.Document.Status.HardwareSolutionSaved", "硬件方案已保存为 {0}。"), trimmedValue));
+                PersistConfiguration(string.Format(L("Document.Status.HardwareOptionSaved", "硬件方案已设为 {0}。"), GetHardwareOptionDisplayName(value)));
             }
         }
 
-        /// <summary>
-        /// 配置文件绝对路径。
-        /// </summary>
-        public string ConfigurationFilePath => MultimodalRuntime.Instance.ConfigurationFilePath;
+        public IEnumerable<OcrHardwareOptionOption> HardwareOptions => new[]
+        {
+            new OcrHardwareOptionOption { Option = OcrHardwareOption.CPU, DisplayName = L("Document.HardwareOption.Cpu", "CPU (中央处理器)") },
+            new OcrHardwareOptionOption { Option = OcrHardwareOption.GPU, DisplayName = L("Document.HardwareOption.Gpu", "GPU (图形处理器)") }
+        };
 
-        /// <summary>
-        /// 配置状态消息。
-        /// </summary>
         public string StatusMessage
         {
             get => _statusMessage;
             private set => SetProperty(ref _statusMessage, value);
         }
 
-        /// <summary>
-        /// 打开配置目录命令。
-        /// </summary>
         public ICommand OpenConfigurationDirectoryCommand { get; }
 
         private void OpenConfigurationDirectory()
         {
             try
             {
-                var directoryPath = Path.GetDirectoryName(ConfigurationFilePath) ?? SkyweaverDirectoryRuntime.Instance.ConfigurationDirectoryPath;
+                var directoryPath = Path.GetDirectoryName(ConfigurationFilePath) ?? string.Empty;
+                if (directoryPath.Length == 0)
+                {
+                    StatusMessage = L("Common.Status.ConfigurationDirectoryUnavailable", "无法定位配置目录。");
+                    return;
+                }
+
                 Directory.CreateDirectory(directoryPath);
                 Process.Start(new ProcessStartInfo
                 {
@@ -124,24 +109,42 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
         {
             try
             {
-                MultimodalRuntime.Instance.SaveConfiguration(_configuration);
+                _runtime.SaveConfiguration(_configuration);
                 StatusMessage = successMessage;
             }
             catch (Exception ex)
             {
-                StatusMessage = string.Format(L("EmbeddingModelConfiguration.Status.SaveFailedFormat", "保存失败：{0}"), ex.Message);
+                StatusMessage = string.Format(L("Localization.Status.SaveFailedFormat", "保存失败：{0}"), ex.Message);
             }
+        }
+
+        private string GetHardwareOptionDisplayName(OcrHardwareOption option)
+        {
+            return option switch
+            {
+                OcrHardwareOption.CPU => L("Document.HardwareOption.Cpu", "CPU"),
+                OcrHardwareOption.GPU => L("Document.HardwareOption.Gpu", "GPU"),
+                _ => option.ToString()
+            };
         }
 
         private void RefreshLocalizedText()
         {
             OnPropertyChanged(nameof(Title));
             OnPropertyChanged(nameof(Description));
+            OnPropertyChanged(nameof(Hint));
+            OnPropertyChanged(nameof(HardwareOptions));
         }
 
         private static string L(string resourceKey, string fallback)
         {
             return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
+    }
+
+    public sealed class OcrHardwareOptionOption
+    {
+        public OcrHardwareOption Option { get; init; }
+        public required string DisplayName { get; init; }
     }
 }

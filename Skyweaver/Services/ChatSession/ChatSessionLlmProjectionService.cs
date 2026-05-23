@@ -76,6 +76,8 @@ namespace Skyweaver.Services.ChatSession
         {
             ArgumentNullException.ThrowIfNull(session);
 
+            lock (session.Transcript.SyncRoot)
+            {
             var effectiveProfile = profile ?? LlmProjectionProfile.DefaultChatProfile();
             var trace = new ChatSessionProjectionTrace();
             var messages = new List<LanguageModelChatMessage>();
@@ -142,6 +144,7 @@ namespace Skyweaver.Services.ChatSession
                 Messages = ApplyTokenBudget(messages, effectiveProfile),
                 Trace = trace
             };
+            }
         }
 
         private static IReadOnlyList<ChatSessionTranscriptEntry> SelectEntries(

@@ -244,13 +244,12 @@
                       Command="{Binding PlacementTarget.Tag.RemoveMessageCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                       CommandParameter="{Binding}">
                 <MenuItem.Icon>
-                    <Border Style="{StaticResource ChatMessageContextMenuIconBadgeStyle}"
-                            Background="#66321418"
-                            BorderBrush="#99FFB1B1">
-                        <TextBlock Text="DEL"
-                                   Style="{StaticResource ChatMessageContextMenuIconTextStyle}"
-                                   Foreground="#FFFFD4D4"/>
-                    </Border>
+                    <!-- 大幅增加图标面积但不改变布局宽高，使用 ScaleTransform 缩放图片本身 -->
+                    <Image Source="pack://application:,,,/Skyweaver;component/Resources/DeleteMessage.png" Width="24" Height="24" RenderTransformOrigin="0.5,0.5">
+                        <Image.RenderTransform>
+                            <ScaleTransform ScaleX="1.6" ScaleY="1.6"/>
+                        </Image.RenderTransform>
+                    </Image>
                 </MenuItem.Icon>
                 <MenuItem.Header>
                     <StackPanel Margin="0,2">
@@ -265,9 +264,12 @@
                       Command="{Binding PlacementTarget.Tag.CopyMessageCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                       CommandParameter="{Binding}">
                 <MenuItem.Icon>
-                    <Border Style="{StaticResource ChatMessageContextMenuIconBadgeStyle}">
-                        <TextBlock Text="CPY" Style="{StaticResource ChatMessageContextMenuIconTextStyle}"/>
-                    </Border>
+                    <!-- 大幅增加图标面积但不改变布局宽高，使用 ScaleTransform 缩放图片本身 -->
+                    <Image Source="pack://application:,,,/Skyweaver;component/Resources/JustCopy.png" Width="24" Height="24" RenderTransformOrigin="0.5,0.5">
+                        <Image.RenderTransform>
+                            <ScaleTransform ScaleX="1.6" ScaleY="1.6"/>
+                        </Image.RenderTransform>
+                    </Image>
                 </MenuItem.Icon>
                 <MenuItem.Header>
                     <StackPanel Margin="0,2">
@@ -282,13 +284,12 @@
                       Command="{Binding PlacementTarget.Tag.CopyMessageAsMarkdownCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                       CommandParameter="{Binding}">
                 <MenuItem.Icon>
-                    <Border Style="{StaticResource ChatMessageContextMenuIconBadgeStyle}"
-                            Background="#55342452"
-                            BorderBrush="#9989C6FF">
-                        <TextBlock Text="MD"
-                                   Style="{StaticResource ChatMessageContextMenuIconTextStyle}"
-                                   Foreground="#FFE7DDFF"/>
-                    </Border>
+                    <!-- 大幅增加图标面积但不改变布局宽高，使用 ScaleTransform 缩放图片本身 -->
+                    <Image Source="pack://application:,,,/Skyweaver;component/Resources/CopyAsMarkdown.png" Width="24" Height="24" RenderTransformOrigin="0.5,0.5">
+                        <Image.RenderTransform>
+                            <ScaleTransform ScaleX="1.6" ScaleY="1.6"/>
+                        </Image.RenderTransform>
+                    </Image>
                 </MenuItem.Icon>
                 <MenuItem.Header>
                     <StackPanel Margin="0,2">
@@ -303,13 +304,12 @@
                       Command="{Binding PlacementTarget.Tag.CopyMessageAsPlainTextCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                       CommandParameter="{Binding}">
                 <MenuItem.Icon>
-                    <Border Style="{StaticResource ChatMessageContextMenuIconBadgeStyle}"
-                            Background="#55322E12"
-                            BorderBrush="#99FFD982">
-                        <TextBlock Text="TXT"
-                                   Style="{StaticResource ChatMessageContextMenuIconTextStyle}"
-                                   Foreground="#FFFFE7BF"/>
-                    </Border>
+                    <!-- 大幅增加图标面积但不改变布局宽高，使用 ScaleTransform 缩放图片本身 -->
+                    <Image Source="pack://application:,,,/Skyweaver;component/Resources/CopyAsText.png" Width="24" Height="24" RenderTransformOrigin="0.5,0.5">
+                        <Image.RenderTransform>
+                            <ScaleTransform ScaleX="1.6" ScaleY="1.6"/>
+                        </Image.RenderTransform>
+                    </Image>
                 </MenuItem.Icon>
                 <MenuItem.Header>
                     <StackPanel Margin="0,2">
@@ -324,13 +324,12 @@
                       Command="{Binding PlacementTarget.Tag.EditMessageCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                       CommandParameter="{Binding}">
                 <MenuItem.Icon>
-                    <Border Style="{StaticResource ChatMessageContextMenuIconBadgeStyle}"
-                            Background="#55212F21"
-                            BorderBrush="#998FE9B9">
-                        <TextBlock Text="EDT"
-                                   Style="{StaticResource ChatMessageContextMenuIconTextStyle}"
-                                   Foreground="#FFD6FFE5"/>
-                    </Border>
+                    <!-- 大幅增加图标面积但不改变布局宽高，使用 ScaleTransform 缩放图片本身 -->
+                    <Image Source="pack://application:,,,/Skyweaver;component/Resources/EditDocument.png" Width="24" Height="24" RenderTransformOrigin="0.5,0.5">
+                        <Image.RenderTransform>
+                            <ScaleTransform ScaleX="1.6" ScaleY="1.6"/>
+                        </Image.RenderTransform>
+                    </Image>
                 </MenuItem.Icon>
                 <MenuItem.Header>
                     <StackPanel Margin="0,2">
@@ -898,29 +897,55 @@
             </Grid>
         </DataTemplate>
 
+        <local:MediaResourceIconConverter x:Key="MediaResourceIconConverter"/>
+
+        <!-- 径向渐变背景，完全复刻自设计稿 -->
         <RadialGradientBrush x:Key="MediaResourceCardBackgroundBrush"
-                             RadiusX="1.012"
-                             RadiusY="0.918"
-                             Center="0.5,0.98"
-                             GradientOrigin="0.5,0.98">
+                             RadiusX="1.01282"
+                             RadiusY="0.917797"
+                             Center="0.499999,0.977749"
+                             GradientOrigin="0.499999,0.977749">
             <GradientStop Color="#C5C9CACA" Offset="0"/>
-            <GradientStop Color="#34445E7C" Offset="1"/>
+            <GradientStop Color="#34445E7C" Offset="0.988506"/>
             <RadialGradientBrush.RelativeTransform>
                 <TransformGroup>
-                    <SkewTransform CenterX="0.5" CenterY="0.98" AngleX="5"/>
-                    <RotateTransform CenterX="0.5" CenterY="0.98" Angle="70"/>
+                    <SkewTransform CenterX="0.499999" CenterY="0.977749" AngleX="5.23486" AngleY="0"/>
+                    <RotateTransform CenterX="0.499999" CenterY="0.977749" Angle="70.494"/>
                 </TransformGroup>
             </RadialGradientBrush.RelativeTransform>
         </RadialGradientBrush>
 
+        <!-- 顶部微光发光背景，完全复刻自设计稿 -->
+        <RadialGradientBrush x:Key="MediaResourceCardTopSheenBrush"
+                             RadiusX="1.18083"
+                             RadiusY="0.766856"
+                             Center="0.5,0.0499004"
+                             GradientOrigin="0.5,0.0499004">
+            <GradientStop Color="#66FFFFFF" Offset="0"/>
+            <GradientStop Color="#24FFFFFF" Offset="0.247126"/>
+            <GradientStop Color="#00FFFFFF" Offset="0.421456"/>
+        </RadialGradientBrush>
+
+        <!-- 对角线反射高光，完全复刻自设计稿 -->
         <LinearGradientBrush x:Key="MediaResourceCardHighlightBrush"
-                             StartPoint="0.04,0.18"
-                             EndPoint="1.04,0.92">
-            <GradientStop Color="#00FFFFFF" Offset="0"/>
-            <GradientStop Color="#36FFFFFF" Offset="0.28"/>
-            <GradientStop Color="#00FFFFFF" Offset="0.52"/>
-            <GradientStop Color="#30FFFFFF" Offset="0.74"/>
-            <GradientStop Color="#02FFFFFF" Offset="1"/>
+                             StartPoint="0.0274601,0.229455"
+                             EndPoint="1.2125,0.229455">
+            <LinearGradientBrush.RelativeTransform>
+                <TransformGroup>
+                    <SkewTransform CenterX="0.0274601" CenterY="0.229455" AngleX="6.38202" AngleY="0"/>
+                    <RotateTransform CenterX="0.0274601" CenterY="0.229455" Angle="32.3018"/>
+                </TransformGroup>
+            </LinearGradientBrush.RelativeTransform>
+            <LinearGradientBrush.GradientStops>
+                <GradientStop Color="#00FFFFFF" Offset="0"/>
+                <GradientStop Color="#2CFFFFFF" Offset="0.254789"/>
+                <GradientStop Color="#00FFFFFF" Offset="0.513412"/>
+                <GradientStop Color="#39FFFFFF" Offset="0.701149"/>
+                <GradientStop Color="#00FFFFFF" Offset="0.720307"/>
+                <GradientStop Color="#33FFFFFF" Offset="0.856322"/>
+                <GradientStop Color="#03FFFFFF" Offset="0.89272"/>
+                <GradientStop Color="#00FFFFFF" Offset="0.988506"/>
+            </LinearGradientBrush.GradientStops>
         </LinearGradientBrush>
 
         <DataTemplate x:Key="MediaResourceMessagePartTemplate" DataType="{x:Type models:ChatMessagePartModel}">
@@ -933,37 +958,68 @@
                     CornerRadius="8"
                     Padding="12">
                 <Grid>
+                    <!-- 水印图 -->
+                    <Image Source="pack://application:,,,/Skyweaver;component/Resources/DocumentCardBackgroundSheen.png"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Top"
+                           Opacity="0.2"
+                           Stretch="None"
+                           IsHitTestVisible="False">
+                        <Image.RenderTransform>
+                            <MatrixTransform Matrix="0.478556,-0.138427,0.138427,0.478556,-0.000640869,70.8747"/>
+                        </Image.RenderTransform>
+                    </Image>
+
+                    <!-- 顶部微光高光 -->
+                    <Border Background="{StaticResource MediaResourceCardTopSheenBrush}"
+                            CornerRadius="7"
+                            IsHitTestVisible="False"/>
+
+                    <!-- 对角线反射高光 -->
                     <Border Background="{StaticResource MediaResourceCardHighlightBrush}"
                             Opacity="0.95"
                             CornerRadius="7"
                             IsHitTestVisible="False"/>
+
                     <Grid Margin="2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="46"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Border Width="36"
-                                Height="42"
-                                CornerRadius="4"
-                                Background="#EEFAFDFF"
-                                BorderBrush="#AA182433"
-                                BorderThickness="1"
-                                VerticalAlignment="Top">
-                            <Grid>
-                                <Path Data="M 25,0 L 36,11 L 25,11 Z"
-                                      Fill="#FFC8E7F0"
-                                      HorizontalAlignment="Right"
-                                      VerticalAlignment="Top"/>
-                                <TextBlock Text="{Binding BadgeText}"
-                                           Margin="3,14,3,0"
-                                           TextAlignment="Center"
-                                           Foreground="#FF152635"
-                                           FontSize="8"
-                                           FontWeight="Bold"
-                                           TextTrimming="CharacterEllipsis"/>
-                            </Grid>
-                        </Border>
+                        <!-- 图标区域 -->
+                        <Grid Width="36" Height="42" VerticalAlignment="Top">
+                            <!-- 如果有特定的 Image 图标，则显示 Image -->
+                            <Image Source="{Binding Converter={StaticResource MediaResourceIconConverter}}"
+                                   Width="36"
+                                   Height="42"
+                                   Stretch="Uniform"
+                                   x:Name="IconImage"/>
+                            
+                            <!-- 备用图标（以防 Converter 返回 null 或者其它） -->
+                            <Border x:Name="FallbackIconBorder"
+                                    Width="36"
+                                    Height="42"
+                                    CornerRadius="4"
+                                    Background="#EEFAFDFF"
+                                    BorderBrush="#AA182433"
+                                    BorderThickness="1"
+                                    Visibility="Collapsed">
+                                <Grid>
+                                    <Path Data="M 25,0 L 36,11 L 25,11 Z"
+                                          Fill="#FFC8E7F0"
+                                          HorizontalAlignment="Right"
+                                          VerticalAlignment="Top"/>
+                                    <TextBlock Text="{Binding BadgeText}"
+                                               Margin="3,14,3,0"
+                                               TextAlignment="Center"
+                                               Foreground="#FF152635"
+                                               FontSize="8"
+                                               FontWeight="Bold"
+                                               TextTrimming="CharacterEllipsis"/>
+                                </Grid>
+                            </Border>
+                        </Grid>
 
                         <StackPanel Grid.Column="1">
                             <DockPanel LastChildFill="True">
@@ -1069,6 +1125,12 @@
                     </Grid>
                 </Grid>
             </Border>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding ElementName=IconImage, Path=Source}" Value="{x:Null}">
+                    <Setter TargetName="FallbackIconBorder" Property="Visibility" Value="Visible"/>
+                    <Setter TargetName="IconImage" Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
         </DataTemplate>
 
         <DataTemplate x:Key="ReasoningMessagePartTemplate" DataType="{x:Type models:ChatMessagePartModel}">
@@ -1331,7 +1393,7 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="Padding" Value="16,10"/>
             <Setter Property="Margin" Value="0,0,5,0"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -1554,39 +1616,44 @@
                             <StackPanel Orientation="Horizontal">
                                 <Button Command="{Binding AddImageCommand}" Style="{StaticResource MediaToolbarButtonStyle}">
                                     <StackPanel Orientation="Horizontal">
-                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/image.png" Width="20" Height="20" Margin="0,0,5,0"/>
-                                        <TextBlock Text="{DynamicResource ChatSessionControl.AddImage}" VerticalAlignment="Center" FontSize="12"/>
+                                        <!-- 加大按钮的图标本身和文字字号 -->
+                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/image.png" Width="30" Height="30" Margin="0,0,5,0"/>
+                                        <TextBlock Text="{DynamicResource ChatSessionControl.AddImage}" VerticalAlignment="Center" FontSize="13"/>
                                     </StackPanel>
                                 </Button>
                                 <Button Command="{Binding AddClipboardCommand}" Style="{StaticResource MediaToolbarButtonStyle}">
                                     <StackPanel Orientation="Horizontal">
-                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/imagealt.png" Width="20" Height="20" Margin="0,0,5,0"/>
-                                        <TextBlock Text="{DynamicResource ChatSessionControl.AddClipboard}" VerticalAlignment="Center" FontSize="12"/>
+                                        <!-- 加大按钮的图标本身和文字字号 -->
+                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/imagealt.png" Width="30" Height="30" Margin="0,0,5,0"/>
+                                        <TextBlock Text="{DynamicResource ChatSessionControl.AddClipboard}" VerticalAlignment="Center" FontSize="13"/>
                                     </StackPanel>
                                 </Button>
 
-                                <Rectangle Width="1" Height="20" Fill="#33FFFFFF" Margin="5,0"/>
+                                <Rectangle Width="1" Height="30" Fill="#33FFFFFF" Margin="5,0"/>
 
                                 <Button Command="{Binding AddAudioCommand}" Style="{StaticResource MediaToolbarButtonStyle}">
                                     <StackPanel Orientation="Horizontal">
-                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/RawImage.png" Width="20" Height="20" Margin="0,0,5,0"/>
-                                        <TextBlock Text="{DynamicResource ChatSessionControl.Voice}" VerticalAlignment="Center" FontSize="12"/>
+                                        <!-- 加大按钮的图标本身和文字字号 -->
+                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/Audio.png" Width="30" Height="30" Margin="0,0,5,0"/>
+                                        <TextBlock Text="{DynamicResource ChatSessionControl.Voice}" VerticalAlignment="Center" FontSize="13"/>
                                     </StackPanel>
                                 </Button>
 
                                 <Button Command="{Binding AddVideoCommand}" Style="{StaticResource MediaToolbarButtonStyle}">
                                     <StackPanel Orientation="Horizontal">
-                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/imagealt.png" Width="20" Height="20" Margin="0,0,5,0"/>
-                                        <TextBlock Text="{DynamicResource ChatSessionControl.AddVideo}" VerticalAlignment="Center" FontSize="12"/>
+                                        <!-- 加大按钮的图标本身和文字字号 -->
+                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/Video.png" Width="30" Height="30" Margin="0,0,5,0"/>
+                                        <TextBlock Text="{DynamicResource ChatSessionControl.AddVideo}" VerticalAlignment="Center" FontSize="13"/>
                                     </StackPanel>
                                 </Button>
 
-                                <Rectangle Width="1" Height="20" Fill="#33FFFFFF" Margin="5,0"/>
+                                <Rectangle Width="1" Height="30" Fill="#33FFFFFF" Margin="5,0"/>
 
                                 <Button Command="{Binding AddDocumentCommand}" Style="{StaticResource MediaToolbarButtonStyle}">
                                     <StackPanel Orientation="Horizontal">
-                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/imgpp.png" Width="20" Height="20" Margin="0,0,5,0"/>
-                                        <TextBlock Text="{DynamicResource ChatSessionControl.AddFile}" VerticalAlignment="Center" FontSize="12"/>
+                                        <!-- 加大按钮的图标本身和文字字号 -->
+                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/UploadFile.png" Width="30" Height="30" Margin="0,0,5,0"/>
+                                        <TextBlock Text="{DynamicResource ChatSessionControl.AddFile}" VerticalAlignment="Center" FontSize="13"/>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>

@@ -38,6 +38,9 @@ namespace Skyweaver.Controls.ShellChatSessionControl.ViewModels
         private ChatSessionModel? _sessionModel;
         private CancellationTokenSource? _executionCancellationSource;
         private DateTime _lastStreamingProjectionRefreshUtc = DateTime.MinValue;
+        private readonly object _streamingRuntimeEventSync = new();
+        private ChatSessionRuntimeEvent? _pendingStreamingRuntimeEvent;
+        private bool _isStreamingRuntimeEventDispatchQueued;
         private string _inputText = string.Empty;
         private string _statusText = L("ShellChat.Status.Ready", "Ready");
         private bool _isExecutionActive;
@@ -262,7 +265,58 @@ namespace Skyweaver.Controls.ShellChatSessionControl.ViewModels
                 return ValueTask.CompletedTask;
             }
 
+            if (IsHighFrequencyStreamingProjectionEvent(runtimeEvent))
+            {
+                QueueStreamingRuntimeEvent(runtimeEvent, dispatcher);
+                return ValueTask.CompletedTask;
+            }
+
+            ClearPendingStreamingRuntimeEvent();
             return new ValueTask(dispatcher.InvokeAsync(() => ApplyRuntimeEvent(runtimeEvent)).Task);
+        }
+
+        private void QueueStreamingRuntimeEvent(
+            ChatSessionRuntimeEvent runtimeEvent,
+            System.Windows.Threading.Dispatcher dispatcher)
+        {
+            lock (_streamingRuntimeEventSync)
+            {
+                _pendingStreamingRuntimeEvent = runtimeEvent;
+                if (_isStreamingRuntimeEventDispatchQueued)
+                {
+                    return;
+                }
+
+                _isStreamingRuntimeEventDispatchQueued = true;
+            }
+
+            dispatcher.BeginInvoke(
+                new Action(FlushPendingStreamingRuntimeEvent),
+                System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+        private void FlushPendingStreamingRuntimeEvent()
+        {
+            ChatSessionRuntimeEvent? runtimeEvent;
+            lock (_streamingRuntimeEventSync)
+            {
+                runtimeEvent = _pendingStreamingRuntimeEvent;
+                _pendingStreamingRuntimeEvent = null;
+                _isStreamingRuntimeEventDispatchQueued = false;
+            }
+
+            if (runtimeEvent != null)
+            {
+                ApplyRuntimeEvent(runtimeEvent);
+            }
+        }
+
+        private void ClearPendingStreamingRuntimeEvent()
+        {
+            lock (_streamingRuntimeEventSync)
+            {
+                _pendingStreamingRuntimeEvent = null;
+            }
         }
 
         private void ApplyRuntimeEvent(ChatSessionRuntimeEvent runtimeEvent)
@@ -475,41 +529,44 @@ namespace Skyweaver.Controls.ShellChatSessionControl.ViewModels
                 return;
             }
 
-            if (session.Transcript.Entries.Any(entry =>
-                    entry.Metadata.TryGetValue("ShellContextSnapshot", out var value) &&
-                    string.Equals(value, "true", StringComparison.OrdinalIgnoreCase)))
+            lock (session.Transcript.SyncRoot)
             {
-                return;
+                if (session.Transcript.Entries.Any(entry =>
+                        entry.Metadata.TryGetValue("ShellContextSnapshot", out var value) &&
+                        string.Equals(value, "true", StringComparison.OrdinalIgnoreCase)))
+                {
+                    return;
+                }
+
+                var entry = new ChatSessionTranscriptEntry
+                {
+                    EntryId = Guid.NewGuid().ToString("N"),
+                    Kind = ChatSessionTranscriptEntryKind.StructuredPayload,
+                    Role = ChatSessionParticipantRole.Runtime,
+                    TimestampUtc = DateTime.UtcNow,
+                    Visibility = TranscriptVisibility.InternalOnly,
+                    LlmPolicy = TranscriptLlmPolicy.Exclude,
+                    HandoffPolicy = TranscriptHandoffPolicy.ExcludeByDefault,
+                    Status = ChatSessionEntryStatus.Completed
+                };
+                entry.Metadata["ShellContextSnapshot"] = "true";
+                entry.Metadata["ShellContextInjection"] = "FirstTurnOnly";
+                entry.Blocks.Add(new ChatSessionTranscriptBlock
+                {
+                    Kind = ChatSessionTranscriptBlockKind.StructuredXml,
+                    Content = _shellContextSnapshotXml,
+                    Title = "Shell Context"
+                });
+
+                entry.Touch();
+                foreach (var block in entry.Blocks)
+                {
+                    block.Touch();
+                }
+
+                session.Transcript.Entries.Add(entry);
+                session.Transcript.Touch();
             }
-
-            var entry = new ChatSessionTranscriptEntry
-            {
-                EntryId = Guid.NewGuid().ToString("N"),
-                Kind = ChatSessionTranscriptEntryKind.StructuredPayload,
-                Role = ChatSessionParticipantRole.Runtime,
-                TimestampUtc = DateTime.UtcNow,
-                Visibility = TranscriptVisibility.InternalOnly,
-                LlmPolicy = TranscriptLlmPolicy.Exclude,
-                HandoffPolicy = TranscriptHandoffPolicy.ExcludeByDefault,
-                Status = ChatSessionEntryStatus.Completed
-            };
-            entry.Metadata["ShellContextSnapshot"] = "true";
-            entry.Metadata["ShellContextInjection"] = "FirstTurnOnly";
-            entry.Blocks.Add(new ChatSessionTranscriptBlock
-            {
-                Kind = ChatSessionTranscriptBlockKind.StructuredXml,
-                Content = _shellContextSnapshotXml,
-                Title = "Shell Context"
-            });
-
-            entry.Touch();
-            foreach (var block in entry.Blocks)
-            {
-                block.Touch();
-            }
-
-            session.Transcript.Entries.Add(entry);
-            session.Transcript.Touch();
         }
 
         private string CreateUniqueShellSessionName()

@@ -2,17 +2,20 @@ using System;
 using System.IO;
 using System.Xml.Linq;
 using Skyweaver.Models.Multimodal;
-using Skyweaver.Services.Directories;
 
 namespace Skyweaver.Services.Multimodal
 {
     public sealed class MultimodalConfigurationRepository
     {
+        private readonly MultimodalPathProvider _pathProvider;
         private readonly object _syncRoot = new();
 
-        public string ConfigurationDirectoryPath => SkyweaverDirectoryRuntime.Instance.ConfigurationDirectoryPath;
+        public MultimodalConfigurationRepository(MultimodalPathProvider pathProvider)
+        {
+            _pathProvider = pathProvider;
+        }
 
-        public string ConfigurationFilePath => Path.Combine(ConfigurationDirectoryPath, "MultimodalPreferences.xml");
+        public string ConfigurationFilePath => _pathProvider.ConfigurationFilePath;
 
         public MultimodalConfiguration Load()
         {
@@ -22,7 +25,7 @@ namespace Skyweaver.Services.Multimodal
 
                 if (!File.Exists(ConfigurationFilePath))
                 {
-                    var configuration = new MultimodalConfiguration();
+                    var configuration = CreateDefaultConfiguration();
                     Save(configuration);
                     return configuration;
                 }
@@ -30,24 +33,18 @@ namespace Skyweaver.Services.Multimodal
                 try
                 {
                     var document = XDocument.Load(ConfigurationFilePath);
-                    var root = document.Root ?? throw new InvalidDataException("MultimodalPreferences.xml is missing its root element.");
-                    
-                    var enableOcrStr = (string?)root.Attribute("EnableDocumentCharacterRecognition") ?? (string?)root.Element("EnableDocumentCharacterRecognition") ?? "false";
-                    bool.TryParse(enableOcrStr, out var enableOcr);
-
-                    var hardwareSolution = (string?)root.Attribute("HardwareSolution") ?? (string?)root.Element("HardwareSolution") ?? "CPU";
+                    var root = document.Root ?? throw new InvalidDataException("Multimodal 配置 XML 缺少根节点。");
 
                     return new MultimodalConfiguration
                     {
-                        EnableDocumentCharacterRecognition = enableOcr,
-                        HardwareSolution = hardwareSolution
+                        EnableOcr = (bool?)root.Element("EnableOcr") ?? false,
+                        HardwareOption = ReadEnum(root.Element("HardwareOption"), OcrHardwareOption.CPU)
                     };
                 }
-                catch
+                catch (Exception)
                 {
-                    var configuration = new MultimodalConfiguration();
-                    Save(configuration);
-                    return configuration;
+                    // 解析发生任何异常时回退到默认配置
+                    return CreateDefaultConfiguration();
                 }
             }
         }
@@ -61,12 +58,10 @@ namespace Skyweaver.Services.Multimodal
                 EnsureConfigurationDirectory();
 
                 var document = new XDocument(
-                    new XElement("MultimodalPreferences",
+                    new XElement("MultimodalConfiguration",
                         new XAttribute("SchemaVersion", 1),
-                        new XAttribute("EnableDocumentCharacterRecognition", configuration.EnableDocumentCharacterRecognition),
-                        new XAttribute("HardwareSolution", configuration.HardwareSolution)
-                    )
-                );
+                        new XElement("EnableOcr", configuration.EnableOcr),
+                        new XElement("HardwareOption", configuration.HardwareOption.ToString())));
 
                 document.Save(ConfigurationFilePath);
             }
@@ -74,7 +69,18 @@ namespace Skyweaver.Services.Multimodal
 
         private void EnsureConfigurationDirectory()
         {
-            Directory.CreateDirectory(ConfigurationDirectoryPath);
+            Directory.CreateDirectory(_pathProvider.ConfigurationDirectoryPath);
+        }
+
+        private static MultimodalConfiguration CreateDefaultConfiguration()
+        {
+            return new MultimodalConfiguration();
+        }
+
+        private static T ReadEnum<T>(XElement? element, T fallback) where T : struct, Enum
+        {
+            var text = (string?)element;
+            return Enum.TryParse<T>(text, out var value) ? value : fallback;
         }
     }
 }

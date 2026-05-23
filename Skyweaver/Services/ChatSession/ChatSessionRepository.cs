@@ -123,10 +123,14 @@ namespace Skyweaver.Services.ChatSession
             ChatSessionResourceLayout.EnsureResources(session);
 
             session.UpdatedAtUtc = DateTime.UtcNow;
-            session.Transcript.SchemaVersion = 3;
-            session.Transcript.RebuildIndex();
+            XDocument document;
+            lock (session.Transcript.SyncRoot)
+            {
+                session.Transcript.SchemaVersion = 3;
+                session.Transcript.RebuildIndex();
+                document = CreateDocument(session);
+            }
 
-            var document = CreateDocument(session);
             SaveAtomically(document, session.SessionFilePath);
         }
 

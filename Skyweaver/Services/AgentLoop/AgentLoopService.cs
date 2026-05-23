@@ -18,6 +18,8 @@ namespace Skyweaver.Services.AgentLoop
         private const string ToolParseErrorName = "_tool_parse_error";
         private const string SyncToolTagName = "Tool";
         private const string AsyncToolTagName = "ToolAsync";
+        private static readonly TimeSpan StreamingTokenUsageRefreshInterval = TimeSpan.FromMilliseconds(500);
+        private static readonly TimeSpan StreamingProtocolRefreshInterval = TimeSpan.FromMilliseconds(16);
         private const double MinCompactionTriggerRatio = 0.8d;
         private const string MinCompactionLayerKey = "MinCompaction";
 
@@ -825,7 +827,11 @@ namespace Skyweaver.Services.AgentLoop
                         ? AgentLoopOutputKind.StructuredXml
                         : AgentLoopOutputKind.NaturalLanguage,
                     request.EnableGemmaThoughtCompatibility);
-                var streamingUpdates = new List<AgentLoopStreamingUpdateDebugSnapshot>();
+                List<AgentLoopStreamingUpdateDebugSnapshot>? streamingUpdates = debugRunContext == null
+                    ? null
+                    : new List<AgentLoopStreamingUpdateDebugSnapshot>();
+                var lastStreamingTokenUsageRefreshUtc = DateTime.MinValue;
+                var lastStreamingProtocolRefreshUtc = DateTime.MinValue;
 
                 AgentLoopTokenUsageInfo BuildStreamingTokenUsage()
                 {
@@ -834,10 +840,59 @@ namespace Skyweaver.Services.AgentLoop
                         ContextWindowTokens = candidate.EffectiveContextWindowTokens,
                         EstimatedInputTokenCount = estimatedInputTokenCount,
                         EstimatedOutputTokenCount =
-                            AgentLoopTokenCounter.EstimateText(rawContentBuilder.ToString()) +
-                            AgentLoopTokenCounter.EstimateText(rawReasoningContentBuilder.ToString()),
+                            EstimateTextLength(rawContentBuilder.Length) +
+                            EstimateTextLength(rawReasoningContentBuilder.Length),
                         ModelId = modelId
                     };
+                }
+
+                static int EstimateTextLength(int length)
+                {
+                    return length <= 0
+                        ? 0
+                        : Math.Max(1, (int)Math.Ceiling(length / 4.0d));
+                }
+
+                AgentLoopTokenUsageInfo? TryBuildStreamingTokenUsage(bool force = false)
+                {
+                    if (onEventAsync == null)
+                    {
+                        return null;
+                    }
+
+                    var now = DateTime.UtcNow;
+                    if (!force && now - lastStreamingTokenUsageRefreshUtc < StreamingTokenUsageRefreshInterval)
+                    {
+                        return null;
+                    }
+
+                    lastStreamingTokenUsageRefreshUtc = now;
+                    return BuildStreamingTokenUsage();
+                }
+
+                IReadOnlyList<AgentLoopStreamingUpdateDebugSnapshot> GetStreamingUpdatesForDebug()
+                {
+                    return streamingUpdates != null
+                        ? streamingUpdates
+                        : Array.Empty<AgentLoopStreamingUpdateDebugSnapshot>();
+                }
+
+                bool ShouldRefreshStreamingProtocolProjection(bool force = false)
+                {
+                    if (force)
+                    {
+                        lastStreamingProtocolRefreshUtc = DateTime.UtcNow;
+                        return true;
+                    }
+
+                    var now = DateTime.UtcNow;
+                    if (now - lastStreamingProtocolRefreshUtc < StreamingProtocolRefreshInterval)
+                    {
+                        return false;
+                    }
+
+                    lastStreamingProtocolRefreshUtc = now;
+                    return true;
                 }
 
                 try
@@ -849,7 +904,7 @@ namespace Skyweaver.Services.AgentLoop
                             Kind = AgentLoopRuntimeEventKind.IterationStarted,
                             IterationNumber = iterationNumber,
                             ModelId = modelId,
-                            TokenUsage = BuildStreamingTokenUsage()
+                            TokenUsage = TryBuildStreamingTokenUsage(force: true)
                         },
                         cancellationToken).ConfigureAwait(false);
 
@@ -887,7 +942,7 @@ namespace Skyweaver.Services.AgentLoop
                                     IterationNumber = iterationNumber,
                                     ModelId = modelId,
                                     ReasoningDelta = update.ReasoningTextDelta,
-                                    TokenUsage = BuildStreamingTokenUsage()
+                                    TokenUsage = TryBuildStreamingTokenUsage()
                                 },
                                 cancellationToken).ConfigureAwait(false);
                         }
@@ -900,18 +955,28 @@ namespace Skyweaver.Services.AgentLoop
                             rawContentBuilder.Append(update.TextDelta);
                         }
 
-                        streamingUpdates.Add(new AgentLoopStreamingUpdateDebugSnapshot
+                        if (streamingUpdates != null)
                         {
-                            SequenceNumber = streamingUpdates.Count + 1,
-                            ReceivedAtLocal = DateTimeOffset.Now,
-                            Update = update,
-                            WasAppendedToRawContent = wasAppendedToRawContent,
-                            RawContentLengthBeforeAppend = rawContentLengthBeforeAppend,
-                            RawContentLengthAfterAppend = rawContentBuilder.Length,
-                            RawContentTailAfterAppend = GetStringBuilderTail(rawContentBuilder, StreamingTraceRawContentTailLength)
-                        });
+                            streamingUpdates.Add(new AgentLoopStreamingUpdateDebugSnapshot
+                            {
+                                SequenceNumber = streamingUpdates.Count + 1,
+                                ReceivedAtLocal = DateTimeOffset.Now,
+                                Update = update,
+                                WasAppendedToRawContent = wasAppendedToRawContent,
+                                RawContentLengthBeforeAppend = rawContentLengthBeforeAppend,
+                                RawContentLengthAfterAppend = rawContentBuilder.Length,
+                                RawContentTailAfterAppend = GetStringBuilderTail(
+                                    rawContentBuilder,
+                                    StreamingTraceRawContentTailLength)
+                            });
+                        }
 
                         if (!wasAppendedToRawContent)
+                        {
+                            continue;
+                        }
+
+                        if (!ShouldRefreshStreamingProtocolProjection())
                         {
                             continue;
                         }
@@ -933,12 +998,13 @@ namespace Skyweaver.Services.AgentLoop
                             cancellationToken).ConfigureAwait(false);
                         previousToolCallSnapshots = currentToolCallSnapshots;
 
+                        var presentationDeltas = presentationTracker.ExtractDeltas(currentRawContent, isFinal: false);
                         await PublishPresentationDeltasAsync(
                             onEventAsync,
-                            presentationTracker.ExtractDeltas(currentRawContent, isFinal: false),
+                            presentationDeltas,
                             iterationNumber,
                             modelId,
-                            BuildStreamingTokenUsage(),
+                            presentationDeltas.Count > 0 ? TryBuildStreamingTokenUsage() : null,
                             cancellationToken).ConfigureAwait(false);
                     }
 
@@ -977,12 +1043,13 @@ namespace Skyweaver.Services.AgentLoop
                         modelId,
                         cancellationToken).ConfigureAwait(false);
 
+                    var finalPresentationDeltas = presentationTracker.ExtractDeltas(rawContent, isFinal: true);
                     await PublishPresentationDeltasAsync(
                         onEventAsync,
-                        presentationTracker.ExtractDeltas(rawContent, isFinal: true),
+                        finalPresentationDeltas,
                         iterationNumber,
                         modelId,
-                        BuildStreamingTokenUsage(),
+                        finalPresentationDeltas.Count > 0 ? TryBuildStreamingTokenUsage(force: true) : null,
                         cancellationToken).ConfigureAwait(false);
                     var hasToolActivity = assistantResponse.GetToolCallParts().Count > 0;
 
@@ -1023,7 +1090,7 @@ namespace Skyweaver.Services.AgentLoop
                             iterationNumber,
                             attemptNumber,
                             modelId,
-                            streamingUpdates,
+                            GetStreamingUpdatesForDebug(),
                             rawContent,
                             hasStartedStreaming,
                             completedNormally: true,
@@ -1057,7 +1124,7 @@ namespace Skyweaver.Services.AgentLoop
                             iterationNumber,
                             attemptNumber,
                             modelId,
-                            streamingUpdates,
+                            GetStreamingUpdatesForDebug(),
                             rawContent,
                             hasStartedStreaming,
                             completedNormally: true,
@@ -1096,7 +1163,7 @@ namespace Skyweaver.Services.AgentLoop
                         iterationNumber,
                         attemptNumber,
                         modelId,
-                        streamingUpdates,
+                        GetStreamingUpdatesForDebug(),
                         rawContent,
                         hasStartedStreaming,
                         completedNormally: true,
@@ -1124,7 +1191,7 @@ namespace Skyweaver.Services.AgentLoop
                         iterationNumber,
                         attemptNumber,
                         modelId,
-                        streamingUpdates,
+                        GetStreamingUpdatesForDebug(),
                         rawContentBuilder.ToString(),
                         hasStartedStreaming,
                         completedNormally: false,

@@ -60,7 +60,7 @@ public sealed class Segment
     /// <summary>
     /// The name of the collection this segment belongs to within the database.
     /// </summary>
-    public string? CollectionName { get; init; }
+    public string? CollectionName { get; set; }
 
     /// <summary>
     /// Extensible key-value metadata attached to this segment.

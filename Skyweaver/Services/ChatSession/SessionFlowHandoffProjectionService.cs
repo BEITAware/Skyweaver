@@ -21,6 +21,8 @@ namespace Skyweaver.Services.ChatSession
         {
             ArgumentNullException.ThrowIfNull(transcript);
 
+            lock (transcript.SyncRoot)
+            {
             var entries = transcript.Entries
                 .Where(entry => string.Equals(entry.NodeId, upstreamNodeId, StringComparison.OrdinalIgnoreCase))
                 .Where(entry => ShouldInclude(entry, policy))
@@ -33,6 +35,7 @@ namespace Skyweaver.Services.ChatSession
                 .Trim();
 
             return SessionFlowPayload.FromNaturalLanguage(content);
+            }
         }
 
         private static bool ShouldInclude(

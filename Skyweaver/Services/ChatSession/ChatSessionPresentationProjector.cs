@@ -19,11 +19,21 @@ namespace Skyweaver.Services.ChatSession
         {
             ArgumentNullException.ThrowIfNull(transcript);
 
+            lock (transcript.SyncRoot)
+            {
+                return ProjectLocked(transcript.Entries, includeDebugEntries);
+            }
+        }
+
+        private static IReadOnlyList<ChatMessageModel> ProjectLocked(
+            IReadOnlyList<ChatSessionTranscriptEntry> entries,
+            bool includeDebugEntries)
+        {
             var messages = new List<ChatMessageModel>();
             var assistantGroups = new Dictionary<string, ChatMessageModel>(StringComparer.OrdinalIgnoreCase);
-            var projectionState = BuildProjectionState(transcript);
+            var projectionState = BuildProjectionState(entries);
 
-            foreach (var entry in transcript.Entries)
+            foreach (var entry in entries)
             {
                 if (!ShouldProjectEntry(entry, includeDebugEntries, projectionState))
                 {
@@ -632,12 +642,12 @@ namespace Skyweaver.Services.ChatSession
             }
         }
 
-        private static ProjectionState BuildProjectionState(ChatSessionTranscript transcript)
+        private static ProjectionState BuildProjectionState(IEnumerable<ChatSessionTranscriptEntry> entries)
         {
             var toolCallKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var mergedToolOutputsByKey = new Dictionary<string, ChatSessionTranscriptEntry>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var entry in transcript.Entries)
+            foreach (var entry in entries)
             {
                 var toolEntryKey = BuildToolEntryKey(entry.TurnId, entry.ToolCallId);
                 if (toolEntryKey.Length == 0)

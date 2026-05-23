@@ -19,7 +19,7 @@
     <system:String x:Key="Preferences.Page.SemanticSearch">Semantic Search</system:String>
     <system:String x:Key="Preferences.Page.Memory">Memory</system:String>
     <system:String x:Key="Preferences.Page.Search">Search</system:String>
-    <system:String x:Key="Preferences.Page.MultimodalDocument">Document</system:String>
+    <system:String x:Key="Preferences.Page.Document">Document</system:String>
     <system:String x:Key="Preferences.Sidebar.Title">Preferences</system:String>
     <system:String x:Key="Preferences.BottomNav.LanguageModelConfiguration">Language Model Configuration</system:String>
     <system:String x:Key="Preferences.BottomNav.EmbeddingModelConfiguration">Embedding Model Configuration</system:String>
@@ -606,17 +606,21 @@
     <system:String x:Key="Search.Status.VertexSearchModelSaved">Vertex AI search model saved.</system:String>
     <system:String x:Key="Search.Status.SaveFailedFormat">Save failed: {0}</system:String>
 
-    <system:String x:Key="Multimodal.Document.Page.Title">Document</system:String>
-    <system:String x:Key="Multimodal.Document.Page.Description">Configure multimodal document processing settings, such as document character recognition (OCR) and hardware acceleration schemes.</system:String>
-    <system:String x:Key="Multimodal.Document.Page.Hint">Changes are written to MultimodalPreferences.xml immediately.</system:String>
-    <system:String x:Key="Multimodal.Document.EnableOcr.Label">Enable Document Character Recognition</system:String>
-    <system:String x:Key="Multimodal.Document.EnableOcr.Content">Enable document character recognition (OCR)</system:String>
-    <system:String x:Key="Multimodal.Document.EnableOcr.Hint">Allows automatically recognizing text characters in images or PDFs during document processing.</system:String>
-    <system:String x:Key="Multimodal.Document.HardwareSolution.Label">Hardware Solution</system:String>
-    <system:String x:Key="Multimodal.Document.HardwareSolution.Hint">Select the hardware acceleration scheme (CPU or GPU) to use for document character recognition computation.</system:String>
-    <system:String x:Key="Multimodal.Document.Status.Loaded">Multimodal configuration loaded.</system:String>
-    <system:String x:Key="Multimodal.Document.Status.EnableOcrSaved">Enable document character recognition setting saved.</system:String>
-    <system:String x:Key="Multimodal.Document.Status.HardwareSolutionSaved">Hardware solution saved as {0}.</system:String>
+    <system:String x:Key="Document.Page.Title">Document</system:String>
+    <system:String x:Key="Document.Page.Description">Configure document parsing and character recognition preferences to optimize multimodal processing capability.</system:String>
+    <system:String x:Key="Document.Page.Hint">Changes are written to Multimodal.xml immediately.</system:String>
+    <system:String x:Key="Document.EnableOcr.Label">Enable Document OCR</system:String>
+    <system:String x:Key="Document.EnableOcr.Content">Run Optical Character Recognition (OCR)</system:String>
+    <system:String x:Key="Document.EnableOcr.Hint">When enabled, the system will automatically recognize and extract text characters from imported images and scanned PDFs.</system:String>
+    <system:String x:Key="Document.HardwareOption.Label">Hardware Option</system:String>
+    <system:String x:Key="Document.HardwareOption.Hint">Choose the hardware acceleration scheme to use during document character recognition (OCR) computations.</system:String>
+    <system:String x:Key="Document.HardwareOption.Cpu">CPU (Central Processing Unit)</system:String>
+    <system:String x:Key="Document.HardwareOption.Gpu">GPU (Graphics Processing Unit)</system:String>
+    <system:String x:Key="Document.Status.Loaded">Document preferences loaded.</system:String>
+    <system:String x:Key="Document.Status.OcrSaved">Enable Document OCR setting saved.</system:String>
+    <system:String x:Key="Document.Status.HardwareOptionSaved">Hardware option set to {0}.</system:String>
+    <system:String x:Key="Document.Instruction.1">1. Enabling document character recognition (OCR) can significantly improve the understanding quality of scanned documents or image formats, but consumes additional computing resources.</system:String>
+    <system:String x:Key="Document.Instruction.2">2. GPU mode requires the system to be equipped with compatible graphics acceleration hardware and corresponding runtimes. If not supported, it will automatically downgrade to CPU execution.</system:String>
 
     <system:String x:Key="MainWindow.Ribbon.StatusTab">Status</system:String>
     <system:String x:Key="MainWindow.Ribbon.ViewTab">View</system:String>

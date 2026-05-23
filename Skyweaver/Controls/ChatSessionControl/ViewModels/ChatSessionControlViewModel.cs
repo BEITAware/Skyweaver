@@ -43,6 +43,9 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         private string _executionStatusText = L("ChatSessionControl.Status.Ready", "就绪");
         private bool _suppressPersistence;
         private DateTime _lastStreamingProjectionRefreshUtc = DateTime.MinValue;
+        private readonly object _streamingRuntimeEventSync = new();
+        private ChatSessionRuntimeEvent? _pendingStreamingRuntimeEvent;
+        private bool _isStreamingRuntimeEventDispatchQueued;
         private CancellationTokenSource? _executionCancellationSource;
 
         private static readonly TimeSpan StreamingProjectionRefreshInterval = TimeSpan.FromMilliseconds(80);
@@ -485,7 +488,58 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                 return ValueTask.CompletedTask;
             }
 
+            if (IsHighFrequencyStreamingProjectionEvent(runtimeEvent))
+            {
+                QueueStreamingRuntimeEvent(runtimeEvent, dispatcher);
+                return ValueTask.CompletedTask;
+            }
+
+            ClearPendingStreamingRuntimeEvent();
             return new ValueTask(dispatcher.InvokeAsync(() => ApplyRuntimeEvent(runtimeEvent)).Task);
+        }
+
+        private void QueueStreamingRuntimeEvent(
+            ChatSessionRuntimeEvent runtimeEvent,
+            System.Windows.Threading.Dispatcher dispatcher)
+        {
+            lock (_streamingRuntimeEventSync)
+            {
+                _pendingStreamingRuntimeEvent = runtimeEvent;
+                if (_isStreamingRuntimeEventDispatchQueued)
+                {
+                    return;
+                }
+
+                _isStreamingRuntimeEventDispatchQueued = true;
+            }
+
+            dispatcher.BeginInvoke(
+                new Action(FlushPendingStreamingRuntimeEvent),
+                System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+        private void FlushPendingStreamingRuntimeEvent()
+        {
+            ChatSessionRuntimeEvent? runtimeEvent;
+            lock (_streamingRuntimeEventSync)
+            {
+                runtimeEvent = _pendingStreamingRuntimeEvent;
+                _pendingStreamingRuntimeEvent = null;
+                _isStreamingRuntimeEventDispatchQueued = false;
+            }
+
+            if (runtimeEvent != null)
+            {
+                ApplyRuntimeEvent(runtimeEvent);
+            }
+        }
+
+        private void ClearPendingStreamingRuntimeEvent()
+        {
+            lock (_streamingRuntimeEventSync)
+            {
+                _pendingStreamingRuntimeEvent = null;
+            }
         }
 
         private void ApplyRuntimeEvent(ChatSessionRuntimeEvent runtimeEvent)
@@ -710,32 +764,41 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
             if (sourceEntryIds.Count > 0)
             {
-                var removedEntries = _sessionModel.Transcript.Entries
-                    .Where(candidate => sourceEntryIds.Contains(candidate.EntryId))
-                    .ToArray();
+                ChatSessionTranscriptEntry[] removedEntries;
+                lock (_sessionModel.Transcript.SyncRoot)
+                {
+                    removedEntries = _sessionModel.Transcript.Entries
+                        .Where(candidate => sourceEntryIds.Contains(candidate.EntryId))
+                        .ToArray();
+                }
+
                 if (removedEntries.Length > 0)
                 {
-                    foreach (var entry in removedEntries)
+                    lock (_sessionModel.Transcript.SyncRoot)
                     {
-                        _sessionModel.Transcript.Entries.Remove(entry);
-                    }
-
-                    foreach (var turn in _sessionModel.Transcript.Turns)
-                    {
-                        if (!string.IsNullOrWhiteSpace(turn.UserEntryId) &&
-                            sourceEntryIds.Contains(turn.UserEntryId))
+                        foreach (var entry in removedEntries)
                         {
-                            turn.UserEntryId = null;
+                            _sessionModel.Transcript.Entries.Remove(entry);
                         }
 
-                        if (!string.IsNullOrWhiteSpace(turn.FinalEntryId) &&
-                            sourceEntryIds.Contains(turn.FinalEntryId))
+                        foreach (var turn in _sessionModel.Transcript.Turns)
                         {
-                            turn.FinalEntryId = null;
+                            if (!string.IsNullOrWhiteSpace(turn.UserEntryId) &&
+                                sourceEntryIds.Contains(turn.UserEntryId))
+                            {
+                                turn.UserEntryId = null;
+                            }
+
+                            if (!string.IsNullOrWhiteSpace(turn.FinalEntryId) &&
+                                sourceEntryIds.Contains(turn.FinalEntryId))
+                            {
+                                turn.FinalEntryId = null;
+                            }
                         }
+
+                        _sessionModel.Transcript.Touch();
                     }
 
-                    _sessionModel.Transcript.Touch();
                     PersistSession();
                     RefreshMessagesFromTranscript();
                     return;
@@ -750,9 +813,13 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         {
             if (_sessionModel != null)
             {
-                _sessionModel.Transcript.Turns.Clear();
-                _sessionModel.Transcript.Entries.Clear();
-                _sessionModel.Transcript.Touch();
+                lock (_sessionModel.Transcript.SyncRoot)
+                {
+                    _sessionModel.Transcript.Turns.Clear();
+                    _sessionModel.Transcript.Entries.Clear();
+                    _sessionModel.Transcript.Touch();
+                }
+
                 PersistSession();
             }
 

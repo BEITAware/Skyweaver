@@ -307,6 +307,8 @@ namespace Skyweaver.Services.Memory
             string documentPath,
             bool includeImageBlocks)
         {
+            lock (session.Transcript.SyncRoot)
+            {
             var entriesById = session.Transcript.Entries
                 .Where(entry => !string.IsNullOrWhiteSpace(entry.EntryId))
                 .ToDictionary(entry => entry.EntryId, StringComparer.OrdinalIgnoreCase);
@@ -455,6 +457,7 @@ namespace Skyweaver.Services.Memory
             }
 
             return blocks;
+            }
         }
 
         private static void AddImageMemoryBlocks(

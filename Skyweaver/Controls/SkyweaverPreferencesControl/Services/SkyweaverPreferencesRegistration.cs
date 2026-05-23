@@ -120,9 +120,9 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.Services
 
                 registry.RegisterPage("multimodal", new PreferencePageInfo
                 {
-                    Id = "preferences-multimodal-document",
+                    Id = "preferences-document",
                     DisplayName = "文档",
-                    DisplayNameResourceKey = "Preferences.Page.MultimodalDocument",
+                    DisplayNameResourceKey = "Preferences.Page.Document",
                     ViewType = typeof(DocumentPreferencesPageView),
                     ViewModelType = typeof(DocumentPreferencesPageViewModel),
                     Order = 10

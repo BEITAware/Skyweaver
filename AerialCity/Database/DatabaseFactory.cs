@@ -71,5 +71,10 @@ internal sealed class DatabaseFactory
             if (segment is not null)
                 database.IndexStoredSegment(segment);
         }
+
+        await foreach (var edge in database.Storage.ListGraphEdgesAsync(ct))
+        {
+            database.IndexGraphEdge(edge);
+        }
     }
 }

@@ -160,6 +160,65 @@ public sealed class FileStorageEngine : IStorageEngine
         return await File.ReadAllBytesAsync(path, ct);
     }
 
+    public async Task WriteGraphEdgeAsync(
+        GraphEdge edge,
+        EmbeddingVector sourceVector,
+        EmbeddingVector targetVector,
+        CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(edge);
+
+        var dimensions = sourceVector.Dimensions;
+        if (targetVector.Dimensions != dimensions)
+        {
+            throw new StorageException(
+                $"Graph edge {edge.Id} vector dimension mismatch: {dimensions} vs {targetVector.Dimensions}.");
+        }
+
+        await _writeLock.WaitAsync(ct);
+        try
+        {
+            _layout.EnsureGraphDimensionDirectory(dimensions);
+            await AcGraphStoreFile.UpsertEdgeAsync(
+                _layout,
+                dimensions,
+                AcGraphStoreFile.DefaultGraphName,
+                AcGraphEdgeRecord.FromEdge(edge, in sourceVector, in targetVector),
+                ct);
+        }
+        catch (Exception ex) when (ex is not StorageException)
+        {
+            throw new StorageException($"Failed to write graph edge {edge.Id}", ex);
+        }
+        finally { _writeLock.Release(); }
+    }
+
+    public async IAsyncEnumerable<GraphEdge> ListGraphEdgesAsync(
+        [EnumeratorCancellation] CancellationToken ct = default)
+    {
+        if (!Directory.Exists(_layout.GraphStorePath))
+            yield break;
+
+        foreach (var path in Directory.EnumerateFiles(
+                     _layout.GraphStorePath,
+                     $"*{AerialCityStorageLayout.GraphFileExtension}",
+                     SearchOption.AllDirectories))
+        {
+            ct.ThrowIfCancellationRequested();
+
+            var file = await AcGraphStoreFile.ReadExistingAsync(path, ct);
+            if (file is null)
+                continue;
+
+            foreach (var record in file.Edges)
+            {
+                ct.ThrowIfCancellationRequested();
+                if (TryCreateGraphEdge(record, out var edge))
+                    yield return edge;
+            }
+        }
+    }
+
     public async Task FlushAsync(CancellationToken ct = default)
     {
         if (_walStream is not null)
@@ -281,6 +340,33 @@ public sealed class FileStorageEngine : IStorageEngine
             Label = label,
             Properties = new Dictionary<string, object>(segment.Metadata)
         };
+    }
+
+    private static bool TryCreateGraphEdge(AcGraphEdgeRecord record, out GraphEdge edge)
+    {
+        edge = null!;
+
+        if (!AerialId.TryParse(record.Id, out var id) ||
+            !AerialId.TryParse(record.SourceId, out var sourceId) ||
+            !AerialId.TryParse(record.TargetId, out var targetId))
+        {
+            return false;
+        }
+
+        var kind = Enum.IsDefined(typeof(EdgeKind), record.KindValue)
+            ? (EdgeKind)record.KindValue
+            : EdgeKind.Custom;
+
+        var properties = new Dictionary<string, object>(StringComparer.Ordinal);
+        foreach (var (key, value) in record.Properties)
+            properties[key] = value;
+
+        edge = new GraphEdge(id, sourceId, targetId, kind)
+        {
+            Weight = record.Weight,
+            Properties = properties
+        };
+        return true;
     }
 
     private static object ReadMetadataValue(JsonElement element)

@@ -63,9 +63,12 @@ namespace Skyweaver.Services.ChatSession
         {
             var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+            lock (session.Transcript.SyncRoot)
+            {
             foreach (var entry in session.Transcript.Entries)
             {
                 Add(entry.ToolCallId);
+            }
             }
 
             foreach (var filePath in EnumerateToolCallFiles(session))

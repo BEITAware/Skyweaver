@@ -107,6 +107,8 @@ namespace Skyweaver.Models.ChatSession
 
         public long Revision { get; private set; }
 
+        public object SyncRoot { get; } = new();
+
         public List<ChatSessionTurnRecord> Turns { get; } = new();
 
         public List<ChatSessionTranscriptEntry> Entries { get; } = new();
@@ -115,16 +117,30 @@ namespace Skyweaver.Models.ChatSession
 
         public void Touch()
         {
-            Revision++;
-            RebuildIndex();
+            lock (SyncRoot)
+            {
+                Revision++;
+                RebuildIndexCore();
+            }
         }
 
         public void SetRevision(long revision)
         {
-            Revision = Math.Max(0, revision);
+            lock (SyncRoot)
+            {
+                Revision = Math.Max(0, revision);
+            }
         }
 
         public void RebuildIndex()
+        {
+            lock (SyncRoot)
+            {
+                RebuildIndexCore();
+            }
+        }
+
+        private void RebuildIndexCore()
         {
             Index.Rebuild(Entries);
         }
