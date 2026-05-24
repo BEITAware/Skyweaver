@@ -1,11 +1,11 @@
-﻿<h1 align="center">BEITA Skyweaver</h1>
+<h1 align="center">BEITA Skyweaver</h1>
 
 <p align="center">
   <sub><em>编织我们曾拥有的未来</em></sub>
 </p>
 
 <p align="center">
-  <img src="ReadmeResources/HeroImage.png" alt="Skyweaver Hero Image">
+  <img src="ReadmeResources/HeroImage2.png" alt="Skyweaver Hero Image">
 </p>
 
 <p align="center">
