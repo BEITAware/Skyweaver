@@ -332,20 +332,23 @@ namespace Skylifter
 
         private void ForceShutdownApplication()
         {
-            StartTaskKillForProcessName("Skyweaver.exe");
-            StartTaskKillForProcessId(Environment.ProcessId);
-
             try
             {
                 HideTraySurface();
                 _memoryQueue.BeginShutdown();
+                
+                // 优先杀掉 Skyweaver 的所有进程，确保所有主窗口和 Shell Chat 窗口等全部被关闭
                 ForceTerminateProcesses(EnumerateSkyweaverProcesses());
+
+                // 作为额外保障，使用 taskkill 强杀 Skyweaver.exe
+                StartTaskKillForProcessName("Skyweaver.exe");
             }
             catch
             {
-                // The current Skylifter process must still terminate even if Skyweaver cleanup fails.
+                // 即使 Skyweaver 清理失败，当前的 Skylifter 进程也必须终止
             }
 
+            // 最后安全退出当前 Skylifter 进程自身
             TerminateCurrentProcess();
         }
 

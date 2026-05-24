@@ -321,11 +321,11 @@ mc:Ignorable="d"
         <!-- 主工作区域 -->
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*" MinWidth="200"/>
+                <ColumnDefinition x:Name="ColSessionList" Width="1*" MinWidth="200"/>
                 <ColumnDefinition Width="5"/>
-                <ColumnDefinition Width="3*" MinWidth="400"/>
+                <ColumnDefinition x:Name="ColChatArea" Width="3*" MinWidth="0"/>
                 <ColumnDefinition Width="5"/>
-                <ColumnDefinition Width="2.5*" MinWidth="350"/>
+                <ColumnDefinition x:Name="ColFullView" Width="2.5*" MinWidth="0"/>
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0">
@@ -342,13 +342,15 @@ mc:Ignorable="d"
                                                    DataContext="{Binding FileExplorerPanel}"/>
             </Grid>
 
-            <GridSplitter Grid.Column="1" Style="{DynamicResource AeroVerticalSplitterStyle}"/>
+            <GridSplitter Grid.Column="1" Style="{DynamicResource AeroVerticalSplitterStyle}"
+                          DragStarted="GridSplitter_DragStarted" DragCompleted="GridSplitter_DragCompleted"/>
 
             <Grid Grid.Column="2">
                 <documentWorkspace:DocumentWorkspacePanelView DataContext="{Binding DocumentWorkspacePanel}"/>
             </Grid>
 
-            <GridSplitter Grid.Column="3" Style="{DynamicResource AeroVerticalSplitterStyle}"/>
+            <GridSplitter x:Name="ChatFullViewSplitter" Grid.Column="3" Style="{DynamicResource AeroVerticalSplitterStyle}"
+                          DragStarted="GridSplitter_DragStarted" DragDelta="ChatFullViewSplitter_DragDelta" DragCompleted="GridSplitter_DragCompleted"/>
 
             <Grid Grid.Column="4">
                 <multiFunctionArea:MultiFunctionAreaPanelView DataContext="{Binding MultiFunctionAreaPanel}"/>

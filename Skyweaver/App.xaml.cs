@@ -33,6 +33,7 @@ namespace Skyweaver
             if (shellChatStartupContext != null)
             {
                 SkylifterLauncher.EnsureStarted(skyweaverExecutablePath);
+                _ = MonitorSkylifterLifecycleAsync();
                 if (ShouldAggregateShellStartup(shellChatStartupContext))
                 {
                     _ = ShowShellChatWindowAfterStartupAggregationAsync(shellChatStartupContext);
@@ -48,6 +49,7 @@ namespace Skyweaver
             _ = ShellIntegrationRuntime.Instance.ApplyConfiguredRegistration();
             SkylifterLauncher.EnsureStarted(skyweaverExecutablePath);
             _ = SkylifterIpcClient.TryRegisterSkyweaverPathAsync(skyweaverExecutablePath);
+            _ = MonitorSkylifterLifecycleAsync();
 
             var splashWindow = new SplashWindow();
             splashWindow.Show();
@@ -83,6 +85,57 @@ namespace Skyweaver
             Current.MainWindow = shellWindow;
             shellWindow.Show();
             shellWindow.Activate();
+        }
+
+        /// <summary>
+        /// 后台监控 Skylifter 进程生命周期。若 Skylifter 被关闭，则当前应用的所有窗口也随之关闭并退出。
+        /// </summary>
+        private async Task MonitorSkylifterLifecycleAsync()
+        {
+            // 给 Skylifter 启动预留 2 秒的缓冲时间
+            await Task.Delay(2000).ConfigureAwait(false);
+
+            while (true)
+            {
+                await Task.Delay(1000).ConfigureAwait(false);
+
+                try
+                {
+                    var isRunning = Process.GetProcessesByName("Skylifter")
+                        .Any(p =>
+                        {
+                            try
+                            {
+                                return !p.HasExited;
+                            }
+                            catch
+                            {
+                                return false;
+                            }
+                        });
+
+                    if (!isRunning)
+                    {
+                        // 发现 Skylifter 已退出，在 UI 线程上关闭当前应用的所有窗口并关闭整个程序
+                        Current.Dispatcher.Invoke(() =>
+                        {
+                            try
+                            {
+                                Current.Shutdown();
+                            }
+                            catch
+                            {
+                                Environment.Exit(0);
+                            }
+                        });
+                        break;
+                    }
+                }
+                catch
+                {
+                    // 忽略异常，继续轮询监测
+                }
+            }
         }
 
         private static bool ShouldAggregateShellStartup(ShellChatStartupContext startupContext)

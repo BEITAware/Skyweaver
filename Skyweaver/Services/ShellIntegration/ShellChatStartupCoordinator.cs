@@ -23,39 +23,44 @@ namespace Skyweaver.Services.ShellIntegration
         {
             ArgumentNullException.ThrowIfNull(startupContext);
 
-            using var startupMutex = new Mutex(false, MutexName);
-            if (TryAcquireMutex(startupMutex))
+            // 将所有涉及 Mutex 锁定的操作放入 Task.Run 中执行，并通过 GetAwaiter().GetResult() 同步等待内部异步调用。
+            // 这样可以确保获取与释放 Mutex 处于同一个后台线程上，避免发生线程关联性错误（ApplicationException），同时也不会阻塞 UI 线程。
+            return await Task.Run(() =>
             {
-                try
+                using var startupMutex = new Mutex(false, MutexName);
+                if (TryAcquireMutex(startupMutex))
                 {
-                    using var aggregator = new Aggregator(startupContext);
-                    return await aggregator.CollectAsync(cancellationToken).ConfigureAwait(false);
+                    try
+                    {
+                        using var aggregator = new Aggregator(startupContext);
+                        return aggregator.CollectAsync(cancellationToken).GetAwaiter().GetResult();
+                    }
+                    finally
+                    {
+                        startupMutex.ReleaseMutex();
+                    }
                 }
-                finally
-                {
-                    startupMutex.ReleaseMutex();
-                }
-            }
 
-            if (await TryForwardAsync(startupContext, ForwardTimeout, cancellationToken).ConfigureAwait(false))
-            {
-                return null;
-            }
-
-            if (TryAcquireMutex(startupMutex))
-            {
-                try
+                if (TryForwardAsync(startupContext, ForwardTimeout, cancellationToken).GetAwaiter().GetResult())
                 {
-                    using var aggregator = new Aggregator(startupContext);
-                    return await aggregator.CollectAsync(cancellationToken).ConfigureAwait(false);
+                    return null;
                 }
-                finally
-                {
-                    startupMutex.ReleaseMutex();
-                }
-            }
 
-            return startupContext;
+                if (TryAcquireMutex(startupMutex))
+                {
+                    try
+                    {
+                        using var aggregator = new Aggregator(startupContext);
+                        return aggregator.CollectAsync(cancellationToken).GetAwaiter().GetResult();
+                    }
+                    finally
+                    {
+                        startupMutex.ReleaseMutex();
+                    }
+                }
+
+                return startupContext;
+            }, cancellationToken).ConfigureAwait(false);
         }
 
         private static async Task<bool> TryForwardAsync(
