@@ -37,6 +37,7 @@
     <system:String x:Key="Preferences.Page.Memory">記憶</system:String>
 
     <system:String x:Key="Preferences.Page.Search">検索</system:String>
+    <system:String x:Key="Preferences.Page.OpenSourceLicenses">オープンソースライセンス</system:String>
 
     <system:String x:Key="Preferences.Sidebar.Title">設定</system:String>
 
@@ -57,6 +58,8 @@
     <system:String x:Key="Preferences.Welcome.Hint">ファイルシステム、表示インターフェース、コンテキスト管理の設定が利用可能です。</system:String>
 
     <system:String x:Key="Preferences.Welcome.CurrentGroups">現在のグループ</system:String>
+    <system:String x:Key="OpenSourceLicenses.Page.Title">オープンソースライセンス</system:String>
+    <system:String x:Key="OpenSourceLicenses.Page.Description">このアプリケーション自体は CC0 で公開されていますが、参照している各パッケージはそれぞれのオープンソースライセンスに従います。</system:String>
 
 
     <system:String x:Key="Common.ConfigurationStatus">設定ステータス</system:String>

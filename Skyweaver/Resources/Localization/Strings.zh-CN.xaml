@@ -19,6 +19,7 @@
     <system:String x:Key="Preferences.Page.SemanticSearch">语义搜索</system:String>
     <system:String x:Key="Preferences.Page.Memory">记忆</system:String>
     <system:String x:Key="Preferences.Page.Document">文档</system:String>
+    <system:String x:Key="Preferences.Page.OpenSourceLicenses">开源许可证</system:String>
     <system:String x:Key="Preferences.Sidebar.Title">首选项</system:String>
     <system:String x:Key="Preferences.BottomNav.LanguageModelConfiguration">语言模型配置</system:String>
     <system:String x:Key="Preferences.BottomNav.EmbeddingModelConfiguration">嵌入模型配置</system:String>
@@ -29,6 +30,8 @@
     <system:String x:Key="Preferences.Welcome.Description">从左侧栏目中选择要查看的配置项。</system:String>
     <system:String x:Key="Preferences.Welcome.Hint">目前已提供文件系统、呈现界面与上下文管理相关配置。</system:String>
     <system:String x:Key="Preferences.Welcome.CurrentGroups">当前栏目</system:String>
+    <system:String x:Key="OpenSourceLicenses.Page.Title">开源许可证</system:String>
+    <system:String x:Key="OpenSourceLicenses.Page.Description">本应用程序本身使用 CC0 开源，但引用的包各自遵循其开源许可证。</system:String>
 
     <system:String x:Key="Common.ConfigurationStatus">配置状态</system:String>
     <system:String x:Key="Common.ConfigurationFile">配置文件</system:String>

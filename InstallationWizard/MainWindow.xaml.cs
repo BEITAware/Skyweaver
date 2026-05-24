@@ -1064,6 +1064,7 @@ To the greatest extent permitted by, but not in contravention of, applicable law
                 System.Diagnostics.Debug.WriteLine("Error parsing default agents: " + ex.Message);
             }
             UpdateLocalizedContent();
+            UpdateDiskSpaceInfo();
         }
 
         /// <summary>
@@ -1123,6 +1124,7 @@ To the greatest extent permitted by, but not in contravention of, applicable law
                     BtnNext.Content = TryFindResource("Btn_Next") as string ?? "下一步 >";
                     BtnCancel.IsEnabled = true;
                     TxtFooterStatus.Text = TryFindResource("Status_SelectDirectory") as string ?? "选择安装目标目录";
+                    UpdateDiskSpaceInfo();
                     break;
 
                 case 4:
@@ -1296,8 +1298,97 @@ To the greatest extent permitted by, but not in contravention of, applicable law
                 if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
                     TxtDestPath.Text = dialog.SelectedPath;
+                    UpdateDiskSpaceInfo();
                 }
             }
+        }
+
+        /// <summary>
+        /// 路径文本框内容变化时刷新磁盘空间信息
+        /// </summary>
+        private void TxtDestPath_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            UpdateDiskSpaceInfo();
+        }
+
+        /// <summary>
+        /// 计算 App 文件夹的实际体积作为所需空间，获取目标磁盘的可用空间
+        /// </summary>
+        private void UpdateDiskSpaceInfo()
+        {
+            if (TxtSpaceRequired == null || TxtSpaceAvailable == null || TxtDestPath == null) return;
+
+            try
+            {
+                // 计算应用程序体积：获取安装程序旁边的 App 文件夹的实际大小
+                var appFolderPath = Path.Combine(AppContext.BaseDirectory, "App");
+                long appSizeBytes = 0;
+                if (Directory.Exists(appFolderPath))
+                {
+                    foreach (var file in Directory.GetFiles(appFolderPath, "*", SearchOption.AllDirectories))
+                    {
+                        try { appSizeBytes += new FileInfo(file).Length; }
+                        catch { /* 忽略无法访问的文件 */ }
+                    }
+                }
+                TxtSpaceRequired.Text = FormatFileSize(appSizeBytes);
+            }
+            catch
+            {
+                TxtSpaceRequired.Text = "--";
+            }
+
+            try
+            {
+                // 获取目标路径所在磁盘的可用空间
+                var destPath = TxtDestPath.Text.Trim();
+                if (!string.IsNullOrWhiteSpace(destPath))
+                {
+                    destPath = Environment.ExpandEnvironmentVariables(destPath);
+                    var root = Path.GetPathRoot(Path.GetFullPath(destPath));
+                    if (!string.IsNullOrEmpty(root))
+                    {
+                        var driveInfo = new DriveInfo(root);
+                        if (driveInfo.IsReady)
+                        {
+                            TxtSpaceAvailable.Text = FormatFileSize(driveInfo.AvailableFreeSpace);
+                        }
+                        else
+                        {
+                            TxtSpaceAvailable.Text = "--";
+                        }
+                    }
+                    else
+                    {
+                        TxtSpaceAvailable.Text = "--";
+                    }
+                }
+                else
+                {
+                    TxtSpaceAvailable.Text = "--";
+                }
+            }
+            catch
+            {
+                TxtSpaceAvailable.Text = "--";
+            }
+        }
+
+        /// <summary>
+        /// 将字节数格式化为人类可读的文件大小字符串
+        /// </summary>
+        private static string FormatFileSize(long bytes)
+        {
+            if (bytes <= 0) return "0 B";
+            string[] units = { "B", "KB", "MB", "GB", "TB" };
+            int unitIndex = 0;
+            double size = bytes;
+            while (size >= 1024.0 && unitIndex < units.Length - 1)
+            {
+                size /= 1024.0;
+                unitIndex++;
+            }
+            return $"{size:F1} {units[unitIndex]}";
         }
 
         /// <summary>

@@ -138,6 +138,16 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.Services
                     Order = 10
                 });
 
+                registry.RegisterPage("about-skyweaver", new PreferencePageInfo
+                {
+                    Id = "preferences-open-source-licenses",
+                    DisplayName = "开源许可证",
+                    DisplayNameResourceKey = "Preferences.Page.OpenSourceLicenses",
+                    ViewType = typeof(OpenSourceLicensesPreferencesPageView),
+                    ViewModelType = typeof(OpenSourceLicensesPreferencesPageViewModel),
+                    Order = 10
+                });
+
                 s_isRegistered = true;
             }
         }

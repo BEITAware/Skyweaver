@@ -201,7 +201,8 @@
                                      FontSize="14" 
                                      Height="34"
                                      VerticalContentAlignment="Center" 
-                                     Margin="0,0,15,0"/>
+                                     Margin="0,0,15,0"
+                                     TextChanged="TxtDestPath_TextChanged"/>
                             <Button x:Name="BtnBrowse" 
                                      Grid.Column="1" 
                                      Content="{DynamicResource Dir_Browse}" 
@@ -218,11 +219,11 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                                     <TextBlock Text="{DynamicResource Dir_SpaceRequired}" Foreground="#AAFFFFFF" FontSize="13.5"/>
-                                    <TextBlock Text="250.0 MB" Foreground="White" FontSize="13.5" FontWeight="SemiBold" Margin="5,0,0,0"/>
+                                    <TextBlock x:Name="TxtSpaceRequired" Text="--" Foreground="White" FontSize="13.5" FontWeight="SemiBold" Margin="5,0,0,0"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal">
                                     <TextBlock Text="{DynamicResource Dir_SpaceAvailable}" Foreground="#AAFFFFFF" FontSize="13.5"/>
-                                    <TextBlock Text="48.3 GB" Foreground="White" FontSize="13.5" FontWeight="SemiBold" Margin="5,0,0,0"/>
+                                    <TextBlock x:Name="TxtSpaceAvailable" Text="--" Foreground="White" FontSize="13.5" FontWeight="SemiBold" Margin="5,0,0,0"/>
                                 </StackPanel>
                             </Grid>
                         </Border>

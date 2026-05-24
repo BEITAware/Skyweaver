@@ -20,6 +20,7 @@
     <system:String x:Key="Preferences.Page.Memory">Memory</system:String>
     <system:String x:Key="Preferences.Page.Search">Search</system:String>
     <system:String x:Key="Preferences.Page.Document">Document</system:String>
+    <system:String x:Key="Preferences.Page.OpenSourceLicenses">Open Source Licenses</system:String>
     <system:String x:Key="Preferences.Sidebar.Title">Preferences</system:String>
     <system:String x:Key="Preferences.BottomNav.LanguageModelConfiguration">Language Model Configuration</system:String>
     <system:String x:Key="Preferences.BottomNav.EmbeddingModelConfiguration">Embedding Model Configuration</system:String>
@@ -30,6 +31,8 @@
     <system:String x:Key="Preferences.Welcome.Description">Choose a configuration page from the left column.</system:String>
     <system:String x:Key="Preferences.Welcome.Hint">File system, presentation interface, and context management preferences are available.</system:String>
     <system:String x:Key="Preferences.Welcome.CurrentGroups">Current Groups</system:String>
+    <system:String x:Key="OpenSourceLicenses.Page.Title">Open Source Licenses</system:String>
+    <system:String x:Key="OpenSourceLicenses.Page.Description">This application itself is released under CC0, while referenced packages each follow their own open source licenses.</system:String>
 
     <system:String x:Key="Common.ConfigurationStatus">Configuration Status</system:String>
     <system:String x:Key="Common.ConfigurationFile">Configuration File</system:String>
