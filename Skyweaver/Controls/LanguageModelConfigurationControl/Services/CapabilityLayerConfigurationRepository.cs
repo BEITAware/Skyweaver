@@ -25,8 +25,10 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
 
                 if (!File.Exists(ConfigurationFilePath))
                 {
-                    Save(Array.Empty<CapabilityLayerDefinition>());
-                    return Array.Empty<CapabilityLayerDefinition>();
+                    var initialDefinitions = new List<CapabilityLayerDefinition>();
+                    CapabilityLayerBuiltIns.EnsureBuiltInLayers(initialDefinitions);
+                    SaveInternal(initialDefinitions);
+                    return initialDefinitions;
                 }
 
                 var document = XDocument.Load(ConfigurationFilePath);

@@ -1,0 +1,207 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    
+    <!-- 应用程序级别 -->
+    <system:String x:Key="App_Title">Skyweaver 安装向导</system:String>
+    <system:String x:Key="Window_Title">Skyweaver 安装向导</system:String>
+    
+    <!-- 标签页名称 -->
+    <system:String x:Key="Tab_Welcome">欢迎</system:String>
+    <system:String x:Key="Tab_License">许可协议</system:String>
+    <system:String x:Key="Tab_SelectDirectory">选择目录</system:String>
+    <system:String x:Key="Tab_Skyweaver">Skyweaver</system:String>
+    <system:String x:Key="Tab_Progress">安装进度</system:String>
+    <system:String x:Key="Tab_Complete">完成</system:String>
+    
+    <!-- 欢迎页面 -->
+    <system:String x:Key="Welcome_Title">欢迎使用 Skyweaver 安装向导</system:String>
+    <system:String x:Key="Welcome_Text1">编织我们曾拥有的未来。此向导将引导您在您的计算机上完成 Skyweaver 的安装部署。</system:String>
+    <system:String x:Key="Welcome_Text2">Skyweaver 是一个 LLM Agent Harness。本向导将为您解压核心运行库并进行本地运行配置。</system:String>
+    <system:String x:Key="Welcome_Text3">建议您在继续之前关闭所有其他应用程序，以便安装程序在不需要重启系统的情况下更新所需的系统文件。</system:String>
+    <system:String x:Key="Welcome_LanguageSelectLabel">选择语言 (Language)：</system:String>
+    <system:String x:Key="Welcome_ClickNextHint">点击“下一步”继续，或点击“取消”退出安装向导。</system:String>
+    
+    <!-- 许可协议页面 -->
+    <system:String x:Key="License_Title">许可协议</system:String>
+    <system:String x:Key="License_SubTitle">在安装 Skyweaver 之前，请仔细阅读以下许可协议条款。</system:String>
+    <system:String x:Key="License_Text">Creative Commons CC0 1.0 通用协议 (CC0 1.0 Universal)
+======================================================
+
+知识共享组织（Creative Commons）不是律师事务所，也不提供法律服务。分发本文档并不产生律师-客户关系。知识共享组织按“原样”提供本信息。知识共享组织对因使用本文档或在此提供的法律文本所引起的一切后果不承担任何法律责任。
+
+宗旨声明
+--------
+
+世界上大多数司法管辖区的法律都会自动将排他的版权和相关权利（定义见下文）赋予原创作品的创作者和随后的所有者（以下统称“所有者”）。
+
+某些所有者希望永久放弃他们对某项作品拥有的这些权利，以便为公共创意、文化和科学作品库（即“公共资源区”）做出贡献。任何人都可以自由地、无需担心后续侵权指控地在该作品基础上进行创作、修改、整合、再利用和分发，可用于任何目的，包括商业用途。
+
+为实现上述目的，将 CC0 与某项作品关联的个人（即“放弃人”）在此公开将该作品与 CC0 关联，并选择将该作品置于公共领域。
+
+1. 版权与相关权利
+------------------
+
+在 CC0 下提供的作品可能受到版权及相关或邻接权利（统称“版权和相关权利”）的保护。版权和相关权利包括但不限于：
+
+  i. 复制、改编、分发、表演、展示、传播和翻译作品的权利；
+  ii. 原创作者和/或表演者保留的署名权、修改权、保护作品完整权等著作人身权；
+  iii. 与作品中描绘的个人肖像或隐私相关的权利；
+  iv. 防止与作品相关的反不正当竞争的权利（受下文第 4(a) 条限制）；
+  v. 保护作品中数据提取、传播、使用和再利用的权利；
+  vi. 数据库权利；以及
+  vii. 基于适用法律或条约的全球范围内其他类似、等同或对应的权利。
+
+2. 权利放弃
+-----------
+
+在适用法律允许的最大范围内，放弃人在此公开、完全、永久、不可撤销且无条件地放弃、舍弃并让渡其对作品拥有的所有版权和相关权利以及相关的诉讼请求，无论这些权利是已知还是未知的，在全世界所有地区生效，在适用法律或条约规定的最长保护期内有效，适用于任何当前或未来的媒介和任意数量的副本，用于任何目的（包括商业、广告或推广目的）。放弃人是为了社会公众的利益而进行这一放弃，并以此约束其继承人。</system:String>
+
+    <!-- 目标路径选择页面 -->
+    <system:String x:Key="Dir_Title">选择安装位置</system:String>
+    <system:String x:Key="Dir_SubTitle">安装向导将把 Skyweaver 安装到以下指定文件夹中。</system:String>
+    <system:String x:Key="Dir_TargetFolderLabel">安装目标文件夹：</system:String>
+    <system:String x:Key="Dir_Browse">浏览...</system:String>
+    <system:String x:Key="Dir_SpaceRequired">所需空间：</system:String>
+    <system:String x:Key="Dir_SpaceAvailable">可用空间：</system:String>
+
+    <!-- 语言模型设置子页面 -->
+    <system:String x:Key="LM_SubStepTitle">语言模型</system:String>
+    <system:String x:Key="LM_Title">语言模型设置</system:String>
+    <system:String x:Key="LM_SubTitle">请设定您的语言模型参数，Skyweaver 将使用它们连接模型 API。</system:String>
+    <system:String x:Key="LM_BtnAdd">添加</system:String>
+    <system:String x:Key="LM_BtnDuplicate">复制</system:String>
+    <system:String x:Key="LM_BtnDelete">删除</system:String>
+    <system:String x:Key="LM_LabelDisplayName">显示名称：</system:String>
+    <system:String x:Key="LM_LabelProtocol">接口协议：</system:String>
+    <system:String x:Key="LM_LabelContextWindow">上下文窗口大小 (Tokens)：</system:String>
+    <system:String x:Key="LM_LabelModalities">支持模态输入：</system:String>
+    <system:String x:Key="LM_ModalityImage">图片</system:String>
+    <system:String x:Key="LM_ModalityAudio">音频</system:String>
+    <system:String x:Key="LM_ModalityVideo">视频</system:String>
+    <system:String x:Key="LM_ModalityDocument">文档</system:String>
+    <system:String x:Key="LM_Google_ModelId">模型标识 (Model ID)：</system:String>
+    <system:String x:Key="LM_Google_ApiKey">API Key：</system:String>
+    <system:String x:Key="LM_Google_BaseUrl">Base URL：</system:String>
+    <system:String x:Key="LM_Google_UseTemp">使用 Temperature</system:String>
+    <system:String x:Key="LM_Google_UseTopP">使用 Top P</system:String>
+    <system:String x:Key="LM_Google_UseMaxTokens">使用 Max Output Tokens</system:String>
+    <system:String x:Key="LM_Google_UseThinkingLevel">使用 Thinking Level</system:String>
+    <system:String x:Key="LM_Google_UseThinkingBudget">使用 Thinking Budget</system:String>
+    <system:String x:Key="LM_Google_IncludeThoughts">包含 Thinking (Thoughts)</system:String>
+    <system:String x:Key="LM_Meai_ModelId">模型标识 (Model ID)：</system:String>
+    <system:String x:Key="LM_Meai_ApiKey">API Key：</system:String>
+    <system:String x:Key="LM_Meai_BaseUrl">Base URL：</system:String>
+    <system:String x:Key="LM_Meai_UseTemp">使用 Temperature</system:String>
+    <system:String x:Key="LM_Meai_UseTopP">使用 Top P</system:String>
+    <system:String x:Key="LM_Meai_UseMaxTokens">使用 Max Output Tokens</system:String>
+    <system:String x:Key="LM_Meai_UsePresence">使用 Presence Penalty</system:String>
+    <system:String x:Key="LM_Meai_UseFrequency">使用 Frequency Penalty</system:String>
+    <system:String x:Key="LM_Meai_UseSeed">使用 Seed</system:String>
+    <system:String x:Key="LM_Meai_UseReasoningEffort">使用 Reasoning Effort</system:String>
+    <system:String x:Key="LM_Meai_UseReasoningOutput">使用 Reasoning Output</system:String>
+
+    <!-- 功能层级设置子页面 -->
+    <system:String x:Key="Layer_SubStepTitle">功能层级</system:String>
+    <system:String x:Key="Layer_Title">功能层级设置 (Capability Layers)</system:String>
+    <system:String x:Key="Layer_SubTitle">Skyweaver 支持基于功能层级路由模型。请为系统必备的三个内置功能层级关联模型优先级。</system:String>
+    <system:String x:Key="Layer_BtnAddRef">添加模型引用</system:String>
+    <system:String x:Key="Layer_ContextCompression_Name">上下文压缩</system:String>
+    <system:String x:Key="Layer_ContextCompression_Desc">用于将长对话历史进行总结与信息压缩。</system:String>
+    <system:String x:Key="Layer_UtilityIFast_Name">实用I（快速）</system:String>
+    <system:String x:Key="Layer_UtilityIFast_Desc">用于处理简单的信息流或高频辅助任务。</system:String>
+    <system:String x:Key="Layer_UtilityIISmart_Name">实用II（智能）</system:String>
+    <system:String x:Key="Layer_UtilityIISmart_Desc">用于解决复杂逻辑推理与核心编程任务。</system:String>
+
+    <!-- 智能体设置子页面 -->
+    <system:String x:Key="Agent_SubStepTitle">智能体</system:String>
+    <system:String x:Key="Agent_Title">预置智能体配置 (Agents)</system:String>
+    <system:String x:Key="Agent_SubTitle">Skyweaver 提供了预置的智能体角色，请选择您想要启用的智能体。您可以在安装后随时进行修改。</system:String>
+    <system:String x:Key="Agent_RadioSpecificLM">指定语言模型</system:String>
+    <system:String x:Key="Agent_RadioCapabilityLayer">功能层级</system:String>
+    <system:String x:Key="Agent_NiceChatter_Name">NiceChatter</system:String>
+    <system:String x:Key="Agent_NiceChatter_Desc">友善的助理，帮助用户进行普通聊天与各项日常任务。</system:String>
+    <system:String x:Key="Agent_Coder_Name">Coder</system:String>
+    <system:String x:Key="Agent_Coder_Desc">专业的编程智能体，擅长在工作区中与用户协作解决复杂的代码问题。</system:String>
+    <system:String x:Key="Agent_CoderWithPowershell_Name">Coder With Powershell</system:String>
+    <system:String x:Key="Agent_CoderWithPowershell_Desc">拥有命令行权限的编程智能体，可以直接在工作区运行 PowerShell 命令调试项目。</system:String>
+    <system:String x:Key="Agent_Puterperson_Name">Puterperson</system:String>
+    <system:String x:Key="Agent_Puterperson_Desc">计算机的化身，帮助用户深度操作计算机系统并自动化完成复杂的工作。</system:String>
+    <system:String x:Key="Agent_Investigator_Name">Investigator</system:String>
+    <system:String x:Key="Agent_Investigator_Desc">探索型子智能体，主要执行代码库的深度搜索、文件树分析与结构调查。</system:String>
+
+    <!-- 会话流子页面 -->
+    <system:String x:Key="Flow_SubStepTitle">会话流</system:String>
+    <system:String x:Key="Flow_Title">会话流设定</system:String>
+    <system:String x:Key="Flow_SubTitle">请选择您想为哪些智能体自动生成会话流节点图。每个选中的智能体都将产生一个专属的会话流配置文件。</system:String>
+    <system:String x:Key="Flow_Desc_Template">使用 {0} 代理自动生成默认会话流节点图文件 ({1}.xml)。</system:String>
+    <system:String x:Key="Flow_GraphNameFormat">{0}会话流</system:String>
+
+
+    <!-- 系统集成子页面 -->
+    <system:String x:Key="Integration_SubStepTitle">系统集成</system:String>
+    <system:String x:Key="Integration_Title">系统集成选项</system:String>
+    <system:String x:Key="Integration_SubTitle">请选择 Skyweaver 与您的操作系统的集成偏好设定。</system:String>
+    <system:String x:Key="Integration_Shortcut">在桌面创建快捷方式</system:String>
+    <system:String x:Key="Integration_StartMenu">将 Skyweaver 添加到开始菜单程序文件夹</system:String>
+    <system:String x:Key="Integration_Startup">在登录 Windows 时自动启动后台守护进程 (Skylifter)</system:String>
+    <system:String x:Key="Integration_Service">注册为 Windows 系统服务以提供持续 Agent 计算能力</system:String>
+    <system:String x:Key="Integration_Shell">启用资源管理器右键菜单 Shell 集成 (推荐)</system:String>
+    <system:String x:Key="Integration_ShellDesc1">• 启用后会为文件、多选文件、目录以及资源管理器背景空白处添加「问问Skyweaver...」右键菜单项。</system:String>
+    <system:String x:Key="Integration_ShellDesc2">• 允许在文件资源管理器中直接右键点击文件或目录，快速启动 Shell Chat 交互。</system:String>
+    <system:String x:Key="Integration_ShellDesc3">• 该配置仅写入当前用户 (HKCU) 注册表，无需管理员权限。</system:String>
+
+    <!-- 进度页面 -->
+    <system:String x:Key="Progress_SubStepTitle">安装进度</system:String>
+    <system:String x:Key="Progress_Title">正在安装</system:String>
+    <system:String x:Key="Progress_SubTitle">请稍候，向导正在将 Skyweaver 部署到您的系统...</system:String>
+
+    <!-- 完成页面 -->
+    <system:String x:Key="Complete_SubStepTitle">完成</system:String>
+    <system:String x:Key="Complete_Title">Skyweaver 安装已完成</system:String>
+    <system:String x:Key="Complete_Text1">Skyweaver 已成功安装到您的计算机中。</system:String>
+    <system:String x:Key="Complete_Text2">单击“完成”按钮关闭此向导并退出安装程序。</system:String>
+    <system:String x:Key="Complete_Launch">立即运行 Skyweaver 主程序</system:String>
+
+    <!-- 按钮与页脚 -->
+    <system:String x:Key="Btn_Back">&lt; 上一步</system:String>
+    <system:String x:Key="Btn_Next">下一步 &gt;</system:String>
+    <system:String x:Key="Btn_Cancel">取消</system:String>
+    <system:String x:Key="Btn_Install">安装</system:String>
+    <system:String x:Key="Btn_Complete">完成</system:String>
+
+    <!-- 页脚状态提示 -->
+    <system:String x:Key="Status_ReadyToInstall">准备安装</system:String>
+    <system:String x:Key="Status_ReadingLicense">阅读许可协议</system:String>
+    <system:String x:Key="Status_SelectDirectory">选择安装目标目录</system:String>
+    <system:String x:Key="Status_ConfigureLM">配置语言模型 API</system:String>
+    <system:String x:Key="Status_ConfigureLayers">配置功能层级优先级</system:String>
+    <system:String x:Key="Status_ConfigureAgents">配置主智能体 (Agent)</system:String>
+    <system:String x:Key="Status_PrepareFlows">准备默认会话流</system:String>
+    <system:String x:Key="Status_SelectIntegration">选择系统集成选项</system:String>
+    <system:String x:Key="Status_Installing">正在安装，请勿关闭程序...</system:String>
+    <system:String x:Key="Status_InstallComplete">安装成功完成</system:String>
+
+    <!-- 安装进度文字 -->
+    <system:String x:Key="Progress_PrepareFiles">准备释放文件...</system:String>
+    <system:String x:Key="Progress_ExtractCore">正在解压 Skyweaver 核心运行库...</system:String>
+    <system:String x:Key="Progress_ExtractDB">正在释放向量图数据库引擎 (AerialCity)...</system:String>
+    <system:String x:Key="Progress_DeployDaemon">正在部署后台守护进程 (Skylifter)...</system:String>
+    <system:String x:Key="Progress_ConfigureNetwork">正在配置本地端口与网络通道 (Tunnel-Next)...</system:String>
+    <system:String x:Key="Progress_CreateShortcuts">正在创建系统快捷方式与初始化环境变量...</system:String>
+    <system:String x:Key="Progress_CleanCache">正在清理临时安装程序缓存...</system:String>
+
+    <!-- 对话框 -->
+    <system:String x:Key="Msg_Title_Warning">提示</system:String>
+    <system:String x:Key="Msg_Title_Info">信息</system:String>
+    <system:String x:Key="Msg_Title_Exit">退出安装</system:String>
+    <system:String x:Key="Msg_KeepAtLeastOneLM">系统必须保留至少一个语言模型配置。</system:String>
+    <system:String x:Key="Msg_SelectAtLeastOneAgent">请至少选择并启用一个智能体以继续安装。</system:String>
+    <system:String x:Key="Msg_Launching">正在启动 Skyweaver...</system:String>
+    <system:String x:Key="Msg_ConfirmExit">您确定要退出 Skyweaver 安装向导吗？</system:String>
+    <system:String x:Key="Browse_Description">选择 Skyweaver 的安装文件夹</system:String>
+
+    <!-- 注册表右键菜单名 -->
+    <system:String x:Key="Shell_Menu_Text">问问Skyweaver...</system:String>
+    
+</ResourceDictionary>

@@ -523,7 +523,7 @@
                              ItemTemplateSelector="{StaticResource ShellChatMessageTemplateSelector}"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              ScrollViewer.VerticalScrollBarVisibility="Auto"
-                             ScrollViewer.CanContentScroll="False"
+                             ScrollViewer.CanContentScroll="True" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
                              VirtualizingPanel.ScrollUnit="Pixel"
                              Padding="0,12,18,0">
                         <ListBox.Template>
@@ -536,7 +536,7 @@
                                     <ScrollViewer Focusable="False"
                                                   HorizontalScrollBarVisibility="Disabled"
                                                   VerticalScrollBarVisibility="Auto"
-                                                  CanContentScroll="False">
+                                                  CanContentScroll="True">
                                         <ItemsPresenter/>
                                     </ScrollViewer>
                                 </Border>

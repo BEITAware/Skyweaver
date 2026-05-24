@@ -17,18 +17,26 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
 
             var wasChanged = false;
 
-            // 1. 保持对 ContextCompressionLayerKey 的现有处理，确保在 XML 配置加载时清除 IsBuiltIn
-            foreach (var definition in definitions)
+            // 1. 确保上下文压缩层级存在并被标记为 BuiltIn
+            var contextCompression = definitions.FirstOrDefault(d => string.Equals(d.Key, ContextCompressionLayerKey, StringComparison.OrdinalIgnoreCase));
+            if (contextCompression == null)
             {
-                if (definition.IsBuiltIn &&
-                    string.Equals(definition.Key, ContextCompressionLayerKey, StringComparison.OrdinalIgnoreCase))
+                contextCompression = new CapabilityLayerDefinition
                 {
-                    definition.IsBuiltIn = false;
-                    wasChanged = true;
-                }
+                    Key = ContextCompressionLayerKey,
+                    Name = "上下文压缩",
+                    IsBuiltIn = true
+                };
+                definitions.Add(contextCompression);
+                wasChanged = true;
+            }
+            else if (!contextCompression.IsBuiltIn)
+            {
+                contextCompression.IsBuiltIn = true;
+                wasChanged = true;
             }
 
-            // 2. 确保 实用I（快速）层级存在并被标记为 BuiltIn
+            // 2. 确保实用I（快速）层级存在并被标记为 BuiltIn
             var utility1 = definitions.FirstOrDefault(d => string.Equals(d.Key, Utility1FastLayerKey, StringComparison.OrdinalIgnoreCase));
             if (utility1 == null)
             {
@@ -41,12 +49,13 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 definitions.Add(utility1);
                 wasChanged = true;
             }
-            else
+            else if (!utility1.IsBuiltIn)
             {
                 utility1.IsBuiltIn = true;
+                wasChanged = true;
             }
 
-            // 3. 确保 实用II（智能）层级存在并被标记为 BuiltIn
+            // 3. 确保实用II（智能）层级存在并被标记为 BuiltIn
             var utility2 = definitions.FirstOrDefault(d => string.Equals(d.Key, Utility2SmartLayerKey, StringComparison.OrdinalIgnoreCase));
             if (utility2 == null)
             {
@@ -59,9 +68,10 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 definitions.Add(utility2);
                 wasChanged = true;
             }
-            else
+            else if (!utility2.IsBuiltIn)
             {
                 utility2.IsBuiltIn = true;
+                wasChanged = true;
             }
 
             return wasChanged;

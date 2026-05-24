@@ -5,71 +5,1102 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:InstallationWizard"
         mc:Ignorable="d"
-        Title="Skyweaver 安装向导" Height="700" Width="1000"
+        Title="Skyweaver 安装向导" Height="580" Width="920"
+        Style="{StaticResource AeroWindowStyle}"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
-        Icon="Resources/Skyweaver.ico"
-        Background="#FF1A1F28"
-        Style="{DynamicResource AeroWindowStyle}">
+        Background="{StaticResource AeroWindowBackgroundBrush}"
+        Icon="Resources/Setup.ico">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <!-- 局部 TabItem 样式：调小 MinWidth，使其在 920 宽窗口的 Header 中以单行平铺 -->
+        <Style x:Key="WizardTabItemStyle" TargetType="{x:Type TabItem}" BasedOn="{StaticResource AeroTabItemStyle}">
+            <Setter Property="MinWidth" Value="60"/>
+            <Setter Property="Width" Value="100"/>
+            <Setter Property="Height" Value="52"/>
+        </Style>
+    </Window.Resources>
 
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="400"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <!-- 顶部玻璃条 Header -->
+            <RowDefinition Height="52"/>
+            <!-- 主内容区域 Content -->
+            <RowDefinition Height="*"/>
+            <!-- 底部操作栏 Footer -->
+            <RowDefinition Height="60"/>
+        </Grid.RowDefinitions>
 
-        <!-- 左侧图片区域 -->
-        <Border Grid.Column="0" Background="{DynamicResource AeroBackgroundBrush}"
-                BorderBrush="{DynamicResource AeroBorderBrush}"
-                BorderThickness="0,0,1,0">
-            <Image Source="Resources/InstallWizardSidePicture.png"
-                   Stretch="Uniform"
-                   VerticalAlignment="Top"
-                   HorizontalAlignment="Left" Height="719" Margin="-27,2,0,0" Width="456"/>
+        <!-- 顶部玻璃条底图 -->
+        <Border Grid.Row="0" Background="{StaticResource AeroHeaderBrush}" BorderBrush="{StaticResource AeroBorderBrush}" BorderThickness="0,0,0,1">
+            <Grid>
+                <!-- Logo / 标题区域 -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0" Height="42">
+                    <Image Height="32"
+                           Stretch="Uniform"
+                           RenderOptions.BitmapScalingMode="HighQuality"
+                           UseLayoutRounding="True"
+                           SnapsToDevicePixels="True"
+                           Source="Resources/CascadeLogo.png"
+                           Margin="0,0,12,0"/>
+                    <TextBlock Text="Skyweaver 安装向导"
+                               Foreground="{StaticResource AeroTextBrush}"
+                               FontSize="15"
+                               VerticalAlignment="Center"
+                               FontWeight="SemiBold" 
+                               FontFamily="Segoe UI"/>
+                </StackPanel>
+            </Grid>
         </Border>
 
-        <!-- 右侧内容区域 -->
-        <Grid Grid.Column="1" Background="#FFF0F0F0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+        <!-- TabControl 只读指示器与内容呈现区 (Padding 减小到 185, 腾出巨大头部空间以容纳9个Tabs) -->
+        <TabControl x:Name="MainTabControl"
+                    Grid.Row="0" Grid.RowSpan="2"
+                    Style="{StaticResource AeroTabControlStyle}"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Padding="185,0,0,0"
+                    SelectedIndex="0"
+                    IsHitTestVisible="True">
+            
+            <!-- 步骤 1：欢迎页面 -->
+            <TabItem Style="{StaticResource WizardTabItemStyle}">
+                <TabItem.Header>
+                    <TextBlock Text="{DynamicResource Tab_Welcome}" FontSize="11.5" Foreground="{StaticResource AeroTextBrush}"/>
+                </TabItem.Header>
+                <Grid Margin="45,35,45,35">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="260"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-            <!-- 页面内容区域 -->
-            <ContentPresenter x:Name="PageContentPresenter" Grid.Row="0" Margin="15"/>
+                    <!-- 左侧插图区域 -->
+                    <Border Grid.Column="0" BorderBrush="{StaticResource AeroBorderBrush}" BorderThickness="1" CornerRadius="8" Margin="0,0,30,0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#22FFFFFF" Offset="0"/>
+                                <GradientStop Color="#05FFFFFF" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Grid>
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <Image Source="Resources/CascadeLogo.png" Width="110" Height="110" Stretch="Uniform" Margin="0,0,0,20">
+                                    <Image.Effect>
+                                        <DropShadowEffect Color="#00C3FF" BlurRadius="25" ShadowDepth="0" Opacity="0.7"/>
+                                    </Image.Effect>
+                                </Image>
+                                <TextBlock Text="Skyweaver" Foreground="White" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                <TextBlock Text="版本 1.0.0" Foreground="#88FFFFFF" FontSize="13" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
 
-            <!-- 底部按钮区域 -->
-            <Border Grid.Row="1"
-                    BorderBrush="#FFCCCCCC"
-                    BorderThickness="0,1,0,0"
-                    Padding="20,15">
-                <Border.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                        <GradientStop Color="#FFF8F8F8" Offset="0"/>
-                        <GradientStop Color="#FFE8E8E8" Offset="1"/>
-                    </LinearGradientBrush>
-                </Border.Background>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button x:Name="BackButton" 
-                            Content="上一步" 
-                            Style="{StaticResource SelectFileScriptButtonStyle}"
-                            Width="80" Height="30" 
-                            Margin="0,0,10,0"
-                            Click="BackButton_Click"
-                            Visibility="Collapsed"/>
-                    <Button x:Name="NextButton" 
-                            Content="下一步" 
-                            Style="{StaticResource SelectFileScriptButtonStyle}"
-                            Width="80" Height="30" 
-                            Margin="0,0,10,0"
-                            Click="NextButton_Click"/>
-                    <Button x:Name="CancelButton" 
-                            Content="取消" 
-                            Style="{StaticResource SelectFileScriptButtonStyle}"
-                            Width="80" Height="30" 
-                            Click="CancelButton_Click"/>
+                    <!-- 右侧欢迎文字 -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,0,0">
+                        <TextBlock Text="{DynamicResource Welcome_Title}" 
+                                   Foreground="White" 
+                                   FontSize="28" 
+                                   FontWeight="Bold" 
+                                   Margin="0,0,0,15">
+                            <TextBlock.Effect>
+                                <DropShadowEffect ShadowDepth="1" BlurRadius="6" Opacity="0.8" Color="Black"/>
+                            </TextBlock.Effect>
+                        </TextBlock>
+                        
+                        <TextBlock Text="{DynamicResource Welcome_Text1}" 
+                                   Foreground="White" 
+                                   FontSize="14.5" 
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap" 
+                                   Margin="0,0,0,10"/>
+
+                        <TextBlock Text="{DynamicResource Welcome_Text2}" 
+                                   Foreground="#D5FFFFFF" 
+                                   FontSize="13.5" 
+                                   TextWrapping="Wrap" 
+                                   LineHeight="22"
+                                   Margin="0,0,0,12"/>
+                        
+                        <TextBlock Text="{DynamicResource Welcome_Text3}" 
+                                   Foreground="#A5FFFFFF" 
+                                   FontSize="12.5" 
+                                   TextWrapping="Wrap" 
+                                   LineHeight="18"
+                                   Margin="0,0,0,18"/>
+
+                        <!-- 语言选择 -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,18" VerticalAlignment="Center">
+                            <TextBlock Text="{DynamicResource Welcome_LanguageSelectLabel}" Foreground="#A5FFFFFF" FontSize="13.5" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <ComboBox x:Name="ComboLanguage" Width="140" Height="26" VerticalContentAlignment="Center" SelectedIndex="0" SelectionChanged="ComboLanguage_SelectionChanged">
+                                <ComboBoxItem Content="简体中文" Tag="zh-CN"/>
+                                <ComboBoxItem Content="English" Tag="en-US"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <TextBlock Text="{DynamicResource Welcome_ClickNextHint}" 
+                                   Foreground="White" 
+                                   FontSize="13.5" 
+                                   FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- 步骤 2：许可协议 -->
+            <TabItem Style="{StaticResource WizardTabItemStyle}">
+                <TabItem.Header>
+                    <TextBlock Text="{DynamicResource Tab_License}" FontSize="11.5" Foreground="{StaticResource AeroTextBrush}"/>
+                </TabItem.Header>
+                <Grid Margin="45,30,45,30">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                        <TextBlock Text="{DynamicResource License_Title}" Foreground="White" FontSize="22" FontWeight="Bold"/>
+                        <TextBlock Text="{DynamicResource License_SubTitle}" Foreground="#CCFFFFFF" FontSize="13.5" Margin="0,4,0,0"/>
+                    </StackPanel>
+
+                    <!-- 协议文本框 -->
+                    <TextBox x:Name="TxtLicenseAgreement"
+                              Grid.Row="1" 
+                              IsReadOnly="True" 
+                              AcceptsReturn="True" 
+                              TextWrapping="Wrap" 
+                              VerticalScrollBarVisibility="Visible"
+                              HorizontalScrollBarVisibility="Disabled"
+                              Padding="12" 
+                              FontSize="12.5" 
+                              Background="#20000000"
+                              Margin="0,0,0,0"/>
+                </Grid>
+            </TabItem>
+
+            <!-- 步骤 3：目标路径选择 -->
+            <TabItem Style="{StaticResource WizardTabItemStyle}">
+                <TabItem.Header>
+                    <TextBlock Text="{DynamicResource Tab_SelectDirectory}" FontSize="11.5" Foreground="{StaticResource AeroTextBrush}"/>
+                </TabItem.Header>
+                <Grid Margin="45,35,45,35">
+                    <StackPanel VerticalAlignment="Top" Margin="0,20,0,0">
+                        <TextBlock Text="{DynamicResource Dir_Title}" Foreground="White" FontSize="22" FontWeight="Bold"/>
+                        <TextBlock Text="{DynamicResource Dir_SubTitle}" Foreground="#CCFFFFFF" FontSize="13.5" Margin="0,4,0,30"/>
+
+                        <TextBlock Text="{DynamicResource Dir_TargetFolderLabel}" Foreground="White" FontSize="14" Margin="0,0,0,12"/>
+                        
+                        <!-- 路径输入和浏览 -->
+                        <Grid Margin="0,0,0,40">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="110"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="TxtDestPath" 
+                                     Grid.Column="0" 
+                                     Text="C:\Program Files\BEITAware\Skyweaver" 
+                                     FontSize="14" 
+                                     Height="34"
+                                     VerticalContentAlignment="Center" 
+                                     Margin="0,0,15,0"/>
+                            <Button x:Name="BtnBrowse" 
+                                     Grid.Column="1" 
+                                     Content="{DynamicResource Dir_Browse}" 
+                                     Height="34"
+                                     Click="BtnBrowse_Click"/>
+                        </Grid>
+
+                        <!-- 磁盘空间显示 -->
+                        <Border BorderBrush="{StaticResource AeroBorderBrush}" BorderThickness="0,1,0,0" Padding="0,25,0,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                    <TextBlock Text="{DynamicResource Dir_SpaceRequired}" Foreground="#AAFFFFFF" FontSize="13.5"/>
+                                    <TextBlock Text="250.0 MB" Foreground="White" FontSize="13.5" FontWeight="SemiBold" Margin="5,0,0,0"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <TextBlock Text="{DynamicResource Dir_SpaceAvailable}" Foreground="#AAFFFFFF" FontSize="13.5"/>
+                                    <TextBlock Text="48.3 GB" Foreground="White" FontSize="13.5" FontWeight="SemiBold" Margin="5,0,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- 步骤 4：Skyweaver (合并了 语言模型、智能体配置、会话流、系统集成) -->
+            <TabItem Style="{StaticResource WizardTabItemStyle}">
+                <TabItem.Header>
+                    <TextBlock Text="{DynamicResource Tab_Skyweaver}" FontSize="11.5" Foreground="{StaticResource AeroTextBrush}"/>
+                </TabItem.Header>
+                <Grid>
+                    <TabControl x:Name="SkyweaverTabControl"
+                                Style="{StaticResource VerticalAeroTabControlStyle}"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Padding="0"
+                                SelectedIndex="0">
+                        
+                        <!-- 子步骤 1：语言模型 -->
+                        <TabItem Style="{StaticResource VerticalAeroTabItemStyle}">
+                            <TabItem.Header>
+                                <TextBlock Text="{DynamicResource LM_SubStepTitle}" FontSize="11.5" Foreground="{StaticResource AeroTextBrush}"/>
+                            </TabItem.Header>
+                            <Grid Margin="35,15,35,15">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                
+                                <StackPanel Grid.Row="0" Margin="0,0,0,8">
+                                    <TextBlock Text="{DynamicResource LM_Title}" Foreground="White" FontSize="20" FontWeight="Bold"/>
+                                    <TextBlock Text="{DynamicResource LM_SubTitle}" Foreground="#CCFFFFFF" FontSize="12.5" Margin="0,2,0,0"/>
+                                </StackPanel>
+ 
+                                <Grid Grid.Row="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="220"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+ 
+                                    <!-- 左侧列表 -->
+                                    <DockPanel Grid.Column="0">
+                                        <!-- 按钮 -->
+                                        <Grid DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="5"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="5"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Button Grid.Column="0" Content="{DynamicResource LM_BtnAdd}" Click="BtnAddLM_Click" Height="26" FontSize="12"/>
+                                            <Button Grid.Column="2" Content="{DynamicResource LM_BtnDuplicate}" Click="BtnDuplicateLM_Click" Height="26" FontSize="12"/>
+                                            <Button Grid.Column="4" Content="{DynamicResource LM_BtnDelete}" Click="BtnRemoveLM_Click" Height="26" FontSize="12"/>
+                                        </Grid>
+ 
+                                        <Border BorderBrush="{StaticResource AeroBorderBrush}" BorderThickness="1" CornerRadius="4">
+                                            <ListBox ItemsSource="{Binding WizardLanguageModels}" 
+                                                     SelectedItem="{Binding SelectedWizardLanguageModel}"
+                                                     Background="#10000000" BorderThickness="0" DisplayMemberPath="DisplayName"/>
+                                        </Border>
+                                    </DockPanel>
+ 
+                                    <!-- 右侧详情编辑区 -->
+                                    <Border Grid.Column="2" BorderBrush="{StaticResource AeroBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="12">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#1AFFFFFF" Offset="0"/>
+                                                <GradientStop Color="#05FFFFFF" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                        
+                                        <Grid x:Name="GridLMDetail">
+                                            <Grid.Style>
+                                                <Style TargetType="Grid">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding SelectedWizardLanguageModel}" Value="{x:Null}">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Grid.Style>
+                                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                                <StackPanel DataContext="{Binding SelectedWizardLanguageModel}">
+                                                    <!-- 基本信息 -->
+                                                    <Grid Margin="0,0,0,8">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="10"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel Grid.Column="0">
+                                                            <TextBlock Text="{DynamicResource LM_LabelDisplayName}" Foreground="White" FontSize="12" Margin="0,0,0,4"/>
+                                                            <TextBox Text="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged}" Height="26" VerticalContentAlignment="Center" Padding="4,0"/>
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="2">
+                                                            <TextBlock Text="{DynamicResource LM_LabelProtocol}" Foreground="White" FontSize="12" Margin="0,0,0,4"/>
+                                                            <ComboBox SelectedValuePath="Content" SelectedValue="{Binding InterfaceType, UpdateSourceTrigger=PropertyChanged}" Height="26" VerticalContentAlignment="Center">
+                                                                <ComboBoxItem Content="MEAI"/>
+                                                                <ComboBoxItem Content="GOOGLE"/>
+                                                            </ComboBox>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                    
+                                                    <Grid Margin="0,0,0,8">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="10"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel Grid.Column="0">
+                                                            <TextBlock Text="{DynamicResource LM_LabelContextWindow}" Foreground="White" FontSize="12" Margin="0,0,0,4"/>
+                                                            <TextBox Text="{Binding ContextWindowTokens, UpdateSourceTrigger=PropertyChanged}" Height="26" VerticalContentAlignment="Center" Padding="4,0"/>
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="2">
+                                                            <!-- 预留 -->
+                                                        </StackPanel>
+                                                    </Grid>
+ 
+                                                    <!-- 支持多模态选项 -->
+                                                    <TextBlock Text="{DynamicResource LM_LabelModalities}" Foreground="White" FontSize="12" Margin="0,0,0,4"/>
+                                                    <WrapPanel Margin="0,0,0,8">
+                                                        <CheckBox Content="{DynamicResource LM_ModalityImage}" IsChecked="{Binding EnableImageInput}" Foreground="White" Margin="0,0,15,5"/>
+                                                        <CheckBox Content="{DynamicResource LM_ModalityAudio}" IsChecked="{Binding EnableAudioInput}" Foreground="White" Margin="0,0,15,5"/>
+                                                        <CheckBox Content="{DynamicResource LM_ModalityVideo}" IsChecked="{Binding EnableVideoInput}" Foreground="White" Margin="0,0,15,5"/>
+                                                        <CheckBox Content="{DynamicResource LM_ModalityDocument}" IsChecked="{Binding EnableDocumentInput}" Foreground="White" Margin="0,0,15,5"/>
+                                                    </WrapPanel>
+ 
+                                                    <Border BorderBrush="#22FFFFFF" BorderThickness="0,1,0,0" Margin="0,4,0,8"/>
+ 
+                                                    <!-- 接口类型特殊设置 -->
+                                                    <ContentControl Content="{Binding InterfaceSettings}">
+                                                        <ContentControl.Resources>
+                                                            <!-- GOOGLE 设置模板 -->
+                                                            <DataTemplate DataType="{x:Type local:WizardGoogleSettings}">
+                                                                <Grid>
+                                                                    <Grid.RowDefinitions>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                    </Grid.RowDefinitions>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                        <ColumnDefinition Width="10"/>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                    </Grid.ColumnDefinitions>
+ 
+                                                                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,8">
+                                                                        <TextBlock Text="{DynamicResource LM_Google_ModelId}" Foreground="White" FontSize="12" Margin="0,0,0,4"/>
+                                                                        <TextBox Text="{Binding ModelId, UpdateSourceTrigger=PropertyChanged}" Height="26" VerticalContentAlignment="Center" Padding="4,0"/>
+                                                                    </StackPanel>
+                                                                    <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,8">
+                                                                        <TextBlock Text="{DynamicResource LM_Google_ApiKey}" Foreground="White" FontSize="12" Margin="0,0,0,4"/>
+                                                                        <TextBox Text="{Binding ApiKey, UpdateSourceTrigger=PropertyChanged}" Height="26" VerticalContentAlignment="Center" Padding="4,0"/>
+                                                                    </StackPanel>
+ 
+                                                                    <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,8">
+                                                                        <TextBlock Text="{DynamicResource LM_Google_BaseUrl}" Foreground="White" FontSize="12" Margin="0,0,0,4"/>
+                                                                        <TextBox Text="{Binding BaseUrl, UpdateSourceTrigger=PropertyChanged}" Height="26" VerticalContentAlignment="Center" Padding="4,0"/>
+                                                                    </StackPanel>
+ 
+                                                                    <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,0,8">
+                                                                        <CheckBox Content="{DynamicResource LM_Google_UseTemp}" IsChecked="{Binding UseTemperature}" Foreground="White" Margin="0,0,0,4"/>
+                                                                        <TextBox Text="{Binding Temperature, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding UseTemperature}" Height="26" VerticalContentAlignment="Center" Padding="4,0"/>
+                                                                    </StackPanel>
+                                                                    <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,0,0,8">
+                                                                        <CheckBox Content="{DynamicResource LM_Google_UseTopP}" IsChecked="{Binding UseTopP}" Foreground="White" Margin="0,0,0,4"/>
+                                                                        <TextBox Text="{Binding TopP, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding UseTopP}" Height="26" VerticalContentAlignment="Center" Padding="4,0"/>
+                                                                    </StackPanel>
+ 
+                                                                    <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,0,8">
+                                                                        <CheckBox Content="{DynamicResource LM_Google_UseMaxTokens}" IsChecked="{Binding UseMaxOutputTokens}" Foreground="White" Margin="0,0,0,4"/>
+                                                                        <TextBox Text="{Binding MaxOutputTokens, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding UseMaxOutputTokens}" Height="26" VerticalContentAlignment="Center" Padding="4,0"/>
+                                                                    </StackPanel>
+                                                                    <StackPanel Grid.Row="3" Grid.Column="2" Margin="0,0,0,8">
+                                                                        <CheckBox Content="{DynamicResource LM_Google_UseThinkingLevel}" IsChecked="{Binding UseThinkingLevel}" Foreground="White" Margin="0,0,0,4"/>
+                                                                        <ComboBox ItemsSource="{Binding SupportedThinkingLevels}" SelectedItem="{Binding ThinkingLevel}" IsEnabled="{Binding UseThinkingLevel}" Height="26" VerticalContentAlignment="Center"/>
+                                                                    </StackPanel>
+ 
+                                                                    <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,0,8">
+                                                                        <CheckBox Content="{DynamicResource LM_Google_UseThinkingBudget}" IsChecked="{Binding UseThinkingBudget}" Foreground="White" Margin="0,0,0,4"/>
+                                                                        <TextBox Text="{Binding ThinkingBudget, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding UseThinkingBudget}" Height="26" VerticalContentAlignment="Center" Padding="4,0"/>
+                                                                    </StackPanel>
+                                                                    <StackPanel Grid.Row="4" Grid.Column="2" Margin="0,0,0,8">
+                                                                        <CheckBox Content="{DynamicResource LM_Google_IncludeThoughts}" IsChecked="{Binding IncludeThoughts}" Foreground="White" Margin="0,12,0,0"/>
+                                                                    </StackPanel>
+                                                                </Grid>
+                                                            </DataTemplate>
+ 
+                                                            <!-- MEAI 设置模板 -->
+                                                            <DataTemplate DataType="{x:Type local:WizardMeaiSettings}">
+                                                                <Grid>
+                                                                    <Grid.RowDefinitions>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                    </Grid.RowDefinitions>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                        <ColumnDefinition Width="10"/>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                    </Grid.ColumnDefinitions>
+ 
+                                                                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,8">
+                                                                        <TextBlock Text="{DynamicResource LM_Meai_ModelId}" Foreground="White" FontSize="12" Margin="0,0,0,4"/>
+                                                                        <TextBox Text="{Binding ModelId, UpdateSourceTrigger=PropertyChanged}" Height="26" VerticalContentAlignment="Center" Padding="4,0"/>
+                                                                    </StackPanel>
+                                                                    <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,8">
+                                                                        <TextBlock Text="{DynamicResource LM_Meai_ApiKey}" Foreground="White" FontSize="12" Margin="0,0,0,4"/>
+                                                                        <TextBox Text="{Binding ApiKey, UpdateSourceTrigger=PropertyChanged}" Height="26" VerticalContentAlignment="Center" Padding="4,0"/>
+                                                                    </StackPanel>
+ 
+                                                                    <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,8">
+                                                                        <TextBlock Text="{DynamicResource LM_Meai_BaseUrl}" Foreground="White" FontSize="12" Margin="0,0,0,4"/>
+                                                                        <TextBox Text="{Binding BaseUrl, UpdateSourceTrigger=PropertyChanged}" Height="26" VerticalContentAlignment="Center" Padding="4,0"/>
+                                                                    </StackPanel>
+ 
+                                                                    <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,0,8">
+                                                                        <CheckBox Content="{DynamicResource LM_Meai_UseTemp}" IsChecked="{Binding UseTemperature}" Foreground="White" Margin="0,0,0,4"/>
+                                                                        <TextBox Text="{Binding Temperature, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding UseTemperature}" Height="26" VerticalContentAlignment="Center" Padding="4,0"/>
+                                                                    </StackPanel>
+                                                                    <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,0,0,8">
+                                                                        <CheckBox Content="{DynamicResource LM_Meai_UseTopP}" IsChecked="{Binding UseTopP}" Foreground="White" Margin="0,0,0,4"/>
+                                                                        <TextBox Text="{Binding TopP, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding UseTopP}" Height="26" VerticalContentAlignment="Center" Padding="4,0"/>
+                                                                    </StackPanel>
+ 
+                                                                    <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,0,8">
+                                                                        <CheckBox Content="{DynamicResource LM_Meai_UseMaxTokens}" IsChecked="{Binding UseMaxOutputTokens}" Foreground="White" Margin="0,0,0,4"/>
+                                                                        <TextBox Text="{Binding MaxOutputTokens, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding UseMaxOutputTokens}" Height="26" VerticalContentAlignment="Center" Padding="4,0"/>
+                                                                    </StackPanel>
+                                                                    <StackPanel Grid.Row="3" Grid.Column="2" Margin="0,0,0,8">
+                                                                        <CheckBox Content="{DynamicResource LM_Meai_UsePresence}" IsChecked="{Binding UsePresencePenalty}" Foreground="White" Margin="0,0,0,4"/>
+                                                                        <TextBox Text="{Binding PresencePenalty, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding UsePresencePenalty}" Height="26" VerticalContentAlignment="Center" Padding="4,0"/>
+                                                                    </StackPanel>
+ 
+                                                                    <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,0,0,8">
+                                                                        <CheckBox Content="{DynamicResource LM_Meai_UseFrequency}" IsChecked="{Binding UseFrequencyPenalty}" Foreground="White" Margin="0,0,0,4"/>
+                                                                        <TextBox Text="{Binding FrequencyPenalty, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding UseFrequencyPenalty}" Height="26" VerticalContentAlignment="Center" Padding="4,0"/>
+                                                                    </StackPanel>
+                                                                    <StackPanel Grid.Row="4" Grid.Column="2" Margin="0,0,0,8">
+                                                                        <CheckBox Content="{DynamicResource LM_Meai_UseSeed}" IsChecked="{Binding UseSeed}" Foreground="White" Margin="0,0,0,4"/>
+                                                                        <TextBox Text="{Binding Seed, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding UseSeed}" Height="26" VerticalContentAlignment="Center" Padding="4,0"/>
+                                                                    </StackPanel>
+ 
+                                                                    <StackPanel Grid.Row="5" Grid.Column="0" Margin="0,0,0,8">
+                                                                        <CheckBox Content="{DynamicResource LM_Meai_UseReasoningEffort}" IsChecked="{Binding UseReasoningEffort}" Foreground="White" Margin="0,0,0,4"/>
+                                                                        <ComboBox ItemsSource="{Binding SupportedReasoningEfforts}" SelectedItem="{Binding ReasoningEffort}" IsEnabled="{Binding UseReasoningEffort}" Height="26" VerticalContentAlignment="Center"/>
+                                                                    </StackPanel>
+                                                                    <StackPanel Grid.Row="5" Grid.Column="2" Margin="0,0,0,8">
+                                                                        <CheckBox Content="{DynamicResource LM_Meai_UseReasoningOutput}" IsChecked="{Binding UseReasoningOutput}" Foreground="White" Margin="0,0,0,4"/>
+                                                                        <ComboBox ItemsSource="{Binding SupportedReasoningOutputs}" SelectedItem="{Binding ReasoningOutput}" IsEnabled="{Binding UseReasoningOutput}" Height="26" VerticalContentAlignment="Center"/>
+                                                                    </StackPanel>
+                                                                </Grid>
+                                                            </DataTemplate>
+                                                        </ContentControl.Resources>
+                                                    </ContentControl>
+                                                </StackPanel>
+                                            </ScrollViewer>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </TabItem>
+
+                        <!-- 子步骤 2：功能层级 -->
+                        <TabItem Style="{StaticResource VerticalAeroTabItemStyle}">
+                            <TabItem.Header>
+                                <TextBlock Text="{DynamicResource Layer_SubStepTitle}" FontSize="11.5" Foreground="{StaticResource AeroTextBrush}"/>
+                            </TabItem.Header>
+                            <Grid Margin="35,20,35,20">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                
+                                <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                                    <TextBlock Text="{DynamicResource Layer_Title}" Foreground="White" FontSize="20" FontWeight="Bold"/>
+                                    <TextBlock Text="{DynamicResource Layer_SubTitle}" Foreground="#CCFFFFFF" FontSize="12.5" Margin="0,2,0,0"/>
+                                </StackPanel>
+ 
+                                <Grid Grid.Row="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+ 
+                                    <!-- 卡片 1：上下文压缩 -->
+                                    <Border Grid.Column="0" BorderBrush="{StaticResource AeroBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="12">
+                                        <Border.Background>
+                                            <SolidColorBrush Color="#12FFFFFF"/>
+                                        </Border.Background>
+                                        <DockPanel>
+                                            <TextBlock DockPanel.Dock="Top" Text="{DynamicResource Layer_ContextCompression_Name}" Foreground="White" FontSize="14" FontWeight="Bold" Margin="0,0,0,6" HorizontalAlignment="Center"/>
+                                            <TextBlock DockPanel.Dock="Top" Text="{DynamicResource Layer_ContextCompression_Desc}" Foreground="#88FFFFFF" FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap" HorizontalAlignment="Center"/>
+                                            <Button DockPanel.Dock="Bottom" Content="{DynamicResource Layer_BtnAddRef}" Click="BtnAddLayer1_Click" Margin="0,8,0,0" Height="26"/>
+                                            
+                                            <ListBox x:Name="LstLayer1" ItemsSource="{Binding CapabilityLayers[0].LanguageModels}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid Margin="0,2">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <ComboBox ItemsSource="{Binding DataContext.WizardLanguageModels, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                      DisplayMemberPath="DisplayName"
+                                                                      SelectedValuePath="Key"
+                                                                      SelectedValue="{Binding LanguageModelKey, UpdateSourceTrigger=PropertyChanged}"
+                                                                      Height="24" FontSize="11.5"/>
+                                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="4,0,0,0">
+                                                                <Button Content="▲" Click="BtnMoveUpLayer1_Click" Width="18" Height="24" Padding="0" FontSize="9"/>
+                                                                <Button Content="▼" Click="BtnMoveDownLayer1_Click" Width="18" Height="24" Padding="0" FontSize="9" Margin="2,0,0,0"/>
+                                                                <Button Content="×" Click="BtnDeleteLayer1_Click" Width="18" Height="24" Padding="0" FontSize="10" Margin="2,0,0,0" Background="#40FF0000"/>
+                                                            </StackPanel>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
+                                        </DockPanel>
+                                    </Border>
+ 
+                                    <!-- 卡片 2：实用I（快速） -->
+                                    <Border Grid.Column="2" BorderBrush="{StaticResource AeroBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="12">
+                                        <Border.Background>
+                                            <SolidColorBrush Color="#12FFFFFF"/>
+                                        </Border.Background>
+                                        <DockPanel>
+                                            <TextBlock DockPanel.Dock="Top" Text="{DynamicResource Layer_UtilityIFast_Name}" Foreground="White" FontSize="14" FontWeight="Bold" Margin="0,0,0,6" HorizontalAlignment="Center"/>
+                                            <TextBlock DockPanel.Dock="Top" Text="{DynamicResource Layer_UtilityIFast_Desc}" Foreground="#88FFFFFF" FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap" HorizontalAlignment="Center"/>
+                                            <Button DockPanel.Dock="Bottom" Content="{DynamicResource Layer_BtnAddRef}" Click="BtnAddLayer2_Click" Margin="0,8,0,0" Height="26"/>
+                                            
+                                            <ListBox x:Name="LstLayer2" ItemsSource="{Binding CapabilityLayers[1].LanguageModels}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid Margin="0,2">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <ComboBox ItemsSource="{Binding DataContext.WizardLanguageModels, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                      DisplayMemberPath="DisplayName"
+                                                                      SelectedValuePath="Key"
+                                                                      SelectedValue="{Binding LanguageModelKey, UpdateSourceTrigger=PropertyChanged}"
+                                                                      Height="24" FontSize="11.5"/>
+                                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="4,0,0,0">
+                                                                <Button Content="▲" Click="BtnMoveUpLayer2_Click" Width="18" Height="24" Padding="0" FontSize="9"/>
+                                                                <Button Content="▼" Click="BtnMoveDownLayer2_Click" Width="18" Height="24" Padding="0" FontSize="9" Margin="2,0,0,0"/>
+                                                                <Button Content="×" Click="BtnDeleteLayer2_Click" Width="18" Height="24" Padding="0" FontSize="10" Margin="2,0,0,0" Background="#40FF0000"/>
+                                                            </StackPanel>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
+                                        </DockPanel>
+                                    </Border>
+ 
+                                    <!-- 卡片 3：实用II（智能） -->
+                                    <Border Grid.Column="4" BorderBrush="{StaticResource AeroBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="12">
+                                        <Border.Background>
+                                            <SolidColorBrush Color="#12FFFFFF"/>
+                                        </Border.Background>
+                                        <DockPanel>
+                                            <TextBlock DockPanel.Dock="Top" Text="{DynamicResource Layer_UtilityIISmart_Name}" Foreground="White" FontSize="14" FontWeight="Bold" Margin="0,0,0,6" HorizontalAlignment="Center"/>
+                                            <TextBlock DockPanel.Dock="Top" Text="{DynamicResource Layer_UtilityIISmart_Desc}" Foreground="#88FFFFFF" FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap" HorizontalAlignment="Center"/>
+                                            <Button DockPanel.Dock="Bottom" Content="{DynamicResource Layer_BtnAddRef}" Click="BtnAddLayer3_Click" Margin="0,8,0,0" Height="26"/>
+                                            
+                                            <ListBox x:Name="LstLayer3" ItemsSource="{Binding CapabilityLayers[2].LanguageModels}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid Margin="0,2">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <ComboBox ItemsSource="{Binding DataContext.WizardLanguageModels, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                      DisplayMemberPath="DisplayName"
+                                                                      SelectedValuePath="Key"
+                                                                      SelectedValue="{Binding LanguageModelKey, UpdateSourceTrigger=PropertyChanged}"
+                                                                      Height="24" FontSize="11.5"/>
+                                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="4,0,0,0">
+                                                                <Button Content="▲" Click="BtnMoveUpLayer3_Click" Width="18" Height="24" Padding="0" FontSize="9"/>
+                                                                <Button Content="▼" Click="BtnMoveDownLayer3_Click" Width="18" Height="24" Padding="0" FontSize="9" Margin="2,0,0,0"/>
+                                                                <Button Content="×" Click="BtnDeleteLayer3_Click" Width="18" Height="24" Padding="0" FontSize="10" Margin="2,0,0,0" Background="#40FF0000"/>
+                                                            </StackPanel>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
+                                        </DockPanel>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </TabItem>
+
+                        <!-- 子步骤 2：智能体 -->
+                        <TabItem Style="{StaticResource VerticalAeroTabItemStyle}">
+                            <TabItem.Header>
+                                <TextBlock Text="{DynamicResource Agent_SubStepTitle}" FontSize="11.5" Foreground="{StaticResource AeroTextBrush}"/>
+                            </TabItem.Header>
+                            <TabItem.Resources>
+                                <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+                            </TabItem.Resources>
+                            <Grid Margin="45,25,45,25">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                
+                                <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                                    <TextBlock Text="{DynamicResource Agent_Title}" Foreground="White" FontSize="22" FontWeight="Bold"/>
+                                    <TextBlock Text="{DynamicResource Agent_SubTitle}" Foreground="#CCFFFFFF" FontSize="13.5" Margin="0,4,0,0"/>
+                                </StackPanel>
+                                
+                                <ListBox Grid.Row="1"
+                                         ItemsSource="{Binding AgentOptions}"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                         ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                            <Setter Property="Padding" Value="0"/>
+                                            <Setter Property="Template">
+                                                 <Setter.Value>
+                                                 <ControlTemplate TargetType="ListBoxItem">
+                                                     <Border x:Name="ItemBorder"
+                                                             Background="#12FFFFFF"
+                                                             BorderBrush="#25FFFFFF"
+                                                             BorderThickness="1"
+                                                             CornerRadius="6"
+                                                             Padding="12,8"
+                                                             Margin="0,0,0,6"
+                                                             SnapsToDevicePixels="True">
+                                                         <VisualStateManager.VisualStateGroups>
+                                                             <VisualStateGroup x:Name="CommonStates">
+                                                                 <VisualState x:Name="Normal" />
+                                                                 <VisualState x:Name="MouseOver">
+                                                                     <Storyboard>
+                                                                         <ColorAnimation Storyboard.TargetName="ItemBorder" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#25FFFFFF" Duration="0:0:0.15"/>
+                                                                         <ColorAnimation Storyboard.TargetName="ItemBorder" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#55FFFFFF" Duration="0:0:0.15"/>
+                                                                     </Storyboard>
+                                                                 </VisualState>
+                                                             </VisualStateGroup>
+                                                             <VisualStateGroup x:Name="SelectionStates">
+                                                                 <VisualState x:Name="Unselected" />
+                                                                 <VisualState x:Name="Selected">
+                                                                     <Storyboard>
+                                                                         <ColorAnimation Storyboard.TargetName="ItemBorder" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#35FFFFFF" Duration="0:0:0.15"/>
+                                                                         <ColorAnimation Storyboard.TargetName="ItemBorder" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#9000C3FF" Duration="0:0:0.15"/>
+                                                                     </Storyboard>
+                                                                 </VisualState>
+                                                             </VisualStateGroup>
+                                                         </VisualStateManager.VisualStateGroups>
+                                                         <ContentPresenter />
+                                                     </Border>
+                                                 </ControlTemplate>
+                                                  </Setter.Value>
+                                             </Setter>
+                                         </Style>
+                                     </ListBox.ItemContainerStyle>
+                                     
+                                     <ListBox.ItemTemplate>
+                                         <DataTemplate>
+                                             <Grid>
+                                                 <Grid.ColumnDefinitions>
+                                                     <ColumnDefinition Width="Auto" />
+                                                     <ColumnDefinition Width="Auto" />
+                                                     <ColumnDefinition Width="*" />
+                                                 </Grid.ColumnDefinitions>
+                                                 
+                                                 <!-- CheckBox 启用勾选 -->
+                                                 <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay}"
+                                                           VerticalAlignment="Center"
+                                                           Margin="4,0,12,0" />
+                                                 
+                                                 <!-- 头像 -->
+                                                 <Grid Grid.Column="1" Margin="0,0,12,0" VerticalAlignment="Center">
+                                                     <Image Source="Resources/Icons/GuideBot.png" 
+                                                            Width="30" 
+                                                            Height="30" 
+                                                            Stretch="Uniform" 
+                                                            RenderOptions.BitmapScalingMode="HighQuality"/>
+                                                 </Grid>
+                                                 
+                                                 <!-- 文字内容描述 -->
+                                                 <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                     <StackPanel Orientation="Horizontal">
+                                                         <TextBlock Text="{Binding DisplayName}" 
+                                                                    Foreground="White" 
+                                                                    FontSize="13.5" 
+                                                                    FontWeight="SemiBold"/>
+                                                         <TextBlock Text="{Binding AgentId, StringFormat='({0})'}" 
+                                                                    Foreground="#77FFFFFF" 
+                                                                    FontSize="11" 
+                                                                    VerticalAlignment="Center" 
+                                                                    Margin="8,1,0,0"/>
+                                                     </StackPanel>
+                                                     
+                                                     <TextBlock Text="{Binding Description}" 
+                                                                Foreground="#CCFFFFFF" 
+                                                                FontSize="11.5" 
+                                                                TextWrapping="Wrap" 
+                                                                Margin="0,3,0,0"
+                                                                LineHeight="16"/>
+                                                                
+                                                     <!-- 语言模型/功能层级配置 -->
+                                                     <Grid Margin="0,8,0,0" IsEnabled="{Binding IsEnabled}">
+                                                         <Grid.ColumnDefinitions>
+                                                             <ColumnDefinition Width="Auto" />
+                                                             <ColumnDefinition Width="15" />
+                                                             <ColumnDefinition Width="*" />
+                                                         </Grid.ColumnDefinitions>
+                                                         
+                                                         <!-- 左侧 RadioButtons 控制模式 -->
+                                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                             <RadioButton Content="{DynamicResource Agent_RadioSpecificModel}" 
+                                                                          IsChecked="{Binding IsSpecificLanguageModel, Mode=TwoWay}" 
+                                                                          Foreground="White" 
+                                                                          FontSize="11.5" 
+                                                                          VerticalAlignment="Center" 
+                                                                          Margin="0,0,10,0"/>
+                                                             <RadioButton Content="{DynamicResource Agent_RadioCapabilityLayer}" 
+                                                                          IsChecked="{Binding IsCapabilityLayer, Mode=TwoWay}" 
+                                                                          Foreground="White" 
+                                                                          FontSize="11.5" 
+                                                                          VerticalAlignment="Center"/>
+                                                         </StackPanel>
+                                                         
+                                                         <!-- 右侧 ComboBox 选择具体项 -->
+                                                         <Grid Grid.Column="2" VerticalAlignment="Center">
+                                                             <!-- 具体的语言模型选择 -->
+                                                             <ComboBox ItemsSource="{Binding DataContext.WizardLanguageModels, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                       DisplayMemberPath="DisplayName"
+                                                                       SelectedValuePath="Key"
+                                                                       SelectedValue="{Binding SelectedLanguageModelKey, Mode=TwoWay}"
+                                                                       Height="24"
+                                                                       FontSize="11.5"
+                                                                       VerticalContentAlignment="Center"
+                                                                       Visibility="{Binding IsSpecificLanguageModel, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                                                      
+                                                             <!-- 功能层级选择 -->
+                                                             <ComboBox ItemsSource="{Binding DataContext.CapabilityLayers, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                       DisplayMemberPath="Name"
+                                                                       SelectedValuePath="Key"
+                                                                       SelectedValue="{Binding SelectedCapabilityLayerKey, Mode=TwoWay}"
+                                                                       Height="24"
+                                                                       FontSize="11.5"
+                                                                       VerticalContentAlignment="Center"
+                                                                       Visibility="{Binding IsCapabilityLayer, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                                         </Grid>
+                                                     </Grid>
+                                                 </StackPanel>
+                                             </Grid>
+                                         </DataTemplate>
+                                     </ListBox.ItemTemplate>
+                                 </ListBox>
+                            </Grid>
+                        </TabItem>
+                        
+                        <!-- 子步骤 3：会话流 -->
+                        <TabItem Style="{StaticResource VerticalAeroTabItemStyle}">
+                            <TabItem.Header>
+                                <TextBlock Text="{DynamicResource Flow_SubStepTitle}" FontSize="11.5" Foreground="{StaticResource AeroTextBrush}"/>
+                            </TabItem.Header>
+                            <Grid Margin="45,25,45,25">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                
+                                <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                                    <TextBlock Text="{DynamicResource Flow_Title}" Foreground="White" FontSize="22" FontWeight="Bold"/>
+                                    <TextBlock Text="{DynamicResource Flow_SubTitle}" Foreground="#CCFFFFFF" FontSize="13.5" Margin="0,4,0,0"/>
+                                </StackPanel>
+                                
+                                <ListBox Grid.Row="1"
+                                         ItemsSource="{Binding FlowOptions}"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                         ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                                         Height="295"
+                                         VerticalAlignment="Top">
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                            <Setter Property="Padding" Value="0"/>
+                                            <Setter Property="Template">
+                                                 <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <Border x:Name="ItemBorder"
+                                                            Background="#12FFFFFF"
+                                                            BorderBrush="#25FFFFFF"
+                                                            BorderThickness="1"
+                                                            CornerRadius="6"
+                                                            Padding="12,8"
+                                                            Margin="0,0,0,6"
+                                                            SnapsToDevicePixels="True">
+                                                        <VisualStateManager.VisualStateGroups>
+                                                            <VisualStateGroup x:Name="CommonStates">
+                                                                <VisualState x:Name="Normal" />
+                                                                <VisualState x:Name="MouseOver">
+                                                                    <Storyboard>
+                                                                        <ColorAnimation Storyboard.TargetName="ItemBorder" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#25FFFFFF" Duration="0:0:0.15"/>
+                                                                        <ColorAnimation Storyboard.TargetName="ItemBorder" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#55FFFFFF" Duration="0:0:0.15"/>
+                                                                    </Storyboard>
+                                                                </VisualState>
+                                                            </VisualStateGroup>
+                                                            <VisualStateGroup x:Name="SelectionStates">
+                                                                <VisualState x:Name="Unselected" />
+                                                                <VisualState x:Name="Selected">
+                                                                    <Storyboard>
+                                                                        <ColorAnimation Storyboard.TargetName="ItemBorder" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#35FFFFFF" Duration="0:0:0.15"/>
+                                                                        <ColorAnimation Storyboard.TargetName="ItemBorder" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#9000C3FF" Duration="0:0:0.15"/>
+                                                                    </Storyboard>
+                                                                </VisualState>
+                                                            </VisualStateGroup>
+                                                        </VisualStateManager.VisualStateGroups>
+                                                        <ContentPresenter />
+                                                    </Border>
+                                                </ControlTemplate>
+                                                 </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                    
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <!-- CheckBox 启用勾选 -->
+                                                <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                          VerticalAlignment="Center"
+                                                          Margin="4,0,12,0" />
+                                                
+                                                <!-- 图标 -->
+                                                <Grid Grid.Column="1" Margin="0,0,12,0" VerticalAlignment="Center">
+                                                    <Image Source="Resources/Icons/GuideBot.png" 
+                                                           Width="30" 
+                                                           Height="30" 
+                                                           Stretch="Uniform" 
+                                                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                                                </Grid>
+                                                
+                                                <!-- 文字内容描述 -->
+                                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding DisplayName}" 
+                                                                   Foreground="White" 
+                                                                   FontSize="13.5" 
+                                                                   FontWeight="SemiBold"/>
+                                                        <TextBlock Text="{Binding AgentId, StringFormat='使用此代理创建会话流图 ({0}.xml)'}" 
+                                                                   Foreground="#77FFFFFF" 
+                                                                   FontSize="11" 
+                                                                   VerticalAlignment="Center" 
+                                                                   Margin="8,1,0,0"/>
+                                                    </StackPanel>
+                                                    
+                                                    <TextBlock Text="{Binding Description}" 
+                                                               Foreground="#CCFFFFFF" 
+                                                               FontSize="11.5" 
+                                                               TextWrapping="Wrap" 
+                                                               Margin="0,3,0,0"
+                                                               LineHeight="16"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Grid>
+                        </TabItem>
+
+                        <!-- 子步骤 4：系统集成 -->
+                        <TabItem Style="{StaticResource VerticalAeroTabItemStyle}">
+                            <TabItem.Header>
+                                <TextBlock Text="{DynamicResource Integration_SubStepTitle}" FontSize="11.5" Foreground="{StaticResource AeroTextBrush}"/>
+                            </TabItem.Header>
+                            <Grid Margin="45,30,45,30">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                
+                                <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                                    <TextBlock Text="{DynamicResource Integration_Title}" Foreground="White" FontSize="22" FontWeight="Bold"/>
+                                    <TextBlock Text="{DynamicResource Integration_SubTitle}" Foreground="#CCFFFFFF" FontSize="13.5" Margin="0,4,0,0"/>
+                                </StackPanel>
+
+                                <Border Grid.Row="1" BorderBrush="{StaticResource AeroBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="25" VerticalAlignment="Top">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#10FFFFFF" Offset="0"/>
+                                            <GradientStop Color="#03FFFFFF" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <StackPanel>
+                                        <!-- 只读系统选项 -->
+                                        <StackPanel Opacity="0.6" Margin="0,0,0,15">
+                                            <CheckBox x:Name="ChkShortcut" Content="{DynamicResource Integration_Shortcut}" IsChecked="True" IsEnabled="False" Foreground="White" FontSize="13.5" Margin="0,0,0,12"/>
+                                            <CheckBox x:Name="ChkStartMenu" Content="{DynamicResource Integration_StartMenu}" IsChecked="True" IsEnabled="False" Foreground="White" FontSize="13.5" Margin="0,0,0,12"/>
+                                            <CheckBox x:Name="ChkStartup" Content="{DynamicResource Integration_Startup}" IsChecked="False" IsEnabled="False" Foreground="White" FontSize="13.5" Margin="0,0,0,12"/>
+                                            <CheckBox x:Name="ChkRegisterService" Content="{DynamicResource Integration_Service}" IsChecked="False" IsEnabled="False" Foreground="White" FontSize="13.5"/>
+                                        </StackPanel>
+                                        
+                                        <Border Height="1" Background="#20FFFFFF" Margin="0,5,0,15"/>
+
+                                        <!-- Shell集成选项 -->
+                                        <CheckBox x:Name="ChkShellIntegration" Content="{DynamicResource Integration_Shell}" IsChecked="True" Foreground="White" FontSize="13.5" Margin="0,0,0,8"/>
+                                        <StackPanel Margin="24,0,0,0">
+                                            <TextBlock Text="{DynamicResource Integration_ShellDesc1}" Foreground="#A0FFFFFF" FontSize="11.5" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{DynamicResource Integration_ShellDesc2}" Foreground="#A0FFFFFF" FontSize="11.5" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                            <TextBlock Text="{DynamicResource Integration_ShellDesc3}" Foreground="#A0FFFFFF" FontSize="11.5" TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+            </TabItem>
+
+            <!-- 步骤 8：安装进度 -->
+            <TabItem Style="{StaticResource WizardTabItemStyle}">
+                <TabItem.Header>
+                    <TextBlock Text="{DynamicResource Tab_Progress}" FontSize="11.5" Foreground="{StaticResource AeroTextBrush}"/>
+                </TabItem.Header>
+                <Grid Margin="45,35,45,35">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{DynamicResource Progress_Title}" Foreground="White" FontSize="22" FontWeight="Bold"/>
+                        <TextBlock Text="{DynamicResource Progress_SubTitle}" Foreground="#CCFFFFFF" FontSize="13.5" Margin="0,4,0,35"/>
+
+                        <!-- 进度条 -->
+                        <ProgressBar x:Name="ProgBar" 
+                                     Minimum="0" 
+                                     Maximum="100" 
+                                     Height="24" 
+                                     Value="0" 
+                                     Margin="0,0,0,15"/>
+                        
+                        <Grid>
+                            <TextBlock x:Name="TxtProgressStatus" 
+                                       Text="{DynamicResource Progress_PrepareFiles}" 
+                                       Foreground="#E0FFFFFF" 
+                                       FontSize="13"/>
+                            <TextBlock x:Name="TxtProgressPercent" 
+                                       Text="0%" 
+                                       Foreground="#E0FFFFFF" 
+                                       FontSize="13" 
+                                       HorizontalAlignment="Right"/>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- 步骤 9：完成页面 -->
+            <TabItem Style="{StaticResource WizardTabItemStyle}">
+                <TabItem.Header>
+                    <TextBlock Text="{DynamicResource Tab_Complete}" FontSize="11.5" Foreground="{StaticResource AeroTextBrush}"/>
+                </TabItem.Header>
+                <Grid Margin="45,35,45,35">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="260"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 左侧完成插图 -->
+                    <Border Grid.Column="0" BorderBrush="{StaticResource AeroBorderBrush}" BorderThickness="1" CornerRadius="8" Margin="0,0,30,0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#33FFFFFF" Offset="0"/>
+                                <GradientStop Color="#0AFFFFFF" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Grid>
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <Image Source="Resources/CascadeLogo.png" Width="110" Height="110" Stretch="Uniform" Margin="0,0,0,20">
+                                    <Image.Effect>
+                                        <DropShadowEffect Color="#00FF66" BlurRadius="25" ShadowDepth="0" Opacity="0.8"/>
+                                    </Image.Effect>
+                                </Image>
+                                <TextBlock Text="{DynamicResource Tab_Complete}" Foreground="White" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- 右侧完成选项 -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,0,0">
+                        <TextBlock Text="{DynamicResource Complete_Title}" 
+                                   Foreground="White" 
+                                   FontSize="28" 
+                                   FontWeight="Bold" 
+                                   Margin="0,0,0,20">
+                            <TextBlock.Effect>
+                                <DropShadowEffect ShadowDepth="1" BlurRadius="6" Opacity="0.8" Color="Black"/>
+                            </TextBlock.Effect>
+                        </TextBlock>
+                        
+                        <TextBlock Text="{DynamicResource Complete_Text1}" 
+                                   Foreground="#E0FFFFFF" 
+                                   FontSize="14.5" 
+                                   Margin="0,0,0,20"/>
+                        
+                        <TextBlock Text="{DynamicResource Complete_Text2}" 
+                                   Foreground="#A5FFFFFF" 
+                                   FontSize="13" 
+                                   Margin="0,0,0,25"/>
+
+                        <CheckBox x:Name="ChkLaunch" 
+                                  Content="{DynamicResource Complete_Launch}" 
+                                  Foreground="White" 
+                                  FontSize="13.5" 
+                                  IsChecked="True"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- 底部操作栏 (跨越 Row 2) -->
+        <Grid Grid.Row="2">
+            <!-- 正常背景层 -->
+            <Border Background="{StaticResource AeroFooterBrush}" BorderBrush="{StaticResource AeroBorderBrush}" BorderThickness="0,1,0,0"/>
+            <!-- 内部高光线 -->
+            <Border BorderBrush="#33FFFFFF" BorderThickness="0,1,0,0" VerticalAlignment="Top" Height="1"/>
+            
+            <!-- 底部控制按钮 -->
+            <Grid Margin="20,0,20,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- 左下角状态提示 -->
+                <TextBlock x:Name="TxtFooterStatus" 
+                           Grid.Column="0" 
+                           Text="{DynamicResource Status_ReadyToInstall}" 
+                           Foreground="#88FFFFFF" 
+                           VerticalAlignment="Center" 
+                           FontSize="12"/>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="BtnBack" 
+                            Content="{DynamicResource Btn_Back}" 
+                            Width="95" 
+                            Margin="0,0,10,0" 
+                            Click="BtnBack_Click"/>
+                    <Button x:Name="BtnNext" 
+                            Content="{DynamicResource Btn_Next}" 
+                            Width="95" 
+                            Margin="0,0,20,0" 
+                            Click="BtnNext_Click"/>
+                    <Button x:Name="BtnCancel" 
+                            Content="{DynamicResource Btn_Cancel}" 
+                            Width="95" 
+                            Click="BtnCancel_Click"/>
                 </StackPanel>
-            </Border>
+            </Grid>
         </Grid>
     </Grid>
 </Window>
