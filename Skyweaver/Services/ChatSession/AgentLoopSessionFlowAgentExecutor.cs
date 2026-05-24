@@ -35,6 +35,8 @@ namespace Skyweaver.Services.ChatSession
                 MinCompactionEnabled = request.MinCompactionEnabled,
                 CompactionFilePath = request.CompactionFilePath,
                 ToolCallIdFactory = request.ToolCallIdFactory,
+                AsyncToolStateScopeId = request.AsyncToolStateScopeId,
+                ToolCallResourceFolderPath = request.ToolCallResourceFolderPath,
                 ToolConfirmationCallback = request.ToolConfirmationCallback
             };
 

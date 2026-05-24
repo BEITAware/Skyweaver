@@ -48,6 +48,10 @@ namespace Skyweaver.Services.AgentLoop
 
         public Func<string>? ToolCallIdFactory { get; init; }
 
+        public string? AsyncToolStateScopeId { get; init; }
+
+        public string? ToolCallResourceFolderPath { get; init; }
+
         public Func<AgentToolConfirmationRequest, CancellationToken, Task<AgentToolConfirmationResult>>? ToolConfirmationCallback { get; init; }
     }
 

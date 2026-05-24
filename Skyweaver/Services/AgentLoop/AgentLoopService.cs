@@ -1,4 +1,6 @@
+using System.IO;
 using System.Text;
+using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
 using Newtonsoft.Json.Linq;
@@ -22,6 +24,7 @@ namespace Skyweaver.Services.AgentLoop
         private static readonly TimeSpan StreamingProtocolRefreshInterval = TimeSpan.FromMilliseconds(16);
         private const double MinCompactionTriggerRatio = 0.8d;
         private const string MinCompactionLayerKey = "MinCompaction";
+        private static readonly AsyncToolRegistry s_asyncToolRegistry = new();
 
         private sealed record ToolExecutionAuthorization(
             bool CanExecute,
@@ -84,6 +87,312 @@ namespace Skyweaver.Services.AgentLoop
             }
         }
 
+        private sealed class AsyncToolPublicationGate : IDisposable
+        {
+            private int _isOpen = 1;
+
+            public bool IsOpen => Volatile.Read(ref _isOpen) == 1;
+
+            public void Dispose()
+            {
+                Volatile.Write(ref _isOpen, 0);
+            }
+        }
+
+        private sealed record AsyncToolCompletionRecord(
+            PendingAsyncToolExecution Execution,
+            SkyweaverToolReturnPayload Payload,
+            AsyncToolProgressSnapshot ProgressSnapshot);
+
+        private sealed record PersistedAsyncToolBackfill(
+            string ToolCallId,
+            AgentToolBackfill Backfill,
+            SkyweaverToolInvocation? Invocation);
+
+        private sealed class AsyncToolRegistryEntry
+        {
+            public AsyncToolRegistryEntry(PendingAsyncToolExecution execution)
+            {
+                Execution = execution ?? throw new ArgumentNullException(nameof(execution));
+            }
+
+            public PendingAsyncToolExecution Execution { get; private set; }
+
+            public SkyweaverToolReturnPayload? CompletedPayload { get; private set; }
+
+            public AsyncToolProgressSnapshot? CompletedProgressSnapshot { get; private set; }
+
+            public bool IsDeliveredToConversation { get; private set; }
+
+            public DateTimeOffset CreatedAtUtc { get; } = DateTimeOffset.UtcNow;
+
+            public DateTimeOffset UpdatedAtUtc { get; private set; } = DateTimeOffset.UtcNow;
+
+            public void UpdateExecution(PendingAsyncToolExecution execution)
+            {
+                Execution = execution ?? throw new ArgumentNullException(nameof(execution));
+                UpdatedAtUtc = DateTimeOffset.UtcNow;
+            }
+
+            public void MarkCompleted(
+                SkyweaverToolReturnPayload payload,
+                AsyncToolProgressSnapshot progressSnapshot,
+                bool deliveredToConversation)
+            {
+                CompletedPayload = payload ?? throw new ArgumentNullException(nameof(payload));
+                CompletedProgressSnapshot = progressSnapshot ?? throw new ArgumentNullException(nameof(progressSnapshot));
+                IsDeliveredToConversation |= deliveredToConversation;
+                UpdatedAtUtc = DateTimeOffset.UtcNow;
+            }
+
+            public void MarkDelivered()
+            {
+                IsDeliveredToConversation = true;
+                UpdatedAtUtc = DateTimeOffset.UtcNow;
+            }
+        }
+
+        private sealed class AsyncToolRegistry
+        {
+            private readonly object _syncRoot = new();
+            private readonly Dictionary<string, Dictionary<string, AsyncToolRegistryEntry>> _entriesByScope =
+                new(StringComparer.OrdinalIgnoreCase);
+
+            public void Track(string? scopeKey, PendingAsyncToolExecution execution)
+            {
+                if (!TryNormalizeScopeKey(scopeKey, out var normalizedScopeKey))
+                {
+                    return;
+                }
+
+                lock (_syncRoot)
+                {
+                    var scopeEntries = GetOrCreateScope(normalizedScopeKey);
+                    if (scopeEntries.TryGetValue(execution.ToolCallId, out var entry))
+                    {
+                        entry.UpdateExecution(execution);
+                        return;
+                    }
+
+                    scopeEntries[execution.ToolCallId] = new AsyncToolRegistryEntry(execution);
+                }
+            }
+
+            public void MarkCompleted(
+                string? scopeKey,
+                PendingAsyncToolExecution execution,
+                SkyweaverToolReturnPayload payload,
+                AsyncToolProgressSnapshot progressSnapshot,
+                bool deliveredToConversation)
+            {
+                if (!TryNormalizeScopeKey(scopeKey, out var normalizedScopeKey))
+                {
+                    return;
+                }
+
+                lock (_syncRoot)
+                {
+                    var scopeEntries = GetOrCreateScope(normalizedScopeKey);
+                    if (!scopeEntries.TryGetValue(execution.ToolCallId, out var entry))
+                    {
+                        entry = new AsyncToolRegistryEntry(execution);
+                        scopeEntries[execution.ToolCallId] = entry;
+                    }
+
+                    entry.MarkCompleted(payload, progressSnapshot, deliveredToConversation);
+                }
+            }
+
+            public void MarkDelivered(string? scopeKey, string? toolCallId)
+            {
+                if (!TryNormalizeScopeKey(scopeKey, out var normalizedScopeKey))
+                {
+                    return;
+                }
+
+                var normalizedToolCallId = ChatSessionToolCallIdGenerator.Normalize(toolCallId);
+                if (normalizedToolCallId.Length == 0)
+                {
+                    return;
+                }
+
+                lock (_syncRoot)
+                {
+                    if (_entriesByScope.TryGetValue(normalizedScopeKey, out var scopeEntries) &&
+                        scopeEntries.TryGetValue(normalizedToolCallId, out var entry))
+                    {
+                        entry.MarkDelivered();
+                    }
+                }
+            }
+
+            public IReadOnlyList<AsyncToolCompletionRecord> ConsumeUndeliveredCompleted(
+                string? scopeKey,
+                IEnumerable<string>? excludedToolCallIds = null)
+            {
+                if (!TryNormalizeScopeKey(scopeKey, out var normalizedScopeKey))
+                {
+                    return Array.Empty<AsyncToolCompletionRecord>();
+                }
+
+                var excludedIds = excludedToolCallIds == null
+                    ? new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                    : excludedToolCallIds
+                        .Select(ChatSessionToolCallIdGenerator.Normalize)
+                        .Where(id => id.Length > 0)
+                        .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                lock (_syncRoot)
+                {
+                    if (!_entriesByScope.TryGetValue(normalizedScopeKey, out var scopeEntries))
+                    {
+                        return Array.Empty<AsyncToolCompletionRecord>();
+                    }
+
+                    var records = scopeEntries.Values
+                        .Where(entry => entry.CompletedPayload != null &&
+                                        entry.CompletedProgressSnapshot != null &&
+                                        !entry.IsDeliveredToConversation &&
+                                        !excludedIds.Contains(entry.Execution.ToolCallId))
+                        .OrderBy(entry => entry.CreatedAtUtc)
+                        .Select(entry =>
+                        {
+                            entry.MarkDelivered();
+                            return new AsyncToolCompletionRecord(
+                                entry.Execution,
+                                entry.CompletedPayload!,
+                                entry.CompletedProgressSnapshot!);
+                        })
+                        .ToArray();
+
+                    return records;
+                }
+            }
+
+            public bool TryGetExecution(
+                string? scopeKey,
+                string? toolCallId,
+                out PendingAsyncToolExecution execution)
+            {
+                execution = null!;
+                if (!TryNormalizeScopeKey(scopeKey, out var normalizedScopeKey))
+                {
+                    return false;
+                }
+
+                var normalizedToolCallId = ChatSessionToolCallIdGenerator.Normalize(toolCallId);
+                if (normalizedToolCallId.Length == 0)
+                {
+                    return false;
+                }
+
+                lock (_syncRoot)
+                {
+                    if (!_entriesByScope.TryGetValue(normalizedScopeKey, out var scopeEntries) ||
+                        !scopeEntries.TryGetValue(normalizedToolCallId, out var entry))
+                    {
+                        return false;
+                    }
+
+                    execution = entry.Execution;
+                    return true;
+                }
+            }
+
+            public bool TryGetCompleted(
+                string? scopeKey,
+                string? toolCallId,
+                out SkyweaverToolReturnPayload payload,
+                out AsyncToolProgressSnapshot progressSnapshot)
+            {
+                payload = null!;
+                progressSnapshot = null!;
+                if (!TryNormalizeScopeKey(scopeKey, out var normalizedScopeKey))
+                {
+                    return false;
+                }
+
+                var normalizedToolCallId = ChatSessionToolCallIdGenerator.Normalize(toolCallId);
+                if (normalizedToolCallId.Length == 0)
+                {
+                    return false;
+                }
+
+                lock (_syncRoot)
+                {
+                    if (!_entriesByScope.TryGetValue(normalizedScopeKey, out var scopeEntries) ||
+                        !scopeEntries.TryGetValue(normalizedToolCallId, out var entry) ||
+                        entry.CompletedPayload == null ||
+                        entry.CompletedProgressSnapshot == null)
+                    {
+                        return false;
+                    }
+
+                    payload = entry.CompletedPayload;
+                    progressSnapshot = entry.CompletedProgressSnapshot;
+                    return true;
+                }
+            }
+
+            public IReadOnlyList<string> GetKnownToolCallIds(string? scopeKey)
+            {
+                if (!TryNormalizeScopeKey(scopeKey, out var normalizedScopeKey))
+                {
+                    return Array.Empty<string>();
+                }
+
+                lock (_syncRoot)
+                {
+                    return _entriesByScope.TryGetValue(normalizedScopeKey, out var scopeEntries)
+                        ? scopeEntries.Keys
+                            .Select(ChatSessionToolCallIdGenerator.Normalize)
+                            .Where(id => id.Length > 0)
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .OrderBy(id => GetToolCallIdOrdinal(id))
+                            .ThenBy(id => id, StringComparer.OrdinalIgnoreCase)
+                            .ToArray()
+                        : Array.Empty<string>();
+                }
+            }
+
+            public IReadOnlyList<PendingAsyncToolExecution> GetExecutions(string? scopeKey)
+            {
+                if (!TryNormalizeScopeKey(scopeKey, out var normalizedScopeKey))
+                {
+                    return Array.Empty<PendingAsyncToolExecution>();
+                }
+
+                lock (_syncRoot)
+                {
+                    return _entriesByScope.TryGetValue(normalizedScopeKey, out var scopeEntries)
+                        ? scopeEntries.Values
+                            .OrderBy(entry => entry.CreatedAtUtc)
+                            .Select(entry => entry.Execution)
+                            .ToArray()
+                        : Array.Empty<PendingAsyncToolExecution>();
+                }
+            }
+
+            private Dictionary<string, AsyncToolRegistryEntry> GetOrCreateScope(string scopeKey)
+            {
+                if (!_entriesByScope.TryGetValue(scopeKey, out var scopeEntries))
+                {
+                    scopeEntries = new Dictionary<string, AsyncToolRegistryEntry>(StringComparer.OrdinalIgnoreCase);
+                    _entriesByScope[scopeKey] = scopeEntries;
+                }
+
+                return scopeEntries;
+            }
+
+            private static bool TryNormalizeScopeKey(string? scopeKey, out string normalizedScopeKey)
+            {
+                normalizedScopeKey = string.IsNullOrWhiteSpace(scopeKey)
+                    ? string.Empty
+                    : scopeKey.Trim();
+                return normalizedScopeKey.Length > 0;
+            }
+        }
+
         private sealed record AsyncToolFlushResult(
             IReadOnlyList<AgentToolBackfill> ToolBackfills,
             IReadOnlyList<string> NewlyLoadedToolKitKeys);
@@ -98,6 +407,15 @@ namespace Skyweaver.Services.AgentLoop
             private readonly HashSet<string> _reservedIds = new(StringComparer.OrdinalIgnoreCase);
             private int _nextId;
 
+            public void Reserve(string? toolCallId)
+            {
+                var normalized = ChatSessionToolCallIdGenerator.Normalize(toolCallId);
+                if (normalized.Length > 0)
+                {
+                    _reservedIds.Add(normalized);
+                }
+            }
+
             public string Create()
             {
                 while (_nextId < int.MaxValue)
@@ -111,6 +429,17 @@ namespace Skyweaver.Services.AgentLoop
 
                 throw new InvalidOperationException("Unable to allocate a unique transient tool call id.");
             }
+        }
+
+        private Func<string> CreateDefaultToolCallIdFactory(AgentLoopRequest request)
+        {
+            var factory = new TransientToolCallIdFactory();
+            foreach (var toolCallId in CollectKnownToolCallIds(request))
+            {
+                factory.Reserve(toolCallId);
+            }
+
+            return factory.Create;
         }
 
         private sealed record StreamedResponseResult(
@@ -285,6 +614,7 @@ namespace Skyweaver.Services.AgentLoop
         private readonly SkyweaverToolKitService _toolKitService;
         private readonly AgentLoopCompactionStore _compactionStore;
         private readonly AgentLoopTokenCounter _tokenCounter;
+        private readonly ChatSessionToolCallResourceStore _toolCallResourceStore;
 
         public AgentLoopService()
             : this(
@@ -305,7 +635,8 @@ namespace Skyweaver.Services.AgentLoop
             AgentLoopContextManager contextManager,
             SkyweaverToolKitService? toolKitService = null,
             AgentLoopCompactionStore? compactionStore = null,
-            AgentLoopTokenCounter? tokenCounter = null)
+            AgentLoopTokenCounter? tokenCounter = null,
+            ChatSessionToolCallResourceStore? toolCallResourceStore = null)
         {
             _systemPromptBuilder = systemPromptBuilder ?? throw new ArgumentNullException(nameof(systemPromptBuilder));
             _languageModelResolver = languageModelResolver ?? throw new ArgumentNullException(nameof(languageModelResolver));
@@ -315,6 +646,7 @@ namespace Skyweaver.Services.AgentLoop
             _toolKitService = toolKitService ?? new SkyweaverToolKitService();
             _compactionStore = compactionStore ?? new AgentLoopCompactionStore();
             _tokenCounter = tokenCounter ?? new AgentLoopTokenCounter(_chatService, _compactionStore);
+            _toolCallResourceStore = toolCallResourceStore ?? new ChatSessionToolCallResourceStore();
         }
 
         public Task<AgentLoopResult> RunAsync(
@@ -341,7 +673,8 @@ namespace Skyweaver.Services.AgentLoop
             ArgumentNullException.ThrowIfNull(request);
             ValidateRequest(request);
 
-            var toolCallIdFactory = request.ToolCallIdFactory ?? new TransientToolCallIdFactory().Create;
+            using var asyncToolPublicationGate = new AsyncToolPublicationGate();
+            var toolCallIdFactory = request.ToolCallIdFactory ?? CreateDefaultToolCallIdFactory(request);
 
             var availableToolKits = _toolKitService.Load();
             var toolKitMembershipMap = _toolKitService.BuildToolKitMembershipMap(availableToolKits);
@@ -398,9 +731,9 @@ namespace Skyweaver.Services.AgentLoop
                     activeToolKitKeys.Add(toolKitKey);
                 }
 
-                var systemPrompt = BuildSystemPromptWithCompactionNotice(
+                var systemPrompt = BuildSystemPromptWithRuntimeToolCallNotice(
                     baseSystemPrompt,
-                    request.CompactionFilePath);
+                    request);
                 var preparedContext = await _contextManager.PrepareAsync(
                     request.Agent,
                     systemPrompt,
@@ -431,9 +764,9 @@ namespace Skyweaver.Services.AgentLoop
 
                 if (appliedMinCompaction != null)
                 {
-                    systemPrompt = BuildSystemPromptWithCompactionNotice(
+                    systemPrompt = BuildSystemPromptWithRuntimeToolCallNotice(
                         baseSystemPrompt,
-                        request.CompactionFilePath);
+                        request);
                     preparedContext = await _contextManager.PrepareAsync(
                         request.Agent,
                         systemPrompt,
@@ -489,6 +822,7 @@ namespace Skyweaver.Services.AgentLoop
                         pendingAsyncToolExecutions,
                         completedAsyncToolResultsById,
                         completedAsyncToolProgressById,
+                        asyncToolPublicationGate,
                         debugRunContext,
                         iterationNumber,
                         latestPassdownOutput,
@@ -672,7 +1006,7 @@ namespace Skyweaver.Services.AgentLoop
             {
                 var compactedPrepared = await _contextManager.PrepareAsync(
                     request.Agent,
-                    BuildSystemPromptWithCompactionNotice(baseSystemPrompt, request.CompactionFilePath),
+                    BuildSystemPromptWithRuntimeToolCallNotice(baseSystemPrompt, request),
                     request.Input,
                     request.InputContentBlocks,
                     persistentHistory,
@@ -774,6 +1108,7 @@ namespace Skyweaver.Services.AgentLoop
             IList<PendingAsyncToolExecution> pendingAsyncToolExecutions,
             IDictionary<string, SkyweaverToolReturnPayload> completedAsyncToolResultsById,
             IDictionary<string, AsyncToolProgressSnapshot> completedAsyncToolProgressById,
+            AsyncToolPublicationGate asyncToolPublicationGate,
             AgentLoopDebugRunContext? debugRunContext,
             int iterationNumber,
             AgentLoopFinalOutput? latestPassdownOutput,
@@ -1075,6 +1410,7 @@ namespace Skyweaver.Services.AgentLoop
                             pendingAsyncToolExecutions,
                             completedAsyncToolResultsById,
                             completedAsyncToolProgressById,
+                            asyncToolPublicationGate,
                             toolCallIdsByIndex,
                             toolCallIdFactory,
                             iterationNumber,
@@ -1290,6 +1626,7 @@ namespace Skyweaver.Services.AgentLoop
             IList<PendingAsyncToolExecution> pendingAsyncToolExecutions,
             IDictionary<string, SkyweaverToolReturnPayload> completedAsyncToolResultsById,
             IDictionary<string, AsyncToolProgressSnapshot> completedAsyncToolProgressById,
+            AsyncToolPublicationGate asyncToolPublicationGate,
             IDictionary<int, string> toolCallIdsByIndex,
             Func<string> toolCallIdFactory,
             int iterationNumber,
@@ -1377,6 +1714,7 @@ namespace Skyweaver.Services.AgentLoop
                             try
                             {
                                 var result = await ExecuteWaitForAsyncToolsAsync(
+                                    request,
                                     invocation,
                                     pendingAsyncToolExecutions,
                                     completedAsyncToolResultsById,
@@ -1421,6 +1759,7 @@ namespace Skyweaver.Services.AgentLoop
                             try
                             {
                                 var result = ExecuteGetAsyncToolProgress(
+                                    request,
                                     invocation,
                                     pendingAsyncToolExecutions,
                                     completedAsyncToolResultsById,
@@ -1553,6 +1892,7 @@ namespace Skyweaver.Services.AgentLoop
                             pendingAsyncToolExecutions,
                             completedAsyncToolResultsById,
                             completedAsyncToolProgressById,
+                            asyncToolPublicationGate,
                             toolCallId,
                             iterationNumber,
                             partIndex,
@@ -1627,13 +1967,14 @@ namespace Skyweaver.Services.AgentLoop
             ArgumentNullException.ThrowIfNull(completedAsyncToolProgressById);
             ArgumentNullException.ThrowIfNull(turnHistory);
 
-            if (pendingAsyncToolExecutions.Count == 0)
-            {
-                return new AsyncToolFlushResult(Array.Empty<AgentToolBackfill>(), Array.Empty<string>());
-            }
-
+            var scopeKey = ResolveAsyncToolScopeKey(request);
             var flushedBackfills = new List<AgentToolBackfill>();
             var newlyLoadedToolKitKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var localToolCallIds = pendingAsyncToolExecutions
+                .Select(execution => execution.ToolCallId)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var deliveredToolCallIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             for (var index = pendingAsyncToolExecutions.Count - 1; index >= 0; index--)
             {
@@ -1663,9 +2004,12 @@ namespace Skyweaver.Services.AgentLoop
                         }
                     }
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
                 {
-                    throw;
+                    payload = _toolManager.CreateErrorToolReturnPayload(
+                        execution.Invocation.ToolName,
+                        "Async tool execution was cancelled.",
+                        execution.ToolCallId);
                 }
                 catch (Exception ex)
                 {
@@ -1676,19 +2020,32 @@ namespace Skyweaver.Services.AgentLoop
                 }
 
                 completedAsyncToolResultsById[execution.ToolCallId] = payload;
-                completedAsyncToolProgressById[execution.ToolCallId] =
-                    execution.ProgressTracker.CreateSnapshot(
+                var progressSnapshot = execution.ProgressTracker.CreateSnapshot(
                         execution.ToolCallId,
                         execution.Invocation.ToolName,
                         isPending: false,
                         isCompleted: true);
+                completedAsyncToolProgressById[execution.ToolCallId] = progressSnapshot;
+                s_asyncToolRegistry.MarkCompleted(
+                    scopeKey,
+                    execution,
+                    payload,
+                    progressSnapshot,
+                    deliveredToConversation: true);
                 var backfill = CreateBackfill(
                     execution.PartIndex,
                     execution.ToolCallIndex,
                     [payload],
                     execution.ToolCallId);
                 flushedBackfills.Add(backfill);
+                deliveredToolCallIds.Add(execution.ToolCallId);
                 turnHistory.Add(CreateToolResultMessage(backfill));
+                PersistAsyncToolOutput(
+                    request.ToolCallResourceFolderPath,
+                    execution.ToolCallId,
+                    request.Agent.AgentId,
+                    backfill.ToolsReturnXml,
+                    transcriptDelivered: true);
 
                 await PublishAsync(
                     onEventAsync,
@@ -1706,7 +2063,234 @@ namespace Skyweaver.Services.AgentLoop
                     cancellationToken).ConfigureAwait(false);
             }
 
+            foreach (var registryExecution in s_asyncToolRegistry.GetExecutions(scopeKey)
+                         .Where(execution => execution.ExecutionTask.IsCompleted &&
+                                             !localToolCallIds.Contains(execution.ToolCallId)))
+            {
+                await ObserveAsyncToolCompletionAsync(
+                    request,
+                    scopeKey,
+                    registryExecution,
+                    cancellationToken).ConfigureAwait(false);
+            }
+
+            var registryCompletions = s_asyncToolRegistry.ConsumeUndeliveredCompleted(
+                scopeKey,
+                localToolCallIds.Concat(deliveredToolCallIds));
+            foreach (var completion in registryCompletions)
+            {
+                var execution = completion.Execution;
+                var backfill = CreateBackfill(
+                    execution.PartIndex,
+                    execution.ToolCallIndex,
+                    [completion.Payload],
+                    execution.ToolCallId);
+                completedAsyncToolResultsById[execution.ToolCallId] = completion.Payload;
+                completedAsyncToolProgressById[execution.ToolCallId] = completion.ProgressSnapshot;
+                flushedBackfills.Add(backfill);
+                deliveredToolCallIds.Add(execution.ToolCallId);
+                turnHistory.Add(CreateToolResultMessage(backfill));
+
+                if (IsLoadToolKits(execution.Invocation.ToolName))
+                {
+                    foreach (var toolKitKey in ExtractLoadedToolKitKeys([completion.Payload]))
+                    {
+                        newlyLoadedToolKitKeys.Add(toolKitKey);
+                    }
+                }
+
+                PersistAsyncToolOutput(
+                    request.ToolCallResourceFolderPath,
+                    execution.ToolCallId,
+                    request.Agent.AgentId,
+                    backfill.ToolsReturnXml,
+                    transcriptDelivered: true);
+
+                await PublishAsync(
+                    onEventAsync,
+                    new AgentLoopRuntimeEvent
+                    {
+                        Kind = AgentLoopRuntimeEventKind.ToolOutputReceived,
+                        IterationNumber = iterationNumber,
+                        PartIndex = execution.PartIndex,
+                        ToolCallIndex = execution.ToolCallIndex,
+                        ToolCallId = execution.ToolCallId,
+                        ToolInvocation = execution.Invocation,
+                        ToolOutputXml = backfill.ToolsReturnXml,
+                        ToolReturns = backfill.ToolReturns
+                    },
+                    cancellationToken).ConfigureAwait(false);
+            }
+
+            foreach (var restored in RestoreUndeliveredPersistedAsyncToolOutputs(
+                         request,
+                         localToolCallIds.Concat(deliveredToolCallIds)))
+            {
+                flushedBackfills.Add(restored.Backfill);
+                deliveredToolCallIds.Add(restored.ToolCallId);
+                turnHistory.Add(CreateToolResultMessage(restored.Backfill));
+                foreach (var toolKitKey in ExtractLoadedToolKitKeysFromToolsReturnXml(restored.Backfill.ToolsReturnXml))
+                {
+                    newlyLoadedToolKitKeys.Add(toolKitKey);
+                }
+
+                await PublishAsync(
+                    onEventAsync,
+                    new AgentLoopRuntimeEvent
+                    {
+                        Kind = AgentLoopRuntimeEventKind.ToolOutputReceived,
+                        IterationNumber = iterationNumber,
+                        PartIndex = restored.Backfill.PartIndex,
+                        ToolCallIndex = restored.Backfill.ToolCallIndex,
+                        ToolCallId = restored.ToolCallId,
+                        ToolInvocation = restored.Invocation,
+                        ToolOutputXml = restored.Backfill.ToolsReturnXml,
+                        ToolReturns = restored.Backfill.ToolReturns
+                    },
+                    cancellationToken).ConfigureAwait(false);
+
+                _toolCallResourceStore.MarkOutputTranscriptDelivered(
+                    request.ToolCallResourceFolderPath,
+                    restored.ToolCallId);
+            }
+
             return new AsyncToolFlushResult(flushedBackfills, newlyLoadedToolKitKeys.ToArray());
+        }
+
+        private IReadOnlyList<PersistedAsyncToolBackfill> RestoreUndeliveredPersistedAsyncToolOutputs(
+            AgentLoopRequest request,
+            IEnumerable<string> excludedToolCallIds)
+        {
+            if (string.IsNullOrWhiteSpace(request.ToolCallResourceFolderPath))
+            {
+                return Array.Empty<PersistedAsyncToolBackfill>();
+            }
+
+            var excludedIds = excludedToolCallIds
+                .Select(ChatSessionToolCallIdGenerator.Normalize)
+                .Where(id => id.Length > 0)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var restored = new List<PersistedAsyncToolBackfill>();
+            foreach (var record in _toolCallResourceStore.EnumerateRecords(request.ToolCallResourceFolderPath))
+            {
+                if (excludedIds.Contains(record.ToolCallId) ||
+                    record.IsOutputTranscriptDelivered ||
+                    string.IsNullOrWhiteSpace(record.OutputXml) ||
+                    !TryParsePersistedAsyncInvocation(record.InvocationXml, out var invocation))
+                {
+                    continue;
+                }
+
+                var backfill = new AgentToolBackfill
+                {
+                    PartIndex = 0,
+                    ToolCallIndex = 0,
+                    ToolCallId = record.ToolCallId,
+                    ToolReturns = Array.Empty<SkyweaverToolReturnPayload>(),
+                    ToolsReturnXml = AgentLoopCompactionStore.EnsureToolCallIdInToolsReturnXml(
+                        record.OutputXml,
+                        record.ToolCallId)
+                };
+                restored.Add(new PersistedAsyncToolBackfill(record.ToolCallId, backfill, invocation));
+                excludedIds.Add(record.ToolCallId);
+            }
+
+            return restored
+                .OrderBy(item => GetToolCallIdOrdinal(item.ToolCallId))
+                .ThenBy(item => item.ToolCallId, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+        }
+
+        private bool TryParsePersistedAsyncInvocation(
+            string? invocationXml,
+            out SkyweaverToolInvocation? invocation)
+        {
+            invocation = null;
+            if (string.IsNullOrWhiteSpace(invocationXml))
+            {
+                return false;
+            }
+
+            try
+            {
+                invocation = _toolManager.ParseToolInvocationXml(invocationXml)
+                    .FirstOrDefault(item => item.IsAsyncInvocation);
+                return invocation != null;
+            }
+            catch (Exception ex) when (ex is InvalidOperationException or XmlException)
+            {
+                return false;
+            }
+        }
+
+        private bool TryGetPersistedAsyncToolRecord(
+            AgentLoopRequest request,
+            string? toolCallId,
+            out ChatSessionToolCallResourceRecord record,
+            bool requireOutput)
+        {
+            record = null!;
+            var normalizedToolCallId = ChatSessionToolCallIdGenerator.Normalize(toolCallId);
+            if (normalizedToolCallId.Length == 0 ||
+                string.IsNullOrWhiteSpace(request.ToolCallResourceFolderPath))
+            {
+                return false;
+            }
+
+            foreach (var candidate in _toolCallResourceStore.EnumerateRecords(request.ToolCallResourceFolderPath))
+            {
+                if (!string.Equals(candidate.ToolCallId, normalizedToolCallId, StringComparison.OrdinalIgnoreCase) ||
+                    (requireOutput && string.IsNullOrWhiteSpace(candidate.OutputXml)) ||
+                    !TryParsePersistedAsyncInvocation(candidate.InvocationXml, out _))
+                {
+                    continue;
+                }
+
+                record = candidate;
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool TryGetKnownAsyncToolRecord(
+            AgentLoopRequest request,
+            string? toolCallId,
+            out ChatSessionToolCallResourceRecord record,
+            bool requireOutput)
+        {
+            if (TryGetPersistedAsyncToolRecord(request, toolCallId, out record, requireOutput))
+            {
+                return true;
+            }
+
+            record = null!;
+            var normalizedToolCallId = ChatSessionToolCallIdGenerator.Normalize(toolCallId);
+            if (normalizedToolCallId.Length == 0)
+            {
+                return false;
+            }
+
+            foreach (var candidate in CollectHistoryToolCallRecords(request))
+            {
+                if (!string.Equals(candidate.ToolCallId, normalizedToolCallId, StringComparison.OrdinalIgnoreCase) ||
+                    (requireOutput && string.IsNullOrWhiteSpace(candidate.OutputXml)) ||
+                    !TryParsePersistedAsyncInvocation(candidate.InvocationXml, out _))
+                {
+                    continue;
+                }
+
+                record = new ChatSessionToolCallResourceRecord
+                {
+                    ToolCallId = candidate.ToolCallId,
+                    InvocationXml = candidate.InvocationXml,
+                    OutputXml = candidate.OutputXml,
+                    IsOutputTranscriptDelivered = true
+                };
+                return true;
+            }
+
+            return false;
         }
 
         private static async Task PublishStreamingToolCallUpdatesAsync(
@@ -2767,7 +3351,8 @@ namespace Skyweaver.Services.AgentLoop
             string toolCallId,
             string? modelId,
             Func<AgentLoopRuntimeEvent, CancellationToken, ValueTask>? onEventAsync,
-            Action<SkyweaverToolProgressUpdate>? progressSink = null)
+            Action<SkyweaverToolProgressUpdate>? progressSink = null,
+            Func<bool>? canPublishProgress = null)
         {
             if (onEventAsync == null && progressSink == null)
             {
@@ -2786,7 +3371,8 @@ namespace Skyweaver.Services.AgentLoop
                     // Progress bookkeeping must not fail the tool itself.
                 }
 
-                if (onEventAsync == null)
+                if (onEventAsync == null ||
+                    canPublishProgress?.Invoke() == false)
                 {
                     return;
                 }
@@ -2904,6 +3490,7 @@ namespace Skyweaver.Services.AgentLoop
             IList<PendingAsyncToolExecution> pendingAsyncToolExecutions,
             IDictionary<string, SkyweaverToolReturnPayload> completedAsyncToolResultsById,
             IDictionary<string, AsyncToolProgressSnapshot> completedAsyncToolProgressById,
+            AsyncToolPublicationGate asyncToolPublicationGate,
             string toolCallId,
             int iterationNumber,
             int partIndex,
@@ -2944,6 +3531,7 @@ namespace Skyweaver.Services.AgentLoop
             try
             {
                 var progressTracker = new AsyncToolProgressTracker();
+                var scopeKey = ResolveAsyncToolScopeKey(request);
                 var progressToolContext = CreateToolProgressContext(
                     runtimeToolContext,
                     invocation,
@@ -2953,26 +3541,42 @@ namespace Skyweaver.Services.AgentLoop
                     toolCallId,
                     modelId,
                     onEventAsync,
-                    progressTracker.Update);
+                    progressTracker.Update,
+                    () => asyncToolPublicationGate.IsOpen);
+                PersistAsyncToolInvocation(request, toolCallId, invocation.InvocationXml);
                 var executionTask = _toolManager.ExecuteAsync(
                     invocation.ToolName,
                     invocation.RawArguments,
                     progressToolContext,
                     request.Agent,
                     authorization.HasHostConfirmation,
-                    cancellationToken);
+                    CancellationToken.None);
 
-                pendingAsyncToolExecutions.Add(new PendingAsyncToolExecution(
+                var execution = new PendingAsyncToolExecution(
                     toolCallId,
                     partIndex,
                     toolCallIndex,
                     invocation,
                     executionTask,
-                    progressTracker));
+                    progressTracker);
+                pendingAsyncToolExecutions.Add(execution);
+                s_asyncToolRegistry.Track(scopeKey, execution);
+                _ = ObserveAsyncToolCompletionAsync(
+                    request,
+                    scopeKey,
+                    execution,
+                    cancellationToken);
 
                 var acknowledgmentPayload = _toolManager.CreateToolReturnPayload(
                     invocation.ToolName,
-                    SkyweaverToolResult.Success($"Async tool call accepted. ToolCallId={toolCallId}."),
+                    SkyweaverToolResult.Success(
+                        $"Async tool call accepted. ToolCallId={toolCallId}.",
+                        new Dictionary<string, object?>
+                        {
+                            ["asyncAcknowledgement"] = true,
+                            ["toolCallId"] = toolCallId,
+                            ["toolName"] = invocation.ToolName
+                        }),
                     toolCallId);
                 return CreateBackfill(partIndex, toolCallIndex, [acknowledgmentPayload], toolCallId);
             }
@@ -2999,7 +3603,118 @@ namespace Skyweaver.Services.AgentLoop
             }
         }
 
+        private async Task ObserveAsyncToolCompletionAsync(
+            AgentLoopRequest request,
+            string scopeKey,
+            PendingAsyncToolExecution execution,
+            CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            ArgumentNullException.ThrowIfNull(execution);
+
+            SkyweaverToolReturnPayload payload;
+            try
+            {
+                var result = await execution.ExecutionTask.ConfigureAwait(false);
+                payload = _toolManager.CreateToolReturnPayload(
+                    execution.Invocation.ToolName,
+                    result,
+                    execution.ToolCallId);
+            }
+            catch (OperationCanceledException)
+            {
+                payload = _toolManager.CreateErrorToolReturnPayload(
+                    execution.Invocation.ToolName,
+                    "Async tool execution was cancelled.",
+                    execution.ToolCallId);
+            }
+            catch (Exception ex)
+            {
+                payload = _toolManager.CreateErrorToolReturnPayload(
+                    execution.Invocation.ToolName,
+                    $"Tool execution failed: {ex.Message}",
+                    execution.ToolCallId);
+            }
+
+            try
+            {
+                var progressSnapshot = execution.ProgressTracker.CreateSnapshot(
+                    execution.ToolCallId,
+                    execution.Invocation.ToolName,
+                    isPending: false,
+                    isCompleted: true);
+                s_asyncToolRegistry.MarkCompleted(
+                    scopeKey,
+                    execution,
+                    payload,
+                    progressSnapshot,
+                    deliveredToConversation: false);
+                PersistAsyncToolOutput(
+                    request.ToolCallResourceFolderPath,
+                    execution.ToolCallId,
+                    request.Agent.AgentId,
+                    _toolManager.BuildToolsReturnXml([payload]),
+                    transcriptDelivered: false);
+            }
+            catch
+            {
+                // Background completion bookkeeping must not fault the process.
+            }
+        }
+
+        private void PersistAsyncToolInvocation(
+            AgentLoopRequest request,
+            string toolCallId,
+            string invocationXml)
+        {
+            if (string.IsNullOrWhiteSpace(request.ToolCallResourceFolderPath))
+            {
+                return;
+            }
+
+            try
+            {
+                _toolCallResourceStore.SaveInvocation(
+                    request.ToolCallResourceFolderPath,
+                    toolCallId,
+                    request.Agent.AgentId,
+                    AgentLoopCompactionStore.EnsureToolCallIdInToolInvocationXml(invocationXml, toolCallId));
+            }
+            catch
+            {
+                // The transcript remains authoritative if the sidecar write fails.
+            }
+        }
+
+        private void PersistAsyncToolOutput(
+            string? toolCallResourceFolderPath,
+            string toolCallId,
+            string? callerAgentId,
+            string outputXml,
+            bool transcriptDelivered)
+        {
+            if (string.IsNullOrWhiteSpace(toolCallResourceFolderPath))
+            {
+                return;
+            }
+
+            try
+            {
+                _toolCallResourceStore.SaveOutput(
+                    toolCallResourceFolderPath,
+                    toolCallId,
+                    callerAgentId,
+                    AgentLoopCompactionStore.EnsureToolCallIdInToolsReturnXml(outputXml, toolCallId),
+                    transcriptDelivered);
+            }
+            catch
+            {
+                // Async result sidecar persistence is best-effort.
+            }
+        }
+
         private async Task<SkyweaverToolResult> ExecuteWaitForAsyncToolsAsync(
+            AgentLoopRequest request,
             SkyweaverToolInvocation invocation,
             IList<PendingAsyncToolExecution> pendingAsyncToolExecutions,
             IDictionary<string, SkyweaverToolReturnPayload> completedAsyncToolResultsById,
@@ -3024,11 +3739,13 @@ namespace Skyweaver.Services.AgentLoop
             }
 
             var waitedToolCallIds = await WaitForAsyncToolCallsAsync(
+                request,
                 requestedToolCallIds,
                 pendingAsyncToolExecutions,
                 completedAsyncToolResultsById,
                 cancellationToken).ConfigureAwait(false);
             var progressSnapshots = ResolveAsyncToolProgressSnapshots(
+                request,
                 waitedToolCallIds,
                 pendingAsyncToolExecutions,
                 completedAsyncToolResultsById,
@@ -3049,6 +3766,7 @@ namespace Skyweaver.Services.AgentLoop
         }
 
         private SkyweaverToolResult ExecuteGetAsyncToolProgress(
+            AgentLoopRequest request,
             SkyweaverToolInvocation invocation,
             IList<PendingAsyncToolExecution> pendingAsyncToolExecutions,
             IDictionary<string, SkyweaverToolReturnPayload> completedAsyncToolResultsById,
@@ -3071,12 +3789,15 @@ namespace Skyweaver.Services.AgentLoop
                     "GetAsyncToolProgress requires at least one ToolCallId.");
             }
 
+            var scopeKey = ResolveAsyncToolScopeKey(request);
             var missingToolCallIds = requestedToolCallIds
                 .Where(toolCallId =>
                     !completedAsyncToolResultsById.ContainsKey(toolCallId) &&
                     !completedAsyncToolProgressById.ContainsKey(toolCallId) &&
                     !pendingAsyncToolExecutions.Any(execution =>
-                        string.Equals(execution.ToolCallId, toolCallId, StringComparison.OrdinalIgnoreCase)))
+                        string.Equals(execution.ToolCallId, toolCallId, StringComparison.OrdinalIgnoreCase)) &&
+                    !s_asyncToolRegistry.TryGetExecution(scopeKey, toolCallId, out _) &&
+                    !TryGetKnownAsyncToolRecord(request, toolCallId, out _, requireOutput: false))
                 .ToArray();
             if (missingToolCallIds.Length > 0)
             {
@@ -3090,6 +3811,7 @@ namespace Skyweaver.Services.AgentLoop
             }
 
             var progressSnapshots = ResolveAsyncToolProgressSnapshots(
+                request,
                 requestedToolCallIds,
                 pendingAsyncToolExecutions,
                 completedAsyncToolResultsById,
@@ -3104,12 +3826,14 @@ namespace Skyweaver.Services.AgentLoop
                 });
         }
 
-        private static IReadOnlyList<AsyncToolProgressSnapshot> ResolveAsyncToolProgressSnapshots(
+        private IReadOnlyList<AsyncToolProgressSnapshot> ResolveAsyncToolProgressSnapshots(
+            AgentLoopRequest request,
             IReadOnlyList<string> requestedToolCallIds,
             IList<PendingAsyncToolExecution> pendingAsyncToolExecutions,
             IDictionary<string, SkyweaverToolReturnPayload> completedAsyncToolResultsById,
             IDictionary<string, AsyncToolProgressSnapshot> completedAsyncToolProgressById)
         {
+            var scopeKey = ResolveAsyncToolScopeKey(request);
             var snapshots = new List<AsyncToolProgressSnapshot>(requestedToolCallIds.Count);
             foreach (var toolCallId in requestedToolCallIds)
             {
@@ -3121,6 +3845,17 @@ namespace Skyweaver.Services.AgentLoop
                     snapshots.Add(pendingExecution.ProgressTracker.CreateSnapshot(
                         pendingExecution.ToolCallId,
                         pendingExecution.Invocation.ToolName,
+                        isPending: !isCompleted,
+                        isCompleted: isCompleted));
+                    continue;
+                }
+
+                if (s_asyncToolRegistry.TryGetExecution(scopeKey, toolCallId, out var registryExecution))
+                {
+                    var isCompleted = registryExecution.ExecutionTask.IsCompleted;
+                    snapshots.Add(registryExecution.ProgressTracker.CreateSnapshot(
+                        registryExecution.ToolCallId,
+                        registryExecution.Invocation.ToolName,
                         isPending: !isCompleted,
                         isCompleted: isCompleted));
                     continue;
@@ -3139,6 +3874,22 @@ namespace Skyweaver.Services.AgentLoop
                         completedResult.ToolName,
                         IsPending: false,
                         IsCompleted: true,
+                        Version: 0,
+                        ObservedAtUtc: null,
+                        Progress: null));
+                    continue;
+                }
+
+                if (TryGetKnownAsyncToolRecord(request, toolCallId, out var persistedRecord, requireOutput: false))
+                {
+                    var toolName = TryParsePersistedAsyncInvocation(persistedRecord.InvocationXml, out var persistedInvocation)
+                        ? persistedInvocation!.ToolName
+                        : string.Empty;
+                    snapshots.Add(new AsyncToolProgressSnapshot(
+                        toolCallId,
+                        toolName,
+                        IsPending: string.IsNullOrWhiteSpace(persistedRecord.OutputXml),
+                        IsCompleted: !string.IsNullOrWhiteSpace(persistedRecord.OutputXml),
                         Version: 0,
                         ObservedAtUtc: null,
                         Progress: null));
@@ -3253,7 +4004,8 @@ namespace Skyweaver.Services.AgentLoop
             return item;
         }
 
-        private static async Task<IReadOnlyList<string>> WaitForAsyncToolCallsAsync(
+        private async Task<IReadOnlyList<string>> WaitForAsyncToolCallsAsync(
+            AgentLoopRequest request,
             IReadOnlyCollection<string> requestedToolCallIds,
             IList<PendingAsyncToolExecution> pendingAsyncToolExecutions,
             IDictionary<string, SkyweaverToolReturnPayload> completedAsyncToolResultsById,
@@ -3264,12 +4016,15 @@ namespace Skyweaver.Services.AgentLoop
                 .Where(item => item.Length > 0)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToArray();
+            var scopeKey = ResolveAsyncToolScopeKey(request);
 
             var missingToolCallIds = normalizedRequestedToolCallIds
                 .Where(toolCallId =>
                     !completedAsyncToolResultsById.ContainsKey(toolCallId) &&
                     !pendingAsyncToolExecutions.Any(execution =>
-                        string.Equals(execution.ToolCallId, toolCallId, StringComparison.OrdinalIgnoreCase)))
+                        string.Equals(execution.ToolCallId, toolCallId, StringComparison.OrdinalIgnoreCase)) &&
+                    !s_asyncToolRegistry.TryGetExecution(scopeKey, toolCallId, out _) &&
+                    !TryGetKnownAsyncToolRecord(request, toolCallId, out _, requireOutput: false))
                 .ToArray();
             if (missingToolCallIds.Length > 0)
             {
@@ -3277,14 +4032,58 @@ namespace Skyweaver.Services.AgentLoop
                     $"Unknown async tool call id(s): {string.Join(", ", missingToolCallIds)}");
             }
 
-            var pendingTasks = pendingAsyncToolExecutions
+            var orphanedToolCallIds = normalizedRequestedToolCallIds
+                .Where(toolCallId =>
+                    !completedAsyncToolResultsById.ContainsKey(toolCallId) &&
+                    !pendingAsyncToolExecutions.Any(execution =>
+                        string.Equals(execution.ToolCallId, toolCallId, StringComparison.OrdinalIgnoreCase)) &&
+                    !s_asyncToolRegistry.TryGetExecution(scopeKey, toolCallId, out _) &&
+                    TryGetKnownAsyncToolRecord(request, toolCallId, out var record, requireOutput: false) &&
+                    string.IsNullOrWhiteSpace(record.OutputXml))
+                .ToArray();
+            if (orphanedToolCallIds.Length > 0)
+            {
+                throw new InvalidOperationException(
+                    $"Async tool call id(s) are known but no live execution is attached: {string.Join(", ", orphanedToolCallIds)}");
+            }
+
+            var localPendingTasks = pendingAsyncToolExecutions
                 .Where(execution => normalizedRequestedToolCallIds.Contains(execution.ToolCallId, StringComparer.OrdinalIgnoreCase))
-                .Select(execution => IgnoreToolTaskFaultsAsync(execution.ExecutionTask, cancellationToken))
+                .Select(execution => execution.ExecutionTask);
+            var registryPendingTasks = normalizedRequestedToolCallIds
+                .Where(toolCallId =>
+                    !pendingAsyncToolExecutions.Any(execution =>
+                        string.Equals(execution.ToolCallId, toolCallId, StringComparison.OrdinalIgnoreCase)) &&
+                    s_asyncToolRegistry.TryGetExecution(scopeKey, toolCallId, out _))
+                .Select(toolCallId =>
+                    s_asyncToolRegistry.TryGetExecution(scopeKey, toolCallId, out var execution)
+                        ? execution.ExecutionTask
+                        : null)
+                .Where(task => task != null)
+                .Cast<Task<SkyweaverToolResult>>();
+            var pendingTasks = localPendingTasks
+                .Concat(registryPendingTasks)
+                .Select(task => IgnoreToolTaskFaultsAsync(task, cancellationToken))
                 .ToArray();
 
             if (pendingTasks.Length > 0)
             {
                 await Task.WhenAll(pendingTasks).ConfigureAwait(false);
+            }
+
+            foreach (var toolCallId in normalizedRequestedToolCallIds)
+            {
+                if (s_asyncToolRegistry.TryGetExecution(scopeKey, toolCallId, out var execution) &&
+                    execution.ExecutionTask.IsCompleted &&
+                    !pendingAsyncToolExecutions.Any(localExecution =>
+                        string.Equals(localExecution.ToolCallId, toolCallId, StringComparison.OrdinalIgnoreCase)))
+                {
+                    await ObserveAsyncToolCompletionAsync(
+                        request,
+                        scopeKey,
+                        execution,
+                        CancellationToken.None).ConfigureAwait(false);
+                }
             }
 
             return normalizedRequestedToolCallIds;
@@ -3830,6 +4629,144 @@ namespace Skyweaver.Services.AgentLoop
                     .ToArray(),
                 _ => Array.Empty<string>()
             };
+        }
+
+        private string BuildSystemPromptWithRuntimeToolCallNotice(
+            string baseSystemPrompt,
+            AgentLoopRequest request)
+        {
+            var noticeLines = new List<string>();
+            var knownToolCallIds = CollectKnownToolCallIds(request);
+            if (knownToolCallIds.Count > 0)
+            {
+                noticeLines.Add("Persistent ToolCallID ledger:");
+                noticeLines.Add($"- Earliest known ToolCallID: {knownToolCallIds[0]}");
+                noticeLines.Add($"- Known ToolCallIDs, oldest first: {FormatToolCallIdList(knownToolCallIds)}");
+                noticeLines.Add("- Reuse the same ToolCallID in later turns and after an agent loop restart. For async calls, use WaitForAsyncTools or GetAsyncToolProgress with these IDs.");
+            }
+
+            var knownAsyncToolCallIds = CollectKnownAsyncToolCallIds(request);
+            if (knownAsyncToolCallIds.Count > 0)
+            {
+                noticeLines.Add($"- Known async ToolCallIDs: {FormatToolCallIdList(knownAsyncToolCallIds)}");
+            }
+
+            var compactedIds = _compactionStore.GetCompactedToolCallIds(request.CompactionFilePath);
+            if (compactedIds.Count > 0)
+            {
+                noticeLines.Add("Some tool calls are compacted: their invocation and output content are hidden from the model context.");
+                noticeLines.Add($"To retrieve compacted content, call <Tool ToolName=\"{SkyweaverBuiltInToolNames.RetrieveCompactedToolCalls}\"><{SkyweaverBuiltInToolNames.CompactionToolCallIdsParameter}>[\"TC1\"]</{SkyweaverBuiltInToolNames.CompactionToolCallIdsParameter}></Tool>.");
+                noticeLines.Add($"Compacted ToolCallIDs: {string.Join(", ", compactedIds)}");
+            }
+
+            if (noticeLines.Count == 0)
+            {
+                return baseSystemPrompt;
+            }
+
+            return baseSystemPrompt.TrimEnd() +
+                   Environment.NewLine +
+                   Environment.NewLine +
+                   string.Join(Environment.NewLine, noticeLines);
+        }
+
+        private IReadOnlyList<string> CollectKnownToolCallIds(AgentLoopRequest request)
+        {
+            var historyToolCallIds = CollectHistoryToolCallRecords(request)
+                .Select(record => record.ToolCallId);
+            return _toolCallResourceStore.EnumerateToolCallIds(request.ToolCallResourceFolderPath)
+                .Concat(historyToolCallIds)
+                .Concat(s_asyncToolRegistry.GetKnownToolCallIds(ResolveAsyncToolScopeKey(request)))
+                .Select(ChatSessionToolCallIdGenerator.Normalize)
+                .Where(id => id.Length > 0)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(GetToolCallIdOrdinal)
+                .ThenBy(id => id, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+        }
+
+        private IReadOnlyList<string> CollectKnownAsyncToolCallIds(AgentLoopRequest request)
+        {
+            var persistedIds = string.IsNullOrWhiteSpace(request.ToolCallResourceFolderPath)
+                ? Array.Empty<string>()
+                : _toolCallResourceStore.EnumerateRecords(request.ToolCallResourceFolderPath)
+                    .Where(record => TryParsePersistedAsyncInvocation(record.InvocationXml, out _))
+                    .Select(record => record.ToolCallId)
+                    .ToArray();
+            var historyAsyncIds = CollectHistoryToolCallRecords(request)
+                .Where(record => TryParsePersistedAsyncInvocation(record.InvocationXml, out _))
+                .Select(record => record.ToolCallId)
+                .ToArray();
+
+            return persistedIds
+                .Concat(historyAsyncIds)
+                .Concat(s_asyncToolRegistry.GetKnownToolCallIds(ResolveAsyncToolScopeKey(request)))
+                .Select(ChatSessionToolCallIdGenerator.Normalize)
+                .Where(id => id.Length > 0)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(GetToolCallIdOrdinal)
+                .ThenBy(id => id, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+        }
+
+        private IReadOnlyList<AgentLoopCompactionToolCallRecord> CollectHistoryToolCallRecords(AgentLoopRequest request)
+        {
+            var history = request.History ?? Array.Empty<LanguageModelChatMessage>();
+            if (history.Count == 0)
+            {
+                return Array.Empty<AgentLoopCompactionToolCallRecord>();
+            }
+
+            return _compactionStore.ExtractToolCallRecords(history);
+        }
+
+        private static string FormatToolCallIdList(IReadOnlyList<string> toolCallIds)
+        {
+            if (toolCallIds.Count <= 40)
+            {
+                return string.Join(", ", toolCallIds);
+            }
+
+            var earliest = toolCallIds.Take(16);
+            var latest = toolCallIds.Skip(Math.Max(16, toolCallIds.Count - 16));
+            return $"{string.Join(", ", earliest)} ... {string.Join(", ", latest)} (total {toolCallIds.Count})";
+        }
+
+        private static long GetToolCallIdOrdinal(string? toolCallId)
+        {
+            var normalized = ChatSessionToolCallIdGenerator.Normalize(toolCallId);
+            return normalized.StartsWith("TC", StringComparison.OrdinalIgnoreCase) &&
+                   long.TryParse(normalized[2..], out var ordinal)
+                ? ordinal
+                : long.MaxValue;
+        }
+
+        private static string ResolveAsyncToolScopeKey(AgentLoopRequest request)
+        {
+            if (!string.IsNullOrWhiteSpace(request.AsyncToolStateScopeId))
+            {
+                return request.AsyncToolStateScopeId.Trim();
+            }
+
+            if (request.ToolContext.Properties.TryGetValue("sessionId", out var sessionId) &&
+                !string.IsNullOrWhiteSpace(sessionId))
+            {
+                return sessionId.Trim();
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.ToolCallResourceFolderPath))
+            {
+                try
+                {
+                    return Path.GetFullPath(request.ToolCallResourceFolderPath);
+                }
+                catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+                {
+                    return request.ToolCallResourceFolderPath.Trim();
+                }
+            }
+
+            return string.Empty;
         }
 
         private string BuildSystemPromptWithCompactionNotice(

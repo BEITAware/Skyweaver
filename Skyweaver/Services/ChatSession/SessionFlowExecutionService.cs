@@ -322,6 +322,7 @@ namespace Skyweaver.Services.ChatSession
 
             var reservedToolCallIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var toolCallIdsByKey = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            ChatSessionResourceLayout.EnsureResources(request.Session);
             var agentResult = await _agentExecutor.ExecuteAsync(
                 new SessionFlowAgentExecutionRequest
                 {
@@ -333,7 +334,9 @@ namespace Skyweaver.Services.ChatSession
                     ToolCallIdFactory = request.ToolCallIdFactory,
                     EnableGemmaThoughtCompatibility = request.EnableGemmaThoughtCompatibility,
                     MinCompactionEnabled = request.MinCompactionEnabled,
-                    CompactionFilePath = ChatSessionResourceLayout.EnsureCompactionFile(request.Session),
+                    CompactionFilePath = ChatSessionResourceLayout.GetCompactionFilePath(request.Session),
+                    AsyncToolStateScopeId = request.Session.SessionId,
+                    ToolCallResourceFolderPath = ChatSessionResourceLayout.GetToolCallsFolderPath(request.Session),
                     ToolConfirmationCallback = request.ToolConfirmationCallback,
                     EventSink = (update, ct) => PublishAgentLoopUpdateAsync(
                         request,

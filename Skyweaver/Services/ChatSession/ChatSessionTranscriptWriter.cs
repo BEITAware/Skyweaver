@@ -25,6 +25,7 @@ namespace Skyweaver.Services.ChatSession
 
         private readonly object _syncRoot = new();
         private readonly Dictionary<string, string> _activeTurnIds = new(StringComparer.OrdinalIgnoreCase);
+        private readonly ChatSessionToolCallResourceStore _toolCallResourceStore = new();
 
         public ChatSessionTurnRecord BeginTurn(ChatSessionModel session, ChatSessionUserInput input)
         {
@@ -366,6 +367,7 @@ namespace Skyweaver.Services.ChatSession
                     runtimeEvent.ToolInvocation != null)
                 {
                     content = AgentLoopCompactionStore.EnsureToolCallIdInToolInvocationXml(content, toolCallId);
+                    SaveToolCallInvocation(session, toolCallId, runtimeEvent.AgentId, content);
                 }
 
                 var block = entry.Blocks.FirstOrDefault()
@@ -423,6 +425,11 @@ namespace Skyweaver.Services.ChatSession
             entry.ToolName = ResolveToolName(runtimeEvent) ?? parent?.ToolName;
             entry.Status = ChatSessionEntryStatus.Completed;
             output = AgentLoopCompactionStore.EnsureToolCallIdInToolsReturnXml(output, toolCallId);
+            if (!IsAsyncToolAcknowledgment(runtimeEvent))
+            {
+                SaveToolCallOutput(session, toolCallId, runtimeEvent.AgentId, output);
+            }
+
             var block = new ChatSessionTranscriptBlock
             {
                 Kind = ChatSessionTranscriptBlockKind.ToolOutputXml,
@@ -434,6 +441,60 @@ namespace Skyweaver.Services.ChatSession
 
             transcript.Entries.Add(entry);
             Touch(transcript, entry);
+        }
+
+        private void SaveToolCallInvocation(
+            ChatSessionModel session,
+            string toolCallId,
+            string? callerAgentId,
+            string invocationXml)
+        {
+            try
+            {
+                _toolCallResourceStore.SaveInvocation(session, toolCallId, callerAgentId, invocationXml);
+            }
+            catch
+            {
+                // Tool-call resource persistence must not interrupt the live agent loop.
+            }
+        }
+
+        private void SaveToolCallOutput(
+            ChatSessionModel session,
+            string toolCallId,
+            string? callerAgentId,
+            string outputXml)
+        {
+            try
+            {
+                _toolCallResourceStore.SaveOutput(
+                    session,
+                    toolCallId,
+                    callerAgentId,
+                    outputXml,
+                    transcriptDelivered: true);
+            }
+            catch
+            {
+                // Transcript state remains authoritative if the sidecar resource write fails.
+            }
+        }
+
+        private static bool IsAsyncToolAcknowledgment(ChatSessionRuntimeEvent runtimeEvent)
+        {
+            return runtimeEvent.ToolReturns.Any(toolReturn =>
+                toolReturn.Result.Data.TryGetValue("asyncAcknowledgement", out var value) &&
+                IsTruthy(value));
+        }
+
+        private static bool IsTruthy(object? value)
+        {
+            return value switch
+            {
+                bool boolean => boolean,
+                string text => bool.TryParse(text, out var parsed) && parsed,
+                _ => false
+            };
         }
 
         private void UpsertToolProgress(ChatSessionModel session, ChatSessionRuntimeEvent runtimeEvent)
