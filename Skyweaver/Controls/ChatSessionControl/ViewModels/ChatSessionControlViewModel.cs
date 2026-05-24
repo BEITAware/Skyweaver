@@ -390,6 +390,42 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             }
         }
 
+        public void HandleFileDrop(System.Collections.Generic.IEnumerable<string> filePaths)
+        {
+            if (filePaths == null)
+            {
+                return;
+            }
+
+            if (_sessionModel == null)
+            {
+                AddSystemStatusMessage(
+                    L("ChatSessionControl.Error.UnboundModel", "此聊天视图未绑定到 ChatSessionModel。"),
+                    L("ChatSessionControl.Status.FileUnavailable", "文件不可用"));
+                return;
+            }
+
+            foreach (var filePath in filePaths)
+            {
+                if (string.IsNullOrWhiteSpace(filePath) || !System.IO.File.Exists(filePath))
+                {
+                    continue;
+                }
+
+                try
+                {
+                    var attachment = _composerImageAttachmentService.SaveMediaFile(_sessionModel, filePath);
+                    PendingComposerImages.Add(attachment);
+                }
+                catch (Exception ex)
+                {
+                    AddSystemStatusMessage(
+                        LF("ChatSessionControl.Error.AddFileFailedFormat", "无法添加文件 {0}: {1}", filePath, ex.Message),
+                        L("ChatSessionControl.Status.AddFileFailed", "添加文件失败"));
+                }
+            }
+        }
+
         private void AddImage()
         {
             var openFileDialog = new Microsoft.Win32.OpenFileDialog

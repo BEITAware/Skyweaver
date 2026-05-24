@@ -51,6 +51,8 @@ namespace Skyweaver.Services.ChatSession
 
         public bool MinCompactionEnabled { get; init; }
 
+        public bool MaxCompactionEnabled { get; init; }
+
         public Func<string>? ToolCallIdFactory { get; init; }
 
         public IAgentToolConfirmationService? ToolConfirmationService { get; init; }
@@ -161,6 +163,8 @@ namespace Skyweaver.Services.ChatSession
 
         public bool MinCompactionEnabled { get; init; }
 
+        public bool MaxCompactionEnabled { get; init; }
+
         public Func<string>? ToolCallIdFactory { get; init; }
 
         public Func<AgentToolConfirmationRequest, CancellationToken, Task<AgentToolConfirmationResult>>? ToolConfirmationCallback { get; init; }
@@ -198,6 +202,8 @@ namespace Skyweaver.Services.ChatSession
         public bool IsSubAgent { get; init; }
 
         public bool MinCompactionEnabled { get; init; }
+
+        public bool MaxCompactionEnabled { get; init; }
 
         public string? CompactionFilePath { get; init; }
 

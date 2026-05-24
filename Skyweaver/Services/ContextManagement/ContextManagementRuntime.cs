@@ -30,6 +30,17 @@ namespace Skyweaver.Services.ContextManagement
             }
         }
 
+        public bool MaxCompactionEnabled
+        {
+            get
+            {
+                lock (_syncRoot)
+                {
+                    return _configuration.MaxCompactionEnabled;
+                }
+            }
+        }
+
         public event EventHandler? ConfigurationChanged;
 
         public ContextManagementConfiguration GetConfiguration()

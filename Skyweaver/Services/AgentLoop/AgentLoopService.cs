@@ -711,6 +711,7 @@ namespace Skyweaver.Services.AgentLoop
             string? lastModelId = null;
             AgentLoopFinalOutput? latestPassdownOutput = null;
             var minCompactionAttemptState = new MinCompactionAttemptState();
+            bool isMinCompacted = false;
 
             for (var iterationNumber = 1; iterationNumber <= MaxIterations; iterationNumber++)
             {
@@ -744,6 +745,7 @@ namespace Skyweaver.Services.AgentLoop
                     request.CompactionFilePath,
                     debugRunContext,
                     iterationNumber,
+                    ResolveSessionResourcesFolderPath(request),
                     cancellationToken).ConfigureAwait(false);
 
                 persistentHistory = preparedContext.PersistentHistory
@@ -764,6 +766,7 @@ namespace Skyweaver.Services.AgentLoop
 
                 if (appliedMinCompaction != null)
                 {
+                    isMinCompacted = true;
                     systemPrompt = BuildSystemPromptWithRuntimeToolCallNotice(
                         baseSystemPrompt,
                         request);
@@ -777,7 +780,159 @@ namespace Skyweaver.Services.AgentLoop
                         request.CompactionFilePath,
                         debugRunContext,
                         iterationNumber,
+                        ResolveSessionResourcesFolderPath(request),
                         cancellationToken).ConfigureAwait(false);
+                }
+
+                if (request.MaxCompactionEnabled)
+                {
+                    var candidates = _languageModelResolver.GetCandidateModels(request.Agent)
+                        .Where(model => model.InterfaceSettings.IsFullyConfigured)
+                        .ToArray();
+                    if (candidates.Length > 0)
+                    {
+                        var compactionModel = candidates
+                            .OrderBy(model => model.EffectiveContextWindowTokens)
+                            .First();
+                        var contextWindowTokens = compactionModel.EffectiveContextWindowTokens;
+                        
+                        int currentTokenCount = 0;
+                        try
+                        {
+                            var tokenCountResult = await _tokenCounter.CountAsync(
+                                compactionModel,
+                                preparedContext.PreparedMessages,
+                                request.CompactionFilePath,
+                                cancellationToken).ConfigureAwait(false);
+                            currentTokenCount = tokenCountResult.TokenCount;
+                        }
+                        catch
+                        {
+                            currentTokenCount = 0;
+                        }
+
+                        if (isMinCompacted && currentTokenCount >= (int)(contextWindowTokens * 0.95d))
+                        {
+                            isMinCompacted = false;
+
+                            var historyBuilder = new StringBuilder();
+                            foreach (var msg in persistentHistory.Concat(turnHistory))
+                            {
+                                var roleName = msg.Role.ToString();
+                                var authorStr = string.IsNullOrEmpty(msg.AuthorName) ? "" : $" (Author: {msg.AuthorName})";
+                                historyBuilder.AppendLine($"=== Role: {roleName}{authorStr} ===");
+                                foreach (var block in msg.ContentBlocks)
+                                {
+                                    if (block.Kind == LanguageModelChatContentBlockKind.Text || block.Kind == LanguageModelChatContentBlockKind.HostPreservedContent)
+                                    {
+                                        historyBuilder.AppendLine(block.Content);
+                                    }
+                                    else
+                                    {
+                                        historyBuilder.AppendLine($"[Binary/Media Data Kind: {block.Kind}, MediaType: {block.MediaType}, Size: {block.Data?.Length ?? 0} bytes]");
+                                    }
+                                }
+                                historyBuilder.AppendLine();
+                            }
+                            var formattedHistory = historyBuilder.ToString();
+
+                            var compressionPrompt = $@"你是一个上下文压缩助手。由于当前对话的上下文长度已经达到模型的极限，你需要对以下的历史对话进行深度压缩和总结（MaxCompaction），以便继续后续任务。
+
+请严格遵守以下压缩要点：
+1. 用户在整个过程中所有的指令（User messages / Instructions），必须尽可能原样保留。
+2. 代理（Assistant）在整个过程中进行的所有操作、工具调用与返回结果，需要高度凝练地保留，仅保留核心步骤、主要发现和结果。
+3. 必须详细说明：
+   - 任务的详情与目的。
+   - 任务当前的进行情况。
+   - 中断点（即触发本次压缩之前最后进行的动作和当前状态）的详细信息。
+4. 保留其他一切对继续任务所必要的关键上下文信息。
+5. 你的输出内容需要尽可能详细、尽可能丰富（保留尽可能多的细节，不要过度省略关键信息，输出长度可以较长，保留更多内容）。
+
+以下是待压缩的完整对话历史：
+{formattedHistory}";
+
+                            string compressedHistoryText;
+                            try
+                            {
+                                compressedHistoryText = await _languageModelResolver.ExecuteCapabilityLayerWithFallbackAsync(
+                                    CapabilityLayerBuiltIns.ContextCompressionLayerKey,
+                                    async (compModel, ct) =>
+                                    {
+                                        var messages = new[]
+                                        {
+                                            new LanguageModelChatMessage(LanguageModelChatRole.User, compressionPrompt)
+                                        };
+                                        var response = await _chatService.GetResponseAsync(compModel, messages, ct).ConfigureAwait(false);
+                                        return response.Text;
+                                    },
+                                    cancellationToken).ConfigureAwait(false);
+                            }
+                            catch (Exception ex)
+                            {
+                                compressedHistoryText = $"[MaxCompaction failed: {ex.Message}]\n\n" + formattedHistory;
+                            }
+
+                            persistentHistory = new List<LanguageModelChatMessage>
+                            {
+                                new LanguageModelChatMessage(
+                                    LanguageModelChatRole.User,
+                                    $"[系统已对历史上下文进行 MaxCompaction 压缩，以下是之前的任务摘要及所有指令原样保留的内容：]\n\n{compressedHistoryText}")
+                                {
+                                    AuthorName = "System"
+                                }
+                            };
+                            turnHistory = new List<LanguageModelChatMessage>();
+
+                            systemPrompt = BuildSystemPromptWithRuntimeToolCallNotice(
+                                baseSystemPrompt,
+                                request);
+                            preparedContext = await _contextManager.PrepareAsync(
+                                request.Agent,
+                                systemPrompt,
+                                request.Input,
+                                request.InputContentBlocks,
+                                persistentHistory,
+                                turnHistory,
+                                request.CompactionFilePath,
+                                debugRunContext,
+                                iterationNumber,
+                                ResolveSessionResourcesFolderPath(request),
+                                cancellationToken).ConfigureAwait(false);
+
+                            persistentHistory = preparedContext.PersistentHistory
+                                .Select(message => message.Clone())
+                                .ToList();
+                            turnHistory = preparedContext.TurnHistory
+                                .Select(message => message.Clone())
+                                .ToList();
+
+                            int afterTokenCount = 0;
+                            try
+                            {
+                                var tokenCountResult = await _tokenCounter.CountAsync(
+                                    compactionModel,
+                                    preparedContext.PreparedMessages,
+                                    request.CompactionFilePath,
+                                    cancellationToken).ConfigureAwait(false);
+                                afterTokenCount = tokenCountResult.TokenCount;
+                            }
+                            catch
+                            {
+                                afterTokenCount = 0;
+                            }
+
+                            appliedMinCompaction = new AgentLoopContextCompressionInfo
+                            {
+                                ContextWindowTokens = contextWindowTokens,
+                                EstimatedTokenCountBeforeCompression = currentTokenCount,
+                                EstimatedTokenCountAfterCompression = afterTokenCount,
+                                TargetTokenCountAfterCompression = (int)(contextWindowTokens * 0.95d),
+                                CompressionLayerKey = "MaxCompaction",
+                                CompressionModelId = compactionModel.SummaryModelId,
+                                CompactedToolCallIds = Array.Empty<string>()
+                            };
+                        }
+                    }
                 }
 
                 var preparedSnapshot = new AgentLoopPreparedRequestDebugSnapshot
@@ -1012,6 +1167,7 @@ namespace Skyweaver.Services.AgentLoop
                     persistentHistory,
                     turnHistory,
                     request.CompactionFilePath,
+                    sessionResourcesFolderPath: ResolveSessionResourcesFolderPath(request),
                     cancellationToken: cancellationToken).ConfigureAwait(false);
                 var afterCount = await _tokenCounter.CountAsync(
                     compactionModel,
@@ -4890,6 +5046,31 @@ namespace Skyweaver.Services.AgentLoop
 
             normalizedXml = document.ToString();
             return true;
+        }
+
+        private static string? ResolveSessionResourcesFolderPath(AgentLoopRequest request)
+        {
+            if (request.ToolContext?.Properties != null &&
+                request.ToolContext.Properties.TryGetValue("resourcesFolderPath", out var rPath) &&
+                !string.IsNullOrWhiteSpace(rPath))
+            {
+                return rPath;
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.ToolCallResourceFolderPath))
+            {
+                try
+                {
+                    var parent = Path.GetDirectoryName(request.ToolCallResourceFolderPath);
+                    if (!string.IsNullOrWhiteSpace(parent))
+                    {
+                        return parent;
+                    }
+                }
+                catch { }
+            }
+
+            return request.ToolContext?.WorkspacePath;
         }
 
         private static string GetLanguageModelDisplayName(LanguageModelDefinition model)

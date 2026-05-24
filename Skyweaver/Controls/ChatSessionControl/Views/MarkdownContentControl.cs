@@ -47,6 +47,23 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                 typeof(MarkdownContentControl),
                 new PropertyMetadata(false, OnIsStreamingChanged));
 
+        private static readonly DependencyProperty CachedBlockProperty =
+            DependencyProperty.RegisterAttached(
+                "CachedBlock",
+                typeof(MarkdownBlock),
+                typeof(MarkdownContentControl),
+                new PropertyMetadata(null));
+
+        private static MarkdownBlock? GetCachedBlock(DependencyObject obj)
+        {
+            return (MarkdownBlock?)obj.GetValue(CachedBlockProperty);
+        }
+
+        private static void SetCachedBlock(DependencyObject obj, MarkdownBlock? value)
+        {
+            obj.SetValue(CachedBlockProperty, value);
+        }
+
         public string MarkdownText
         {
             get => (string)GetValue(MarkdownTextProperty);
@@ -85,6 +102,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                 e.Property == FontWeightProperty ||
                 e.Property == FontStyleProperty)
             {
+                Content = null; // 样式改变时清空子元素，强制重新生成以应用新样式
                 RefreshContent();
             }
         }
@@ -171,13 +189,19 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                         if (existingElement != null && IsElementMatchingBlock(existingElement, block))
                         {
                             element = existingElement;
-                            UpdateBlockElement(element, block);
+                            var cachedBlock = GetCachedBlock(element);
+                            if (!IsBlockEquivalent(cachedBlock, block))
+                            {
+                                UpdateBlockElement(element, block);
+                                SetCachedBlock(element, block);
+                            }
                         }
                     }
 
                     if (element == null)
                     {
                         element = CreateBlockElement(block);
+                        SetCachedBlock(element, block);
                         if (index < root.Children.Count)
                         {
                             root.Children.RemoveAt(index);
@@ -209,6 +233,123 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             finally
             {
                 _isRefreshing = false;
+            }
+        }
+
+        private static bool IsBlockEquivalent(MarkdownBlock? a, MarkdownBlock? b)
+        {
+            if (ReferenceEquals(a, b)) return true;
+            if (a == null || b == null) return false;
+            if (a.GetType() != b.GetType()) return false;
+
+            switch (a)
+            {
+                case MarkdownParagraphBlock paraA:
+                    var paraB = (MarkdownParagraphBlock)b;
+                    return AreInlinesEquivalent(paraA.Inlines, paraB.Inlines);
+
+                case MarkdownHeadingBlock headA:
+                    var headB = (MarkdownHeadingBlock)b;
+                    return headA.Level == headB.Level && AreInlinesEquivalent(headA.Inlines, headB.Inlines);
+
+                case MarkdownCodeBlock codeA:
+                    var codeB = (MarkdownCodeBlock)b;
+                    return codeA.Content == codeB.Content && codeA.Language == codeB.Language;
+
+                case MarkdownQuoteBlock quoteA:
+                    var quoteB = (MarkdownQuoteBlock)b;
+                    return AreInlinesEquivalent(quoteA.Inlines, quoteB.Inlines);
+
+                case MarkdownListBlock listA:
+                    var listB = (MarkdownListBlock)b;
+                    if (listA.Items.Count != listB.Items.Count) return false;
+                    for (int i = 0; i < listA.Items.Count; i++)
+                    {
+                        var itemA = listA.Items[i];
+                        var itemB = listB.Items[i];
+                        if (itemA.Marker != itemB.Marker || !AreInlinesEquivalent(itemA.Inlines, itemB.Inlines))
+                            return false;
+                    }
+                    return true;
+
+                case MarkdownMathBlock mathA:
+                    var mathB = (MarkdownMathBlock)b;
+                    return mathA.Content == mathB.Content;
+
+                case MarkdownTableBlock tableA:
+                    var tableB = (MarkdownTableBlock)b;
+                    if (tableA.Columns.Count != tableB.Columns.Count) return false;
+                    for (int i = 0; i < tableA.Columns.Count; i++)
+                    {
+                        if (tableA.Columns[i].Header != tableB.Columns[i].Header) return false;
+                    }
+                    if (tableA.Rows.Count != tableB.Rows.Count) return false;
+                    for (int i = 0; i < tableA.Rows.Count; i++)
+                    {
+                        var rowA = tableA.Rows[i];
+                        var rowB = tableB.Rows[i];
+                        if (rowA.Cells.Count != rowB.Cells.Count) return false;
+                        for (int j = 0; j < rowA.Cells.Count; j++)
+                        {
+                            if (rowA.Cells[j] != rowB.Cells[j]) return false;
+                        }
+                    }
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        private static bool AreInlinesEquivalent(IReadOnlyList<MarkdownInline> a, IReadOnlyList<MarkdownInline> b)
+        {
+            if (ReferenceEquals(a, b)) return true;
+            if (a == null || b == null) return false;
+            if (a.Count != b.Count) return false;
+            for (int i = 0; i < a.Count; i++)
+            {
+                if (!IsInlineEquivalent(a[i], b[i])) return false;
+            }
+            return true;
+        }
+
+        private static bool IsInlineEquivalent(MarkdownInline a, MarkdownInline b)
+        {
+            if (ReferenceEquals(a, b)) return true;
+            if (a == null || b == null) return false;
+            if (a.GetType() != b.GetType()) return false;
+
+            switch (a)
+            {
+                case MarkdownTextInline textA:
+                    var textB = (MarkdownTextInline)b;
+                    return textA.Text == textB.Text;
+
+                case MarkdownStrongInline strongA:
+                    var strongB = (MarkdownStrongInline)b;
+                    return AreInlinesEquivalent(strongA.Children, strongB.Children);
+
+                case MarkdownEmphasisInline empA:
+                    var empB = (MarkdownEmphasisInline)b;
+                    return AreInlinesEquivalent(empA.Children, empB.Children);
+
+                case MarkdownCodeInline codeA:
+                    var codeB = (MarkdownCodeInline)b;
+                    return codeA.Content == codeB.Content;
+
+                case MarkdownLinkInline linkA:
+                    var linkB = (MarkdownLinkInline)b;
+                    return linkA.Url == linkB.Url && AreInlinesEquivalent(linkA.Label, linkB.Label);
+
+                case MarkdownMathInline mathA:
+                    var mathB = (MarkdownMathInline)b;
+                    return mathA.Content == mathB.Content && mathA.IsDisplayStyle == mathB.IsDisplayStyle;
+
+                case MarkdownLineBreakInline:
+                    return true;
+
+                default:
+                    return false;
             }
         }
 

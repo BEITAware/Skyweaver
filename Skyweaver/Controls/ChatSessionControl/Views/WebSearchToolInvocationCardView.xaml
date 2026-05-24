@@ -1,0 +1,510 @@
+<UserControl x:Class="Skyweaver.Controls.ChatSessionControl.Views.WebSearchToolInvocationCardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:Skyweaver.Controls.ChatSessionControl.Views"
+             mc:Ignorable="d"
+             d:DesignHeight="236"
+             d:DesignWidth="560">
+    <UserControl.Resources>
+        <local:ToolResultToStatusConverter x:Key="ToolResultToStatusConverter"/>
+
+        <!-- 专为 WebSearch 设计的 Aero 玻璃背景色，美学参考自 WebSearch.xaml -->
+        <RadialGradientBrush x:Key="WebSearchToolCardBackgroundBrush"
+                             RadiusX="1.01282"
+                             RadiusY="0.917797"
+                             Center="0.5,0.98"
+                             GradientOrigin="0.5,0.98">
+            <RadialGradientBrush.GradientStops>
+                <GradientStop Color="#D6C5C9CA" Offset="0"/>
+                <GradientStop Color="#8A9CAEBE" Offset="0.45"/>
+                <GradientStop Color="#5434445E" Offset="1"/>
+            </RadialGradientBrush.GradientStops>
+            <RadialGradientBrush.RelativeTransform>
+                <TransformGroup>
+                    <SkewTransform CenterX="0.5" CenterY="0.98" AngleX="5.23"/>
+                    <RotateTransform CenterX="0.5" CenterY="0.98" Angle="70.5"/>
+                </TransformGroup>
+            </RadialGradientBrush.RelativeTransform>
+        </RadialGradientBrush>
+
+        <!-- 顶部强高光，美学参考自 WebSearch.xaml -->
+        <RadialGradientBrush x:Key="WebSearchToolCardTopLightBrush"
+                             RadiusX="1.18"
+                             RadiusY="0.767"
+                             Center="0.5,0.05"
+                             GradientOrigin="0.5,0.05">
+            <RadialGradientBrush.GradientStops>
+                <GradientStop Color="#7DFFFFFF" Offset="0"/>
+                <GradientStop Color="#29FFFFFF" Offset="0.247"/>
+                <GradientStop Color="#00FFFFFF" Offset="0.421"/>
+            </RadialGradientBrush.GradientStops>
+        </RadialGradientBrush>
+
+        <!-- 八个停止点的高亮玻璃扫光，美学参考自 WebSearch.xaml -->
+        <LinearGradientBrush x:Key="WebSearchToolCardSheenBrush"
+                             StartPoint="0.027,0.229"
+                             EndPoint="1.212,0.229">
+            <LinearGradientBrush.GradientStops>
+                <GradientStop Color="#00FFFFFF" Offset="0"/>
+                <GradientStop Color="#3EFFFFFF" Offset="0.255"/>
+                <GradientStop Color="#00FFFFFF" Offset="0.513"/>
+                <GradientStop Color="#67FFFFFF" Offset="0.701"/>
+                <GradientStop Color="#00FFFFFF" Offset="0.72"/>
+                <GradientStop Color="#62FFFFFF" Offset="0.856"/>
+                <GradientStop Color="#03FFFFFF" Offset="0.893"/>
+                <GradientStop Color="#00FFFFFF" Offset="0.989"/>
+            </LinearGradientBrush.GradientStops>
+            <LinearGradientBrush.RelativeTransform>
+                <TransformGroup>
+                    <SkewTransform CenterX="0.027" CenterY="0.229" AngleX="6.38"/>
+                    <RotateTransform CenterX="0.027" CenterY="0.229" Angle="32.3"/>
+                </TransformGroup>
+            </LinearGradientBrush.RelativeTransform>
+        </LinearGradientBrush>
+
+        <!-- 参数分割线渐变 -->
+        <LinearGradientBrush x:Key="WebSearchToolParameterRuleBrush"
+                             StartPoint="0,0"
+                             EndPoint="1,0">
+            <GradientStop Color="#75007BFF" Offset="0"/>
+            <GradientStop Color="#1A93F2FF" Offset="0.48"/>
+            <GradientStop Color="#0093F2FF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <SolidColorBrush x:Key="WebSearchToolBrightTextBrush" Color="#F4FBFF"/>
+        <SolidColorBrush x:Key="WebSearchToolSoftTextBrush" Color="#D9E5EB"/>
+        <SolidColorBrush x:Key="WebSearchToolMutedTextBrush" Color="#B8C5CD"/>
+        <SolidColorBrush x:Key="WebSearchToolPlaceholderTextBrush" Color="#CBD4DA"/>
+        <SolidColorBrush x:Key="WebSearchToolCoolGrayTextBrush" Color="#AAB8C2"/>
+        <DropShadowEffect x:Key="WebSearchToolTextShadowEffect"
+                           Color="#1A2D3C"
+                           BlurRadius="3"
+                           ShadowDepth="1"
+                           Opacity="0.45"/>
+
+        <Style x:Key="WebSearchToolFieldLabelTextStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Microsoft YaHei UI, Segoe UI"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource WebSearchToolMutedTextBrush}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="Effect" Value="{StaticResource WebSearchToolTextShadowEffect}"/>
+        </Style>
+
+        <Style x:Key="WebSearchToolFieldValueTextStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Consolas, Microsoft YaHei UI"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="{StaticResource WebSearchToolBrightTextBrush}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Effect" Value="{StaticResource WebSearchToolTextShadowEffect}"/>
+        </Style>
+
+        <Style x:Key="WebSearchToolStreamingBadgeBorderStyle" TargetType="Border">
+            <Setter Property="Margin" Value="8,0,0,0"/>
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Background" Value="#18FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#6793F2FF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Border CornerRadius="4"
+            BorderBrush="#6793F2FF"
+            BorderThickness="1"
+            Background="{StaticResource WebSearchToolCardBackgroundBrush}"
+            SnapsToDevicePixels="True">
+        <Grid ClipToBounds="True">
+            <Border Margin="1"
+                    CornerRadius="3"
+                    Background="{StaticResource WebSearchToolCardTopLightBrush}"
+                    IsHitTestVisible="False"/>
+            <Border Margin="1"
+                    CornerRadius="3"
+                    Background="{StaticResource WebSearchToolCardSheenBrush}"
+                    IsHitTestVisible="False"/>
+
+            <!-- 背景中淡入并旋转的 WebSearch.png 图标 -->
+            <Image Source="{Binding IconPath}"
+                   Width="178"
+                   Height="178"
+                   Margin="-24,-18,0,0"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Stretch="Uniform"
+                   Opacity="0.28"
+                   RenderOptions.BitmapScalingMode="HighQuality"
+                   IsHitTestVisible="False">
+                <Image.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="1.04" ScaleY="1.04"/>
+                        <RotateTransform Angle="-16" CenterX="89" CenterY="89"/>
+                    </TransformGroup>
+                </Image.RenderTransform>
+            </Image>
+
+            <Grid Margin="18,16,18,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="136"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="1">
+                    <TextBlock Text="{Binding State.ToolDisplayName}"
+                               FontFamily="Microsoft YaHei UI, Segoe UI"
+                               FontSize="21"
+                               FontWeight="Bold"
+                               Foreground="{StaticResource WebSearchToolBrightTextBrush}"
+                               Effect="{StaticResource WebSearchToolTextShadowEffect}"
+                               TextWrapping="Wrap"/>
+                    <TextBlock Margin="0,3,0,0"
+                               Text="{Binding Description}"
+                               FontFamily="Segoe UI, Microsoft YaHei UI"
+                               FontSize="12"
+                               Foreground="{StaticResource WebSearchToolSoftTextBrush}"
+                               Effect="{StaticResource WebSearchToolTextShadowEffect}"
+                               TextWrapping="Wrap"/>
+                    <TextBlock Margin="0,5,0,0"
+                               FontFamily="Consolas, Microsoft YaHei UI"
+                               FontSize="11"
+                               Foreground="{StaticResource WebSearchToolMutedTextBrush}"
+                               Effect="{StaticResource WebSearchToolTextShadowEffect}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="{DynamicResource ToolInvocation.Status.ReceivingParameters}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding State.IsInvocationClosed}" Value="True">
+                                        <Setter Property="Text" Value="{DynamicResource ToolInvocation.Status.ParametersReceived}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding State.HasToolResult}" Value="True">
+                                        <Setter Property="Text" Value="{DynamicResource ToolInvocation.Status.ToolResultReceived}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <!-- 自定义字段列表 -->
+                    <ItemsControl Margin="0,12,0,0"
+                                  ItemsSource="{Binding Fields}">
+                        <ItemsControl.Style>
+                            <Style TargetType="ItemsControl">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasFields}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ItemsControl.Style>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,0,0,7">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="118"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0"
+                                               Margin="0,0,10,0"
+                                               Text="{Binding Label}"
+                                               Style="{StaticResource WebSearchToolFieldLabelTextStyle}"/>
+
+                                    <Border Grid.Column="1"
+                                            MinHeight="20"
+                                            Padding="0,0,0,4"
+                                            BorderBrush="{StaticResource WebSearchToolParameterRuleBrush}"
+                                            BorderThickness="0,0,0,1">
+                                        <Grid>
+                                            <TextBlock Text="{Binding Parameter.Value}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock" BasedOn="{StaticResource WebSearchToolFieldValueTextStyle}">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Parameter.HasValue}" Value="False">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+
+                                            <TextBlock Text="{Binding EmptyValueText}"
+                                                       FontFamily="Microsoft YaHei UI, Segoe UI"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource WebSearchToolPlaceholderTextBrush}"
+                                                       Effect="{StaticResource WebSearchToolTextShadowEffect}"
+                                                       FontStyle="Italic"
+                                                       TextWrapping="Wrap">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Parameter.HasValue}" Value="False">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Grid>
+                                    </Border>
+
+                                    <Border Grid.Column="2">
+                                        <Border.Style>
+                                            <Style TargetType="Border" BasedOn="{StaticResource WebSearchToolStreamingBadgeBorderStyle}">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Parameter.IsStreaming}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{DynamicResource ToolInvocation.Streaming}"
+                                                   FontFamily="Consolas, Microsoft YaHei UI"
+                                                   FontSize="10"
+                                                   Foreground="{StaticResource WebSearchToolBrightTextBrush}"
+                                                   Effect="{StaticResource WebSearchToolTextShadowEffect}"/>
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- 回退参数列表 -->
+                    <ItemsControl Margin="0,12,0,0"
+                                  ItemsSource="{Binding State.Parameters}">
+                        <ItemsControl.Style>
+                            <Style TargetType="ItemsControl">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasFields}" Value="False">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ItemsControl.Style>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,0,0,7">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="118"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0"
+                                               Margin="0,0,10,0"
+                                               Text="{Binding Name}"
+                                               Style="{StaticResource WebSearchToolFieldLabelTextStyle}"/>
+
+                                    <Border Grid.Column="1"
+                                            MinHeight="20"
+                                            Padding="0,0,0,4"
+                                            BorderBrush="{StaticResource WebSearchToolParameterRuleBrush}"
+                                            BorderThickness="0,0,0,1">
+                                        <Grid>
+                                            <TextBlock Text="{Binding Value}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock" BasedOn="{StaticResource WebSearchToolFieldValueTextStyle}">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding HasValue}" Value="False">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+
+                                            <TextBlock Text="{DynamicResource ToolInvocation.WaitingForParameter}"
+                                                       FontFamily="Microsoft YaHei UI, Segoe UI"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource WebSearchToolPlaceholderTextBrush}"
+                                                       Effect="{StaticResource WebSearchToolTextShadowEffect}"
+                                                       FontStyle="Italic"
+                                                       TextWrapping="Wrap">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding HasValue}" Value="False">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Grid>
+                                    </Border>
+
+                                    <Border Grid.Column="2">
+                                        <Border.Style>
+                                            <Style TargetType="Border" BasedOn="{StaticResource WebSearchToolStreamingBadgeBorderStyle}">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsStreaming}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{DynamicResource ToolInvocation.Streaming}"
+                                                   FontFamily="Consolas, Microsoft YaHei UI"
+                                                   FontSize="10"
+                                                   Foreground="{StaticResource WebSearchToolBrightTextBrush}"
+                                                   Effect="{StaticResource WebSearchToolTextShadowEffect}"/>
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- 执行进度信息 -->
+                    <Grid Margin="0,11,0,0">
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding State.HasToolProgress}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="{Binding State.ToolProgressPhase}"
+                                               FontFamily="Microsoft YaHei UI, Segoe UI"
+                                               FontSize="12"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource WebSearchToolCoolGrayTextBrush}"
+                                               Effect="{StaticResource WebSearchToolTextShadowEffect}">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding State.ToolProgressPhase}" Value="">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <TextBlock Margin="0,2,0,0"
+                                               Text="{Binding State.ToolProgressStatusText}"
+                                               FontFamily="Microsoft YaHei UI, Segoe UI"
+                                               FontSize="13"
+                                               Foreground="{StaticResource WebSearchToolBrightTextBrush}"
+                                               Effect="{StaticResource WebSearchToolTextShadowEffect}"
+                                               TextWrapping="Wrap"/>
+                                </StackPanel>
+
+                                <TextBlock Grid.Column="1"
+                                           Margin="14,0,0,0"
+                                           Text="{Binding State.ToolProgressCountText}"
+                                           FontFamily="Consolas, Microsoft YaHei UI"
+                                           FontSize="12"
+                                           Foreground="{StaticResource WebSearchToolCoolGrayTextBrush}"
+                                           Effect="{StaticResource WebSearchToolTextShadowEffect}"
+                                           VerticalAlignment="Top">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding State.HasToolProgressCount}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+
+                            <ProgressBar Margin="0,8,0,0"
+                                         Height="7"
+                                         Minimum="0"
+                                         Maximum="100"
+                                         Foreground="#B493F2FF"
+                                         Background="#24000000"
+                                         BorderBrush="#4493F2FF"
+                                         Value="{Binding State.ToolProgressValue, Mode=OneWay}"
+                                         IsIndeterminate="{Binding State.IsToolProgressIndeterminate, Mode=OneWay}"/>
+
+                            <ScrollViewer Margin="0,8,0,0"
+                                          MaxHeight="92"
+                                          VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled">
+                                <ScrollViewer.Style>
+                                    <Style TargetType="ScrollViewer">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding State.HasToolProgressActiveItems}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ScrollViewer.Style>
+                                <ItemsControl ItemsSource="{Binding State.ToolProgressActiveItems}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Margin="0,0,0,3"
+                                                       Text="{Binding}"
+                                                       FontFamily="Consolas, Microsoft YaHei UI"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource WebSearchToolBrightTextBrush}"
+                                                       Effect="{StaticResource WebSearchToolTextShadowEffect}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       ToolTip="{Binding}"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- 执行结果展示 -->
+                    <Grid Margin="0,12,0,0">
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding State.HasToolResult}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <StackPanel>
+                            <TextBlock Text="{DynamicResource ToolInvocation.Result}"
+                                       FontFamily="Microsoft YaHei UI, Segoe UI"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource WebSearchToolCoolGrayTextBrush}"
+                                       Effect="{StaticResource WebSearchToolTextShadowEffect}"/>
+
+                            <TextBlock Margin="0,8,0,0"
+                                       Text="{Binding State.ToolResultContent, Converter={StaticResource ToolResultToStatusConverter}, ConverterParameter=WebSearch}"
+                                       Foreground="{StaticResource WebSearchToolBrightTextBrush}"
+                                       FontFamily="Microsoft YaHei UI, Segoe UI"
+                                       FontSize="13"
+                                       Effect="{StaticResource WebSearchToolTextShadowEffect}"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

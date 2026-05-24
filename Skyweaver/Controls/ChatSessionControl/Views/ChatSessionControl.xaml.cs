@@ -362,5 +362,35 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             var height = ActualHeight;
             RibbonAspectRatio = height > 0 ? Math.Max(ActualWidth / height, 0.0001) : 1.0;
         }
+
+        private void ComposerArea_PreviewDragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.Copy;
+                e.Handled = true;
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+        }
+
+        private void ComposerArea_PreviewDrop(object sender, DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                return;
+            }
+
+            if (e.Data.GetData(DataFormats.FileDrop) is string[] filePaths && filePaths.Length > 0)
+            {
+                if (DataContext is ChatSessionControlViewModel viewModel)
+                {
+                    viewModel.HandleFileDrop(filePaths);
+                    e.Handled = true;
+                }
+            }
+        }
     }
 }

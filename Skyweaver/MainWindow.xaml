@@ -15,6 +15,11 @@ mc:Ignorable="d"
         WindowState="Maximized"
         Icon="/Skyweaver;component/Resources/Skyweaver.ico" Background="#FF1A1F28">
 
+    <!-- 任务栏图标信息 -->
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo/>
+    </Window.TaskbarItemInfo>
+
     <DockPanel>
         <!-- Ribbon区域 -->
 

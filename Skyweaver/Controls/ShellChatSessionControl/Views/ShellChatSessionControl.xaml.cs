@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -270,6 +272,42 @@ namespace Skyweaver.Controls.ShellChatSessionControl.Views
             }
 
             e.Handled = true;
+        }
+
+        private void InputTextBox_PreviewDragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.Copy;
+                e.Handled = true;
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+        }
+
+        private void InputTextBox_PreviewDrop(object sender, DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                return;
+            }
+
+            if (e.Data.GetData(DataFormats.FileDrop) is string[] filePaths && filePaths.Length > 0)
+            {
+                var pathsText = string.Join(" ", filePaths.Select(p => $"\"{p}\""));
+                if (sender is TextBox textBox)
+                {
+                    var selectionStart = textBox.SelectionStart;
+                    var text = textBox.Text ?? string.Empty;
+                    textBox.Text = text.Insert(selectionStart, pathsText);
+                    textBox.SelectionStart = selectionStart + pathsText.Length;
+                    textBox.Focus();
+                }
+
+                e.Handled = true;
+            }
         }
     }
 }

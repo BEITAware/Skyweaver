@@ -37,7 +37,7 @@ namespace Skyweaver.Services.ContextManagement
                 return new ContextManagementConfiguration
                 {
                     MinCompactionEnabled = (bool?)root.Element("MinCompactionEnabled") ?? false,
-                    MaxCompactionEnabled = (bool?)root.Element("MaxCompactionEnabled") ?? false,
+                    MaxCompactionEnabled = (bool?)root.Element("MaxCompactionEnabled") ?? true,
                     LifeCycleEnabled = (bool?)root.Element("LifeCycleEnabled") ?? false,
                     LifeCycleRatioPercent = ReadDouble(root.Element("LifeCycleRatioPercent"), 100d),
                     RnnOptimizedCompactionEnabled = (bool?)root.Element("RnnOptimizedCompactionEnabled") ?? false,

@@ -334,6 +334,7 @@ namespace Skyweaver.Services.ChatSession
                     ToolCallIdFactory = request.ToolCallIdFactory,
                     EnableGemmaThoughtCompatibility = request.EnableGemmaThoughtCompatibility,
                     MinCompactionEnabled = request.MinCompactionEnabled,
+                    MaxCompactionEnabled = request.MaxCompactionEnabled,
                     CompactionFilePath = ChatSessionResourceLayout.GetCompactionFilePath(request.Session),
                     AsyncToolStateScopeId = request.Session.SessionId,
                     ToolCallResourceFolderPath = ChatSessionResourceLayout.GetToolCallsFolderPath(request.Session),
@@ -776,7 +777,8 @@ namespace Skyweaver.Services.ChatSession
                 {
                     ["sessionId"] = request.Session.SessionId,
                     ["flowId"] = request.Session.FlowBinding.GraphId,
-                    ["flowName"] = request.Graph.Document.Name
+                    ["flowName"] = request.Graph.Document.Name,
+                    ["resourcesFolderPath"] = ChatSessionResourceLayout.GetResourcesFolderPath(request.Session)
                 }
             };
         }

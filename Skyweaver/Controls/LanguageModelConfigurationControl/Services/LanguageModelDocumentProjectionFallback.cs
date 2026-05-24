@@ -576,7 +576,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
         private static PaddleOcrAll CreatePaddleOcr()
         {
             var model = CreateLocalV5ChineseModel();
-            return new PaddleOcrAll(model, PaddleDevice.Openblas())
+            return new PaddleOcrAll(model, PaddleDevice.Blas())
             {
                 AllowRotateDetection = true,
                 Enable180Classification = false

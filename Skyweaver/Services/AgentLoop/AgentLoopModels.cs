@@ -42,6 +42,8 @@ namespace Skyweaver.Services.AgentLoop
 
         public bool MinCompactionEnabled { get; init; }
 
+        public bool MaxCompactionEnabled { get; init; }
+
         public string? CompactionFilePath { get; init; }
 
         public bool EnableCompactionTools { get; init; }

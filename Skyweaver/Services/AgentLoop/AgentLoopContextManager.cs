@@ -55,6 +55,7 @@ namespace Skyweaver.Services.AgentLoop
                 compactionFilePath: null,
                 debugRunContext: null,
                 iterationNumber: 0,
+                sessionResourcesFolderPath: null,
                 cancellationToken);
         }
 
@@ -68,6 +69,7 @@ namespace Skyweaver.Services.AgentLoop
             string? compactionFilePath = null,
             AgentLoopDebugRunContext? debugRunContext = null,
             int iterationNumber = 0,
+            string? sessionResourcesFolderPath = null,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(agent);
@@ -84,7 +86,8 @@ namespace Skyweaver.Services.AgentLoop
                 immutableHistory,
                 upstreamInput,
                 upstreamContentBlocks,
-                currentTurnHistory);
+                currentTurnHistory,
+                sessionResourcesFolderPath);
             var compactedPreparedMessages = _compactionStore.ApplyCompaction(
                 compactionFilePath,
                 preparedMessages);
@@ -102,7 +105,8 @@ namespace Skyweaver.Services.AgentLoop
             IReadOnlyList<LanguageModelChatMessage> persistentHistory,
             string upstreamInput,
             IReadOnlyList<LanguageModelChatContentBlock>? upstreamContentBlocks,
-            IReadOnlyList<LanguageModelChatMessage> turnHistory)
+            IReadOnlyList<LanguageModelChatMessage> turnHistory,
+            string? sessionResourcesFolderPath)
         {
             var messages = new List<LanguageModelChatMessage>(persistentHistory.Count + turnHistory.Count + 3)
             {
@@ -112,24 +116,50 @@ namespace Skyweaver.Services.AgentLoop
             messages.AddRange(persistentHistory.Select(message => message.Clone()));
             messages.Add(CreateInputMessage(upstreamInput, upstreamContentBlocks));
             messages.AddRange(turnHistory.Select(message => message.Clone()));
-            InsertToolProtocolTailReminder(messages);
+            InsertToolProtocolTailReminder(messages, sessionResourcesFolderPath);
             return messages;
         }
 
-        private static void InsertToolProtocolTailReminder(List<LanguageModelChatMessage> messages)
+        private static void InsertToolProtocolTailReminder(List<LanguageModelChatMessage> messages, string? sessionResourcesFolderPath)
         {
             ArgumentNullException.ThrowIfNull(messages);
+
+            LanguageModelChatMessage? planMessage = null;
+            if (!string.IsNullOrWhiteSpace(sessionResourcesFolderPath))
+            {
+                var activePlans = PlanManager.LoadActivePlans(sessionResourcesFolderPath);
+                if (activePlans.Count > 0)
+                {
+                    var planPromptText = PlanManager.BuildActivePlansPrompt(activePlans);
+                    planMessage = new LanguageModelChatMessage(LanguageModelChatRole.System, planPromptText)
+                    {
+                        IsHostInjectedTail = true
+                    };
+                }
+            }
 
             var reminder = CreateToolProtocolTailReminder();
             for (var index = messages.Count - 1; index > 0; index--)
             {
                 if (messages[index].Role is LanguageModelChatRole.User or LanguageModelChatRole.System)
                 {
-                    messages.Insert(index, reminder);
+                    if (planMessage != null)
+                    {
+                        messages.Insert(index, planMessage);
+                        messages.Insert(index + 1, reminder);
+                    }
+                    else
+                    {
+                        messages.Insert(index, reminder);
+                    }
                     return;
                 }
             }
 
+            if (planMessage != null)
+            {
+                messages.Add(planMessage);
+            }
             messages.Add(reminder);
         }
 

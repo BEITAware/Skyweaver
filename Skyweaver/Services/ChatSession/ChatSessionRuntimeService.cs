@@ -240,20 +240,6 @@ namespace Skyweaver.Services.ChatSession
                     };
                 }
 
-                await PublishRuntimeEventAsync(
-                    new ChatSessionRuntimeEvent
-                    {
-                        Kind = ChatSessionRuntimeEventKind.ExecutionStarted,
-                        SessionId = sessionId,
-                        SessionTitle = request.Session.Name,
-                        FlowName = graph.Document.Name,
-                        Message = compilationResult.Issues.Count == 0
-                            ? L("ChatSessionRuntime.ExecutionStarted.Ready", "会话流编译与运行时预检查通过，开始执行。")
-                            : LF("ChatSessionRuntime.ExecutionStarted.WithIssuesFormat", "会话流编译通过，伴随 {0} 条提示或警告，开始执行。", compilationResult.Issues.Count),
-                        CompilationIssues = compilationResult.Issues
-                    },
-                    linkedCancellationSource.Token).ConfigureAwait(false);
-
                 var executionResult = await _executionService.ExecuteAsync(
                     new SessionFlowExecutionRequest
                     {
@@ -266,6 +252,8 @@ namespace Skyweaver.Services.ChatSession
                         EnableGemmaThoughtCompatibility = request.EnableGemmaThoughtCompatibility,
                         MinCompactionEnabled = request.MinCompactionEnabled ||
                                                 ContextManagementRuntime.Instance.MinCompactionEnabled,
+                        MaxCompactionEnabled = request.MaxCompactionEnabled ||
+                                                ContextManagementRuntime.Instance.MaxCompactionEnabled,
                         ToolCallIdFactory = toolCallIdFactory,
                         ToolConfirmationCallback = ResolveToolConfirmationCallback(request)
                     },

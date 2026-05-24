@@ -172,6 +172,76 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             };
         }
 
+        public static FrameworkElement CreateWebSearch(
+            SkyweaverToolInvocationPresentationContext context,
+            IEnumerable<ToolInvocationCardFieldDefinition>? fields = null)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            context.State.EnsureParameterDefinitions(context.EffectiveDefinition.Parameters);
+
+            var fieldViewModels = (fields ?? Array.Empty<ToolInvocationCardFieldDefinition>())
+                .Where(field => !string.IsNullOrWhiteSpace(field.ParameterName))
+                .Select(field =>
+                {
+                    var definition = context.EffectiveDefinition.Parameters.FirstOrDefault(parameter =>
+                        string.Equals(parameter.Name, field.ParameterName, StringComparison.OrdinalIgnoreCase));
+                    var parameterState = context.State.GetOrCreateParameterState(field.ParameterName, definition);
+                    var toolName = context.EffectiveDefinition.Name;
+                    return new ToolInvocationCardFieldViewModel(
+                        toolName,
+                        field.ParameterName,
+                        field.Label,
+                        parameterState,
+                        field.EmptyValueText);
+                })
+                .ToArray();
+
+            return new WebSearchToolInvocationCardView
+            {
+                DataContext = new ToolInvocationCardViewModel(
+                    context.State,
+                    context.EffectiveDefinition.Description,
+                    context.IconPath,
+                    fieldViewModels)
+            };
+        }
+
+        public static FrameworkElement CreateWebBrowse(
+            SkyweaverToolInvocationPresentationContext context,
+            IEnumerable<ToolInvocationCardFieldDefinition>? fields = null)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            context.State.EnsureParameterDefinitions(context.EffectiveDefinition.Parameters);
+
+            var fieldViewModels = (fields ?? Array.Empty<ToolInvocationCardFieldDefinition>())
+                .Where(field => !string.IsNullOrWhiteSpace(field.ParameterName))
+                .Select(field =>
+                {
+                    var definition = context.EffectiveDefinition.Parameters.FirstOrDefault(parameter =>
+                        string.Equals(parameter.Name, field.ParameterName, StringComparison.OrdinalIgnoreCase));
+                    var parameterState = context.State.GetOrCreateParameterState(field.ParameterName, definition);
+                    var toolName = context.EffectiveDefinition.Name;
+                    return new ToolInvocationCardFieldViewModel(
+                        toolName,
+                        field.ParameterName,
+                        field.Label,
+                        parameterState,
+                        field.EmptyValueText);
+                })
+                .ToArray();
+
+            return new WebBrowseToolInvocationCardView
+            {
+                DataContext = new ToolInvocationCardViewModel(
+                    context.State,
+                    context.EffectiveDefinition.Description,
+                    context.IconPath,
+                    fieldViewModels)
+            };
+        }
+
         public static FrameworkElement CreateDefault(
             SkyweaverToolInvocationPresentationState state,
             string? description,

@@ -13,7 +13,7 @@ namespace Skyweaver.Models.ContextManagement
     public sealed class ContextManagementConfiguration : ObservableObject
     {
         private bool _minCompactionEnabled;
-        private bool _maxCompactionEnabled;
+        private bool _maxCompactionEnabled = true;
         private bool _lifeCycleEnabled;
         private double _lifeCycleRatioPercent = 100d;
         private bool _rnnOptimizedCompactionEnabled;

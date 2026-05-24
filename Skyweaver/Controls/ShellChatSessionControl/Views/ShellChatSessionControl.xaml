@@ -591,7 +591,10 @@
                              VerticalScrollBarVisibility="Auto"
                              HorizontalScrollBarVisibility="Disabled"
                              AcceptsReturn="True"
-                             PreviewKeyDown="InputTextBox_PreviewKeyDown"/>
+                             PreviewKeyDown="InputTextBox_PreviewKeyDown"
+                             AllowDrop="True"
+                             PreviewDragOver="InputTextBox_PreviewDragOver"
+                             PreviewDrop="InputTextBox_PreviewDrop"/>
                     <TextBlock Text="{DynamicResource ShellChat.InputPlaceholder}"
                                Foreground="#55FFFFFF"
                                FontSize="13"

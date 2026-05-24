@@ -15,7 +15,7 @@
         <Style TargetType="ScrollBar" BasedOn="{StaticResource AeroScrollBarV2Style}"/>
         <Style TargetType="ScrollViewer" BasedOn="{StaticResource AeroScrollViewerV2Style}"/>
 
-        <DrawingBrush x:Key="ChatSoftGlassSliceBrush" Stretch="Uniform">
+        <DrawingBrush x:Key="ChatSoftGlassSliceBrush" Stretch="Fill">
             <DrawingBrush.Drawing>
                 <DrawingGroup>
                     <DrawingGroup.Children>
@@ -1393,7 +1393,7 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="Padding" Value="10,2"/>
             <Setter Property="Margin" Value="0,0,5,0"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -1521,7 +1521,30 @@
                          BorderThickness="0"
                          Padding="12"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                         ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         VirtualizingPanel.IsVirtualizing="True"
+                         VirtualizingPanel.VirtualizationMode="Recycling"
+                         VirtualizingPanel.ScrollUnit="Pixel">
+                    <!-- 自定义 ListBox 模板，强制内部 ScrollViewer 禁用水平滚动，
+                         避免隐式 AeroScrollViewerV2Style（默认 Horizontal=Auto）覆盖导致内容获得无限水平空间，
+                         使系统消息等超长内容能正确换行而非溢出。同时启用 CanContentScroll="True" 以支持虚拟化。 -->
+                    <ListBox.Template>
+                        <ControlTemplate TargetType="ListBox">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Padding="{TemplateBinding Padding}"
+                                    ClipToBounds="True">
+                                <ScrollViewer Focusable="False"
+                                              HorizontalScrollBarVisibility="Disabled"
+                                              VerticalScrollBarVisibility="Auto"
+                                              CanContentScroll="True">
+                                    <ItemsPresenter/>
+                                </ScrollViewer>
+                            </Border>
+                        </ControlTemplate>
+                    </ListBox.Template>
+                </ListBox>
 
                 <TextBlock Text="{DynamicResource ChatSessionControl.EmptyState}"
                            Margin="26"
@@ -1539,7 +1562,10 @@
                     Background="{DynamicResource ChatSessionHeaderBackgroundBrush}"
                     BorderBrush="#3396FCFF"
                     BorderThickness="1"
-                    CornerRadius="2">
+                    CornerRadius="2"
+                    AllowDrop="True"
+                    PreviewDragOver="ComposerArea_PreviewDragOver"
+                    PreviewDrop="ComposerArea_PreviewDrop">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -1612,29 +1638,29 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                         <!-- 顶部工具栏 -->
-                        <Border Grid.Row="2" Background="{StaticResource MediaBarGlassBrush}" BorderBrush="#80FFFFFF" BorderThickness="1" Margin="0,0,0,8" CornerRadius="3" Padding="10,5">
+                        <Border Grid.Row="2" Background="{StaticResource MediaBarGlassBrush}" BorderBrush="#80FFFFFF" BorderThickness="1" Margin="0,0,0,8" CornerRadius="3" Padding="8,2">
                             <StackPanel Orientation="Horizontal">
                                 <Button Command="{Binding AddImageCommand}" Style="{StaticResource MediaToolbarButtonStyle}">
                                     <StackPanel Orientation="Horizontal">
                                         <!-- 加大按钮的图标本身和文字字号 -->
-                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/image.png" Width="30" Height="30" Margin="0,0,5,0"/>
+                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/image.png" Width="32" Height="32" Margin="0,0,5,0"/>
                                         <TextBlock Text="{DynamicResource ChatSessionControl.AddImage}" VerticalAlignment="Center" FontSize="13"/>
                                     </StackPanel>
                                 </Button>
                                 <Button Command="{Binding AddClipboardCommand}" Style="{StaticResource MediaToolbarButtonStyle}">
                                     <StackPanel Orientation="Horizontal">
                                         <!-- 加大按钮的图标本身和文字字号 -->
-                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/imagealt.png" Width="30" Height="30" Margin="0,0,5,0"/>
+                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/imagealt.png" Width="32" Height="32" Margin="0,0,5,0"/>
                                         <TextBlock Text="{DynamicResource ChatSessionControl.AddClipboard}" VerticalAlignment="Center" FontSize="13"/>
                                     </StackPanel>
                                 </Button>
 
-                                <Rectangle Width="1" Height="30" Fill="#33FFFFFF" Margin="5,0"/>
+                                <Rectangle Width="1" Height="24" Fill="#33FFFFFF" Margin="5,0"/>
 
                                 <Button Command="{Binding AddAudioCommand}" Style="{StaticResource MediaToolbarButtonStyle}">
                                     <StackPanel Orientation="Horizontal">
                                         <!-- 加大按钮的图标本身和文字字号 -->
-                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/Audio.png" Width="30" Height="30" Margin="0,0,5,0"/>
+                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/Audio.png" Width="32" Height="32" Margin="0,0,5,0"/>
                                         <TextBlock Text="{DynamicResource ChatSessionControl.Voice}" VerticalAlignment="Center" FontSize="13"/>
                                     </StackPanel>
                                 </Button>
@@ -1642,17 +1668,17 @@
                                 <Button Command="{Binding AddVideoCommand}" Style="{StaticResource MediaToolbarButtonStyle}">
                                     <StackPanel Orientation="Horizontal">
                                         <!-- 加大按钮的图标本身和文字字号 -->
-                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/Video.png" Width="30" Height="30" Margin="0,0,5,0"/>
+                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/Video.png" Width="32" Height="32" Margin="0,0,5,0"/>
                                         <TextBlock Text="{DynamicResource ChatSessionControl.AddVideo}" VerticalAlignment="Center" FontSize="13"/>
                                     </StackPanel>
                                 </Button>
 
-                                <Rectangle Width="1" Height="30" Fill="#33FFFFFF" Margin="5,0"/>
+                                <Rectangle Width="1" Height="24" Fill="#33FFFFFF" Margin="5,0"/>
 
                                 <Button Command="{Binding AddDocumentCommand}" Style="{StaticResource MediaToolbarButtonStyle}">
                                     <StackPanel Orientation="Horizontal">
                                         <!-- 加大按钮的图标本身和文字字号 -->
-                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/UploadFile.png" Width="30" Height="30" Margin="0,0,5,0"/>
+                                        <Image Source="pack://application:,,,/Skyweaver;component/Resources/UploadFile.png" Width="32" Height="32" Margin="0,0,5,0"/>
                                         <TextBlock Text="{DynamicResource ChatSessionControl.AddFile}" VerticalAlignment="Center" FontSize="13"/>
                                     </StackPanel>
                                 </Button>

@@ -61,7 +61,7 @@ namespace Skyweaver
             finally
             {
                 _allowGuiClose = true;
-                Dispatcher.BeginInvoke(
+                _ = Dispatcher.BeginInvoke(
                     DispatcherPriority.ApplicationIdle,
                     new Action(Close));
             }

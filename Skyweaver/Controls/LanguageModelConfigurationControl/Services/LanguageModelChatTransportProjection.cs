@@ -2,6 +2,7 @@ using System.Net;
 using System.Xml.Linq;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Models;
 using Skyweaver.Services.ChatSession;
+using Skyweaver.Services.Multimodal;
 
 namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
 {
@@ -63,6 +64,19 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                         BuildPreservedResourceXml("Image", block)));
                     changed = true;
                     continue;
+                }
+
+                // 长图像自动解析：对比例超过 21:9 或 9:21 的图像进行切分
+                if (block.Kind == LanguageModelChatContentBlockKind.Image &&
+                    model?.EnableImageInput != false)
+                {
+                    var autoParseSlices = TryAutoParseImageBlock(block);
+                    if (autoParseSlices != null)
+                    {
+                        projectedBlocks.AddRange(autoParseSlices);
+                        changed = true;
+                        continue;
+                    }
                 }
 
                 if (block.Kind == LanguageModelChatContentBlockKind.Audio && model?.EnableAudioInput == false)
@@ -498,6 +512,39 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             }
 
             return new XElement("SkyweaverPreservedContent", element).ToString(SaveOptions.DisableFormatting);
+        }
+
+        /// <summary>
+        /// 尝试对图像块执行长图自动解析。
+        /// 若功能未启用或图像无需切分，返回 null。
+        /// </summary>
+        private static IReadOnlyList<LanguageModelChatContentBlock>? TryAutoParseImageBlock(
+            LanguageModelChatContentBlock block)
+        {
+            if (!MultimodalRuntime.Instance.GetConfiguration().EnableLongImageAutoParse)
+            {
+                return null;
+            }
+
+            var imagePath = block.ResourcePath ?? block.Content;
+            if (string.IsNullOrWhiteSpace(imagePath))
+            {
+                return null;
+            }
+
+            var slicePaths = LongImageAutoParseService.TryAutoParse(imagePath.Trim());
+            if (slicePaths == null || slicePaths.Count == 0)
+            {
+                return null;
+            }
+
+            var blocks = new List<LanguageModelChatContentBlock>(slicePaths.Count);
+            foreach (var slicePath in slicePaths)
+            {
+                blocks.Add(LanguageModelChatContentBlock.CreateImage(slicePath, "image/png"));
+            }
+
+            return blocks;
         }
     }
 }

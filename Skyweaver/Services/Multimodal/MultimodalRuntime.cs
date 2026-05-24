@@ -48,7 +48,8 @@ namespace Skyweaver.Services.Multimodal
             return new MultimodalConfiguration
             {
                 EnableOcr = configuration.EnableOcr,
-                HardwareOption = configuration.HardwareOption
+                HardwareOption = configuration.HardwareOption,
+                EnableLongImageAutoParse = configuration.EnableLongImageAutoParse
             };
         }
     }

@@ -3,13 +3,17 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media.Animation;
 
 namespace InstallationWizard.Pages
 {
     public partial class InstallationProgressPage : UserControl
     {
-        private int _totalSteps = 5;
         private int _currentStep = 0;
         private bool _installationStarted = false;
 
@@ -267,8 +271,10 @@ namespace InstallationWizard.Pages
             try
             {
                 // 使用COM对象创建快捷方式
-                Type shellType = Type.GetTypeFromProgID("WScript.Shell");
-                dynamic shell = Activator.CreateInstance(shellType);
+                Type? shellType = Type.GetTypeFromProgID("WScript.Shell");
+                if (shellType == null) throw new InvalidOperationException("Could not get shell type.");
+                dynamic? shell = Activator.CreateInstance(shellType);
+                if (shell == null) throw new InvalidOperationException("Could not create shell instance.");
                 var shortcut = shell.CreateShortcut(shortcutPath);
 
                 shortcut.TargetPath = targetPath;

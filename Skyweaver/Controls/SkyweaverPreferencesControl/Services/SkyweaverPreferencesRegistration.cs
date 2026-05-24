@@ -120,6 +120,16 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.Services
 
                 registry.RegisterPage("multimodal", new PreferencePageInfo
                 {
+                    Id = "preferences-image",
+                    DisplayName = "图像",
+                    DisplayNameResourceKey = "Preferences.Page.Image",
+                    ViewType = typeof(ImagePreferencesPageView),
+                    ViewModelType = typeof(ImagePreferencesPageViewModel),
+                    Order = 5
+                });
+
+                registry.RegisterPage("multimodal", new PreferencePageInfo
+                {
                     Id = "preferences-document",
                     DisplayName = "文档",
                     DisplayNameResourceKey = "Preferences.Page.Document",

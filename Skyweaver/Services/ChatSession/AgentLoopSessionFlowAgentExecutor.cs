@@ -33,6 +33,7 @@ namespace Skyweaver.Services.ChatSession
                 EnableGemmaThoughtCompatibility = request.EnableGemmaThoughtCompatibility,
                 IsSubAgent = request.IsSubAgent,
                 MinCompactionEnabled = request.MinCompactionEnabled,
+                MaxCompactionEnabled = request.MaxCompactionEnabled,
                 CompactionFilePath = request.CompactionFilePath,
                 ToolCallIdFactory = request.ToolCallIdFactory,
                 AsyncToolStateScopeId = request.AsyncToolStateScopeId,
