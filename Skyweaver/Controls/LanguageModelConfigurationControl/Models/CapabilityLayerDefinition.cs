@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
 using Skyweaver.Infrastructure.Mvvm;
 using Skyweaver.Services.Localization;
 
@@ -18,7 +19,18 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Models
 
         public string Name
         {
-            get => _name;
+            get
+            {
+                if (IsBuiltIn)
+                {
+                    var localizedName = L($"LanguageModelConfiguration.CapabilityLayers.BuiltIn.{Key}.Name", _name);
+                    if (!string.IsNullOrEmpty(localizedName))
+                    {
+                        return localizedName;
+                    }
+                }
+                return _name;
+            }
             set => SetProperty(ref _name, value?.Trim() ?? string.Empty);
         }
 
@@ -43,7 +55,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Models
 
         public bool CanRename => !IsBuiltIn;
 
-        public bool IsUserSelectable => !IsBuiltIn;
+        public bool IsUserSelectable => !string.Equals(Key, CapabilityLayerBuiltIns.ContextCompressionLayerKey, StringComparison.OrdinalIgnoreCase);
 
         public string ManagementHint => IsBuiltIn
             ? L("LanguageModelConfiguration.CapabilityLayers.ManagementHint.BuiltIn", "系统内置功能层级。名称不可修改，也不能删除。")
@@ -51,6 +63,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Models
 
         public void RefreshLocalizedText()
         {
+            OnPropertyChanged(nameof(Name));
             OnPropertyChanged(nameof(ManagementHint));
         }
 

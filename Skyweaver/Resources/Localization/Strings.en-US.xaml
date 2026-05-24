@@ -111,6 +111,9 @@
     <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.LayerName">Layer Name</system:String>
     <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.AddLanguageModel">Add Language Model</system:String>
     <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.ManagementHint.BuiltIn">System built-in capability layer. Its name cannot be changed and it cannot be deleted.</system:String>
+    <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.BuiltIn.builtin.context-compression.Name">Context Compression</system:String>
+    <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.BuiltIn.builtin.utility-i-fast.Name">Utility I (Fast)</system:String>
+    <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.BuiltIn.builtin.utility-ii-smart.Name">Utility II (Smart)</system:String>
     <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.ManagementHint.User">User-defined capability layer.</system:String>
     <system:String x:Key="LanguageModelConfiguration.Status.Complete">Complete</system:String>
     <system:String x:Key="LanguageModelConfiguration.Status.Incomplete">Incomplete</system:String>

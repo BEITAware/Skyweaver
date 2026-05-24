@@ -218,6 +218,12 @@
 
     <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.ManagementHint.BuiltIn">システム組み込みの機能レイヤーです。名前の変更や削除はできません。</system:String>
 
+    <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.BuiltIn.builtin.context-compression.Name">コンテキスト圧縮</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.BuiltIn.builtin.utility-i-fast.Name">実用I（高速）</system:String>
+
+    <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.BuiltIn.builtin.utility-ii-smart.Name">実用II（スマート）</system:String>
+
     <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.ManagementHint.User">ユーザー定義の機能レイヤー。</system:String>
 
     <system:String x:Key="LanguageModelConfiguration.Status.Complete">完了</system:String>

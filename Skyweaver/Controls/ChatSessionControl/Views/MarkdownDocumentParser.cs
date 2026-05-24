@@ -21,8 +21,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             var lines = normalized.Split('\n');
             var blocks = new List<MarkdownBlock>();
             var paragraphLines = new List<string>();
-            var hasTrailingIncompleteLine = isStreaming && !normalized.EndsWith('\n');
-            var parseLineCount = hasTrailingIncompleteLine ? Math.Max(0, lines.Length - 1) : lines.Length;
+            var parseLineCount = lines.Length;
 
             for (var index = 0; index < parseLineCount;)
             {
@@ -89,15 +88,6 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             }
 
             FlushParagraph(blocks, paragraphLines);
-
-            if (hasTrailingIncompleteLine)
-            {
-                var trailingLine = lines[^1].TrimEnd();
-                if (trailingLine.Length > 0)
-                {
-                    blocks.Add(new MarkdownParagraphBlock(ParseInlines(trailingLine)));
-                }
-            }
 
             return blocks;
         }

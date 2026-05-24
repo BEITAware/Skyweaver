@@ -110,6 +110,9 @@
     <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.LayerName">层级名称</system:String>
     <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.AddLanguageModel">添加语言模型</system:String>
     <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.ManagementHint.BuiltIn">系统内置功能层级。名称不可修改，也不能删除。</system:String>
+    <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.BuiltIn.builtin.context-compression.Name">上下文压缩</system:String>
+    <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.BuiltIn.builtin.utility-i-fast.Name">实用I（快速）</system:String>
+    <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.BuiltIn.builtin.utility-ii-smart.Name">实用II（智能）</system:String>
     <system:String x:Key="LanguageModelConfiguration.CapabilityLayers.ManagementHint.User">用户自定义功能层级。</system:String>
     <system:String x:Key="LanguageModelConfiguration.Status.Complete">已完善</system:String>
     <system:String x:Key="LanguageModelConfiguration.Status.Incomplete">未完善</system:String>

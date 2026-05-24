@@ -30,7 +30,8 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
         private static readonly Brush MathBorderBrush = CreateFrozenBrush(Color.FromArgb(0x44, 0xCF, 0xB9, 0x7A));
         private static readonly Brush MathBackgroundBrush = CreateFrozenBrush(Color.FromArgb(0x18, 0x22, 0x1A, 0x10));
         private static readonly Brush MathForegroundBrush = CreateFrozenBrush(Color.FromRgb(0xF4, 0xDF, 0xB5));
-        private static readonly Style TableCellTextStyle = CreateTableCellTextStyle();
+        private static readonly Style TableCellTextStyle = CreateTableCellTextStyle(TextWrapping.Wrap);
+        private static readonly Style TableCellStreamingTextStyle = CreateTableCellTextStyle(TextWrapping.NoWrap);
 
         public static readonly DependencyProperty MarkdownTextProperty =
             DependencyProperty.Register(
@@ -60,6 +61,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
 
         private DateTime _lastStreamingRefreshUtc = DateTime.MinValue;
         private bool _refreshPending;
+        private bool _isRefreshing;
 
         public MarkdownContentControl()
         {
@@ -136,26 +138,141 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
 
         private void RefreshContent()
         {
-            var blocks = MarkdownDocumentParser.Parse(MarkdownText, IsStreaming);
-            if (blocks.Count == 0)
+            if (_isRefreshing)
             {
-                Content = null;
                 return;
             }
 
-            var root = new StackPanel();
-            for (var index = 0; index < blocks.Count; index++)
+            _isRefreshing = true;
+            try
             {
-                var element = CreateBlockElement(blocks[index]);
-                if (index < blocks.Count - 1)
+                var blocks = MarkdownDocumentParser.Parse(MarkdownText, IsStreaming);
+                if (blocks.Count == 0)
                 {
-                    element.Margin = AppendBottomMargin(element.Margin, 8.0);
+                    Content = null;
+                    return;
                 }
 
-                root.Children.Add(element);
-            }
+                var root = Content as StackPanel;
+                if (root == null)
+                {
+                    root = new StackPanel();
+                    Content = root;
+                }
 
-            Content = root;
+                for (var index = 0; index < blocks.Count; index++)
+                {
+                    var block = blocks[index];
+                    FrameworkElement? element = null;
+
+                    if (index < root.Children.Count)
+                    {
+                        var existingElement = root.Children[index] as FrameworkElement;
+                        if (existingElement != null && IsElementMatchingBlock(existingElement, block))
+                        {
+                            element = existingElement;
+                            UpdateBlockElement(element, block);
+                        }
+                    }
+
+                    if (element == null)
+                    {
+                        element = CreateBlockElement(block);
+                        if (index < root.Children.Count)
+                        {
+                            root.Children.RemoveAt(index);
+                            root.Children.Insert(index, element);
+                        }
+                        else
+                        {
+                            root.Children.Add(element);
+                        }
+                    }
+
+                    var expectedMargin = new Thickness(0);
+                    if (index < blocks.Count - 1)
+                    {
+                        expectedMargin = AppendBottomMargin(expectedMargin, 8.0);
+                    }
+
+                    if (element.Margin != expectedMargin)
+                    {
+                        element.Margin = expectedMargin;
+                    }
+                }
+
+                while (root.Children.Count > blocks.Count)
+                {
+                    root.Children.RemoveAt(root.Children.Count - 1);
+                }
+            }
+            finally
+            {
+                _isRefreshing = false;
+            }
+        }
+
+        private static string GetBlockTag(MarkdownBlock block)
+        {
+            return block switch
+            {
+                MarkdownHeadingBlock => "Heading",
+                MarkdownParagraphBlock => "Paragraph",
+                MarkdownCodeBlock => "Code",
+                MarkdownQuoteBlock => "Quote",
+                MarkdownListBlock => "List",
+                MarkdownMathBlock => "Math",
+                MarkdownTableBlock => "Table",
+                _ => "Unknown"
+            };
+        }
+
+        private static bool IsElementMatchingBlock(FrameworkElement element, MarkdownBlock block)
+        {
+            return element.Tag?.ToString() == GetBlockTag(block);
+        }
+
+        private void UpdateBlockElement(FrameworkElement element, MarkdownBlock block)
+        {
+            switch (block)
+            {
+                case MarkdownHeadingBlock heading:
+                    var headingText = (TextBlock)element;
+                    headingText.Inlines.Clear();
+                    AddInlines(headingText.Inlines, heading.Inlines);
+                    break;
+
+                case MarkdownParagraphBlock paragraph:
+                    var paraText = (TextBlock)element;
+                    paraText.Inlines.Clear();
+                    AddInlines(paraText.Inlines, paragraph.Inlines);
+                    break;
+
+                case MarkdownQuoteBlock quote:
+                    var quoteBorder = (Border)element;
+                    var quoteText = (TextBlock)quoteBorder.Child;
+                    quoteText.Inlines.Clear();
+                    AddInlines(quoteText.Inlines, quote.Inlines);
+                    break;
+
+                case MarkdownListBlock list:
+                    UpdateListBlock((StackPanel)element, list);
+                    break;
+
+                case MarkdownCodeBlock code:
+                    UpdateCodeBlock((Border)element, code);
+                    break;
+
+                case MarkdownMathBlock math:
+                    var mathBorder = (Border)element;
+                    var mathText = (TextBlock)mathBorder.Child;
+                    mathText.Text = $"\\[{math.Content}\\]";
+                    break;
+
+                case MarkdownTableBlock table:
+                    UpdateTableBlock((DataGrid)element, table);
+                    break;
+            }
         }
 
         private FrameworkElement CreateBlockElement(MarkdownBlock block)
@@ -176,6 +293,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
         private TextBlock CreateParagraphBlock(MarkdownParagraphBlock block)
         {
             var textBlock = CreateBaseTextBlock();
+            textBlock.Tag = "Paragraph";
             AddInlines(textBlock.Inlines, block.Inlines);
             return textBlock;
         }
@@ -183,6 +301,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
         private TextBlock CreateHeadingBlock(MarkdownHeadingBlock block)
         {
             var textBlock = CreateBaseTextBlock();
+            textBlock.Tag = "Heading";
             textBlock.Foreground = HeadingForegroundBrush;
             textBlock.FontWeight = FontWeights.SemiBold;
             textBlock.FontSize = ResolveHeadingFontSize(block.Level);
@@ -198,6 +317,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
 
             return new Border
             {
+                Tag = "Quote",
                 BorderBrush = QuoteBorderBrush,
                 BorderThickness = new Thickness(3, 0, 0, 0),
                 Padding = new Thickness(10, 2, 0, 2),
@@ -207,7 +327,14 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
 
         private FrameworkElement CreateListBlock(MarkdownListBlock block)
         {
-            var root = new StackPanel();
+            var root = new StackPanel { Tag = "List" };
+            UpdateListBlock(root, block);
+            return root;
+        }
+
+        private void UpdateListBlock(StackPanel root, MarkdownListBlock block)
+        {
+            root.Children.Clear();
             for (var index = 0; index < block.Items.Count; index++)
             {
                 var item = block.Items[index];
@@ -232,13 +359,29 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                 row.Children.Add(content);
                 root.Children.Add(row);
             }
-
-            return root;
         }
 
         private Border CreateCodeBlock(MarkdownCodeBlock block)
         {
             var stackPanel = new StackPanel();
+            var border = new Border
+            {
+                Tag = "Code",
+                Background = CodeBackgroundBrush,
+                BorderBrush = CodeBorderBrush,
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(8),
+                Padding = new Thickness(10),
+                Child = stackPanel
+            };
+            UpdateCodeBlock(border, block);
+            return border;
+        }
+
+        private void UpdateCodeBlock(Border border, MarkdownCodeBlock block)
+        {
+            var stackPanel = (StackPanel)border.Child;
+            stackPanel.Children.Clear();
             if (!string.IsNullOrWhiteSpace(block.Language))
             {
                 var header = new DockPanel
@@ -275,43 +418,39 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                 FontSize = Math.Max(12.0, ResolveBaseFontSize() - 1.0),
                 TextWrapping = TextWrapping.Wrap
             });
-
-            return new Border
-            {
-                Background = CodeBackgroundBrush,
-                BorderBrush = CodeBorderBrush,
-                BorderThickness = new Thickness(1),
-                CornerRadius = new CornerRadius(8),
-                Padding = new Thickness(10),
-                Child = stackPanel
-            };
         }
 
         private Border CreateMathBlock(MarkdownMathBlock block)
         {
-            return new Border
+            var textBlock = new TextBlock
             {
+                Foreground = MathForegroundBrush,
+                FontFamily = new FontFamily("Consolas"),
+                FontSize = Math.Max(12.0, ResolveBaseFontSize() - 0.5),
+                TextWrapping = TextWrapping.Wrap,
+                TextAlignment = TextAlignment.Center
+            };
+
+            var border = new Border
+            {
+                Tag = "Math",
                 Background = MathBackgroundBrush,
                 BorderBrush = MathBorderBrush,
                 BorderThickness = new Thickness(1),
                 CornerRadius = new CornerRadius(8),
                 Padding = new Thickness(10, 8, 10, 8),
-                Child = new TextBlock
-                {
-                    Text = $"\\[{block.Content}\\]",
-                    Foreground = MathForegroundBrush,
-                    FontFamily = new FontFamily("Consolas"),
-                    FontSize = Math.Max(12.0, ResolveBaseFontSize() - 0.5),
-                    TextWrapping = TextWrapping.Wrap,
-                    TextAlignment = TextAlignment.Center
-                }
+                Child = textBlock
             };
+
+            textBlock.Text = $"\\[{block.Content}\\]";
+            return border;
         }
 
         private FrameworkElement CreateTableBlock(MarkdownTableBlock block)
         {
             var dataGrid = new DataGrid
             {
+                Tag = "Table",
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Top,
                 MaxHeight = TableMaxHeight,
@@ -323,31 +462,70 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                 dataGrid.Style = dataGridStyle;
             }
 
-            var columnLookup = new Dictionary<DataGridColumn, int>();
-            for (var columnIndex = 0; columnIndex < block.Columns.Count; columnIndex++)
+            dataGrid.Sorting += (s, e) => ApplyTableSort((DataGrid)s, e);
+            UpdateTableBlock(dataGrid, block);
+            return dataGrid;
+        }
+
+        private void UpdateTableBlock(DataGrid dataGrid, MarkdownTableBlock block)
+        {
+            bool columnsNeedRebuild = dataGrid.Columns.Count != block.Columns.Count;
+            if (!columnsNeedRebuild)
             {
-                var headerText = block.Columns[columnIndex].Header;
-                if (string.IsNullOrWhiteSpace(headerText))
+                for (int i = 0; i < block.Columns.Count; i++)
                 {
-                    headerText = LF("Markdown.Table.ColumnFallbackFormat", "Column {0}", columnIndex + 1);
+                    var newHeader = block.Columns[i].Header;
+                    if (string.IsNullOrWhiteSpace(newHeader))
+                    {
+                        newHeader = LF("Markdown.Table.ColumnFallbackFormat", "Column {0}", i + 1);
+                    }
+                    if (dataGrid.Columns[i].Header?.ToString() != newHeader)
+                    {
+                        columnsNeedRebuild = true;
+                        break;
+                    }
                 }
+            }
 
-                var column = new DataGridTextColumn
+            if (columnsNeedRebuild)
+            {
+                dataGrid.Columns.Clear();
+                for (var columnIndex = 0; columnIndex < block.Columns.Count; columnIndex++)
                 {
-                    Header = headerText,
-                    Binding = new Binding($"Cells[{columnIndex}]"),
-                    ClipboardContentBinding = new Binding($"Cells[{columnIndex}]"),
-                    ElementStyle = TableCellTextStyle,
-                    MinWidth = TableMinColumnWidth
-                };
+                    var headerText = block.Columns[columnIndex].Header;
+                    if (string.IsNullOrWhiteSpace(headerText))
+                    {
+                        headerText = LF("Markdown.Table.ColumnFallbackFormat", "Column {0}", columnIndex + 1);
+                    }
 
-                dataGrid.Columns.Add(column);
-                columnLookup[column] = columnIndex;
+                    var column = new DataGridTextColumn
+                    {
+                        Header = headerText,
+                        Binding = new Binding($"Cells[{columnIndex}]"),
+                        ClipboardContentBinding = new Binding($"Cells[{columnIndex}]"),
+                        ElementStyle = IsStreaming ? TableCellStreamingTextStyle : TableCellTextStyle,
+                        MinWidth = TableMinColumnWidth
+                    };
+
+                    dataGrid.Columns.Add(column);
+                }
+            }
+            else
+            {
+                var expectedStyle = IsStreaming ? TableCellStreamingTextStyle : TableCellTextStyle;
+                for (var columnIndex = 0; columnIndex < dataGrid.Columns.Count; columnIndex++)
+                {
+                    if (dataGrid.Columns[columnIndex] is DataGridTextColumn textColumn)
+                    {
+                        if (textColumn.ElementStyle != expectedStyle)
+                        {
+                            textColumn.ElementStyle = expectedStyle;
+                        }
+                    }
+                }
             }
 
             dataGrid.ItemsSource = block.Rows.ToList();
-            dataGrid.Sorting += (_, e) => ApplyTableSort(dataGrid, e, columnLookup);
-            return dataGrid;
         }
 
         private void AddInlines(InlineCollection collection, IEnumerable<MarkdownInline> inlines)
@@ -511,12 +689,16 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
 
         private static void ApplyTableSort(
             DataGrid dataGrid,
-            DataGridSortingEventArgs e,
-            IReadOnlyDictionary<DataGridColumn, int> columnLookup)
+            DataGridSortingEventArgs e)
         {
             e.Handled = true;
-            if (!columnLookup.TryGetValue(e.Column, out var columnIndex) ||
-                dataGrid.ItemsSource is null)
+            if (dataGrid.ItemsSource is null)
+            {
+                return;
+            }
+
+            var columnIndex = dataGrid.Columns.IndexOf(e.Column);
+            if (columnIndex < 0)
             {
                 return;
             }
@@ -540,10 +722,10 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                 : rows.OrderByDescending(row => row.GetCell(columnIndex), StringComparer.CurrentCultureIgnoreCase).ToList();
         }
 
-        private static Style CreateTableCellTextStyle()
+        private static Style CreateTableCellTextStyle(TextWrapping textWrapping)
         {
             var style = new Style(typeof(TextBlock));
-            style.Setters.Add(new Setter(TextBlock.TextWrappingProperty, TextWrapping.Wrap));
+            style.Setters.Add(new Setter(TextBlock.TextWrappingProperty, textWrapping));
             style.Setters.Add(new Setter(TextBlock.VerticalAlignmentProperty, VerticalAlignment.Center));
             return style;
         }
