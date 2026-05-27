@@ -36,6 +36,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         private readonly ChatSessionPresentationProjector _presentationProjector;
         private readonly MemoryService _memoryService;
         private readonly string _sessionFlowValidationSummary;
+        private ChatSessionPersistenceScheduler? _persistenceScheduler;
 
         private string _draftMessageText = string.Empty;
         private ChatMessageModel? _selectedMessage;
@@ -248,6 +249,11 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                 OnPropertyChanged(nameof(CanSendMessage));
                 CommandManager.InvalidateRequerySuggested();
             };
+
+            if (_chatSessionRepository != null)
+            {
+                _persistenceScheduler = new ChatSessionPersistenceScheduler(_chatSessionRepository);
+            }
 
             if (_sessionModel != null)
             {
@@ -1258,12 +1264,12 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
         private void PersistSession()
         {
-            if (_suppressPersistence || _sessionModel == null || _chatSessionRepository == null)
+            if (_suppressPersistence || _sessionModel == null || _persistenceScheduler == null)
             {
                 return;
             }
 
-            _chatSessionRepository.Save(_sessionModel);
+            _persistenceScheduler.ScheduleSave(_sessionModel);
         }
 
         public void SaveSessionSnapshot()
@@ -1275,7 +1281,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
             try
             {
-                _chatSessionRepository?.Save(_sessionModel);
+                _persistenceScheduler?.Flush(_sessionModel);
             }
             catch
             {
@@ -1299,6 +1305,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         {
             SaveSessionSnapshot();
             QueueMemoryForClosedSession();
+            _persistenceScheduler?.Dispose();
         }
 
         private void AddSystemStatusMessage(string content, string title)

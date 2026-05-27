@@ -34,6 +34,7 @@ namespace Skyweaver.Controls.ShellChatSessionControl.ViewModels
         private readonly MemoryService _memoryService;
         private readonly IReadOnlyDictionary<string, string> _agentAvatarPathsById;
         private readonly string _shellContextSnapshotXml;
+        private readonly ChatSessionPersistenceScheduler _persistenceScheduler;
 
         private ChatSessionModel? _sessionModel;
         private CancellationTokenSource? _executionCancellationSource;
@@ -61,6 +62,7 @@ namespace Skyweaver.Controls.ShellChatSessionControl.ViewModels
             _presentationProjector = new ChatSessionPresentationProjector();
             _toolInvocationPresentationService = new ToolInvocationPresentationService();
             _memoryService = new MemoryService();
+            _persistenceScheduler = new ChatSessionPersistenceScheduler(_chatSessionRepository);
             _agentAvatarPathsById = LoadAgentAvatarPathsById();
             _shellContextSnapshotXml = _startupContext.HasContext
                 ? BuildShellContextText(_startupContext)
@@ -518,7 +520,7 @@ namespace Skyweaver.Controls.ShellChatSessionControl.ViewModels
                 preferredBinding.IsBound ? preferredBinding : null);
             session.IsShellSession = true;
             PersistShellContextSnapshot(session);
-            _chatSessionRepository.Save(session);
+            _persistenceScheduler.Flush(session);
             return session;
         }
 
