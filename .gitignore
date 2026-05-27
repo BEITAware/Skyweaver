@@ -381,9 +381,11 @@ bulk_rename.ps1
 cleanup_branding.ps1
 REF/
 .*/
+!.github/
 **/designs-*/
 **/Design*/
 **/.*/
+!**/.github/
 **/*.psd
 **/*.ai
 **/*.sketch

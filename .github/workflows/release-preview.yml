@@ -1,0 +1,129 @@
+name: Build & Release Skyweaver Preview
+
+# 触发条件：推送匹配 sw-preview-* 模式的 Tag
+on:
+  push:
+    tags:
+      - 'sw-preview-*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      # ── 检出代码 ──────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 安装 .NET SDK ────────────────────────────────────────
+      # 项目需要 .NET 9.x（global.json 指定 9.0.201 + rollForward）
+      # 同时需要 .NET Framework 4.8 目标包（用于 InstallationWizard）
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      # ── 添加 MSBuild 到 PATH（用于编译 net48 WPF 安装器）─────
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      # ── 还原 NuGet 依赖 ──────────────────────────────────────
+      - name: Restore dependencies (Skyweaver)
+        run: dotnet restore Skyweaver/Skyweaver.csproj
+
+      - name: Restore dependencies (InstallationWizard)
+        run: |
+          dotnet restore InstallationWizard/InstallationWizard.csproj
+          nuget restore InstallationWizard/InstallationWizard.csproj || true
+
+      # ── 编译 Skyweaver 主程序（Release, ReadyToRun, 非单文件）──
+      - name: Publish Skyweaver
+        run: |
+          dotnet publish Skyweaver/Skyweaver.csproj `
+            --configuration Release `
+            --runtime win-x64 `
+            --self-contained false `
+            --output ./publish/Skyweaver `
+            /p:PublishReadyToRun=true `
+            /p:PublishSingleFile=false
+
+      # ── 编译 InstallationWizard 安装器（net48 WPF）────────────
+      - name: Build InstallationWizard
+        run: |
+          msbuild InstallationWizard/InstallationWizard.csproj `
+            /p:Configuration=Release `
+            /p:RestorePackages=true `
+            /restore
+
+      # ── 组装 Installer 目录结构 ──────────────────────────────
+      # Installer 期望的布局：
+      #   InstallationWizard.exe
+      #   App/
+      #     Skyweaver/
+      #       Skyweaver.exe
+      #       ... (所有发布文件)
+      - name: Assemble installer package
+        run: |
+          $installerOutput = "InstallationWizard/bin/Release/net48"
+          $appPayloadDir = "$installerOutput/App/Skyweaver"
+
+          # 确保 App/Skyweaver 目录存在
+          New-Item -ItemType Directory -Force -Path $appPayloadDir | Out-Null
+
+          # 将 Skyweaver 发布产物复制到 Installer 的 App/Skyweaver/ 下
+          Copy-Item -Path "./publish/Skyweaver/*" -Destination $appPayloadDir -Recurse -Force
+
+          Write-Host "Installer package assembled at: $installerOutput"
+          Write-Host "Payload files:"
+          Get-ChildItem -Path $appPayloadDir -Recurse | Select-Object FullName
+
+      # ── 高强度压缩为 zip ─────────────────────────────────────
+      - name: Compress to zip (maximum compression)
+        run: |
+          $installerOutput = "InstallationWizard/bin/Release/net48"
+          $zipPath = "./Skyweaver-Preview-${{ github.ref_name }}.zip"
+
+          # 使用 7-Zip 进行高强度压缩（-mx=9 为最高压缩率）
+          # GitHub Actions Windows runner 预装了 7-Zip
+          7z a -tzip -mx=9 $zipPath "$installerOutput/*"
+
+          Write-Host "Archive created: $zipPath"
+          Write-Host "Archive size: $((Get-Item $zipPath).Length / 1MB) MB"
+
+      # ── 创建 GitHub Release ──────────────────────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "Skyweaver Preview ${{ github.ref_name }}"
+          body: |
+            编织我们曾有的未来：Skyweaver Preview
+
+            ---
+
+            ## 📦 安装说明
+
+            1. 下载下方的 `.zip` 压缩包
+            2. 解压到任意位置
+            3. 运行 `InstallationWizard.exe` 启动安装向导
+            4. 按照向导指引完成安装与配置
+
+            > ⚠️ **注意**：Skyweaver 目前处于早期预览阶段，不代表最终成果。需要 .NET 8 Desktop Runtime。
+
+            ---
+
+            ## 📦 Installation
+
+            1. Download the `.zip` archive below
+            2. Extract to any location
+            3. Run `InstallationWizard.exe` to launch the setup wizard
+            4. Follow the wizard to complete installation and configuration
+
+            > ⚠️ **Note**: Skyweaver is currently in early preview and does not represent the final product. Requires .NET 8 Desktop Runtime.
+          draft: false
+          prerelease: true
+          files: |
+            ./Skyweaver-Preview-${{ github.ref_name }}.zip
