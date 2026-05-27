@@ -203,5 +203,17 @@
 
     <!-- 注册表右键菜单名 -->
     <system:String x:Key="Shell_Menu_Text">问问Skyweaver...</system:String>
+
+    <!-- 侧向文件系统 LateralFS 子页面 -->
+    <system:String x:Key="LFS_SubStepTitle">侧向文件系统</system:String>
+    <system:String x:Key="LFS_Title">侧向文件系统设置 (LateralFS)</system:String>
+    <system:String x:Key="LFS_SubTitle">启用侧向文件系统可以在不影响宿主性能的情况下提供高性能的数据挂载能力。</system:String>
+    <system:String x:Key="LFS_EnableLabel">启用侧向文件系统 (LateralFS)</system:String>
+    <system:String x:Key="LFS_EnableHint">启用后，安装阶段将在 Windows 上尝试启用 Projected File System (ProjFS) 功能。</system:String>
+    <system:String x:Key="LFS_WorkingDirLabel">LateralFS 工作根目录：</system:String>
+    <system:String x:Key="LFS_Browse">浏览...</system:String>
+    <system:String x:Key="LFS_BrowseDescription">选择 LateralFS 的工作根目录</system:String>
+    <system:String x:Key="Status_ConfigureLFS">配置侧向文件系统 LateralFS</system:String>
+    <system:String x:Key="Progress_EnableProjFS">正在配置 Windows Projected File System (ProjFS)...</system:String>
     
 </ResourceDictionary>

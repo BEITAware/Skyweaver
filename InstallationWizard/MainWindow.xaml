@@ -917,7 +917,74 @@
                             </Grid>
                         </TabItem>
 
-                        <!-- 子步骤 4：系统集成 -->
+                        <!-- 子步骤 4：侧向文件系统 (LateralFS) -->
+                        <TabItem Style="{StaticResource VerticalAeroTabItemStyle}">
+                            <TabItem.Header>
+                                <TextBlock Text="{DynamicResource LFS_SubStepTitle}" FontSize="11.5" Foreground="{StaticResource AeroTextBrush}"/>
+                            </TabItem.Header>
+                            <Grid Margin="45,30,45,30">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                
+                                <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                                    <TextBlock Text="{DynamicResource LFS_Title}" Foreground="White" FontSize="22" FontWeight="Bold"/>
+                                    <TextBlock Text="{DynamicResource LFS_SubTitle}" Foreground="#CCFFFFFF" FontSize="13.5" Margin="0,4,0,0"/>
+                                </StackPanel>
+
+                                <Border Grid.Row="1" BorderBrush="{StaticResource AeroBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="25" VerticalAlignment="Top">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#10FFFFFF" Offset="0"/>
+                                            <GradientStop Color="#03FFFFFF" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <StackPanel>
+                                        <!-- 启用/禁用选项 -->
+                                        <CheckBox x:Name="ChkEnableLFS" 
+                                                  Content="{DynamicResource LFS_EnableLabel}" 
+                                                  IsChecked="{Binding IsLfsEnabled, Mode=TwoWay}" 
+                                                  Foreground="White" 
+                                                  FontSize="13.5" 
+                                                  Margin="0,0,0,8"/>
+                                        
+                                        <TextBlock Text="{DynamicResource LFS_EnableHint}" 
+                                                   Foreground="#A0FFFFFF" 
+                                                   FontSize="11.5" 
+                                                   TextWrapping="Wrap" 
+                                                   Margin="24,0,0,15"/>
+
+                                        <Border Height="1" Background="#20FFFFFF" Margin="0,5,0,15"/>
+
+                                        <!-- 工作根目录设置 -->
+                                        <StackPanel IsEnabled="{Binding IsLfsEnabled}">
+                                            <TextBlock Text="{DynamicResource LFS_WorkingDirLabel}" Foreground="White" FontSize="13.5" Margin="0,0,0,8"/>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="95"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBox x:Name="TxtLfsWorkingDir" 
+                                                         Grid.Column="0" 
+                                                         Text="{Binding LfsWorkingDir, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                         FontSize="13" 
+                                                         Height="28" 
+                                                         VerticalContentAlignment="Center" 
+                                                         Margin="0,0,10,0"/>
+                                                <Button x:Name="BtnBrowseLfs" 
+                                                        Grid.Column="1" 
+                                                        Content="{DynamicResource LFS_Browse}" 
+                                                        Height="28" 
+                                                        Click="BtnBrowseLfs_Click"/>
+                                            </Grid>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </TabItem>
+
+                        <!-- 子步骤 5：系统集成 -->
                         <TabItem Style="{StaticResource VerticalAeroTabItemStyle}">
                             <TabItem.Header>
                                 <TextBlock Text="{DynamicResource Integration_SubStepTitle}" FontSize="11.5" Foreground="{StaticResource AeroTextBrush}"/>
@@ -941,12 +1008,10 @@
                                         </LinearGradientBrush>
                                     </Border.Background>
                                     <StackPanel>
-                                        <!-- 只读系统选项 -->
-                                        <StackPanel Opacity="0.6" Margin="0,0,0,15">
-                                            <CheckBox x:Name="ChkShortcut" Content="{DynamicResource Integration_Shortcut}" IsChecked="True" IsEnabled="False" Foreground="White" FontSize="13.5" Margin="0,0,0,12"/>
-                                            <CheckBox x:Name="ChkStartMenu" Content="{DynamicResource Integration_StartMenu}" IsChecked="True" IsEnabled="False" Foreground="White" FontSize="13.5" Margin="0,0,0,12"/>
-                                            <CheckBox x:Name="ChkStartup" Content="{DynamicResource Integration_Startup}" IsChecked="False" IsEnabled="False" Foreground="White" FontSize="13.5" Margin="0,0,0,12"/>
-                                            <CheckBox x:Name="ChkRegisterService" Content="{DynamicResource Integration_Service}" IsChecked="False" IsEnabled="False" Foreground="White" FontSize="13.5"/>
+                                        <!-- 系统快捷方式选项 -->
+                                        <StackPanel Margin="0,0,0,15">
+                                            <CheckBox x:Name="ChkShortcut" Content="{DynamicResource Integration_Shortcut}" IsChecked="True" Foreground="White" FontSize="13.5" Margin="0,0,0,12"/>
+                                            <CheckBox x:Name="ChkStartMenu" Content="{DynamicResource Integration_StartMenu}" IsChecked="True" Foreground="White" FontSize="13.5"/>
                                         </StackPanel>
                                         
                                         <Border Height="1" Background="#20FFFFFF" Margin="0,5,0,15"/>

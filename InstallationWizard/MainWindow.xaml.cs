@@ -477,6 +477,34 @@ namespace InstallationWizard
             }
         }
 
+        private bool _isLfsEnabled = true;
+        public bool IsLfsEnabled
+        {
+            get => _isLfsEnabled;
+            set
+            {
+                if (_isLfsEnabled != value)
+                {
+                    _isLfsEnabled = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private string _lfsWorkingDir = string.Empty;
+        public string LfsWorkingDir
+        {
+            get => _lfsWorkingDir;
+            set
+            {
+                if (_lfsWorkingDir != value)
+                {
+                    _lfsWorkingDir = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -983,6 +1011,15 @@ To the greatest extent permitted by, but not in contravention of, applicable law
         {
             InitializeComponent();
             this.DataContext = this;
+            
+            string userProfile = Environment.GetEnvironmentVariable("USERPROFILE") 
+                                 ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            if (string.IsNullOrWhiteSpace(userProfile))
+            {
+                userProfile = Environment.GetEnvironmentVariable("HOME") ?? AppContext.BaseDirectory;
+            }
+            LfsWorkingDir = Path.Combine(userProfile, "Skyweaver", "LateralFS");
+
             UpdateLocalizedContent();
             
             // 初始化内置层级
@@ -1075,14 +1112,14 @@ To the greatest extent permitted by, but not in contravention of, applicable law
             if (MainTabControl == null) return;
             if (BtnBack == null || BtnNext == null || BtnCancel == null || TxtFooterStatus == null) return;
             if (_currentStep < 1) _currentStep = 1;
-            if (_currentStep > 10) _currentStep = 10;
+            if (_currentStep > 11) _currentStep = 11;
 
             // 更新 TabControl 选中的 Index
             if (_currentStep <= 3)
             {
                 MainTabControl.SelectedIndex = _currentStep - 1;
             }
-            else if (_currentStep >= 4 && _currentStep <= 8)
+            else if (_currentStep >= 4 && _currentStep <= 9)
             {
                 MainTabControl.SelectedIndex = 3; // Skyweaver tab
                 if (SkyweaverTabControl != null)
@@ -1090,11 +1127,11 @@ To the greatest extent permitted by, but not in contravention of, applicable law
                     SkyweaverTabControl.SelectedIndex = _currentStep - 4;
                 }
             }
-            else if (_currentStep == 9)
+            else if (_currentStep == 10)
             {
                 MainTabControl.SelectedIndex = 4; // 安装进度
             }
-            else if (_currentStep == 10)
+            else if (_currentStep == 11)
             {
                 MainTabControl.SelectedIndex = 5; // 完成
             }
@@ -1189,12 +1226,20 @@ To the greatest extent permitted by, but not in contravention of, applicable law
                 case 8:
                     BtnBack.IsEnabled = true;
                     BtnNext.IsEnabled = true;
+                    BtnNext.Content = TryFindResource("Btn_Next") as string ?? "下一步 >";
+                    BtnCancel.IsEnabled = true;
+                    TxtFooterStatus.Text = TryFindResource("Status_ConfigureLFS") as string ?? "配置侧向文件系统 LateralFS";
+                    break;
+
+                case 9:
+                    BtnBack.IsEnabled = true;
+                    BtnNext.IsEnabled = true;
                     BtnNext.Content = TryFindResource("Btn_Install") as string ?? "安装";
                     BtnCancel.IsEnabled = true;
                     TxtFooterStatus.Text = TryFindResource("Status_SelectIntegration") as string ?? "选择系统集成选项";
                     break;
 
-                case 9:
+                case 10:
                     BtnBack.IsEnabled = false;
                     BtnNext.IsEnabled = false;
                     BtnCancel.IsEnabled = false;
@@ -1206,7 +1251,7 @@ To the greatest extent permitted by, but not in contravention of, applicable law
                     }
                     break;
 
-                case 10:
+                case 11:
                     BtnBack.IsEnabled = false;
                     BtnNext.IsEnabled = true;
                     BtnNext.Content = TryFindResource("Btn_Complete") as string ?? "完成";
@@ -1216,12 +1261,9 @@ To the greatest extent permitted by, but not in contravention of, applicable law
             }
         }
 
-        /// <summary>
-        /// 上一步按钮点击事件
-        /// </summary>
         private void BtnBack_Click(object sender, RoutedEventArgs e)
         {
-            if (_currentStep > 1 && _currentStep != 9)
+            if (_currentStep > 1 && _currentStep != 10)
             {
                 _currentStep--;
                 UpdateStepUI();
@@ -1233,7 +1275,7 @@ To the greatest extent permitted by, but not in contravention of, applicable law
         /// </summary>
         private void BtnNext_Click(object sender, RoutedEventArgs e)
         {
-            if (_currentStep == 10)
+            if (_currentStep == 11)
             {
                 if (ChkLaunch.IsChecked == true)
                 {
@@ -1263,7 +1305,7 @@ To the greatest extent permitted by, but not in contravention of, applicable law
                 }
             }
 
-            if (_currentStep < 10)
+            if (_currentStep < 11)
             {
                 _currentStep++;
                 UpdateStepUI();
@@ -1299,6 +1341,24 @@ To the greatest extent permitted by, but not in contravention of, applicable law
                 {
                     TxtDestPath.Text = dialog.SelectedPath;
                     UpdateDiskSpaceInfo();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 浏览 LateralFS 工作文件夹
+        /// </summary>
+        private void BtnBrowseLfs_Click(object sender, RoutedEventArgs e)
+        {
+            using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
+            {
+                dialog.Description = TryFindResource("LFS_BrowseDescription") as string ?? "选择 LateralFS 的工作根目录";
+                dialog.SelectedPath = LfsWorkingDir;
+                dialog.ShowNewFolderButton = true;
+
+                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    LfsWorkingDir = dialog.SelectedPath;
                 }
             }
         }
@@ -1404,10 +1464,20 @@ To the greatest extent permitted by, but not in contravention of, applicable law
                 var sourcePath = Path.Combine(AppContext.BaseDirectory, "App", "Skyweaver");
                 var createDesktopShortcut = ChkShortcut.IsChecked == true;
                 var createStartMenuShortcut = ChkStartMenu.IsChecked == true;
-                var createStartupShortcut = ChkStartup.IsChecked == true;
+                var createStartupShortcut = false;
                 var enableShellIntegration = ChkShellIntegration.IsChecked == true;
                 var shellMenuText = TryFindResource("Shell_Menu_Text") as string ?? "Ask Skyweaver...";
                 _installedExecutablePath = Path.Combine(destinationPath, "Skyweaver.exe");
+
+                // 获取选中的语言代码
+                string selectedLanguage = "zh-CN";
+                if (ComboLanguage.SelectedItem is System.Windows.Controls.ComboBoxItem item)
+                {
+                    selectedLanguage = item.Tag as string ?? "zh-CN";
+                }
+
+                var enableLfs = IsLfsEnabled;
+                var lfsWorkingDir = LfsWorkingDir;
 
                 await Task.Run(() =>
                 {
@@ -1417,7 +1487,7 @@ To the greatest extent permitted by, but not in contravention of, applicable law
                         ? Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories)
                         : Array.Empty<string>();
 
-                    var totalWork = Math.Max(sourceFiles.Length, 1) + 8;
+                    var totalWork = Math.Max(sourceFiles.Length, 1) + (enableLfs ? 11 : 10);
                     var completedWork = 0;
 
                     ReportInstallStep(++completedWork, totalWork, "Saving language model configuration...");
@@ -1431,6 +1501,22 @@ To the greatest extent permitted by, but not in contravention of, applicable law
 
                     ReportInstallStep(++completedWork, totalWork, "Saving session flow configuration...");
                     Dispatcher.Invoke(SaveSessionFlowConfigs);
+
+                    ReportInstallStep(++completedWork, totalWork, "Saving localization configuration...");
+                    Dispatcher.Invoke(() => SaveLocalizationConfig(selectedLanguage));
+
+                    ReportInstallStep(++completedWork, totalWork, "Saving lateral file system configuration...");
+                    Dispatcher.Invoke(() => SaveLateralFileSystemConfig(enableLfs, lfsWorkingDir));
+
+                    if (enableLfs)
+                    {
+                        string progressMsg = "Configuring Windows Projected File System (ProjFS)...";
+                        Dispatcher.Invoke(() => {
+                            progressMsg = TryFindResource("Progress_EnableProjFS") as string ?? progressMsg;
+                        });
+                        ReportInstallStep(++completedWork, totalWork, progressMsg);
+                        EnableProjFSFeature();
+                    }
 
                     ReportInstallStep(++completedWork, totalWork, "Copying application files...");
                     if (Directory.Exists(sourcePath))
@@ -1453,7 +1539,7 @@ To the greatest extent permitted by, but not in contravention of, applicable law
                 });
 
                 UpdateInstallProgress(100, "Installation complete.");
-                _currentStep = 10;
+                _currentStep = 11;
                 UpdateStepUI();
             }
             catch (Exception ex)
@@ -1584,14 +1670,7 @@ To the greatest extent permitted by, but not in contravention of, applicable law
         {
             try
             {
-                string userProfile = Environment.GetEnvironmentVariable("USERPROFILE") 
-                                     ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                if (string.IsNullOrWhiteSpace(userProfile))
-                {
-                    userProfile = Environment.GetEnvironmentVariable("HOME") ?? AppContext.BaseDirectory;
-                }
-
-                string configDir = Path.Combine(userProfile, "Skyweaver", "Configuration");
+                string configDir = GetTrueConfigurationDirectoryPath();
                 Directory.CreateDirectory(configDir);
                 string filePath = Path.Combine(configDir, "LanguageModel.xml");
 
@@ -1679,14 +1758,7 @@ To the greatest extent permitted by, but not in contravention of, applicable law
         {
             try
             {
-                string userProfile = Environment.GetEnvironmentVariable("USERPROFILE") 
-                                     ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                if (string.IsNullOrWhiteSpace(userProfile))
-                {
-                    userProfile = Environment.GetEnvironmentVariable("HOME") ?? AppContext.BaseDirectory;
-                }
-
-                string configDir = Path.Combine(userProfile, "Skyweaver", "Configuration");
+                string configDir = GetTrueConfigurationDirectoryPath();
                 Directory.CreateDirectory(configDir);
                 string filePath = Path.Combine(configDir, "CapabilityLayer.xml");
 
@@ -1714,14 +1786,7 @@ To the greatest extent permitted by, but not in contravention of, applicable law
         {
             try
             {
-                string userProfile = Environment.GetEnvironmentVariable("USERPROFILE") 
-                                     ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                if (string.IsNullOrWhiteSpace(userProfile))
-                {
-                    userProfile = Environment.GetEnvironmentVariable("HOME") ?? AppContext.BaseDirectory;
-                }
-
-                string configDir = Path.Combine(userProfile, "Skyweaver", "Configuration");
+                string configDir = GetTrueConfigurationDirectoryPath();
                 Directory.CreateDirectory(configDir);
                 string filePath = Path.Combine(configDir, "AgentConfiguration.xml");
 
@@ -1774,15 +1839,7 @@ To the greatest extent permitted by, but not in contravention of, applicable law
         {
             try
             {
-                string userProfile = Environment.GetEnvironmentVariable("USERPROFILE") 
-                                     ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                if (string.IsNullOrWhiteSpace(userProfile))
-                {
-                    userProfile = Environment.GetEnvironmentVariable("HOME") ?? AppContext.BaseDirectory;
-                }
-
-                // 默认会话流目录是 user folder/Skyweaver/Nodegraphs
-                string nodegraphsDir = Path.Combine(userProfile, "Skyweaver", "Nodegraphs");
+                string nodegraphsDir = GetTrueSessionFlowsDirectoryPath();
                 Directory.CreateDirectory(nodegraphsDir);
 
                 foreach (var option in FlowOptions)
@@ -1953,14 +2010,7 @@ To the greatest extent permitted by, but not in contravention of, applicable law
         {
             try
             {
-                string userProfile = Environment.GetEnvironmentVariable("USERPROFILE") 
-                                     ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                if (string.IsNullOrWhiteSpace(userProfile))
-                {
-                    userProfile = Environment.GetEnvironmentVariable("HOME") ?? AppContext.BaseDirectory;
-                }
-
-                string configDir = Path.Combine(userProfile, "Skyweaver", "Configuration");
+                string configDir = GetTrueConfigurationDirectoryPath();
                 Directory.CreateDirectory(configDir);
                 string filePath = Path.Combine(configDir, "ShellIntegration.xml");
 
@@ -2029,6 +2079,165 @@ To the greatest extent permitted by, but not in contravention of, applicable law
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Failed to apply shell integration registry: " + ex.Message);
+            }
+        }
+
+        private string GetTrueConfigurationDirectoryPath()
+        {
+            string userProfile = Environment.GetEnvironmentVariable("USERPROFILE") 
+                                 ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            if (string.IsNullOrWhiteSpace(userProfile))
+            {
+                userProfile = Environment.GetEnvironmentVariable("HOME") ?? AppContext.BaseDirectory;
+            }
+
+            string defaultDir = Path.Combine(userProfile, "Skyweaver", "Configuration");
+            string directoriesXmlPath = Path.Combine(defaultDir, "Directories.xml");
+
+            if (File.Exists(directoriesXmlPath))
+            {
+                try
+                {
+                    var document = System.Xml.Linq.XDocument.Load(directoriesXmlPath);
+                    var root = document.Root;
+                    if (root != null)
+                    {
+                        var configDirEl = root.Element("ConfigurationDirectory");
+                        if (configDirEl != null && !string.IsNullOrWhiteSpace(configDirEl.Value))
+                        {
+                            string rawPath = configDirEl.Value.Trim();
+                            string expandedPath = Environment.ExpandEnvironmentVariables(rawPath);
+                            return Path.GetFullPath(expandedPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Failed to load/parse Directories.xml: " + ex.Message);
+                }
+            }
+
+            return defaultDir;
+        }
+
+        private string GetTrueSessionFlowsDirectoryPath()
+        {
+            string userProfile = Environment.GetEnvironmentVariable("USERPROFILE") 
+                                 ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            if (string.IsNullOrWhiteSpace(userProfile))
+            {
+                userProfile = Environment.GetEnvironmentVariable("HOME") ?? AppContext.BaseDirectory;
+            }
+
+            string defaultDir = Path.Combine(userProfile, "Skyweaver", "Nodegraphs");
+            string defaultConfigDir = Path.Combine(userProfile, "Skyweaver", "Configuration");
+            string directoriesXmlPath = Path.Combine(defaultConfigDir, "Directories.xml");
+
+            if (File.Exists(directoriesXmlPath))
+            {
+                try
+                {
+                    var document = System.Xml.Linq.XDocument.Load(directoriesXmlPath);
+                    var root = document.Root;
+                    if (root != null)
+                    {
+                        var flowsDirEl = root.Element("SessionFlowsDirectory");
+                        if (flowsDirEl != null && !string.IsNullOrWhiteSpace(flowsDirEl.Value))
+                        {
+                            string rawPath = flowsDirEl.Value.Trim();
+                            string expandedPath = Environment.ExpandEnvironmentVariables(rawPath);
+                            return Path.GetFullPath(expandedPath);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Failed to load/parse Directories.xml: " + ex.Message);
+                }
+            }
+
+            return defaultDir;
+        }
+
+        /// <summary>
+        /// 保存选中的语言到 Skyweaver 的 AppData 配置文件中
+        /// </summary>
+        private void SaveLocalizationConfig(string selectedLanguage)
+        {
+            try
+            {
+                string configDir = GetTrueConfigurationDirectoryPath();
+                Directory.CreateDirectory(configDir);
+                string filePath = Path.Combine(configDir, "Localization.xml");
+
+                var doc = new System.Xml.Linq.XDocument(
+                    new System.Xml.Linq.XElement("LocalizationConfiguration",
+                        new System.Xml.Linq.XAttribute("SchemaVersion", 1),
+                        new System.Xml.Linq.XElement("LanguageCode", selectedLanguage)
+                    )
+                );
+                doc.Save(filePath);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Failed to save localization configuration: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// 保存侧向文件系统配置到 Skyweaver 的 AppData 配置文件中
+        /// </summary>
+        private void SaveLateralFileSystemConfig(bool enableLfs, string lfsWorkingDir)
+        {
+            try
+            {
+                string configDir = GetTrueConfigurationDirectoryPath();
+                Directory.CreateDirectory(configDir);
+                string filePath = Path.Combine(configDir, "LateralFileSystem.xml");
+
+                var doc = new System.Xml.Linq.XDocument(
+                    new System.Xml.Linq.XElement("LateralFileSystemConfiguration",
+                        new System.Xml.Linq.XAttribute("SchemaVersion", 1),
+                        new System.Xml.Linq.XElement("IsEnabled", enableLfs),
+                        new System.Xml.Linq.XElement("WorkingRootDirectory", lfsWorkingDir ?? string.Empty)
+                    )
+                );
+                doc.Save(filePath);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Failed to save lateral file system configuration: " + ex.Message);
+            }
+        }
+
+        private void EnableProjFSFeature()
+        {
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "dism.exe",
+                    Arguments = "/online /enable-feature /featurename:Client-ProjFS /norestart /all",
+                    UseShellExecute = true,
+                    Verb = "runas",
+                    WindowStyle = ProcessWindowStyle.Hidden
+                };
+
+                using (var process = Process.Start(psi))
+                {
+                    if (process != null)
+                    {
+                        process.WaitForExit();
+                        if (process.ExitCode != 0)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"dism.exe exited with code {process.ExitCode}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Failed to enable Windows ProjFS feature: " + ex.Message);
             }
         }
 

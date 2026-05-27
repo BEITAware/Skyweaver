@@ -203,5 +203,17 @@ To the greatest extent permitted by, but not in contravention of, applicable law
     
     <!-- Shell integration text -->
     <system:String x:Key="Shell_Menu_Text">Ask Skyweaver...</system:String>
+
+    <!-- Lateral File System sub-page -->
+    <system:String x:Key="LFS_SubStepTitle">LateralFS</system:String>
+    <system:String x:Key="LFS_Title">Lateral File System Settings (LateralFS)</system:String>
+    <system:String x:Key="LFS_SubTitle">Enabling the Lateral File System provides high-performance virtualized file mounts.</system:String>
+    <system:String x:Key="LFS_EnableLabel">Enable Lateral File System (LateralFS)</system:String>
+    <system:String x:Key="LFS_EnableHint">If enabled, setup will attempt to enable the Windows Projected File System (ProjFS) feature.</system:String>
+    <system:String x:Key="LFS_WorkingDirLabel">LateralFS Working Root Directory:</system:String>
+    <system:String x:Key="LFS_Browse">Browse...</system:String>
+    <system:String x:Key="LFS_BrowseDescription">Select the working root directory for LateralFS</system:String>
+    <system:String x:Key="Status_ConfigureLFS">Configuring Lateral File System (LateralFS)</system:String>
+    <system:String x:Key="Progress_EnableProjFS">Configuring Windows Projected File System (ProjFS)...</system:String>
     
 </ResourceDictionary>

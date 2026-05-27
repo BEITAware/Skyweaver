@@ -295,12 +295,11 @@
     </Style>
 
     <Style x:Key="VerticalAeroTabItemStyle" TargetType="{x:Type TabItem}">
-        <Setter Property="MinWidth" Value="90"/>
-        <Setter Property="Height" Value="80"/>
+        <Setter Property="MinWidth" Value="65"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TabItem}">
-                    <Grid x:Name="Root" MinWidth="{TemplateBinding MinWidth}" Height="{TemplateBinding Height}">
+                    <Grid x:Name="Root" Width="{TemplateBinding MinWidth}" Height="80">
                         <Grid.LayoutTransform>
                             <RotateTransform Angle="-90"/>
                         </Grid.LayoutTransform>
@@ -369,7 +368,7 @@
                                                    TextElement.Foreground="{StaticResource AeroTextBrush}"
                                                    TextElement.FontSize="12"
                                                    TextElement.FontWeight="SemiBold"
-                                                   Margin="20,0">
+                                                   Margin="14,0">
                                     <ContentPresenter.LayoutTransform>
                                         <RotateTransform Angle="90"/>
                                     </ContentPresenter.LayoutTransform>
