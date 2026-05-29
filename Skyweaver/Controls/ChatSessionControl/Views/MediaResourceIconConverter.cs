@@ -65,4 +65,62 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             throw new NotImplementedException();
         }
     }
+
+    /// <summary>
+    /// 媒体资源类型文字转换器，根据媒体资源的文件类型和后缀名返回对应的中文描述类型
+    /// </summary>
+    public class MediaResourceMediaTypeConverter : IValueConverter
+    {
+        public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is not ChatMessagePartModel part)
+            {
+                return null;
+            }
+
+            try
+            {
+                if (part.PartType == ChatMessagePartType.Document)
+                {
+                    string? path = part.ResourcePath ?? part.Title;
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        string ext = Path.GetExtension(path).ToLower();
+                        if (ext == ".pdf")
+                        {
+                            return "PDF文档";
+                        }
+                        if (ext == ".doc" || ext == ".docx")
+                        {
+                            return "Microsoft Office Word文档";
+                        }
+                    }
+                    return "文档文件";
+                }
+                else if (part.PartType == ChatMessagePartType.TextAttachment)
+                {
+                    return "文本文件";
+                }
+                else if (part.PartType == ChatMessagePartType.Audio)
+                {
+                    return "音频文件";
+                }
+                else if (part.PartType == ChatMessagePartType.Video)
+                {
+                    return "视频文件";
+                }
+            }
+            catch
+            {
+                // 忽略转换异常
+            }
+
+            return "媒体资源";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

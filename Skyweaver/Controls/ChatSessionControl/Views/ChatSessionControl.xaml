@@ -898,6 +898,7 @@
         </DataTemplate>
 
         <local:MediaResourceIconConverter x:Key="MediaResourceIconConverter"/>
+        <local:MediaResourceMediaTypeConverter x:Key="MediaResourceMediaTypeConverter"/>
 
         <!-- 径向渐变背景，完全复刻自设计稿 -->
         <RadialGradientBrush x:Key="MediaResourceCardBackgroundBrush"
@@ -920,7 +921,7 @@
                              RadiusX="1.18083"
                              RadiusY="0.766856"
                              Center="0.5,0.0499004"
-                             GradientOrigin="0.5,0.0499004">
+                                          GradientOrigin="0.5,0.0499004">
             <GradientStop Color="#66FFFFFF" Offset="0"/>
             <GradientStop Color="#24FFFFFF" Offset="0.247126"/>
             <GradientStop Color="#00FFFFFF" Offset="0.421456"/>
@@ -955,33 +956,22 @@
                     Background="{StaticResource MediaResourceCardBackgroundBrush}"
                     BorderBrush="#6793F2FF"
                     BorderThickness="1"
-                    CornerRadius="8"
-                    Padding="12">
+                    CornerRadius="8">
                 <Grid>
-                    <!-- 水印图 -->
-                    <Image Source="pack://application:,,,/Skyweaver;component/Resources/DocumentCardBackgroundSheen.png"
-                           HorizontalAlignment="Left"
-                           VerticalAlignment="Top"
-                           Opacity="0.2"
-                           Stretch="None"
-                           IsHitTestVisible="False">
-                        <Image.RenderTransform>
-                            <MatrixTransform Matrix="0.478556,-0.138427,0.138427,0.478556,-0.000640869,70.8747"/>
-                        </Image.RenderTransform>
-                    </Image>
-
                     <!-- 顶部微光高光 -->
                     <Border Background="{StaticResource MediaResourceCardTopSheenBrush}"
                             CornerRadius="7"
+                            Margin="1"
                             IsHitTestVisible="False"/>
 
                     <!-- 对角线反射高光 -->
                     <Border Background="{StaticResource MediaResourceCardHighlightBrush}"
                             Opacity="0.95"
                             CornerRadius="7"
+                            Margin="1"
                             IsHitTestVisible="False"/>
 
-                    <Grid Margin="2">
+                    <Grid Margin="14">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="46"/>
                             <ColumnDefinition Width="*"/>
@@ -1020,32 +1010,28 @@
                                 </Grid>
                             </Border>
                         </Grid>
-
+ 
                         <StackPanel Grid.Column="1">
+                            <!-- 媒体类型指示标题 -->
+                            <TextBlock Text="{Binding Converter={StaticResource MediaResourceMediaTypeConverter}}"
+                                       Foreground="#FFF6FEFF"
+                                       FontWeight="SemiBold"
+                                       FontSize="11"
+                                       Margin="0,0,0,2"/>
+
                             <DockPanel LastChildFill="True">
-                                <Border DockPanel.Dock="Right"
-                                        Background="#22000000"
-                                        BorderBrush="#55E7FBFF"
-                                        BorderThickness="1"
-                                        CornerRadius="5"
-                                        Padding="6,2"
-                                        Margin="8,0,0,0">
-                                    <TextBlock Text="{Binding ProgressPhase}"
-                                               Foreground="#FFEAFDFF"
-                                               FontSize="10"
-                                               FontWeight="SemiBold">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
+                                <DockPanel.Style>
+                                    <Style TargetType="DockPanel">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Title}" Value="{x:Null}">
                                                 <Setter Property="Visibility" Value="Collapsed"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding HasProgress}" Value="True">
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </Border>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Title}" Value="">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DockPanel.Style>
                                 <TextBlock Text="{Binding Title}"
                                            Foreground="#FFF6FEFF"
                                            FontWeight="SemiBold"

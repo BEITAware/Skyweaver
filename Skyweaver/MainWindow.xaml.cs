@@ -29,6 +29,15 @@ namespace Skyweaver
                 shellWindow.Owner = this;
                 shellWindow.Show();
             }
+
+            // 按 Ctrl + Shift + A 快捷键直接弹出 语音智能助手球 窗口进行设计演示和测试
+            if (e.Key == System.Windows.Input.Key.A && 
+                (System.Windows.Input.Keyboard.Modifiers & (System.Windows.Input.ModifierKeys.Control | System.Windows.Input.ModifierKeys.Shift)) == (System.Windows.Input.ModifierKeys.Control | System.Windows.Input.ModifierKeys.Shift))
+            {
+                var assistantWindow = new Skyweaver.Windows.AssistantBallWindow();
+                assistantWindow.Owner = this;
+                assistantWindow.Show();
+            }
         }
 
         private void SessionListPanelView_Loaded()

@@ -92,76 +92,107 @@ namespace Skyweaver.Services.Daemon
                     continue;
                 }
 
-                // 检查是否有任何触发器满足条件
-                DateTime? mostRecentDue = null;
+                // 若该计划任务从未执行过（例如新创建，或升级后未曾运行），则在首次加载时将其
+                // 上次运行时间初始化为当前时间，避免立即触发历史遗留时间点。
+                if (task.LastRunTime == null)
+                {
+                    task.LastRunTime = now;
+                    anySaved = true;
+                    continue;
+                }
+
+                DateTime? latestDueOccurrence = null;
+                bool hasAnyTimelyTrigger = false;
+
                 foreach (var trigger in task.Triggers)
                 {
                     DateTime occurrence = GetMostRecentOccurrence(trigger, now);
-                    if (occurrence > (task.LastRunTime ?? DateTime.MinValue))
+                    
+                    // 仅当该触发器在当前周期中应该触发，即 occurrence 晚于 LastRunTime
+                    if (occurrence > task.LastRunTime.Value)
                     {
-                        if (mostRecentDue == null || occurrence > mostRecentDue.Value)
+                        // 判定是否是及时的触发（在 15 分钟的时间窗口内）。
+                        // 这样可以避免关机休眠、重新启动或长久关闭应用后，突然补跑很多历史错过的计划任务。
+                        bool isTimely = (now - occurrence) <= TimeSpan.FromMinutes(15);
+                        
+                        if (isTimely)
                         {
-                            mostRecentDue = occurrence;
+                            hasAnyTimelyTrigger = true;
+                        }
+
+                        if (latestDueOccurrence == null || occurrence > latestDueOccurrence.Value)
+                        {
+                            latestDueOccurrence = occurrence;
                         }
                     }
                 }
 
-                if (mostRecentDue != null)
+                if (latestDueOccurrence != null)
                 {
-                    lock (_gate)
+                    if (hasAnyTimelyTrigger)
                     {
-                        if (_runningTaskIds.Contains(task.Id))
+                        lock (_gate)
                         {
-                            continue;
-                        }
-                        _runningTaskIds.Add(task.Id);
-                    }
-
-                    // 立即更新 LastRunTime 并保存，防止在长任务执行期间被重复触发
-                    task.LastRunTime = mostRecentDue.Value;
-                    anySaved = true;
-
-                    // 在后台执行会话流
-                    _ = Task.Run(async () =>
-                    {
-                        try
-                        {
-                            var binding = new ChatSessionFlowBinding
+                            if (_runningTaskIds.Contains(task.Id))
                             {
-                                FilePath = task.SessionFlowPath,
-                                GraphName = task.SessionFlowName
-                            };
-                            var sessionName = $"{task.Name}_{now:yyyyMMdd_HHmmss}";
-                            var session = _sessionRepository.Create(sessionName, binding);
-                            session.IsScheduledTaskSession = true;
-                            _sessionRepository.Save(session);
-
-                            var request = new ChatSessionRuntimeRequest
-                            {
-                                Session = session,
-                                UserText = task.Prompt,
-                                UserContentBlocks = Array.Empty<LanguageModelChatContentBlock>(),
-                                ToolConfirmationCallback = task.AutoApproveTools
-                                    ? (confirmationRequest, ct) => Task.FromResult(AgentToolConfirmationResult.Approve())
-                                    : null
-                            };
-
-                            await _runtimeService.ExecuteTurnAsync(request, cancellationToken: cancellationToken).ConfigureAwait(false);
-
-                            NotificationService.Instance.ShowTransient(string.Format("计划任务 {0} 已完成！", task.Name));
-                        }
-                        catch (Exception ex)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Failed to run scheduled task: {ex.Message}");
-                        }
-                        finally
-                        {
-                            lock (_gate)
-                            {
-                                _runningTaskIds.Remove(task.Id);
+                                continue;
                             }
+                            _runningTaskIds.Add(task.Id);
                         }
-                    }, cancellationToken);
+
+                        // 立即更新 LastRunTime 并保存，防止在长任务执行期间被重复触发
+                        task.LastRunTime = latestDueOccurrence.Value;
+                        anySaved = true;
+
+                        // 在后台执行会话流
+                        _ = Task.Run(async () =>
+                        {
+                            try
+                            {
+                                var binding = new ChatSessionFlowBinding
+                                {
+                                    FilePath = task.SessionFlowPath,
+                                    GraphName = task.SessionFlowName
+                                };
+                                var sessionName = $"{task.Name}_{now:yyyyMMdd_HHmmss}";
+                                var session = _sessionRepository.Create(sessionName, binding);
+                                session.IsScheduledTaskSession = true;
+                                _sessionRepository.Save(session);
+
+                                var request = new ChatSessionRuntimeRequest
+                                {
+                                    Session = session,
+                                    UserText = task.Prompt,
+                                    UserContentBlocks = Array.Empty<LanguageModelChatContentBlock>(),
+                                    ToolConfirmationCallback = task.AutoApproveTools
+                                        ? (confirmationRequest, ct) => Task.FromResult(AgentToolConfirmationResult.Approve())
+                                        : null
+                                };
+
+                                await _runtimeService.ExecuteTurnAsync(request, cancellationToken: cancellationToken).ConfigureAwait(false);
+
+                                NotificationService.Instance.ShowTransient(string.Format("计划任务 {0} 已完成！", task.Name));
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Failed to run scheduled task: {ex.Message}");
+                            }
+                            finally
+                            {
+                                lock (_gate)
+                                {
+                                    _runningTaskIds.Remove(task.Id);
+                                }
+                            }
+                        }, cancellationToken);
+                    }
+                    else
+                    {
+                        // 触发时间点已经过去很久（多于 15 分钟），这很可能是因为程序未开启时错过的。
+                        // 我们在这里静默更新 LastRunTime，防止下一次再被判定为过期导致多次触发。
+                        task.LastRunTime = latestDueOccurrence.Value;
+                        anySaved = true;
+                    }
                 }
             }
 
