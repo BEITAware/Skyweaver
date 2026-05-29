@@ -21,7 +21,7 @@ using Skyweaver.Windows;
 
 namespace Skyweaver.Controls.ShellChatSessionControl.ViewModels
 {
-    public sealed class ShellChatSessionControlViewModel : ObservableObject
+    public sealed class ShellChatSessionControlViewModel : ObservableObject, IDisposable
     {
         private static readonly TimeSpan StreamingProjectionRefreshInterval = TimeSpan.FromMilliseconds(100);
         private const string ShellIdleAvatarPath = "pack://application:,,,/Resources/SkyweaverAppLogo.png";
@@ -34,6 +34,7 @@ namespace Skyweaver.Controls.ShellChatSessionControl.ViewModels
         private readonly MemoryService _memoryService;
         private readonly IReadOnlyDictionary<string, string> _agentAvatarPathsById;
         private readonly string _shellContextSnapshotXml;
+        private readonly ChatSessionPersistenceScheduler _persistenceScheduler;
 
         private ChatSessionModel? _sessionModel;
         private CancellationTokenSource? _executionCancellationSource;
@@ -61,6 +62,7 @@ namespace Skyweaver.Controls.ShellChatSessionControl.ViewModels
             _presentationProjector = new ChatSessionPresentationProjector();
             _toolInvocationPresentationService = new ToolInvocationPresentationService();
             _memoryService = new MemoryService();
+            _persistenceScheduler = new ChatSessionPersistenceScheduler(_chatSessionRepository);
             _agentAvatarPathsById = LoadAgentAvatarPathsById();
             _shellContextSnapshotXml = _startupContext.HasContext
                 ? BuildShellContextText(_startupContext)
@@ -518,7 +520,7 @@ namespace Skyweaver.Controls.ShellChatSessionControl.ViewModels
                 preferredBinding.IsBound ? preferredBinding : null);
             session.IsShellSession = true;
             PersistShellContextSnapshot(session);
-            _chatSessionRepository.Save(session);
+            _persistenceScheduler.Flush(session);
             return session;
         }
 
@@ -960,6 +962,13 @@ namespace Skyweaver.Controls.ShellChatSessionControl.ViewModels
         private static string LF(string resourceKey, string fallbackFormat, params object?[] args)
         {
             return string.Format(L(resourceKey, fallbackFormat), args);
+        }
+
+        public void Dispose()
+        {
+            _executionCancellationSource?.Dispose();
+            _persistenceScheduler.Dispose();
+            _runtimeService.Dispose();
         }
     }
 }

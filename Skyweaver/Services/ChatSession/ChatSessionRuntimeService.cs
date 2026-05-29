@@ -11,7 +11,7 @@ using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Services.ChatSession
 {
-    public sealed class ChatSessionRuntimeService
+    public sealed class ChatSessionRuntimeService : IDisposable
     {
         private static readonly ConcurrentDictionary<string, CancellationTokenSource> s_activeExecutions =
             new(StringComparer.OrdinalIgnoreCase);
@@ -22,6 +22,7 @@ namespace Skyweaver.Services.ChatSession
         private readonly SessionFlowExecutionService _executionService;
         private readonly ChatSessionTranscriptWriter _transcriptWriter;
         private readonly ChatSessionRepository _sessionRepository;
+        private readonly ChatSessionPersistenceScheduler _persistenceScheduler;
         private readonly SemaphoreSlim _executionGate = new(1, 1);
 
         private CancellationTokenSource? _activeExecutionCancellationSource;
@@ -68,6 +69,7 @@ namespace Skyweaver.Services.ChatSession
             _executionService = executionService ?? throw new ArgumentNullException(nameof(executionService));
             _transcriptWriter = transcriptWriter ?? throw new ArgumentNullException(nameof(transcriptWriter));
             _sessionRepository = sessionRepository ?? throw new ArgumentNullException(nameof(sessionRepository));
+            _persistenceScheduler = new ChatSessionPersistenceScheduler(_sessionRepository);
         }
 
         public bool IsExecutionActive => _isExecutionActive;
@@ -321,7 +323,7 @@ namespace Skyweaver.Services.ChatSession
             {
                 if (hasRegisteredExecution)
                 {
-                    PersistSession(request.Session);
+                    _persistenceScheduler.Flush(request.Session);
                 }
 
                 if (hasRegisteredExecution)
@@ -352,12 +354,18 @@ namespace Skyweaver.Services.ChatSession
         {
             try
             {
-                _sessionRepository.Save(session);
+                _persistenceScheduler.ScheduleSave(session);
             }
             catch
             {
                 // Runtime persistence must not mask the original agent failure path.
             }
+        }
+
+        public void Dispose()
+        {
+            _persistenceScheduler.Dispose();
+            _executionGate.Dispose();
         }
 
         private static bool ShouldPersistAfter(ChatSessionRuntimeEvent runtimeEvent)
