@@ -143,7 +143,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
             switch (part.PartType)
             {
                 case ChatMessagePartType.Text:
-                    builder.Append(ConvertMarkdownToPlainText(part.Content));
+                    builder.Append(ConvertMarkdownToPlainText(part.Content, part.IsUserMessage));
                     break;
 
                 case ChatMessagePartType.Image:
@@ -283,7 +283,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
                 : "text";
         }
 
-        private static string ConvertMarkdownToPlainText(string markdown)
+        private static string ConvertMarkdownToPlainText(string markdown, bool isUserMessage = false)
         {
             if (string.IsNullOrWhiteSpace(markdown))
             {
@@ -291,7 +291,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Services
             }
 
             var builder = new StringBuilder();
-            foreach (var block in MarkdownDocumentParser.Parse(markdown))
+            foreach (var block in MarkdownDocumentParser.Parse(markdown, isUserMessage: isUserMessage))
             {
                 if (builder.Length > 0)
                 {

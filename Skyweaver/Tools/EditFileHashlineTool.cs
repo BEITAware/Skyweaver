@@ -1,6 +1,11 @@
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -13,15 +18,19 @@ using Skyweaver.Services.SkyweaverTools;
 
 namespace Skyweaver.Tools
 {
-    public sealed class EditFileSearchReplaceTool :
+    /// <summary>
+    /// 利用 Hashline 上下文哈希进行文件局部编辑的工具。
+    /// 默认采用 LateralFS Only 安全限制，支持在设置面板中切换权限范围。
+    /// </summary>
+    public sealed class EditFileHashlineTool :
         ISkyweaverTool,
         ISkyweaverToolConfigurationProvider,
         ISkyweaverToolInvocationPresentationProvider,
         ISkyweaverToolPromptDescriptionProvider
     {
-        public const string ToolName = "EditFile_SearchReplace";
+        public const string ToolName = "EditFileHashline";
 
-        private static readonly SkyweaverToolDefinition s_definition = BuildDefinition(new EditFileSearchReplaceToolSettings());
+        private static readonly SkyweaverToolDefinition s_definition = BuildDefinition(new EditFileHashlineToolSettings());
 
         private static readonly UTF8Encoding s_utf8WithoutBomStrict = new(false, true);
         private static readonly UnicodeEncoding s_utf16LittleEndianStrict = new(false, false, true);
@@ -39,29 +48,29 @@ namespace Skyweaver.Tools
 
         public SkyweaverToolDefinition GetEffectiveDefinition(SkyweaverToolConfigurationState configuration)
         {
-            return BuildDefinition(EditFileSearchReplaceToolSettings.FromConfiguration(configuration));
+            return BuildDefinition(EditFileHashlineToolSettings.FromConfiguration(configuration));
         }
 
         public SkyweaverToolConfigurationPresenter? CreateConfigurationPresenter(SkyweaverToolConfigurationEditorContext context)
         {
-            return new EditFileSearchReplaceToolConfigurationPresenter(context);
+            return new EditFileHashlineToolConfigurationPresenter(context);
         }
 
         public string GetPromptDescription(SkyweaverToolPromptDescriptionContext context)
         {
-            return BuildDescription(EditFileSearchReplaceToolSettings.FromConfiguration(context.ConfigurationState));
+            return BuildDescription(EditFileHashlineToolSettings.FromConfiguration(context.ConfigurationState));
         }
 
         public FrameworkElement? CreateInvocationPresentation(SkyweaverToolInvocationPresentationContext context)
         {
             ArgumentNullException.ThrowIfNull(context);
-
             return ToolInvocationCardFactory.Create(
                 context,
                 [
-                    new ToolInvocationCardFieldDefinition("File", "FilePath", "Waiting for file path..."),
-                    new ToolInvocationCardFieldDefinition("Search", "Search", "Waiting for search text..."),
-                    new ToolInvocationCardFieldDefinition("Replace", "Replace", "Empty means delete matches"),
+                    new ToolInvocationCardFieldDefinition("File path", "FilePath", "Waiting for file path..."),
+                    new ToolInvocationCardFieldDefinition("Start line hash", "StartLineHash", "Waiting for start line hash..."),
+                    new ToolInvocationCardFieldDefinition("End line hash", "EndLineHash", "Waiting for end line hash..."),
+                    new ToolInvocationCardFieldDefinition("Replace content", "ReplaceContent", "Waiting for replacement content..."),
                     new ToolInvocationCardFieldDefinition("Encoding", "Encoding", "Default utf-8 with safe auto-detection")
                 ]);
         }
@@ -73,57 +82,133 @@ namespace Skyweaver.Tools
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var settings = EditFileSearchReplaceToolSettings.FromConfiguration(context.CurrentToolConfiguration);
+            var settings = EditFileHashlineToolSettings.FromConfiguration(context.CurrentToolConfiguration);
             var requestedPath = arguments.GetString("FilePath") ?? string.Empty;
-            var search = arguments.GetString("Search") ?? string.Empty;
-            var replace = arguments.GetString("Replace") ?? string.Empty;
+            var startLineHash = (arguments.GetString("StartLineHash") ?? string.Empty).Trim().ToLowerInvariant();
+            var endLineHash = (arguments.GetString("EndLineHash") ?? string.Empty).Trim().ToLowerInvariant();
+            var replaceContent = arguments.GetString("ReplaceContent") ?? string.Empty;
             WriteTargetPath? targetPath = null;
 
             try
             {
-                if (search.Length == 0)
+                if (string.IsNullOrEmpty(startLineHash))
                 {
-                    return SkyweaverToolResult.Failure("Search string cannot be empty.");
+                    return SkyweaverToolResult.Failure("Start line hash cannot be empty.");
+                }
+                if (string.IsNullOrEmpty(endLineHash))
+                {
+                    return SkyweaverToolResult.Failure("End line hash cannot be empty.");
                 }
 
-                targetPath = ResolveWriteTargetPath(requestedPath, context.WorkspacePath, settings.PermissionScope);
+                targetPath = ResolveWriteTargetPath(requestedPath, context.WorkspacePath);
+
+                // 检验权限范围限制
+                if (settings.PermissionScope == EditFileHashlinePermissionScope.LateralFileSystemOnly &&
+                    targetPath.LateralNodeName == null)
+                {
+                    return SkyweaverToolResult.Failure(
+                        "This tool is configured as LateralFileSystemOnly. FilePath must resolve inside a LateralFS virtual folder. Prefer LateralFS\\NodeName\\relative\\file.ext.",
+                        BuildData(targetPath, settings, null, null, null, didWrite: false));
+                }
 
                 if (Directory.Exists(targetPath.ResolvedPath))
                 {
                     return SkyweaverToolResult.Failure(
                         $"Path points to a directory, not a file: {targetPath.ResolvedPath}",
-                        BuildData(targetPath, settings, null, null, null, null, null, didWrite: false));
+                        BuildData(targetPath, settings, null, null, null, didWrite: false));
                 }
 
                 if (!File.Exists(targetPath.ResolvedPath))
                 {
                     return SkyweaverToolResult.Failure(
                         $"File not found: {targetPath.ResolvedPath}",
-                        BuildData(targetPath, settings, null, null, null, null, null, didWrite: false));
+                        BuildData(targetPath, settings, null, null, null, didWrite: false));
                 }
 
                 var originalBytes = await File.ReadAllBytesAsync(targetPath.ResolvedPath, cancellationToken).ConfigureAwait(false);
                 var encodingDecision = ResolveEncodingDecision(originalBytes, GetExplicitEncodingName(arguments));
                 var originalContent = DecodeContent(originalBytes, encodingDecision);
-                var occurrenceCount = CountOccurrences(originalContent, search);
 
-                if (occurrenceCount == 0)
+                // 解析文件并计算行哈希
+                var originalLines = HashlineHelper.ParseFileLines(originalContent);
+                HashlineHelper.CalculateHashes(originalLines);
+
+                // 寻找起始与终止哈希行
+                var startMatches = originalLines
+                    .Select((line, index) => new { line, index })
+                    .Where(x => string.Equals(x.line.Hash, startLineHash, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                var endMatches = originalLines
+                    .Select((line, index) => new { line, index })
+                    .Where(x => string.Equals(x.line.Hash, endLineHash, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                if (startMatches.Count == 0)
                 {
                     return SkyweaverToolResult.Failure(
-                        "Search string was not found. File was not changed.",
-                        BuildData(targetPath, settings, encodingDecision, originalBytes.LongLength, originalContent.Length, 0, 0, didWrite: false));
+                        $"Start line hash '{startLineHash}' was not found in the file.",
+                        BuildData(targetPath, settings, encodingDecision, originalBytes.LongLength, null, didWrite: false));
+                }
+                if (startMatches.Count > 1)
+                {
+                    return SkyweaverToolResult.Failure(
+                        $"Multiple lines matched the start line hash '{startLineHash}'. Aborting for safety.",
+                        BuildData(targetPath, settings, encodingDecision, originalBytes.LongLength, null, didWrite: false));
                 }
 
-                var updatedContent = originalContent.Replace(search, replace, StringComparison.Ordinal);
+                if (endMatches.Count == 0)
+                {
+                    return SkyweaverToolResult.Failure(
+                        $"End line hash '{endLineHash}' was not found in the file.",
+                        BuildData(targetPath, settings, encodingDecision, originalBytes.LongLength, null, didWrite: false));
+                }
+                if (endMatches.Count > 1)
+                {
+                    return SkyweaverToolResult.Failure(
+                        $"Multiple lines matched the end line hash '{endLineHash}'. Aborting for safety.",
+                        BuildData(targetPath, settings, encodingDecision, originalBytes.LongLength, null, didWrite: false));
+                }
+
+                int startIndex = startMatches[0].index;
+                int endIndex = endMatches[0].index;
+
+                if (startIndex > endIndex)
+                {
+                    return SkyweaverToolResult.Failure(
+                        $"Start line hash '{startLineHash}' (line {startIndex + 1}) occurs after end line hash '{endLineHash}' (line {endIndex + 1}) in the file.",
+                        BuildData(targetPath, settings, encodingDecision, originalBytes.LongLength, null, didWrite: false));
+                }
+
+                // 进行替换
+                var replacementLines = HashlineHelper.ParseFileLines(replaceContent);
+                if (replacementLines.Count > 0)
+                {
+                    var lastReplacementLine = replacementLines[^1];
+                    if (string.IsNullOrEmpty(lastReplacementLine.LineBreak))
+                    {
+                        lastReplacementLine.LineBreak = originalLines[endIndex].LineBreak;
+                    }
+                }
+
+                var newLines = new List<HashlineHelper.FileLine>();
+                newLines.AddRange(originalLines.Take(startIndex));
+                newLines.AddRange(replacementLines);
+                newLines.AddRange(originalLines.Skip(endIndex + 1));
+
+                string updatedContent = string.Concat(newLines.Select(l => l.Text + l.LineBreak));
+
                 if (string.Equals(updatedContent, originalContent, StringComparison.Ordinal))
                 {
                     return SkyweaverToolResult.Success(
-                        "Search string was found, but replacement text is identical. File was not changed.",
-                        BuildData(targetPath, settings, encodingDecision, originalBytes.LongLength, originalContent.Length, occurrenceCount, originalBytes.LongLength, didWrite: false));
+                        "Replacement content is identical to the selected block. File was not changed.",
+                        BuildData(targetPath, settings, encodingDecision, originalBytes.LongLength, originalBytes.LongLength, didWrite: false));
                 }
 
                 var updatedBytes = EncodeContent(updatedContent, encodingDecision);
                 await File.WriteAllBytesAsync(targetPath.ResolvedPath, updatedBytes, cancellationToken).ConfigureAwait(false);
+
+                // 刷新 RAG 索引
                 var ragSync = await AerialCityRagToolSync.RefreshFileAsync(
                     targetPath.ResolvedPath,
                     context.WorkspacePath,
@@ -132,7 +217,7 @@ namespace Skyweaver.Tools
                 return SkyweaverToolResult.Success(
                     SkyweaverLineDiffPresentation.BuildContent(originalContent, updatedContent),
                     AerialCityRagToolSync.WithSyncData(
-                        BuildData(targetPath, settings, encodingDecision, originalBytes.LongLength, originalContent.Length, occurrenceCount, updatedBytes.LongLength, didWrite: true),
+                        BuildData(targetPath, settings, encodingDecision, originalBytes.LongLength, updatedBytes.LongLength, didWrite: true),
                         ragSync),
                     SkyweaverToolResultPresentationHints.CreateLineDiff());
             }
@@ -143,12 +228,12 @@ namespace Skyweaver.Tools
             catch (Exception ex) when (IsExpectedException(ex))
             {
                 return SkyweaverToolResult.Failure(
-                    $"Failed to search and replace file content: {ex.Message}",
-                    BuildData(targetPath, settings, null, null, null, null, null, didWrite: false));
+                    $"Failed to edit file using Hashline: {ex.Message}",
+                    BuildData(targetPath, settings, null, null, null, didWrite: false));
             }
         }
 
-        private static SkyweaverToolDefinition BuildDefinition(EditFileSearchReplaceToolSettings settings)
+        private static SkyweaverToolDefinition BuildDefinition(EditFileHashlineToolSettings settings)
         {
             return new SkyweaverToolDefinition(
                 ToolName,
@@ -157,45 +242,54 @@ namespace Skyweaver.Tools
                 [
                     new SkyweaverToolParameterDefinition(
                         "FilePath",
-                        "Full file path and name. You may also use LateralFS\\NodeName\\relative\\file.ext; the host resolves that shortcut to the node virtual folder and blocks path traversal outside the node.",
+                        "Path of the text file to edit.",
                         SkyweaverToolParameterType.String,
                         isRequired: true),
                     new SkyweaverToolParameterDefinition(
-                        "Search",
-                        "Exact text to find. Matching is ordinal and case-sensitive.",
+                        "StartLineHash",
+                        "The 4-character hash of the starting line of the block to replace.",
                         SkyweaverToolParameterType.String,
                         isRequired: true),
                     new SkyweaverToolParameterDefinition(
-                        "Replace",
-                        "Replacement text. Omit or leave empty to delete every Search match.",
+                        "EndLineHash",
+                        "The 4-character hash of the ending line of the block to replace.",
                         SkyweaverToolParameterType.String,
-                        isRequired: false),
+                        isRequired: true),
+                    new SkyweaverToolParameterDefinition(
+                        "ReplaceContent",
+                        "The new content to replace the target block (inclusive).",
+                        SkyweaverToolParameterType.String,
+                        isRequired: true),
                     new SkyweaverToolParameterDefinition(
                         "Encoding",
-                        "Optional text encoding name. Default is utf-8. When utf-8 is requested, the tool safely auto-detects UTF BOMs plus strong UTF-16/UTF-32 zero-byte patterns. If bytes are not valid UTF-8 and cannot be identified, pass the correct encoding explicitly.",
+                        "Optional text encoding name. Default is utf-8.",
                         SkyweaverToolParameterType.String,
                         isRequired: false,
                         defaultValue: "utf-8")
                 ],
-                defaultToolKitKeys: ["LegacyEditFile"]);
+                defaultAgentPermission: SkyweaverToolDefaultAgentPermission.RequireConfirmation);
         }
 
-        private static string BuildDescription(EditFileSearchReplaceToolSettings settings)
+        private static string BuildDescription(EditFileHashlineToolSettings settings)
         {
-            var permissionText = settings.PermissionScope == EditFileSearchReplacePermissionScope.FullAccess
-                ? "Permission: FullAccess, so the tool may write any file path that the process account can access."
-                : "Permission: LateralFileSystemOnly, so the tool may write only inside LateralFS virtual folders.";
+            var permissionText = settings.PermissionScope == EditFileHashlinePermissionScope.LateralFileSystemOnly
+                ? "Permission: LateralFileSystemOnly, so the tool may write only inside LateralFS virtual folders."
+                : "Permission: FullAccess, so the tool may write any file path that the Skyweaver process account can access.";
 
-            return "Replace exact text in a file and write the result back with encoding safety. " +
-                "The FilePath can be a normal path, or a LateralFS shortcut in the form LateralFS\\NodeName\\relative\\file.ext. " +
-                "The shortcut is resolved to that node's actual virtual folder before writing, and '..' traversal outside the node is rejected. " +
+            return "Edits a file by replacing a block of text defined by start and end line hashes (inclusive) with the ReplaceContent. " +
+                "FilePath may be a normal path, or a LateralFS shortcut in the form LateralFS\\NodeName\\relative\\file.ext. " +
                 permissionText;
         }
 
-        private static WriteTargetPath ResolveWriteTargetPath(
-            string requestedPath,
-            string? workspacePath,
-            EditFileSearchReplacePermissionScope permissionScope)
+        private static string? GetExplicitEncodingName(SkyweaverToolArguments arguments)
+        {
+            return arguments.RawArguments.TryGetValue("Encoding", out var rawEncoding) &&
+                !string.IsNullOrWhiteSpace(rawEncoding)
+                ? rawEncoding.Trim()
+                : null;
+        }
+
+        private static WriteTargetPath ResolveWriteTargetPath(string requestedPath, string? workspacePath)
         {
             ToolFileSystemHelper.LateralFileSystemPathResolution? lateralResolution = null;
             string resolvedPath;
@@ -214,13 +308,6 @@ namespace Skyweaver.Tools
                 }
             }
 
-            if (permissionScope == EditFileSearchReplacePermissionScope.LateralFileSystemOnly &&
-                lateralResolution == null)
-            {
-                throw new InvalidOperationException(
-                    "This tool is configured as LateralFileSystemOnly. FilePath must resolve inside a LateralFS virtual folder. Prefer LateralFS\\NodeName\\relative\\file.ext.");
-            }
-
             return new WriteTargetPath(
                 resolvedPath,
                 lateralResolution?.NodeName,
@@ -228,79 +315,6 @@ namespace Skyweaver.Tools
                 lateralResolution?.NodeVirtualRootPath,
                 lateralResolution?.RelativePath,
                 lateralResolution?.UsedShortcut ?? false);
-        }
-
-        private static string BuildSuccessContent(
-            WriteTargetPath targetPath,
-            EditFileSearchReplaceToolSettings settings,
-            EncodingDecision encodingDecision,
-            int occurrenceCount,
-            long bytesBefore,
-            long bytesAfter)
-        {
-            var builder = new StringBuilder(512);
-            builder.AppendLine($"Path: {targetPath.ResolvedPath}");
-            builder.AppendLine($"PermissionScope: {settings.PermissionScope}");
-            if (!string.IsNullOrWhiteSpace(targetPath.LateralNodeName))
-            {
-                builder.AppendLine($"LateralFSNode: {targetPath.LateralNodeName}");
-                builder.AppendLine($"LateralFSRelativePath: {targetPath.LateralRelativePath}");
-                builder.AppendLine($"UsedLateralFSShortcut: {targetPath.UsedLateralShortcut}");
-            }
-
-            builder.AppendLine($"RequestedEncoding: {encodingDecision.RequestedEncodingDisplayName}");
-            builder.AppendLine($"Encoding: {encodingDecision.EffectiveEncodingName}");
-            if (encodingDecision.IsAutoDetected)
-            {
-                builder.AppendLine($"DetectedEncoding: {encodingDecision.DetectedEncodingName}");
-                builder.AppendLine($"DetectedEncodingReason: {encodingDecision.DetectionReason}");
-            }
-
-            builder.AppendLine($"OccurrencesReplaced: {occurrenceCount}");
-            builder.AppendLine($"BytesBefore: {bytesBefore}");
-            builder.AppendLine($"BytesAfter: {bytesAfter}");
-            return builder.ToString().TrimEnd();
-        }
-
-        private static IReadOnlyDictionary<string, object?> BuildData(
-            WriteTargetPath? targetPath,
-            EditFileSearchReplaceToolSettings settings,
-            EncodingDecision? encodingDecision,
-            long? bytesBefore,
-            int? charactersBefore,
-            int? occurrencesReplaced,
-            long? bytesAfter,
-            bool didWrite)
-        {
-            return new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase)
-            {
-                ["resolvedPath"] = targetPath?.ResolvedPath,
-                ["permissionScope"] = settings.PermissionScope.ToString(),
-                ["lateralNodeName"] = targetPath?.LateralNodeName,
-                ["lateralNodeId"] = targetPath?.LateralNodeId,
-                ["lateralNodeVirtualRootPath"] = targetPath?.LateralNodeVirtualRootPath,
-                ["lateralRelativePath"] = targetPath?.LateralRelativePath,
-                ["usedLateralShortcut"] = targetPath?.UsedLateralShortcut,
-                ["requestedEncoding"] = encodingDecision?.RequestedEncodingName,
-                ["requestedEncodingWasDefault"] = encodingDecision?.RequestedEncodingWasDefault,
-                ["encoding"] = encodingDecision?.EffectiveEncodingName,
-                ["encodingAutoDetected"] = encodingDecision?.IsAutoDetected,
-                ["detectedEncoding"] = encodingDecision?.DetectedEncodingName,
-                ["detectedEncodingReason"] = encodingDecision?.DetectionReason,
-                ["bytesBefore"] = bytesBefore,
-                ["charactersBefore"] = charactersBefore,
-                ["occurrencesReplaced"] = occurrencesReplaced,
-                ["bytesAfter"] = bytesAfter,
-                ["didWrite"] = didWrite
-            };
-        }
-
-        private static string? GetExplicitEncodingName(SkyweaverToolArguments arguments)
-        {
-            return arguments.RawArguments.TryGetValue("Encoding", out var rawEncoding) &&
-                !string.IsNullOrWhiteSpace(rawEncoding)
-                ? rawEncoding.Trim()
-                : null;
         }
 
         private static EncodingDecision ResolveEncodingDecision(byte[] fileBytes, string? explicitEncodingName)
@@ -637,30 +651,6 @@ namespace Skyweaver.Tools
             return bytes;
         }
 
-        private static int CountOccurrences(string text, string search)
-        {
-            if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(search))
-            {
-                return 0;
-            }
-
-            var count = 0;
-            var index = 0;
-            while (index < text.Length)
-            {
-                var foundIndex = text.IndexOf(search, index, StringComparison.Ordinal);
-                if (foundIndex < 0)
-                {
-                    break;
-                }
-
-                count++;
-                index = foundIndex + search.Length;
-            }
-
-            return count;
-        }
-
         private static bool HasPrefix(byte[] fileBytes, byte[] prefix)
         {
             if (fileBytes.Length < prefix.Length)
@@ -690,6 +680,35 @@ namespace Skyweaver.Tools
                 or EncoderFallbackException;
         }
 
+        private static IReadOnlyDictionary<string, object?> BuildData(
+            WriteTargetPath? targetPath,
+            EditFileHashlineToolSettings settings,
+            EncodingDecision? encodingDecision,
+            long? bytesBefore,
+            long? bytesAfter,
+            bool didWrite)
+        {
+            return new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["resolvedPath"] = targetPath?.ResolvedPath,
+                ["permissionScope"] = settings.PermissionScope.ToString(),
+                ["lateralNodeName"] = targetPath?.LateralNodeName,
+                ["lateralNodeId"] = targetPath?.LateralNodeId,
+                ["lateralNodeVirtualRootPath"] = targetPath?.LateralNodeVirtualRootPath,
+                ["lateralRelativePath"] = targetPath?.LateralRelativePath,
+                ["usedLateralShortcut"] = targetPath?.UsedLateralShortcut,
+                ["requestedEncoding"] = encodingDecision?.RequestedEncodingName,
+                ["requestedEncodingWasDefault"] = encodingDecision?.RequestedEncodingWasDefault,
+                ["encoding"] = encodingDecision?.Encoding.WebName,
+                ["encodingAutoDetected"] = encodingDecision?.IsAutoDetected,
+                ["detectedEncoding"] = encodingDecision?.DetectedEncodingName,
+                ["detectedEncodingReason"] = encodingDecision?.DetectionReason,
+                ["bytesBefore"] = bytesBefore,
+                ["bytesAfter"] = bytesAfter,
+                ["didWrite"] = didWrite
+            };
+        }
+
         private sealed record WriteTargetPath(
             string ResolvedPath,
             string? LateralNodeName,
@@ -714,18 +733,18 @@ namespace Skyweaver.Tools
         }
     }
 
-    internal enum EditFileSearchReplacePermissionScope
+    internal enum EditFileHashlinePermissionScope
     {
         LateralFileSystemOnly,
         FullAccess
     }
 
-    internal sealed class EditFileSearchReplaceToolSettings
+    internal sealed class EditFileHashlineToolSettings
     {
-        private const string RootElementName = "EditFileSearchReplaceSettings";
+        private const string RootElementName = "EditFileHashlineSettings";
 
-        public EditFileSearchReplacePermissionScope PermissionScope { get; set; } =
-            EditFileSearchReplacePermissionScope.LateralFileSystemOnly;
+        public EditFileHashlinePermissionScope PermissionScope { get; set; } =
+            EditFileHashlinePermissionScope.LateralFileSystemOnly;
 
         public XElement ToXElement()
         {
@@ -734,12 +753,12 @@ namespace Skyweaver.Tools
                 new XElement("PermissionScope", PermissionScope.ToString()));
         }
 
-        public static EditFileSearchReplaceToolSettings FromConfiguration(SkyweaverToolConfigurationState? configuration)
+        public static EditFileHashlineToolSettings FromConfiguration(SkyweaverToolConfigurationState? configuration)
         {
             var payload = configuration?.GetPayload();
             if (payload == null)
             {
-                return new EditFileSearchReplaceToolSettings();
+                return new EditFileHashlineToolSettings();
             }
 
             var root = string.Equals(payload.Name.LocalName, RootElementName, StringComparison.OrdinalIgnoreCase)
@@ -748,38 +767,38 @@ namespace Skyweaver.Tools
 
             if (root == null)
             {
-                return new EditFileSearchReplaceToolSettings();
+                return new EditFileHashlineToolSettings();
             }
 
-            return new EditFileSearchReplaceToolSettings
+            return new EditFileHashlineToolSettings
             {
                 PermissionScope = ParsePermissionScope((string?)root.Element("PermissionScope"))
             };
         }
 
-        public static EditFileSearchReplacePermissionScope ParsePermissionScope(string? value)
+        public static EditFileHashlinePermissionScope ParsePermissionScope(string? value)
         {
             var normalized = (value ?? string.Empty).Trim();
             if (normalized.Length == 0)
             {
-                return EditFileSearchReplacePermissionScope.LateralFileSystemOnly;
+                return EditFileHashlinePermissionScope.LateralFileSystemOnly;
             }
 
             if (string.Equals(normalized, "FullAccess", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(normalized, "FullAuthorization", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(normalized, "Full", StringComparison.OrdinalIgnoreCase))
             {
-                return EditFileSearchReplacePermissionScope.FullAccess;
+                return EditFileHashlinePermissionScope.FullAccess;
             }
 
-            return EditFileSearchReplacePermissionScope.LateralFileSystemOnly;
+            return EditFileHashlinePermissionScope.LateralFileSystemOnly;
         }
     }
 
-    internal sealed class EditFileSearchReplacePermissionOption
+    internal sealed class EditFileHashlinePermissionOption
     {
-        public EditFileSearchReplacePermissionOption(
-            EditFileSearchReplacePermissionScope scope,
+        public EditFileHashlinePermissionOption(
+            EditFileHashlinePermissionScope scope,
             string displayName,
             string description)
         {
@@ -788,31 +807,31 @@ namespace Skyweaver.Tools
             Description = description;
         }
 
-        public EditFileSearchReplacePermissionScope Scope { get; }
+        public EditFileHashlinePermissionScope Scope { get; }
 
         public string DisplayName { get; }
 
         public string Description { get; }
     }
 
-    internal sealed class EditFileSearchReplaceToolConfigurationViewModel : ObservableObject
+    internal sealed class EditFileHashlineToolConfigurationViewModel : ObservableObject
     {
         private readonly Action _notifyConfigurationChanged;
-        private EditFileSearchReplacePermissionOption? _selectedPermission;
+        private EditFileHashlinePermissionOption? _selectedPermission;
 
-        public EditFileSearchReplaceToolConfigurationViewModel(
-            EditFileSearchReplaceToolSettings settings,
+        public EditFileHashlineToolConfigurationViewModel(
+            EditFileHashlineToolSettings settings,
             Action notifyConfigurationChanged)
         {
             _notifyConfigurationChanged = notifyConfigurationChanged ?? throw new ArgumentNullException(nameof(notifyConfigurationChanged));
-            PermissionOptions = new ObservableCollection<EditFileSearchReplacePermissionOption>
+            PermissionOptions = new ObservableCollection<EditFileHashlinePermissionOption>
             {
                 new(
-                    EditFileSearchReplacePermissionScope.LateralFileSystemOnly,
+                    EditFileHashlinePermissionScope.LateralFileSystemOnly,
                     "LateralFS only",
                     "The model can write only inside LateralFS virtual folders. LateralFS\\NodeName\\... shortcuts are supported and checked."),
                 new(
-                    EditFileSearchReplacePermissionScope.FullAccess,
+                    EditFileHashlinePermissionScope.FullAccess,
                     "Full access",
                     "The model can write any file path that the Skyweaver process account can access. LateralFS shortcuts still work.")
             };
@@ -821,9 +840,9 @@ namespace Skyweaver.Tools
                 ?? PermissionOptions[0];
         }
 
-        public ObservableCollection<EditFileSearchReplacePermissionOption> PermissionOptions { get; }
+        public ObservableCollection<EditFileHashlinePermissionOption> PermissionOptions { get; }
 
-        public EditFileSearchReplacePermissionOption? SelectedPermission
+        public EditFileHashlinePermissionOption? SelectedPermission
         {
             get => _selectedPermission;
             set
@@ -843,33 +862,33 @@ namespace Skyweaver.Tools
         {
             get
             {
-                var scope = SelectedPermission?.Scope ?? EditFileSearchReplacePermissionScope.LateralFileSystemOnly;
-                return scope == EditFileSearchReplacePermissionScope.FullAccess
+                var scope = SelectedPermission?.Scope ?? EditFileHashlinePermissionScope.LateralFileSystemOnly;
+                return scope == EditFileHashlinePermissionScope.FullAccess
                     ? "Current permission: FullAccess. Normal absolute/relative paths and LateralFS shortcuts are accepted."
                     : "Current permission: LateralFileSystemOnly. Use LateralFS\\NodeName\\relative\\file.ext or an actual path under a LateralFS virtual root.";
             }
         }
 
-        public EditFileSearchReplaceToolSettings ToSettings()
+        public EditFileHashlineToolSettings ToSettings()
         {
-            return new EditFileSearchReplaceToolSettings
+            return new EditFileHashlineToolSettings
             {
-                PermissionScope = SelectedPermission?.Scope ?? EditFileSearchReplacePermissionScope.LateralFileSystemOnly
+                PermissionScope = SelectedPermission?.Scope ?? EditFileHashlinePermissionScope.LateralFileSystemOnly
             };
         }
     }
 
-    internal sealed class EditFileSearchReplaceToolConfigurationPresenter : SkyweaverToolConfigurationPresenter
+    internal sealed class EditFileHashlineToolConfigurationPresenter : SkyweaverToolConfigurationPresenter
     {
-        private readonly EditFileSearchReplaceToolConfigurationViewModel _viewModel;
+        private readonly EditFileHashlineToolConfigurationViewModel _viewModel;
         private readonly FrameworkElement _view;
 
-        public EditFileSearchReplaceToolConfigurationPresenter(SkyweaverToolConfigurationEditorContext context)
+        public EditFileHashlineToolConfigurationPresenter(SkyweaverToolConfigurationEditorContext context)
         {
             ArgumentNullException.ThrowIfNull(context);
 
-            var settings = EditFileSearchReplaceToolSettings.FromConfiguration(context.InitialConfiguration);
-            _viewModel = new EditFileSearchReplaceToolConfigurationViewModel(settings, RaiseConfigurationChanged);
+            var settings = EditFileHashlineToolSettings.FromConfiguration(context.InitialConfiguration);
+            _viewModel = new EditFileHashlineToolConfigurationViewModel(settings, RaiseConfigurationChanged);
             _view = CreateView(_viewModel);
         }
 
@@ -886,12 +905,12 @@ namespace Skyweaver.Tools
             catch (Exception ex)
             {
                 configuration = null;
-                errorMessage = $"EditFile_SearchReplace configuration is invalid: {ex.Message}";
+                errorMessage = $"EditFileHashline configuration is invalid: {ex.Message}";
                 return false;
             }
         }
 
-        private static FrameworkElement CreateView(EditFileSearchReplaceToolConfigurationViewModel viewModel)
+        private static FrameworkElement CreateView(EditFileHashlineToolConfigurationViewModel viewModel)
         {
             var panel = new StackPanel
             {
@@ -909,15 +928,15 @@ namespace Skyweaver.Tools
             var comboBox = new ComboBox
             {
                 MinWidth = 220,
-                DisplayMemberPath = nameof(EditFileSearchReplacePermissionOption.DisplayName),
+                DisplayMemberPath = nameof(EditFileHashlinePermissionOption.DisplayName),
                 Margin = new Thickness(0, 0, 0, 10)
             };
             comboBox.SetBinding(
                 ItemsControl.ItemsSourceProperty,
-                new Binding(nameof(EditFileSearchReplaceToolConfigurationViewModel.PermissionOptions)));
+                new Binding(nameof(EditFileHashlineToolConfigurationViewModel.PermissionOptions)));
             comboBox.SetBinding(
                 ComboBox.SelectedItemProperty,
-                new Binding(nameof(EditFileSearchReplaceToolConfigurationViewModel.SelectedPermission))
+                new Binding(nameof(EditFileHashlineToolConfigurationViewModel.SelectedPermission))
                 {
                     Mode = BindingMode.TwoWay,
                     UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
@@ -932,7 +951,7 @@ namespace Skyweaver.Tools
             };
             description.SetBinding(
                 TextBlock.TextProperty,
-                new Binding(nameof(EditFileSearchReplaceToolConfigurationViewModel.PermissionDescription)));
+                new Binding(nameof(EditFileHashlineToolConfigurationViewModel.PermissionDescription)));
             panel.Children.Add(description);
 
             var preview = new TextBlock
@@ -943,7 +962,7 @@ namespace Skyweaver.Tools
             };
             preview.SetBinding(
                 TextBlock.TextProperty,
-                new Binding(nameof(EditFileSearchReplaceToolConfigurationViewModel.PreviewText)));
+                new Binding(nameof(EditFileHashlineToolConfigurationViewModel.PreviewText)));
             panel.Children.Add(preview);
 
             return panel;

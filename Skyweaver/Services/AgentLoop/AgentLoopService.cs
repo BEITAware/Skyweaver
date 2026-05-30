@@ -10,6 +10,7 @@ using Skyweaver.Controls.LanguageModelConfigurationControl.Models;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
 using Skyweaver.Services.ChatSession;
 using Skyweaver.Services.SkyweaverTools;
+using Skyweaver.Services.ContextManagement;
 
 namespace Skyweaver.Services.AgentLoop
 {
@@ -742,9 +743,8 @@ namespace Skyweaver.Services.AgentLoop
                     activeToolKitKeys.Add(toolKitKey);
                 }
 
-                var systemPrompt = BuildSystemPromptWithRuntimeToolCallNotice(
-                    baseSystemPrompt,
-                    request);
+                var systemPrompt = baseSystemPrompt;
+                var runtimeToolCallNotice = BuildRuntimeToolCallNotice(request);
                 var preparedContext = await _contextManager.PrepareAsync(
                     request.Agent,
                     systemPrompt,
@@ -756,6 +756,7 @@ namespace Skyweaver.Services.AgentLoop
                     debugRunContext,
                     iterationNumber,
                     ResolveSessionResourcesFolderPath(request),
+                    runtimeToolCallNotice,
                     cancellationToken).ConfigureAwait(false);
 
                 persistentHistory = preparedContext.PersistentHistory
@@ -777,9 +778,6 @@ namespace Skyweaver.Services.AgentLoop
                 if (appliedMinCompaction != null)
                 {
                     isMinCompacted = true;
-                    systemPrompt = BuildSystemPromptWithRuntimeToolCallNotice(
-                        baseSystemPrompt,
-                        request);
                     preparedContext = await _contextManager.PrepareAsync(
                         request.Agent,
                         systemPrompt,
@@ -791,6 +789,7 @@ namespace Skyweaver.Services.AgentLoop
                         debugRunContext,
                         iterationNumber,
                         ResolveSessionResourcesFolderPath(request),
+                        runtimeToolCallNotice,
                         cancellationToken).ConfigureAwait(false);
                 }
 
@@ -821,12 +820,22 @@ namespace Skyweaver.Services.AgentLoop
                             currentTokenCount = 0;
                         }
 
-                        if (isMinCompacted && currentTokenCount >= (int)(contextWindowTokens * 0.95d))
+                        bool isCompactionPreconditionMet = !request.MinCompactionEnabled || isMinCompacted;
+                        if (isCompactionPreconditionMet && currentTokenCount >= (int)(contextWindowTokens * 0.95d))
                         {
                             isMinCompacted = false;
 
+                            // 区分固有系统消息与可压缩的历史记录，仅压缩代理循环中产生的内容和非系统历史消息
+                            var inherentSystemMessages = persistentHistory
+                                .Where(msg => msg.Role == LanguageModelChatRole.System)
+                                .ToList();
+                            var compressibleHistory = persistentHistory
+                                .Where(msg => msg.Role != LanguageModelChatRole.System)
+                                .Concat(turnHistory)
+                                .ToList();
+
                             var historyBuilder = new StringBuilder();
-                            foreach (var msg in persistentHistory.Concat(turnHistory))
+                            foreach (var msg in compressibleHistory)
                             {
                                 var roleName = msg.Role.ToString();
                                 var authorStr = string.IsNullOrEmpty(msg.AuthorName) ? "" : $" (Author: {msg.AuthorName})";
@@ -882,7 +891,7 @@ namespace Skyweaver.Services.AgentLoop
                                 compressedHistoryText = $"[MaxCompaction failed: {ex.Message}]\n\n" + formattedHistory;
                             }
 
-                            persistentHistory = new List<LanguageModelChatMessage>
+                            persistentHistory = new List<LanguageModelChatMessage>(inherentSystemMessages)
                             {
                                 new LanguageModelChatMessage(
                                     LanguageModelChatRole.User,
@@ -893,9 +902,8 @@ namespace Skyweaver.Services.AgentLoop
                             };
                             turnHistory = new List<LanguageModelChatMessage>();
 
-                            systemPrompt = BuildSystemPromptWithRuntimeToolCallNotice(
-                                baseSystemPrompt,
-                                request);
+                            systemPrompt = baseSystemPrompt;
+                            runtimeToolCallNotice = BuildRuntimeToolCallNotice(request);
                             preparedContext = await _contextManager.PrepareAsync(
                                 request.Agent,
                                 systemPrompt,
@@ -907,6 +915,7 @@ namespace Skyweaver.Services.AgentLoop
                                 debugRunContext,
                                 iterationNumber,
                                 ResolveSessionResourcesFolderPath(request),
+                                runtimeToolCallNotice,
                                 cancellationToken).ConfigureAwait(false);
 
                             persistentHistory = preparedContext.PersistentHistory
@@ -1171,13 +1180,14 @@ namespace Skyweaver.Services.AgentLoop
             {
                 var compactedPrepared = await _contextManager.PrepareAsync(
                     request.Agent,
-                    BuildSystemPromptWithRuntimeToolCallNotice(baseSystemPrompt, request),
+                    baseSystemPrompt,
                     request.Input,
                     request.InputContentBlocks,
                     persistentHistory,
                     turnHistory,
                     request.CompactionFilePath,
                     sessionResourcesFolderPath: ResolveSessionResourcesFolderPath(request),
+                    runtimeToolCallNotice: BuildRuntimeToolCallNotice(request),
                     cancellationToken: cancellationToken).ConfigureAwait(false);
                 var afterCount = await _tokenCounter.CountAsync(
                     compactionModel,
@@ -4797,24 +4807,27 @@ namespace Skyweaver.Services.AgentLoop
             };
         }
 
-        private string BuildSystemPromptWithRuntimeToolCallNotice(
-            string baseSystemPrompt,
-            AgentLoopRequest request)
+        private string BuildRuntimeToolCallNotice(AgentLoopRequest request)
         {
             var noticeLines = new List<string>();
-            var knownToolCallIds = CollectKnownToolCallIds(request);
-            if (knownToolCallIds.Count > 0)
-            {
-                noticeLines.Add("Persistent ToolCallID ledger:");
-                noticeLines.Add($"- Earliest known ToolCallID: {knownToolCallIds[0]}");
-                noticeLines.Add($"- Known ToolCallIDs, oldest first: {FormatToolCallIdList(knownToolCallIds)}");
-                noticeLines.Add("- Reuse the same ToolCallID in later turns and after an agent loop restart. For async calls, use WaitForAsyncTools or GetAsyncToolProgress with these IDs.");
-            }
+            var config = ContextArrangementRuntime.Instance.GetConfiguration();
 
-            var knownAsyncToolCallIds = CollectKnownAsyncToolCallIds(request);
-            if (knownAsyncToolCallIds.Count > 0)
+            if (config.ToolCallIdTable)
             {
-                noticeLines.Add($"- Known async ToolCallIDs: {FormatToolCallIdList(knownAsyncToolCallIds)}");
+                var knownToolCallIds = CollectKnownToolCallIds(request);
+                if (knownToolCallIds.Count > 0)
+                {
+                    noticeLines.Add("Persistent ToolCallID ledger:");
+                    noticeLines.Add($"- Earliest known ToolCallID: {knownToolCallIds[0]}");
+                    noticeLines.Add($"- Known ToolCallIDs, oldest first: {FormatToolCallIdList(knownToolCallIds)}");
+                    noticeLines.Add("- Reuse the same ToolCallID in later turns and after an agent loop restart. For async calls, use WaitForAsyncTools or GetAsyncToolProgress with these IDs.");
+                }
+
+                var knownAsyncToolCallIds = CollectKnownAsyncToolCallIds(request);
+                if (knownAsyncToolCallIds.Count > 0)
+                {
+                    noticeLines.Add($"- Known async ToolCallIDs: {FormatToolCallIdList(knownAsyncToolCallIds)}");
+                }
             }
 
             var compactedIds = _compactionStore.GetCompactedToolCallIds(request.CompactionFilePath);
@@ -4827,13 +4840,10 @@ namespace Skyweaver.Services.AgentLoop
 
             if (noticeLines.Count == 0)
             {
-                return baseSystemPrompt;
+                return string.Empty;
             }
 
-            return baseSystemPrompt.TrimEnd() +
-                   Environment.NewLine +
-                   Environment.NewLine +
-                   string.Join(Environment.NewLine, noticeLines);
+            return string.Join(Environment.NewLine, noticeLines);
         }
 
         private IReadOnlyList<string> CollectKnownToolCallIds(AgentLoopRequest request)

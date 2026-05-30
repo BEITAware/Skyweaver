@@ -200,7 +200,8 @@ namespace Skyweaver.Tools
                         SkyweaverToolParameterType.String,
                         isRequired: false,
                         defaultValue: "utf-8")
-                ]);
+                ],
+                defaultToolKitKeys: ["LegacyEditFile"]);
         }
 
         #pragma warning disable CS0162

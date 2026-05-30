@@ -38,7 +38,6 @@ namespace Skyweaver.Services.Multimodal
                     return new MultimodalConfiguration
                     {
                         EnableOcr = (bool?)root.Element("EnableOcr") ?? false,
-                        HardwareOption = ReadEnum(root.Element("HardwareOption"), OcrHardwareOption.CPU),
                         EnableLongImageAutoParse = (bool?)root.Element("EnableLongImageAutoParse") ?? true
                     };
                 }
@@ -62,7 +61,6 @@ namespace Skyweaver.Services.Multimodal
                     new XElement("MultimodalConfiguration",
                         new XAttribute("SchemaVersion", 1),
                         new XElement("EnableOcr", configuration.EnableOcr),
-                        new XElement("HardwareOption", configuration.HardwareOption.ToString()),
                         new XElement("EnableLongImageAutoParse", configuration.EnableLongImageAutoParse)));
 
                 document.Save(ConfigurationFilePath);

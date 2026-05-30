@@ -118,6 +118,16 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.Services
                     Order = 40
                 });
 
+                registry.RegisterPage("context-management", new PreferencePageInfo
+                {
+                    Id = "preferences-context-arrangement",
+                    DisplayName = "上下文编排",
+                    DisplayNameResourceKey = "Preferences.Page.ContextArrangement",
+                    ViewType = typeof(ContextArrangementPreferencesPageView),
+                    ViewModelType = typeof(ContextArrangementPreferencesPageViewModel),
+                    Order = 50
+                });
+
                 registry.RegisterPage("multimodal", new PreferencePageInfo
                 {
                     Id = "preferences-image",

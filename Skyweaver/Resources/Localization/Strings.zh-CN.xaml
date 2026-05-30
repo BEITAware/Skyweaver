@@ -18,6 +18,7 @@
     <system:String x:Key="Preferences.Page.ContextCompression">压缩</system:String>
     <system:String x:Key="Preferences.Page.SemanticSearch">语义搜索</system:String>
     <system:String x:Key="Preferences.Page.Memory">记忆</system:String>
+    <system:String x:Key="Preferences.Page.ContextArrangement">上下文编排</system:String>
     <system:String x:Key="Preferences.Page.Document">文档</system:String>
     <system:String x:Key="Preferences.Page.OpenSourceLicenses">开源许可证</system:String>
     <system:String x:Key="Preferences.Sidebar.Title">首选项</system:String>
@@ -513,6 +514,19 @@
     <system:String x:Key="Memory.Status.EmbeddingCompleted">记忆：嵌入完成。</system:String>
     <system:String x:Key="Memory.Instruction.1">1. 记忆机制会将您的交互对话摘要和关键事实提取为记忆载体。</system:String>
     <system:String x:Key="Memory.Instruction.2">2. 记忆共享范围的变更会影响代理在新会话中加载历史记忆的隔离度。</system:String>
+
+    <system:String x:Key="ContextArrangement.Page.Title">上下文编排</system:String>
+    <system:String x:Key="ContextArrangement.Page.Description">配置上下文编排策略，优化大语言模型工具调用与提示词结构。</system:String>
+    <system:String x:Key="ContextArrangement.Page.Hint">修改后会立即写入 ContextArrangement.xml。</system:String>
+    <system:String x:Key="ContextArrangement.OptimizeToolCallPrompt.Label">工具调用优化提示词</system:String>
+    <system:String x:Key="ContextArrangement.OptimizeToolCallPrompt.Hint">启用后，系统将优化发送给大模型的工具调用说明与提示词结构，以提高工具调用准确率。</system:String>
+    <system:String x:Key="ContextArrangement.ToolCallIdTable.Label">Tool Call ID表</system:String>
+    <system:String x:Key="ContextArrangement.ToolCallIdTable.Hint">维护并向上下文附加 Tool Call ID 映射表，确保在多轮对话中能够正确跟踪和响应工具状态。</system:String>
+    <system:String x:Key="ContextArrangement.Status.Loaded">上下文编排配置已加载。</system:String>
+    <system:String x:Key="ContextArrangement.Status.OptimizeToolCallPromptSaved">工具调用优化提示词设置已保存。</system:String>
+    <system:String x:Key="ContextArrangement.Status.ToolCallIdTableSaved">Tool Call ID表设置已保存。</system:String>
+    <system:String x:Key="ContextArrangement.Instruction.1">1. 上下文编排旨在增强模型在复杂多工具调用场景下的稳定性和参数解析准确度。</system:String>
+    <system:String x:Key="ContextArrangement.Instruction.2">2. 设置的更改会立即应用于新生成的 LLM 交互提示词中。</system:String>
 
     <system:String x:Key="Common.Refresh">刷新</system:String>
     <system:String x:Key="SemanticSearch.Page.Title">语义搜索</system:String>

@@ -18,6 +18,7 @@
     <system:String x:Key="Preferences.Page.ContextCompression">Compression</system:String>
     <system:String x:Key="Preferences.Page.SemanticSearch">Semantic Search</system:String>
     <system:String x:Key="Preferences.Page.Memory">Memory</system:String>
+    <system:String x:Key="Preferences.Page.ContextArrangement">Context Arrangement</system:String>
     <system:String x:Key="Preferences.Page.Search">Search</system:String>
     <system:String x:Key="Preferences.Page.Document">Document</system:String>
     <system:String x:Key="Preferences.Page.OpenSourceLicenses">Open Source Licenses</system:String>
@@ -514,6 +515,19 @@
     <system:String x:Key="Memory.Status.EmbeddingCompleted">Memory: Embedding completed.</system:String>
     <system:String x:Key="Memory.Instruction.1">1. The memory mechanism extracts summaries and key facts from your interactive dialogues as memory vectors.</system:String>
     <system:String x:Key="Memory.Instruction.2">2. Changes to the memory sharing scope affect the isolation level of historical memory loaded by the agent in new sessions.</system:String>
+
+    <system:String x:Key="ContextArrangement.Page.Title">Context Arrangement</system:String>
+    <system:String x:Key="ContextArrangement.Page.Description">Configure context arrangement strategies to optimize large language model tool calls and prompt structures.</system:String>
+    <system:String x:Key="ContextArrangement.Page.Hint">Changes will be written to ContextArrangement.xml immediately.</system:String>
+    <system:String x:Key="ContextArrangement.OptimizeToolCallPrompt.Label">Optimize tool call prompts</system:String>
+    <system:String x:Key="ContextArrangement.OptimizeToolCallPrompt.Hint">When enabled, the system will optimize tool call descriptions and prompt structures sent to LLMs to improve tool invocation accuracy.</system:String>
+    <system:String x:Key="ContextArrangement.ToolCallIdTable.Label">Tool Call ID table</system:String>
+    <system:String x:Key="ContextArrangement.ToolCallIdTable.Hint">Maintain and attach a Tool Call ID mapping table to the context, ensuring proper tracking and response to tool states in multi-turn conversations.</system:String>
+    <system:String x:Key="ContextArrangement.Status.Loaded">Context arrangement configuration loaded.</system:String>
+    <system:String x:Key="ContextArrangement.Status.OptimizeToolCallPromptSaved">Optimize tool call prompt setting saved.</system:String>
+    <system:String x:Key="ContextArrangement.Status.ToolCallIdTableSaved">Tool Call ID table setting saved.</system:String>
+    <system:String x:Key="ContextArrangement.Instruction.1">1. Context Arrangement aims to enhance model stability and parameter parsing accuracy under complex multi-tool invocation scenarios.</system:String>
+    <system:String x:Key="ContextArrangement.Instruction.2">2. Changes to settings apply immediately to newly generated LLM interaction prompts.</system:String>
 
     <system:String x:Key="Common.Refresh">Refresh</system:String>
     <system:String x:Key="SemanticSearch.Page.Title">Semantic Search</system:String>

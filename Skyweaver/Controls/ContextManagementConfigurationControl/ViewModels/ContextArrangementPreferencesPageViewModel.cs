@@ -1,56 +1,70 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Input;
 using Skyweaver.Commands;
 using Skyweaver.Infrastructure.Mvvm;
-using Skyweaver.Models.Multimodal;
-using Skyweaver.Services.Multimodal;
+using Skyweaver.Models.ContextManagement;
+using Skyweaver.Services.ContextManagement;
 using Skyweaver.Services.Localization;
 
-namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
+namespace Skyweaver.Controls.ContextManagementConfigurationControl.ViewModels
 {
-    public sealed class DocumentPreferencesPageViewModel : ObservableObject
+    public sealed class ContextArrangementPreferencesPageViewModel : ObservableObject
     {
-        private readonly MultimodalRuntime _runtime;
-        private readonly MultimodalConfiguration _configuration;
+        private readonly ContextArrangementRuntime _runtime;
+        private readonly ContextArrangementConfiguration _configuration;
         private string _statusMessage;
 
-        public DocumentPreferencesPageViewModel()
+        public ContextArrangementPreferencesPageViewModel()
         {
-            _runtime = MultimodalRuntime.Instance;
+            _runtime = ContextArrangementRuntime.Instance;
             _configuration = _runtime.GetConfiguration();
-            _statusMessage = L("Document.Status.Loaded", "文档首选项已加载。");
+            _statusMessage = L("ContextArrangement.Status.Loaded", "上下文编排配置已加载。");
 
             OpenConfigurationDirectoryCommand = new RelayCommand(OpenConfigurationDirectory);
             LocalizationRuntime.Instance.LanguageChanged += (_, _) => RefreshLocalizedText();
         }
 
-        public string Title => L("Document.Page.Title", "文档");
+        public string Title => L("ContextArrangement.Page.Title", "上下文编排");
 
-        public string Description => L("Document.Page.Description", "配置文档解析和字符识别首选项，优化多模态处理能力。");
+        public string Description => L("ContextArrangement.Page.Description", "配置上下文编排策略，优化大语言模型工具调用与提示词结构。");
 
-        public string Hint => L("Document.Page.Hint", "修改后会立即写入 Multimodal.xml。");
+        public string Hint => L("ContextArrangement.Page.Hint", "修改后会立即写入 ContextArrangement.xml。");
 
         public string ConfigurationFilePath => _runtime.ConfigurationFilePath;
 
-        public bool EnableOcr
+        public bool OptimizeToolCallPrompt
         {
-            get => _configuration.EnableOcr;
+            get => _configuration.OptimizeToolCallPrompt;
             set
             {
-                if (_configuration.EnableOcr == value)
+                if (_configuration.OptimizeToolCallPrompt == value)
                 {
                     return;
                 }
 
-                _configuration.EnableOcr = value;
+                _configuration.OptimizeToolCallPrompt = value;
                 OnPropertyChanged();
-                PersistConfiguration(L("Document.Status.OcrSaved", "启用文档字符识别设置已保存。"));
+                PersistConfiguration(L("ContextArrangement.Status.OptimizeToolCallPromptSaved", "工具调用优化提示词设置已保存。"));
             }
         }
 
+        public bool ToolCallIdTable
+        {
+            get => _configuration.ToolCallIdTable;
+            set
+            {
+                if (_configuration.ToolCallIdTable == value)
+                {
+                    return;
+                }
+
+                _configuration.ToolCallIdTable = value;
+                OnPropertyChanged();
+                PersistConfiguration(L("ContextArrangement.Status.ToolCallIdTableSaved", "Tool Call ID表设置已保存。"));
+            }
+        }
 
         public string StatusMessage
         {
@@ -97,8 +111,6 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
             }
         }
 
-
-
         private void RefreshLocalizedText()
         {
             OnPropertyChanged(nameof(Title));
@@ -111,6 +123,4 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
             return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
-
-
 }

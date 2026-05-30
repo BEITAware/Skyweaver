@@ -47,6 +47,13 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                 typeof(MarkdownContentControl),
                 new PropertyMetadata(false, OnIsStreamingChanged));
 
+        public static readonly DependencyProperty IsUserMessageProperty =
+            DependencyProperty.Register(
+                nameof(IsUserMessage),
+                typeof(bool),
+                typeof(MarkdownContentControl),
+                new PropertyMetadata(false, OnIsUserMessageChanged));
+
         private static readonly DependencyProperty CachedBlockProperty =
             DependencyProperty.RegisterAttached(
                 "CachedBlock",
@@ -74,6 +81,12 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
         {
             get => (bool)GetValue(IsStreamingProperty);
             set => SetValue(IsStreamingProperty, value);
+        }
+
+        public bool IsUserMessage
+        {
+            get => (bool)GetValue(IsUserMessageProperty);
+            set => SetValue(IsUserMessageProperty, value);
         }
 
         private DateTime _lastStreamingRefreshUtc = DateTime.MinValue;
@@ -113,6 +126,11 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
         }
 
         private static void OnIsStreamingChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
+        {
+            ((MarkdownContentControl)dependencyObject).ScheduleRefresh(force: true);
+        }
+
+        private static void OnIsUserMessageChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
         {
             ((MarkdownContentControl)dependencyObject).ScheduleRefresh(force: true);
         }
@@ -164,7 +182,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             _isRefreshing = true;
             try
             {
-                var blocks = MarkdownDocumentParser.Parse(MarkdownText, IsStreaming);
+                var blocks = MarkdownDocumentParser.Parse(MarkdownText, IsStreaming, IsUserMessage);
                 if (blocks.Count == 0)
                 {
                     Content = null;

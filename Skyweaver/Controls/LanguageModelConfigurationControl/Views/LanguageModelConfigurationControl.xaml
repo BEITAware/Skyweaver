@@ -16,6 +16,7 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="8"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
         </Style>
 
         <Style x:Key="ConfigurationListViewItemStyle"
@@ -386,13 +387,13 @@
     </UserControl.Resources>
 
     <Grid Background="{DynamicResource DocumentTabBackgroundBrush}">
-        <ScrollViewer VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled">
+        
+        
             <Grid Margin="18">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="1.5*"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <StackPanel Grid.Row="0"
@@ -529,8 +530,10 @@
                         <Border Grid.Row="1"
                                 Style="{StaticResource GlassCardBorderStyle}">
                             <Grid>
-                                <ContentControl Content="{Binding SelectedLanguageModel}"
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                    <ContentControl Content="{Binding SelectedLanguageModel}"
                                                 ContentTemplate="{StaticResource LanguageModelEditorTemplate}"/>
+                                </ScrollViewer>
                                 <TextBlock Text="{DynamicResource LanguageModelConfiguration.EmptySelection}"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center"
@@ -653,6 +656,6 @@
                     </DockPanel>
                 </GroupBox>
             </Grid>
-        </ScrollViewer>
+        
     </Grid>
 </UserControl>

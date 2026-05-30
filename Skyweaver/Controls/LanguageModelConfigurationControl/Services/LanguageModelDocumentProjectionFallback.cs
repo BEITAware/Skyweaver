@@ -7,6 +7,7 @@ using System.Text;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
+using System.Collections.Concurrent;
 using WpfImaging = System.Windows.Media.Imaging;
 using WpfMedia = System.Windows.Media;
 using Docnet.Core;
@@ -31,6 +32,21 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
         private static readonly object s_ocrLock = new();
         private static PaddleOcrAll? s_ocr;
 
+        private static PaddleOcrAll GetOcrInstance()
+        {
+            if (s_ocr == null)
+            {
+                lock (s_ocrLock)
+                {
+                    if (s_ocr == null)
+                    {
+                        s_ocr = CreatePaddleOcr();
+                    }
+                }
+            }
+            return s_ocr;
+        }
+
         public static async Task<IReadOnlyList<LanguageModelChatContentBlock>> ProjectDocumentAsync(
             LanguageModelChatContentBlock block,
             string preservedContentXml,
@@ -40,20 +56,24 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
         {
             ArgumentNullException.ThrowIfNull(block);
 
-            var path = block.ResourcePath ?? block.Content;
-            await ReportProgressAsync(
-                block,
-                path,
-                "Preparing",
-                "Preparing document projection.",
-                progressCallback,
-                cancellationToken).ConfigureAwait(false);
-            if (imageInputEnabled)
+            // 将所有图像渲染、OCR、IO等密集型同步操作全部转移到后台线程执行，避免阻塞 UI 线程导致卡顿
+            return await Task.Run(async () =>
             {
-                return await ProjectDocumentAsImagesAsync(block, path, preservedContentXml, progressCallback, cancellationToken).ConfigureAwait(false);
-            }
+                var path = block.ResourcePath ?? block.Content;
+                await ReportProgressAsync(
+                    block,
+                    path,
+                    "Preparing",
+                    "Preparing document projection.",
+                    progressCallback,
+                    cancellationToken).ConfigureAwait(false);
+                if (imageInputEnabled)
+                {
+                    return await ProjectDocumentAsImagesAsync(block, path, preservedContentXml, progressCallback, cancellationToken).ConfigureAwait(false);
+                }
 
-            return await ProjectDocumentAsOcrAsync(block, path, preservedContentXml, progressCallback, cancellationToken).ConfigureAwait(false);
+                return await ProjectDocumentAsOcrAsync(block, path, preservedContentXml, progressCallback, cancellationToken).ConfigureAwait(false);
+            }, cancellationToken).ConfigureAwait(false);
         }
 
         private static async Task<IReadOnlyList<LanguageModelChatContentBlock>> ProjectDocumentAsImagesAsync(
@@ -161,13 +181,13 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                             "Skyweaver could not render any pages for OCR."))];
                 }
 
-                var builder = new StringBuilder();
-                builder.AppendLine("<DocumentOcrProjection>");
-                builder.AppendLine($"  <Source Path=\"{Escape(localPath)}\" MediaType=\"{Escape(block.MediaType)}\" Pages=\"{pageImagePaths.Count.ToString(CultureInfo.InvariantCulture)}\" />");
-
-                for (var index = 0; index < pageImagePaths.Count; index++)
+                var pageTexts = new string[pageImagePaths.Count];
+                for (var i = 0; i < pageImagePaths.Count; i++)
                 {
+                    var index = i;
                     cancellationToken.ThrowIfCancellationRequested();
+
+                    // 报告单页开始 OCR 识别
                     await ReportProgressAsync(
                         block,
                         localPath,
@@ -179,10 +199,11 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                         pageImagePaths.Count,
                         pageImagePaths.Count == 0 ? null : index / (double)pageImagePaths.Count,
                         activeItems: [Path.GetFileName(pageImagePaths[index])]).ConfigureAwait(false);
+
                     var pageText = RunPaddleOcr(pageImagePaths[index]);
-                    builder.AppendLine($"  <Page Index=\"{(index + 1).ToString(CultureInfo.InvariantCulture)}\" ImagePath=\"{Escape(pageImagePaths[index])}\">");
-                    builder.AppendLine(Escape(pageText));
-                    builder.AppendLine("  </Page>");
+                    pageTexts[index] = pageText;
+
+                    // 报告单页完成 OCR 识别
                     await ReportProgressAsync(
                         block,
                         localPath,
@@ -193,6 +214,17 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                         index + 1,
                         pageImagePaths.Count,
                         (index + 1) / (double)pageImagePaths.Count).ConfigureAwait(false);
+                }
+
+                var builder = new StringBuilder();
+                builder.AppendLine("<DocumentOcrProjection>");
+                builder.AppendLine($"  <Source Path=\"{Escape(localPath)}\" MediaType=\"{Escape(block.MediaType)}\" Pages=\"{pageImagePaths.Count.ToString(CultureInfo.InvariantCulture)}\" />");
+
+                for (var index = 0; index < pageImagePaths.Count; index++)
+                {
+                    builder.AppendLine($"  <Page Index=\"{(index + 1).ToString(CultureInfo.InvariantCulture)}\" ImagePath=\"{Escape(pageImagePaths[index])}\">");
+                    builder.AppendLine(Escape(pageTexts[index]));
+                    builder.AppendLine("  </Page>");
                 }
 
                 builder.AppendLine("</DocumentOcrProjection>");
@@ -480,16 +512,16 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
 
         private static string RunPaddleOcr(string imagePath)
         {
+            var ocr = GetOcrInstance();
             lock (s_ocrLock)
             {
-                s_ocr ??= CreatePaddleOcr();
                 using var source = Cv2.ImRead(imagePath, ImreadModes.Color);
                 if (source.Empty())
                 {
                     return string.Empty;
                 }
 
-                var result = s_ocr.Run(source);
+                var result = ocr.Run(source);
                 return result.Text ?? string.Empty;
             }
         }

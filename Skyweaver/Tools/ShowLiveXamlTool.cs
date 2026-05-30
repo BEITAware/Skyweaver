@@ -24,7 +24,8 @@ namespace Skyweaver.Tools
                     isRequired: true)
             ],
             isSystemTool: false,
-            canBelongToToolKit: false);
+            canBelongToToolKit: true,
+            defaultToolKitKeys: ["LiveXAML"]);
 
         public SkyweaverToolDefinition Definition => s_definition;
 

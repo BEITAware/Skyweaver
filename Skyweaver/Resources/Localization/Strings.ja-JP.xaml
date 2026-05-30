@@ -35,6 +35,8 @@
     <system:String x:Key="Preferences.Page.Document">ドキュメント</system:String>
 
     <system:String x:Key="Preferences.Page.Memory">記憶</system:String>
+ 
+    <system:String x:Key="Preferences.Page.ContextArrangement">コンテキスト編成</system:String>
 
     <system:String x:Key="Preferences.Page.Search">検索</system:String>
     <system:String x:Key="Preferences.Page.OpenSourceLicenses">オープンソースライセンス</system:String>
@@ -1005,6 +1007,30 @@
     <system:String x:Key="Memory.Instruction.1">1. 記憶メカニズムは、インタラクティブな対話のサマリーや主要なファクトを記憶ベクトルとして抽出します。</system:String>
 
     <system:String x:Key="Memory.Instruction.2">2. 記憶共有スコープの変更は、新しいセッションでエージェントがロードする歴史的記憶の隔離レベルに影響します。</system:String>
+ 
+    <system:String x:Key="ContextArrangement.Page.Title">コンテキスト編成</system:String>
+ 
+    <system:String x:Key="ContextArrangement.Page.Description">コンテキスト編成戦略を構成し、大規模言語モデルのツール呼び出しとプロンプト構造を最適化します。</system:String>
+ 
+    <system:String x:Key="ContextArrangement.Page.Hint">変更はすぐに ContextArrangement.xml に書き込まれます。</system:String>
+ 
+    <system:String x:Key="ContextArrangement.OptimizeToolCallPrompt.Label">ツール呼び出し最適化プロンプト</system:String>
+ 
+    <system:String x:Key="ContextArrangement.OptimizeToolCallPrompt.Hint">有効にすると、LLMに送信されるツール呼び出しの説明とプロンプト構造を最適化し、ツール呼び出しの正確性を向上させます。</system:String>
+ 
+    <system:String x:Key="ContextArrangement.ToolCallIdTable.Label">Tool Call ID表</system:String>
+ 
+    <system:String x:Key="ContextArrangement.ToolCallIdTable.Hint">コンテキストにツール呼び出しIDマッピングテーブルを維持および追加し、複数ターンの会話でツールの状態を正しく追跡および応答できるようにします。</system:String>
+ 
+    <system:String x:Key="ContextArrangement.Status.Loaded">コンテキスト編成構成がロードされました。</system:String>
+ 
+    <system:String x:Key="ContextArrangement.Status.OptimizeToolCallPromptSaved">ツール呼び出し最適化プロンプト設定が保存されました。</system:String>
+ 
+    <system:String x:Key="ContextArrangement.Status.ToolCallIdTableSaved">Tool Call ID表設定が保存されました。</system:String>
+ 
+    <system:String x:Key="ContextArrangement.Instruction.1">1. コンテキスト編成は、複雑なマルチツール呼び出しシナリオにおけるモデルの安定性とパラメータ解析の精度を向上させることを目的としています。</system:String>
+ 
+    <system:String x:Key="ContextArrangement.Instruction.2">2. 設定の変更は、新しく生成される LLM インタラクションプロンプトに即座に適用されます。</system:String>
 
 
     <system:String x:Key="Common.Refresh">更新</system:String>

@@ -10,7 +10,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
         private static readonly Regex OrderedListPattern = new(@"^\s*(\d+)\.\s+(.*)$", RegexOptions.Compiled);
         private static readonly Regex TableDelimiterCellPattern = new(@"^\s*:?-{3,}:?\s*$", RegexOptions.Compiled);
 
-        public static IReadOnlyList<MarkdownBlock> Parse(string? markdown, bool isStreaming = false)
+        public static IReadOnlyList<MarkdownBlock> Parse(string? markdown, bool isStreaming = false, bool isUserMessage = false)
         {
             if (string.IsNullOrEmpty(markdown))
             {
@@ -30,21 +30,21 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
 
                 if (trimmed.Length == 0)
                 {
-                    FlushParagraph(blocks, paragraphLines);
+                    FlushParagraph(blocks, paragraphLines, isUserMessage);
                     index++;
                     continue;
                 }
 
                 if (TryParseCodeBlock(lines, parseLineCount, ref index, out var codeBlock))
                 {
-                    FlushParagraph(blocks, paragraphLines);
+                    FlushParagraph(blocks, paragraphLines, isUserMessage);
                     blocks.Add(codeBlock);
                     continue;
                 }
 
                 if (TryParseMathBlock(lines, parseLineCount, ref index, out var mathBlock))
                 {
-                    FlushParagraph(blocks, paragraphLines);
+                    FlushParagraph(blocks, paragraphLines, isUserMessage);
                     blocks.Add(mathBlock);
                     continue;
                 }
@@ -56,29 +56,29 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                         paragraphLines.Add(leadingText);
                     }
 
-                    FlushParagraph(blocks, paragraphLines);
+                    FlushParagraph(blocks, paragraphLines, isUserMessage);
                     blocks.Add(tableBlock);
                     continue;
                 }
 
-                if (TryParseHeading(trimmed, out var headingBlock))
+                if (TryParseHeading(trimmed, out var headingBlock, isUserMessage))
                 {
-                    FlushParagraph(blocks, paragraphLines);
+                    FlushParagraph(blocks, paragraphLines, isUserMessage);
                     blocks.Add(headingBlock);
                     index++;
                     continue;
                 }
 
-                if (TryParseList(lines, parseLineCount, ref index, out var listBlock))
+                if (TryParseList(lines, parseLineCount, ref index, out var listBlock, isUserMessage))
                 {
-                    FlushParagraph(blocks, paragraphLines);
+                    FlushParagraph(blocks, paragraphLines, isUserMessage);
                     blocks.Add(listBlock);
                     continue;
                 }
 
-                if (TryParseQuote(lines, parseLineCount, ref index, out var quoteBlock))
+                if (TryParseQuote(lines, parseLineCount, ref index, out var quoteBlock, isUserMessage))
                 {
-                    FlushParagraph(blocks, paragraphLines);
+                    FlushParagraph(blocks, paragraphLines, isUserMessage);
                     blocks.Add(quoteBlock);
                     continue;
                 }
@@ -87,12 +87,12 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                 index++;
             }
 
-            FlushParagraph(blocks, paragraphLines);
+            FlushParagraph(blocks, paragraphLines, isUserMessage);
 
             return blocks;
         }
 
-        private static void FlushParagraph(ICollection<MarkdownBlock> blocks, ICollection<string> paragraphLines)
+        private static void FlushParagraph(ICollection<MarkdownBlock> blocks, ICollection<string> paragraphLines, bool isUserMessage)
         {
             if (paragraphLines.Count == 0)
             {
@@ -106,10 +106,10 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                 return;
             }
 
-            blocks.Add(new MarkdownParagraphBlock(ParseInlines(text)));
+            blocks.Add(new MarkdownParagraphBlock(ParseInlines(text, isUserMessage)));
         }
 
-        private static bool TryParseHeading(string line, out MarkdownHeadingBlock block)
+        private static bool TryParseHeading(string line, out MarkdownHeadingBlock block, bool isUserMessage)
         {
             var match = HeadingPattern.Match(line);
             if (!match.Success)
@@ -119,7 +119,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             }
 
             var level = Math.Min(6, match.Groups[1].Value.Length);
-            block = new MarkdownHeadingBlock(level, ParseInlines(match.Groups[2].Value.Trim()));
+            block = new MarkdownHeadingBlock(level, ParseInlines(match.Groups[2].Value.Trim(), isUserMessage));
             return true;
         }
 
@@ -196,7 +196,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             return true;
         }
 
-        private static bool TryParseQuote(string[] lines, int lineCount, ref int index, out MarkdownQuoteBlock block)
+        private static bool TryParseQuote(string[] lines, int lineCount, ref int index, out MarkdownQuoteBlock block, bool isUserMessage)
         {
             if (!lines[index].TrimStart().StartsWith(">", StringComparison.Ordinal))
             {
@@ -223,7 +223,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                 index++;
             }
 
-            block = new MarkdownQuoteBlock(ParseInlines(string.Join("\n", quoteLines).TrimEnd()));
+            block = new MarkdownQuoteBlock(ParseInlines(string.Join("\n", quoteLines).TrimEnd(), isUserMessage));
             return true;
         }
 
@@ -279,7 +279,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             return true;
         }
 
-        private static bool TryParseList(string[] lines, int lineCount, ref int index, out MarkdownListBlock block)
+        private static bool TryParseList(string[] lines, int lineCount, ref int index, out MarkdownListBlock block, bool isUserMessage)
         {
             if (!TryGetListItem(lines[index], out var markerText, out var itemContent))
             {
@@ -289,13 +289,13 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
 
             var items = new List<MarkdownListItem>
             {
-                new(markerText, ParseInlines(itemContent))
+                new(markerText, ParseInlines(itemContent, isUserMessage))
             };
 
             index++;
             while (index < lineCount && TryGetListItem(lines[index], out markerText, out itemContent))
             {
-                items.Add(new MarkdownListItem(markerText, ParseInlines(itemContent)));
+                items.Add(new MarkdownListItem(markerText, ParseInlines(itemContent, isUserMessage)));
                 index++;
             }
 
@@ -326,7 +326,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             return false;
         }
 
-        private static IReadOnlyList<MarkdownInline> ParseInlines(string text)
+        private static IReadOnlyList<MarkdownInline> ParseInlines(string text, bool isUserMessage = false)
         {
             var inlines = new List<MarkdownInline>();
             var builder = new StringBuilder();
@@ -343,22 +343,22 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                     continue;
                 }
 
-                if (TryParseLinkInline(text, ref index, builder, inlines))
+                if (TryParseLinkInline(text, ref index, builder, inlines, isUserMessage))
                 {
                     continue;
                 }
 
-                if (TryParseStrongInline(text, ref index, builder, inlines))
+                if (TryParseStrongInline(text, ref index, builder, inlines, isUserMessage))
                 {
                     continue;
                 }
 
-                if (TryParseEmphasisInline(text, ref index, builder, inlines))
+                if (TryParseEmphasisInline(text, ref index, builder, inlines, isUserMessage))
                 {
                     continue;
                 }
 
-                if (text[index] == '\\' && index + 1 < text.Length)
+                if (!isUserMessage && text[index] == '\\' && index + 1 < text.Length)
                 {
                     builder.Append(text[index + 1]);
                     index += 2;
@@ -443,7 +443,8 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             string text,
             ref int index,
             StringBuilder builder,
-            ICollection<MarkdownInline> inlines)
+            ICollection<MarkdownInline> inlines,
+            bool isUserMessage)
         {
             if (text[index] != '[')
             {
@@ -470,7 +471,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             }
 
             FlushTextInline(builder, inlines);
-            inlines.Add(new MarkdownLinkInline(ParseInlines(label), url));
+            inlines.Add(new MarkdownLinkInline(ParseInlines(label, isUserMessage), url));
             index = closeUrlIndex + 1;
             return true;
         }
@@ -479,7 +480,8 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             string text,
             ref int index,
             StringBuilder builder,
-            ICollection<MarkdownInline> inlines)
+            ICollection<MarkdownInline> inlines,
+            bool isUserMessage)
         {
             if (!StartsWith(text, index, "**"))
             {
@@ -499,7 +501,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             }
 
             FlushTextInline(builder, inlines);
-            inlines.Add(new MarkdownStrongInline(ParseInlines(content)));
+            inlines.Add(new MarkdownStrongInline(ParseInlines(content, isUserMessage)));
             index = closingIndex + 2;
             return true;
         }
@@ -508,7 +510,8 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             string text,
             ref int index,
             StringBuilder builder,
-            ICollection<MarkdownInline> inlines)
+            ICollection<MarkdownInline> inlines,
+            bool isUserMessage)
         {
             if (text[index] != '*')
             {
@@ -533,7 +536,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             }
 
             FlushTextInline(builder, inlines);
-            inlines.Add(new MarkdownEmphasisInline(ParseInlines(content)));
+            inlines.Add(new MarkdownEmphasisInline(ParseInlines(content, isUserMessage)));
             index = closingIndex + 1;
             return true;
         }

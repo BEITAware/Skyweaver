@@ -1,5 +1,6 @@
 using Skyweaver.Controls.AgentConfigurationControl.Models;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
+using Skyweaver.Services.ContextManagement;
 
 namespace Skyweaver.Services.AgentLoop
 {
@@ -16,6 +17,7 @@ namespace Skyweaver.Services.AgentLoop
 2. 【严禁】直接将具体工具名称作为 XML 根标签（例如：严禁使用 <SpawnSubAgent>...</SpawnSubAgent>，必须写为 <Tool ToolName="SpawnSubAgent">...</Tool>）。
 3. 【严禁】使用 <tool_call>、<function_call>、CreateMessage、FinishTask、<tools>、<tool_calls> 等任何其他伪协议。
 4. 工具标签必须是完整且独立的 XML；严禁夹杂在普通正文文字里。
+5. 如果想要代理循环继续，必须在回复中包含有效的工具调用，否则代理循环自动终止。
 
 正确的工具调用 One-shot 示例：
 <Tool ToolName="SpawnSubAgent">
@@ -56,6 +58,7 @@ namespace Skyweaver.Services.AgentLoop
                 debugRunContext: null,
                 iterationNumber: 0,
                 sessionResourcesFolderPath: null,
+                runtimeToolCallNotice: null,
                 cancellationToken);
         }
 
@@ -70,6 +73,7 @@ namespace Skyweaver.Services.AgentLoop
             AgentLoopDebugRunContext? debugRunContext = null,
             int iterationNumber = 0,
             string? sessionResourcesFolderPath = null,
+            string? runtimeToolCallNotice = null,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(agent);
@@ -87,7 +91,8 @@ namespace Skyweaver.Services.AgentLoop
                 upstreamInput,
                 upstreamContentBlocks,
                 currentTurnHistory,
-                sessionResourcesFolderPath);
+                sessionResourcesFolderPath,
+                runtimeToolCallNotice);
             var compactedPreparedMessages = _compactionStore.ApplyCompaction(
                 compactionFilePath,
                 preparedMessages);
@@ -106,9 +111,10 @@ namespace Skyweaver.Services.AgentLoop
             string upstreamInput,
             IReadOnlyList<LanguageModelChatContentBlock>? upstreamContentBlocks,
             IReadOnlyList<LanguageModelChatMessage> turnHistory,
-            string? sessionResourcesFolderPath)
+            string? sessionResourcesFolderPath,
+            string? runtimeToolCallNotice)
         {
-            var messages = new List<LanguageModelChatMessage>(persistentHistory.Count + turnHistory.Count + 3)
+            var messages = new List<LanguageModelChatMessage>(persistentHistory.Count + turnHistory.Count + 4)
             {
                 new(LanguageModelChatRole.System, systemPrompt ?? string.Empty)
             };
@@ -116,11 +122,14 @@ namespace Skyweaver.Services.AgentLoop
             messages.AddRange(persistentHistory.Select(message => message.Clone()));
             messages.Add(CreateInputMessage(upstreamInput, upstreamContentBlocks));
             messages.AddRange(turnHistory.Select(message => message.Clone()));
-            InsertToolProtocolTailReminder(messages, sessionResourcesFolderPath);
+            InsertToolProtocolTailReminder(messages, sessionResourcesFolderPath, runtimeToolCallNotice);
             return messages;
         }
 
-        private static void InsertToolProtocolTailReminder(List<LanguageModelChatMessage> messages, string? sessionResourcesFolderPath)
+        private static void InsertToolProtocolTailReminder(
+            List<LanguageModelChatMessage> messages,
+            string? sessionResourcesFolderPath,
+            string? runtimeToolCallNotice)
         {
             ArgumentNullException.ThrowIfNull(messages);
 
@@ -138,29 +147,55 @@ namespace Skyweaver.Services.AgentLoop
                 }
             }
 
-            var reminder = CreateToolProtocolTailReminder();
+            // 构造运行时工具调用提示消息，作为系统注入提醒
+            LanguageModelChatMessage? noticeMessage = null;
+            if (!string.IsNullOrWhiteSpace(runtimeToolCallNotice))
+            {
+                noticeMessage = new LanguageModelChatMessage(LanguageModelChatRole.System, runtimeToolCallNotice)
+                {
+                    IsHostInjectedTail = true
+                };
+            }
+
+            var config = ContextArrangementRuntime.Instance.GetConfiguration();
+            LanguageModelChatMessage? reminder = null;
+            if (config.OptimizeToolCallPrompt)
+            {
+                reminder = CreateToolProtocolTailReminder();
+            }
+
             for (var index = messages.Count - 1; index > 0; index--)
             {
                 if (messages[index].Role is LanguageModelChatRole.User or LanguageModelChatRole.System)
                 {
+                    if (reminder != null)
+                    {
+                        messages.Insert(index, reminder);
+                    }
                     if (planMessage != null)
                     {
                         messages.Insert(index, planMessage);
-                        messages.Insert(index + 1, reminder);
                     }
-                    else
+                    if (noticeMessage != null)
                     {
-                        messages.Insert(index, reminder);
+                        messages.Insert(index, noticeMessage);
                     }
                     return;
                 }
             }
 
+            if (noticeMessage != null)
+            {
+                messages.Add(noticeMessage);
+            }
             if (planMessage != null)
             {
                 messages.Add(planMessage);
             }
-            messages.Add(reminder);
+            if (reminder != null)
+            {
+                messages.Add(reminder);
+            }
         }
 
         private static List<LanguageModelChatMessage> NormalizeHistory(

@@ -231,7 +231,8 @@ namespace Skyweaver.Services.ChatSession
                     : block.ResourcePath,
                 IsUserVisible(entry),
                 isCollapsible,
-                ResolveInitialExpandedState(partType, isCollapsible));
+                ResolveInitialExpandedState(partType, isCollapsible),
+                isUserMessage: entry.Role == ChatSessionParticipantRole.User);
             part.PresentationKind = ResolvePresentationKind(entry, block);
             part.ToolProgress = ResolveToolProgress(entry, block);
             return part;

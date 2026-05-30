@@ -25,6 +25,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
         private bool _isUserVisible;
         private bool _isCollapsible;
         private bool _isExpanded;
+        private bool _isUserMessage;
         private SkyweaverToolInvocationPresentationState? _toolPresentationState;
         private FrameworkElement? _toolPresentationView;
 
@@ -89,6 +90,12 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
         {
             get => _isExpanded;
             set => SetProperty(ref _isExpanded, value);
+        }
+
+        public bool IsUserMessage
+        {
+            get => _isUserMessage;
+            set => SetProperty(ref _isUserMessage, value);
         }
 
         public string? Title
@@ -234,7 +241,8 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
             string? resourcePath = null,
             bool isUserVisible = true,
             bool isCollapsible = true,
-            bool isExpanded = false)
+            bool isExpanded = false,
+            bool isUserMessage = false)
         {
             _partType = partType;
             _content = content;
@@ -246,6 +254,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Models
             _isUserVisible = isUserVisible;
             _isCollapsible = isCollapsible;
             _isExpanded = isExpanded;
+            _isUserMessage = isUserMessage;
             _toolCallId = NormalizeMetadataValue(toolCallId);
             _callerAgentId = NormalizeMetadataValue(callerAgentId);
             _resourcePath = NormalizeMetadataValue(resourcePath);

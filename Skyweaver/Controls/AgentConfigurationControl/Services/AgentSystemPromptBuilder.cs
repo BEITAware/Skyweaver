@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Skyweaver.Controls.AgentConfigurationControl.Models;
 using Skyweaver.Controls.PersonaSettingsControl.Services;
@@ -209,7 +212,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
             builder.AppendLine("  参数是之前异步工具回填中返回的 ToolCallId JSON 数组。它会阻塞代理循环直到这些工具全部完成；工具的实际结果会在随后第一个代理循环回填。");
             builder.AppendLine($"- {SkyweaverBuiltInToolNames.GetAsyncToolProgress}：读取若干异步工具调用的最新进度快照。它只能同步调用，不能使用 <ToolAsync>。");
             builder.AppendLine($"  调用格式：<Tool ToolName=\"{SkyweaverBuiltInToolNames.GetAsyncToolProgress}\"><{SkyweaverBuiltInToolNames.GetAsyncToolProgressParameter}>[\"TC1\",\"TC2\"]</{SkyweaverBuiltInToolNames.GetAsyncToolProgressParameter}></Tool>");
-            builder.AppendLine("  参数是之前异步工具回填中返回的 ToolCallId JSON 数组。它不会等待工具完成；返回值会包含 progressVersion、阶段、状态文本、计数、比例与活动项。");
+            builder.AppendLine("  参数是之前异步工具回填中返回 of ToolCallId JSON 数组。它不会等待工具完成；返回值会包含 progressVersion、阶段、状态文本、计数、比例与活动项。");
             builder.AppendLine($"- {SkyweaverBuiltInToolNames.RetrieveCompactedToolCalls}：取回被压缩隐藏的工具调用参数与返回内容。仅当系统提示说明存在已压缩 ToolCallID 时使用。");
             builder.AppendLine($"  调用格式：<Tool ToolName=\"{SkyweaverBuiltInToolNames.RetrieveCompactedToolCalls}\"><{SkyweaverBuiltInToolNames.CompactionToolCallIdsParameter}>[\"TC1\",\"TC2\"]</{SkyweaverBuiltInToolNames.CompactionToolCallIdsParameter}></Tool>");
             builder.AppendLine();
@@ -256,7 +259,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
             }
             builder.AppendLine($"- 如果系统提示说明部分工具调用已被压缩，可以同步调用 {SkyweaverBuiltInToolNames.RetrieveCompactedToolCalls} 取回指定 ToolCallID 的原文。不要用 <ToolAsync> 调用它。");
             builder.AppendLine("- <ToolAsync> 或 <Tool> 标签之外的文本会被当成可见聊天内容；工具标签本身会被 Host 捕获、流式呈现为工具调用卡片，并从聊天正文中移除。");
-            builder.AppendLine("- 只要本次 assistant 响应包含任意工具调用，Host 就会按出现顺序发起或执行工具并自动继续下一轮代理循环。");
+            builder.AppendLine("- 只要本次 assistant 响应包含任意工具调用，Host 会按出现顺序发起或执行工具并自动继续下一轮代理循环。");
             if (isSubAgent)
             {
                 builder.AppendLine($"- 如果本次 assistant 响应不包含工具调用，Host 不会直接结束子代理循环；它会提醒你继续调用工具完成任务，或者调用 {SkyweaverBuiltInToolNames.PassToMainAgent} 结束循环并回传结果。");
@@ -318,6 +321,7 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
             bool isSubAgent)
         {
             builder.AppendLine("响应规则");
+            builder.AppendLine("- **如果需要编辑文件，应当使用HashLine系列工具，使用ReadTextFileHashline读出然后使用对应工具编辑。**");
             builder.AppendLine("- 若只是回答用户或结束当前代理循环，直接输出最终内容，不要调用工具。");
             if (isSubAgent)
             {
@@ -328,8 +332,6 @@ namespace Skyweaver.Controls.AgentConfigurationControl.Services
                 builder.AppendLine("- 如果还需要代理循环继续，必须调用工具，否则代理循环将结束。");
             }
             builder.AppendLine($"- 若需要外部工具结果，默认输出 <Tool> 标签；只有当你判断某个调用可能阻塞很久且不需要立刻结果时，才使用 <ToolAsync>。若要阻塞直到若干结果就绪，使用 <Tool ToolName=\"{SkyweaverBuiltInToolNames.WaitForAsyncTools}\">；若只想查看当前进度，使用 <Tool ToolName=\"{SkyweaverBuiltInToolNames.GetAsyncToolProgress}\">。");
-            builder.AppendLine("- 不要输出格式错误的 XML 工具标签；Host 不会修复工具 XML。");
-            builder.AppendLine("- 若正文需要提到字面量 <Tool> 或 <ToolAsync> 标签，请使用实体转义（例如 &lt;ToolAsync&gt;），否则 Host 会把它当成工具调用。");
 
             if (agent.IsStructuredXmlIO)
             {
