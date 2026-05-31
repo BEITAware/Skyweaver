@@ -1,0 +1,2995 @@
+# Aero Aesthetics Violations Report
+
+This issue tracks violations of the Aero aesthetics design guidelines in Skyweaver.
+Specifically, the guidelines state:
+> For UI design in Skyweaver ('Aero aesthetics'), avoid hardcoded hex colors and flat corners (`CornerRadius="0"`); instead, use theme-defined dynamic resource bindings like `{DynamicResource AeroBackgroundBrush}` and `{DynamicResource StandardCornerRadius}`.
+
+## Flat Corners (`CornerRadius="0"`)
+
+### `./Skyweaver/Controls/ShellChatSessionControl/Views/ShellChatSessionControl.xaml`
+- Line 405: `CornerRadius="0,0,0,0"`
+
+### `./Skyweaver/Controls/WorkflowEditorControl/Views/WorkflowEditorControl.xaml`
+- Line 484: `CornerRadius="0"`
+
+### `./Skyweaver/Resources/Controls/ButtonStyles.xaml`
+- Line 228: `CornerRadius="0"`
+- Line 235: `CornerRadius="0"`
+- Line 240: `CornerRadius="0"`
+
+### `./Skyweaver/Resources/Controls/CheckBoxComboBoxStyles.xaml`
+- Line 48: `CornerRadius="0">`
+- Line 135: `CornerRadius="0">`
+- Line 189: `CornerRadius="0"`
+
+### `./Skyweaver/Resources/Controls/CustomContextMenuStyles.xaml`
+- Line 63: `CornerRadius="0">`
+- Line 151: `CornerRadius="0">`
+
+### `./Skyweaver/Resources/Controls/ScrollBarStyles.xaml`
+- Line 197: `CornerRadius="0">`
+- Line 587: `CornerRadius="0"/>`
+
+## Hardcoded Hex Colors
+
+### `./InstallationWizard/MainWindow.xaml`
+- Line 82: `<GradientStop Color="#22FFFFFF" Offset="0"/>`
+- Line 83: `<GradientStop Color="#05FFFFFF" Offset="1"/>`
+- Line 90: `<DropShadowEffect Color="#00C3FF" BlurRadius="25" ShadowDepth="0" Opacity="0.7"/>`
+- Line 94: `<TextBlock Text="版本 1.0.0" Foreground="#88FFFFFF" FontSize="13" HorizontalAlignment="Center" Margin="0,8,0,0"/>`
+- Line 119: `Foreground="#D5FFFFFF"`
+- Line 126: `Foreground="#A5FFFFFF"`
+- Line 134: `<TextBlock Text="{DynamicResource Welcome_LanguageSelectLabel}" Foreground="#A5FFFFFF" FontSize="13.5" VerticalAlignment="Center" Margin="0,0,10,0"/>`
+- Line 162: `<TextBlock Text="{DynamicResource License_SubTitle}" Foreground="#CCFFFFFF" FontSize="13.5" Margin="0,4,0,0"/>`
+- Line 175: `Background="#20000000"`
+- Line 188: `<TextBlock Text="{DynamicResource Dir_SubTitle}" Foreground="#CCFFFFFF" FontSize="13.5" Margin="0,4,0,30"/>`
+- Line 221: `<TextBlock Text="{DynamicResource Dir_SpaceRequired}" Foreground="#AAFFFFFF" FontSize="13.5"/>`
+- Line 225: `<TextBlock Text="{DynamicResource Dir_SpaceAvailable}" Foreground="#AAFFFFFF" FontSize="13.5"/>`
+- Line 260: `<TextBlock Text="{DynamicResource LM_SubTitle}" Foreground="#CCFFFFFF" FontSize="12.5" Margin="0,2,0,0"/>`
+- Line 289: `Background="#10000000" BorderThickness="0" DisplayMemberPath="DisplayName"/>`
+- Line 297: `<GradientStop Color="#1AFFFFFF" Offset="0"/>`
+- Line 298: `<GradientStop Color="#05FFFFFF" Offset="1"/>`
+- Line 358: `<Border BorderBrush="#22FFFFFF" BorderThickness="0,1,0,0" Margin="0,4,0,8"/>`
+- Line 512: `<TextBlock Text="{DynamicResource Layer_SubTitle}" Foreground="#CCFFFFFF" FontSize="12.5" Margin="0,2,0,0"/>`
+- Line 527: `<SolidColorBrush Color="#12FFFFFF"/>`
+- Line 531: `<TextBlock DockPanel.Dock="Top" Text="{DynamicResource Layer_ContextCompression_Desc}" Foreground="#88FFFFFF" FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap" HorizontalAlignment="Center"/>`
+- Line 550: `<Button Content="×" Click="BtnDeleteLayer1_Click" Width="18" Height="24" Padding="0" FontSize="10" Margin="2,0,0,0" Background="#40FF0000"/>`
+- Line 562: `<SolidColorBrush Color="#12FFFFFF"/>`
+- Line 566: `<TextBlock DockPanel.Dock="Top" Text="{DynamicResource Layer_UtilityIFast_Desc}" Foreground="#88FFFFFF" FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap" HorizontalAlignment="Center"/>`
+- Line 585: `<Button Content="×" Click="BtnDeleteLayer2_Click" Width="18" Height="24" Padding="0" FontSize="10" Margin="2,0,0,0" Background="#40FF0000"/>`
+- Line 597: `<SolidColorBrush Color="#12FFFFFF"/>`
+- Line 601: `<TextBlock DockPanel.Dock="Top" Text="{DynamicResource Layer_UtilityIISmart_Desc}" Foreground="#88FFFFFF" FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap" HorizontalAlignment="Center"/>`
+- Line 620: `<Button Content="×" Click="BtnDeleteLayer3_Click" Width="18" Height="24" Padding="0" FontSize="10" Margin="2,0,0,0" Background="#40FF0000"/>`
+- Line 648: `<TextBlock Text="{DynamicResource Agent_SubTitle}" Foreground="#CCFFFFFF" FontSize="13.5" Margin="0,4,0,0"/>`
+- Line 667: `Background="#12FFFFFF"`
+- Line 668: `BorderBrush="#25FFFFFF"`
+- Line 679: `<ColorAnimation Storyboard.TargetName="ItemBorder" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#25FFFFFF" Duration="0:0:0.15"/>`
+- Line 680: `<ColorAnimation Storyboard.TargetName="ItemBorder" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#55FFFFFF" Duration="0:0:0.15"/>`
+- Line 688: `<ColorAnimation Storyboard.TargetName="ItemBorder" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#35FFFFFF" Duration="0:0:0.15"/>`
+- Line 689: `<ColorAnimation Storyboard.TargetName="ItemBorder" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#9000C3FF" Duration="0:0:0.15"/>`
+- Line 733: `Foreground="#77FFFFFF"`
+- Line 740: `Foreground="#CCFFFFFF"`
+- Line 813: `<TextBlock Text="{DynamicResource Flow_SubTitle}" Foreground="#CCFFFFFF" FontSize="13.5" Margin="0,4,0,0"/>`
+- Line 834: `Background="#12FFFFFF"`
+- Line 835: `BorderBrush="#25FFFFFF"`
+- Line 846: `<ColorAnimation Storyboard.TargetName="ItemBorder" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#25FFFFFF" Duration="0:0:0.15"/>`
+- Line 847: `<ColorAnimation Storyboard.TargetName="ItemBorder" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#55FFFFFF" Duration="0:0:0.15"/>`
+- Line 855: `<ColorAnimation Storyboard.TargetName="ItemBorder" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#35FFFFFF" Duration="0:0:0.15"/>`
+- Line 856: `<ColorAnimation Storyboard.TargetName="ItemBorder" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#9000C3FF" Duration="0:0:0.15"/>`
+- Line 900: `Foreground="#77FFFFFF"`
+- Line 907: `Foreground="#CCFFFFFF"`
+- Line 933: `<TextBlock Text="{DynamicResource LFS_SubTitle}" Foreground="#CCFFFFFF" FontSize="13.5" Margin="0,4,0,0"/>`
+- Line 939: `<GradientStop Color="#10FFFFFF" Offset="0"/>`
+- Line 940: `<GradientStop Color="#03FFFFFF" Offset="1"/>`
+- Line 953: `Foreground="#A0FFFFFF"`
+- Line 958: `<Border Height="1" Background="#20FFFFFF" Margin="0,5,0,15"/>`
+- Line 1000: `<TextBlock Text="{DynamicResource Integration_SubTitle}" Foreground="#CCFFFFFF" FontSize="13.5" Margin="0,4,0,0"/>`
+- Line 1006: `<GradientStop Color="#10FFFFFF" Offset="0"/>`
+- Line 1007: `<GradientStop Color="#03FFFFFF" Offset="1"/>`
+- Line 1017: `<Border Height="1" Background="#20FFFFFF" Margin="0,5,0,15"/>`
+- Line 1022: `<TextBlock Text="{DynamicResource Integration_ShellDesc1}" Foreground="#A0FFFFFF" FontSize="11.5" TextWrapping="Wrap" Margin="0,0,0,4"/>`
+- Line 1023: `<TextBlock Text="{DynamicResource Integration_ShellDesc2}" Foreground="#A0FFFFFF" FontSize="11.5" TextWrapping="Wrap" Margin="0,0,0,4"/>`
+- Line 1024: `<TextBlock Text="{DynamicResource Integration_ShellDesc3}" Foreground="#A0FFFFFF" FontSize="11.5" TextWrapping="Wrap"/>`
+- Line 1042: `<TextBlock Text="{DynamicResource Progress_SubTitle}" Foreground="#CCFFFFFF" FontSize="13.5" Margin="0,4,0,35"/>`
+- Line 1055: `Foreground="#E0FFFFFF"`
+- Line 1059: `Foreground="#E0FFFFFF"`
+- Line 1082: `<GradientStop Color="#33FFFFFF" Offset="0"/>`
+- Line 1083: `<GradientStop Color="#0AFFFFFF" Offset="1"/>`
+- Line 1090: `<DropShadowEffect Color="#00FF66" BlurRadius="25" ShadowDepth="0" Opacity="0.8"/>`
+- Line 1111: `Foreground="#E0FFFFFF"`
+- Line 1116: `Foreground="#A5FFFFFF"`
+- Line 1135: `<Border BorderBrush="#33FFFFFF" BorderThickness="0,1,0,0" VerticalAlignment="Top" Height="1"/>`
+- Line 1149: `Foreground="#88FFFFFF"`
+
+### `./InstallationWizard/Styles/AeroColors.xaml`
+- Line 24: `<GradientStop Color="#FF1A2E6F" Offset="0"/>`
+- Line 25: `<GradientStop Color="#FF191641" Offset="1"/>`
+- Line 37: `<GradientStop Color="#00000000" Offset="0"/>`
+- Line 38: `<GradientStop Color="#11FFFFFF" Offset="0.705972"/>`
+- Line 39: `<GradientStop Color="#00000000" Offset="0.718224"/>`
+- Line 40: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 58: `<GradientStop Color="#FF05090E" Offset="0"/>`
+- Line 59: `<GradientStop Color="#FF171E3A" Offset="1"/>`
+- Line 64: `<GradientStop Color="#44000000" Offset="0"/>`
+- Line 65: `<GradientStop Color="#22000000" Offset="0.9"/>`
+- Line 66: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 71: `<GradientStop Color="#FF2B4568" Offset="0"/>`
+- Line 72: `<GradientStop Color="#FF1A2E4D" Offset="0.5"/>`
+- Line 73: `<GradientStop Color="#FF0F1C30" Offset="1"/>`
+- Line 78: `<GradientStop Color="#FF6A94C5" Offset="0"/>`
+- Line 79: `<GradientStop Color="#FF4679B3" Offset="0.116883"/>`
+- Line 80: `<GradientStop Color="#FF052C63" Offset="0.402299"/>`
+- Line 81: `<GradientStop Color="#FE950000" Offset="0.721707"/>`
+- Line 82: `<GradientStop Color="#FF750000" Offset="1"/>`
+- Line 87: `<GradientStop Color="#33FFFFFF" Offset="0"/>`
+- Line 88: `<GradientStop Color="#11FFFFFF" Offset="0.49"/>`
+- Line 89: `<GradientStop Color="#05FFFFFF" Offset="0.5"/>`
+- Line 90: `<GradientStop Color="#08FFFFFF" Offset="1"/>`
+- Line 95: `<GradientStop Color="#33FFFFFF" Offset="0"/>`
+- Line 96: `<GradientStop Color="#11FFFFFF" Offset="0.39"/>`
+- Line 97: `<GradientStop Color="#05FFFFFF" Offset="0.4"/>`
+- Line 98: `<GradientStop Color="#08FFFFFF" Offset="1"/>`
+- Line 103: `<GradientStop Color="#FF00C3FF" Offset="1"/>`
+- Line 104: `<GradientStop Color="#00007ACC" Offset="0.6"/>`
+- Line 109: `<GradientStop Color="#66FFFFFF" Offset="0"/>`
+- Line 110: `<GradientStop Color="#33FFFFFF" Offset="0.49"/>`
+- Line 111: `<GradientStop Color="#11FFFFFF" Offset="0.5"/>`
+- Line 112: `<GradientStop Color="#22FFFFFF" Offset="1"/>`
+- Line 115: `<SolidColorBrush x:Key="AeroTextBrush" Color="#FFFFFFFF"/>`
+- Line 116: `<SolidColorBrush x:Key="AeroTextDisabledBrush" Color="#FF888888"/>`
+- Line 120: `<GradientStop Color="#8800BFFF" Offset="0"/>`
+- Line 121: `<GradientStop Color="#0000BFFF" Offset="1"/>`
+- Line 126: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 127: `<GradientStop Color="#88FFFFFF" Offset="0.5"/>`
+- Line 128: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 133: `<GradientStop Color="#CCFF0000" Offset="0"/>`
+- Line 134: `<GradientStop Color="#AA800000" Offset="1"/>`
+
+### `./InstallationWizard/Styles/AeroControls.xaml`
+- Line 11: `<Pen Thickness="2" LineJoin="Round" Brush="#FF82869E"/>`
+- Line 16: `<GradientStop Color="#6ADDFFFD" Offset="0.00153139"/>`
+- Line 17: `<GradientStop Color="#3A000000" Offset="0.139357"/>`
+- Line 18: `<GradientStop Color="#E07FCEFF" Offset="0.32925"/>`
+- Line 19: `<GradientStop Color="#7F000000" Offset="0.378254"/>`
+- Line 20: `<GradientStop Color="#FF0099FF" Offset="0.828484"/>`
+- Line 42: `<Pen Thickness="2" StartLineCap="Round" EndLineCap="Round" LineJoin="Round" Brush="#67BBDDF2"/>`
+- Line 47: `<GradientStop Color="#CB4C87AF" Offset="0.295559"/>`
+- Line 48: `<GradientStop Color="#CD162D41" Offset="0.607963"/>`
+- Line 49: `<GradientStop Color="#CD3A576E" Offset="0.638591"/>`
+- Line 50: `<GradientStop Color="#CD6E869C" Offset="0.911179"/>`
+- Line 72: `<Pen Thickness="2" StartLineCap="Round" EndLineCap="Round" LineJoin="Round" Brush="#67BBDDF2"/>`
+- Line 77: `<GradientStop Color="#FF87B0CA" Offset="0.323124"/>`
+- Line 78: `<GradientStop Color="#FF496A89" Offset="0.488515"/>`
+- Line 79: `<GradientStop Color="#FF335876" Offset="0.500766"/>`
+- Line 80: `<GradientStop Color="#FF559EBA" Offset="0.68147"/>`
+- Line 101: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 102: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 114: `<GradientStop Color="#25FFFFFF" Offset="0"/>`
+- Line 115: `<GradientStop Color="#00FFFFFF" Offset="0.185299"/>`
+- Line 116: `<GradientStop Color="#1AFFFFFF" Offset="0.540582"/>`
+- Line 117: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 148: `<GradientStop Color="#60FFFFFF" Offset="0"/>`
+- Line 149: `<GradientStop Color="#10FFFFFF" Offset="0.45"/>`
+- Line 150: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 163: `<GradientStop Color="#FF61D1F0" Offset="0"/>`
+- Line 164: `<GradientStop Color="#00000000" Offset="0.662338"/>`
+- Line 177: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 178: `<GradientStop Color="#00FFFFFF" Offset="0.487941"/>`
+- Line 179: `<GradientStop Color="#00000004" Offset="0.517625"/>`
+- Line 180: `<GradientStop Color="#FF38CBF4" Offset="0.717996"/>`
+- Line 216: `<GradientStop Color="#8061D1F0" Offset="0"/>`
+- Line 217: `<GradientStop Color="#0061D1F0" Offset="1"/>`
+- Line 267: `<Setter TargetName="ContentSite" Property="TextElement.Foreground" Value="#FFFFFFFF"/>`
+- Line 279: `<ColorAnimation Storyboard.TargetName="Border" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#1AFFFFFF" Duration="0:0:0.1" />`
+- Line 318: `<GradientStop Color="#60FFFFFF" Offset="0"/>`
+- Line 319: `<GradientStop Color="#10FFFFFF" Offset="0.45"/>`
+- Line 320: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 333: `<GradientStop Color="#FF61D1F0" Offset="0"/>`
+- Line 334: `<GradientStop Color="#00000000" Offset="0.662338"/>`
+- Line 347: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 348: `<GradientStop Color="#00FFFFFF" Offset="0.487941"/>`
+- Line 349: `<GradientStop Color="#00000004" Offset="0.517625"/>`
+- Line 350: `<GradientStop Color="#FF38CBF4" Offset="0.717996"/>`
+- Line 390: `<GradientStop Color="#8061D1F0" Offset="0"/>`
+- Line 391: `<GradientStop Color="#0061D1F0" Offset="1"/>`
+- Line 441: `<Setter TargetName="ContentSite" Property="TextElement.Foreground" Value="#FFFFFFFF"/>`
+- Line 453: `<ColorAnimation Storyboard.TargetName="Border" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#1AFFFFFF" Duration="0:0:0.1" />`
+- Line 667: `<Setter Property="Background" Value="#33000000"/>`
+- Line 668: `<Setter Property="BorderBrush" Value="#66FFFFFF"/>`
+
+### `./InstallationWizard/Styles/AeroImplicitStyles.xaml`
+- Line 142: `Background="#B2485166"`
+- Line 146: `<GradientStop Color="#0FFFFFFF" Offset="0"/>`
+- Line 147: `<GradientStop Color="#7FFFFFFF" Offset="0.1"/>`
+- Line 148: `<GradientStop Color="#00FFFFFF" Offset="0.2"/>`
+- Line 228: `Background="#B2485166"`
+- Line 232: `<GradientStop Color="#0FFFFFFF" Offset="0"/>`
+- Line 233: `<GradientStop Color="#7FFFFFFF" Offset="0.1"/>`
+- Line 234: `<GradientStop Color="#00FFFFFF" Offset="0.2"/>`
+- Line 323: `<Setter Property="SelectionBrush" Value="#804B9DCC"/>`
+- Line 342: `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 343: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 348: `<GradientStop Color="#FF4588BD" Offset="0"/>`
+- Line 349: `<GradientStop Color="#001AD5FF" Offset="0.381"/>`
+- Line 362: `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 363: `<GradientStop Color="#34C3EFFF" Offset="1"/>`
+- Line 368: `<GradientStop Color="#44FFFFFF" Offset="0"/>`
+- Line 369: `<GradientStop Color="#0BFFFFFF" Offset="0.345"/>`
+- Line 370: `<GradientStop Color="#01FFFFFF" Offset="0.351"/>`
+- Line 371: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 380: `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 381: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 386: `<GradientStop Color="#384588BD" Offset="0"/>`
+- Line 387: `<GradientStop Color="#001AD5FF" Offset="0.691"/>`
+- Line 400: `<GradientStop Color="#FF6A9FC0" Offset="0"/>`
+- Line 401: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 406: `<GradientStop Color="#FF5A9ED0" Offset="0"/>`
+- Line 407: `<GradientStop Color="#001AD5FF" Offset="0.55"/>`
+- Line 416: `<GradientStop Color="#FF6A9FC0" Offset="0"/>`
+- Line 417: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 422: `<GradientStop Color="#FF5A9ED0" Offset="0"/>`
+- Line 423: `<GradientStop Color="#001AD5FF" Offset="0.55"/>`
+- Line 436: `<GradientStop Color="#40000000" Offset="0"/>`
+- Line 437: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 446: `<GradientStop Color="#25000000" Offset="0"/>`
+- Line 447: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 456: `<GradientStop Color="#25000000" Offset="0"/>`
+- Line 457: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 472: `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.3"/>`
+- Line 581: `<Border x:Name="IdleBackground" CornerRadius="4" BorderThickness="2" BorderBrush="#67BBDDF2">`
+- Line 584: `<GradientStop Color="#FF637495" Offset="0.308"/>`
+- Line 585: `<GradientStop Color="#FF384D75" Offset="0.489"/>`
+- Line 586: `<GradientStop Color="#FF223761" Offset="0.495"/>`
+- Line 587: `<GradientStop Color="#FF284D7E" Offset="0.681"/>`
+- Line 596: `<GradientStop Color="#FF4B9DCC" Offset="0.231"/>`
+- Line 597: `<GradientStop Color="#013C4F73" Offset="1"/>`
+- Line 607: `<Border x:Name="HoverBackground" Opacity="0" CornerRadius="4" BorderThickness="2" BorderBrush="#67BBDDF2">`
+- Line 610: `<GradientStop Color="#FF7387AF" Offset="0.308"/>`
+- Line 611: `<GradientStop Color="#FF405886" Offset="0.489"/>`
+- Line 612: `<GradientStop Color="#FF284276" Offset="0.495"/>`
+- Line 613: `<GradientStop Color="#FF295691" Offset="0.681"/>`
+- Line 622: `<GradientStop Color="#FF4B9DCC" Offset="0.231"/>`
+- Line 623: `<GradientStop Color="#013C4F73" Offset="1"/>`
+- Line 632: `<GradientStop Color="#FF4B9DCC" Offset="0.231"/>`
+- Line 633: `<GradientStop Color="#013C4F73" Offset="1"/>`
+- Line 643: `<Border x:Name="PressedBackground" Opacity="0" CornerRadius="4" BorderThickness="2" BorderBrush="#67BBDDF2">`
+- Line 646: `<GradientStop Color="#FF324F80" Offset="0.308"/>`
+- Line 647: `<GradientStop Color="#FF142E74" Offset="0.489"/>`
+- Line 648: `<GradientStop Color="#FF09246B" Offset="0.501"/>`
+- Line 649: `<GradientStop Color="#FF0A348A" Offset="0.681"/>`
+- Line 658: `<GradientStop Color="#FF3A5AC6" Offset="0.213"/>`
+- Line 659: `<GradientStop Color="#013C4F73" Offset="1"/>`
+- Line 668: `<GradientStop Color="#80000000" Offset="0"/>`
+- Line 669: `<GradientStop Color="#40000000" Offset="0.15"/>`
+- Line 670: `<GradientStop Color="#00000000" Offset="0.4"/>`
+- Line 679: `<GradientStop Color="#50000000" Offset="0"/>`
+- Line 680: `<GradientStop Color="#00000000" Offset="0.1"/>`
+- Line 681: `<GradientStop Color="#00000000" Offset="0.9"/>`
+- Line 682: `<GradientStop Color="#50000000" Offset="1"/>`
+- Line 694: `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>`
+- Line 802: `<GradientStop Color="#60A0D0FF" Offset="0"/>`
+- Line 803: `<GradientStop Color="#3060A0D0" Offset="0.5"/>`
+- Line 804: `<GradientStop Color="#4080C0F0" Offset="1"/>`
+- Line 809: `<GradientStop Color="#A0C0E8FF" Offset="0"/>`
+- Line 810: `<GradientStop Color="#6080B0E0" Offset="0.5"/>`
+- Line 811: `<GradientStop Color="#80A0D0FF" Offset="1"/>`
+- Line 837: `<GradientStop Color="#40FFFFFF" Offset="0"/>`
+- Line 838: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 849: `<Setter TargetName="Bg" Property="BorderBrush" Value="#5090C0E0"/>`
+- Line 854: `<Setter TargetName="Bg" Property="BorderBrush" Value="#80A0D0FF"/>`
+- Line 880: `<Border x:Name="IdleBackground" CornerRadius="3" BorderThickness="1" BorderBrush="#FF82869E">`
+- Line 883: `<GradientStop Color="#E0183858" Offset="0"/>`
+- Line 884: `<GradientStop Color="#D0285878" Offset="0.15"/>`
+- Line 885: `<GradientStop Color="#C0306888" Offset="0.5"/>`
+- Line 886: `<GradientStop Color="#D0285878" Offset="0.85"/>`
+- Line 887: `<GradientStop Color="#E0183858" Offset="1"/>`
+- Line 896: `<GradientStop Color="#30FFFFFF" Offset="0"/>`
+- Line 897: `<GradientStop Color="#10FFFFFF" Offset="0.5"/>`
+- Line 898: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 907: `<GradientStop Color="#4060B0F0" Offset="0"/>`
+- Line 908: `<GradientStop Color="#0060B0F0" Offset="1"/>`
+- Line 917: `<GradientStop Color="#50FFFFFF" Offset="0"/>`
+- Line 918: `<GradientStop Color="#20FFFFFF" Offset="0.5"/>`
+- Line 919: `<GradientStop Color="#3080B0D0" Offset="1"/>`
+- Line 925: `<Border x:Name="HoverBackground" Opacity="0" CornerRadius="3" BorderThickness="1" BorderBrush="#67BBDDF2">`
+- Line 928: `<GradientStop Color="#CD6E869C" Offset="0"/>`
+- Line 929: `<GradientStop Color="#CD3A576E" Offset="0.35"/>`
+- Line 930: `<GradientStop Color="#CD162D41" Offset="0.5"/>`
+- Line 931: `<GradientStop Color="#CB4C87AF" Offset="1"/>`
+- Line 940: `<GradientStop Color="#50FFFFFF" Offset="0"/>`
+- Line 941: `<GradientStop Color="#20FFFFFF" Offset="0.5"/>`
+- Line 942: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 948: `<Border x:Name="PressedBackground" Opacity="0" CornerRadius="3" BorderThickness="1" BorderBrush="#67BBDDF2">`
+- Line 951: `<GradientStop Color="#FF87B0CA" Offset="0"/>`
+- Line 952: `<GradientStop Color="#FF496A89" Offset="0.45"/>`
+- Line 953: `<GradientStop Color="#FF335876" Offset="0.5"/>`
+- Line 954: `<GradientStop Color="#FF559EBA" Offset="1"/>`
+- Line 963: `<GradientStop Color="#60FFFFFF" Offset="0"/>`
+- Line 964: `<GradientStop Color="#20FFFFFF" Offset="0.6"/>`
+- Line 965: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 973: `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>`
+- Line 1043: `<DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="2" Opacity="0.6"/>`
+- Line 1046: `<SolidColorBrush Color="#01000000"/>`
+- Line 1054: `<GradientStop Color="#F0102030" Offset="0"/>`
+- Line 1055: `<GradientStop Color="#F0183050" Offset="0.3"/>`
+- Line 1056: `<GradientStop Color="#F0102840" Offset="0.7"/>`
+- Line 1057: `<GradientStop Color="#F0081828" Offset="1"/>`
+- Line 1075: `<GradientStop Color="#25FFFFFF" Offset="0"/>`
+- Line 1076: `<GradientStop Color="#10FFFFFF" Offset="0.5"/>`
+- Line 1077: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 1086: `<GradientStop Color="#3040A0E0" Offset="0"/>`
+- Line 1087: `<GradientStop Color="#0040A0E0" Offset="1"/>`
+- Line 1096: `<GradientStop Color="#60FFFFFF" Offset="0"/>`
+- Line 1097: `<GradientStop Color="#30FFFFFF" Offset="0.3"/>`
+- Line 1098: `<GradientStop Color="#20FFFFFF" Offset="0.7"/>`
+- Line 1099: `<GradientStop Color="#4080C0E0" Offset="1"/>`
+- Line 1160: `<GradientStop Color="#6060B0F0" Offset="0"/>`
+- Line 1161: `<GradientStop Color="#0060B0F0" Offset="1"/>`
+- Line 1172: `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 1173: `<GradientStop Color="#FFF0F0F0" Offset="0.4"/>`
+- Line 1174: `<GradientStop Color="#FFE0E0E0" Offset="0.5"/>`
+- Line 1175: `<GradientStop Color="#FFF5F5F5" Offset="1"/>`
+- Line 1180: `<GradientStop Color="#FF909090" Offset="0"/>`
+- Line 1181: `<GradientStop Color="#FF707070" Offset="1"/>`
+- Line 1185: `<DropShadowEffect Color="#000000" BlurRadius="3" ShadowDepth="1" Opacity="0.4"/>`
+- Line 1193: `<GradientStop Color="#80FFFFFF" Offset="0"/>`
+- Line 1194: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 1205: `<GradientStop Color="#FFE8F4FF" Offset="0"/>`
+- Line 1206: `<GradientStop Color="#FFD0E8FF" Offset="0.4"/>`
+- Line 1207: `<GradientStop Color="#FFC0D8F0" Offset="0.5"/>`
+- Line 1208: `<GradientStop Color="#FFD8ECFF" Offset="1"/>`
+- Line 1215: `<GradientStop Color="#FF60A0D0" Offset="0"/>`
+- Line 1216: `<GradientStop Color="#FF4080B0" Offset="1"/>`
+- Line 1226: `<GradientStop Color="#FFD0E8FF" Offset="0"/>`
+- Line 1227: `<GradientStop Color="#FFB0D0F0" Offset="0.4"/>`
+- Line 1228: `<GradientStop Color="#FFA0C0E0" Offset="0.5"/>`
+- Line 1229: `<GradientStop Color="#FFC0D8F0" Offset="1"/>`
+- Line 1277: `<GradientStop Color="#66EAF2FE" Offset="0"/>`
+- Line 1278: `<GradientStop Color="#00B7D7EE" Offset="0.528"/>`
+- Line 1279: `<GradientStop Color="#668CC5E6" Offset="1"/>`
+- Line 1284: `<GradientStop Color="#CCE4EAF8" Offset="0"/>`
+- Line 1285: `<GradientStop Color="#CCA9B0BE" Offset="0.118"/>`
+- Line 1286: `<GradientStop Color="#CC34526A" Offset="0.397"/>`
+- Line 1287: `<GradientStop Color="#CC0D2D42" Offset="0.519"/>`
+- Line 1288: `<GradientStop Color="#CC4C9EC0" Offset="1"/>`
+- Line 1297: `<GradientStop Color="#99EAF2FE" Offset="0"/>`
+- Line 1298: `<GradientStop Color="#33B7D7EE" Offset="0.528"/>`
+- Line 1299: `<GradientStop Color="#998CC5E6" Offset="1"/>`
+- Line 1304: `<GradientStop Color="#CCEEF4FF" Offset="0"/>`
+- Line 1305: `<GradientStop Color="#CCB9C0CE" Offset="0.118"/>`
+- Line 1306: `<GradientStop Color="#CC44627A" Offset="0.397"/>`
+- Line 1307: `<GradientStop Color="#CC1D3D52" Offset="0.519"/>`
+- Line 1308: `<GradientStop Color="#CC5CAED0" Offset="1"/>`
+- Line 1319: `<GradientStop Color="#FF8AE0FF" Offset="0.093"/>`
+- Line 1320: `<GradientStop Color="#FF35A6E6" Offset="0.645"/>`
+- Line 1321: `<GradientStop Color="#FF4DA6E4" Offset="0.712"/>`
+- Line 1322: `<GradientStop Color="#FFAED3F4" Offset="0.942"/>`
+- Line 1327: `<DropShadowEffect Color="#22657C" BlurRadius="2" ShadowDepth="0" Opacity="0.8" Direction="315"/>`
+- Line 1339: `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>`
+- Line 1428: `<GradientStop Color="#CCD9E7F4" Offset="0"/>`
+- Line 1429: `<GradientStop Color="#CC7CBEEA" Offset="1"/>`
+- Line 1434: `<GradientStop Color="#CC9CB3C8" Offset="0.473"/>`
+- Line 1435: `<GradientStop Color="#CC3A576E" Offset="0.593"/>`
+- Line 1436: `<GradientStop Color="#CC162D41" Offset="0.623"/>`
+- Line 1437: `<GradientStop Color="#CC4C87AF" Offset="0.798"/>`
+- Line 1446: `<GradientStop Color="#FFE9F7FF" Offset="0"/>`
+- Line 1447: `<GradientStop Color="#FF8CCEFA" Offset="1"/>`
+- Line 1452: `<GradientStop Color="#FFACC3D8" Offset="0.473"/>`
+- Line 1453: `<GradientStop Color="#FF4A677E" Offset="0.593"/>`
+- Line 1454: `<GradientStop Color="#FF263D51" Offset="0.623"/>`
+- Line 1455: `<GradientStop Color="#FF5C97BF" Offset="0.798"/>`
+- Line 1471: `<GradientStop Color="#FF8AE0FF" Offset="0.093"/>`
+- Line 1472: `<GradientStop Color="#FF35A6E6" Offset="0.645"/>`
+- Line 1473: `<GradientStop Color="#FF4DA6E4" Offset="0.712"/>`
+- Line 1474: `<GradientStop Color="#FFAED3F4" Offset="0.942"/>`
+- Line 1479: `<DropShadowEffect Color="#22657C" BlurRadius="2" ShadowDepth="0" Opacity="0.8" Direction="315"/>`
+- Line 1490: `<GradientStop Color="#FF8AE0FF" Offset="0.093"/>`
+- Line 1491: `<GradientStop Color="#FF35A6E6" Offset="0.645"/>`
+- Line 1492: `<GradientStop Color="#FF4DA6E4" Offset="0.712"/>`
+- Line 1493: `<GradientStop Color="#FFAED3F4" Offset="0.942"/>`
+- Line 1497: `<DropShadowEffect Color="#22657C" BlurRadius="2" ShadowDepth="0" Opacity="0.8" Direction="315"/>`
+- Line 1509: `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>`
+- Line 1601: `<GradientStop Color="#60000000" Offset="0"/>`
+- Line 1602: `<GradientStop Color="#40000000" Offset="0.5"/>`
+- Line 1603: `<GradientStop Color="#30000000" Offset="1"/>`
+- Line 1608: `<GradientStop Color="#40000000" Offset="0"/>`
+- Line 1609: `<GradientStop Color="#20FFFFFF" Offset="1"/>`
+- Line 1624: `<GradientStop Color="#FF80D0FF" Offset="0"/>`
+- Line 1625: `<GradientStop Color="#FF40A0E0" Offset="0.4"/>`
+- Line 1626: `<GradientStop Color="#FF0080D0" Offset="0.5"/>`
+- Line 1627: `<GradientStop Color="#FF60B0E0" Offset="1"/>`
+- Line 1633: `<DropShadowEffect Color="#4080C0FF" BlurRadius="4" ShadowDepth="0" Opacity="0.6"/>`
+- Line 1698: `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 1699: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 1704: `<GradientStop Color="#374588BD" Offset="0"/>`
+- Line 1705: `<GradientStop Color="#081AD5FF" Offset="0.691"/>`
+- Line 1706: `<GradientStop Color="#1FFFFFFF" Offset="1"/>`
+- Line 1715: `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 1716: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 1721: `<GradientStop Color="#A34588BD" Offset="0"/>`
+- Line 1722: `<GradientStop Color="#111AD5FF" Offset="0.691"/>`
+- Line 1723: `<GradientStop Color="#31FFFFFF" Offset="1"/>`
+- Line 1733: `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.3"/>`
+- Line 1822: `<GradientStop Color="#60000000" Offset="0"/>`
+- Line 1823: `<GradientStop Color="#30000000" Offset="0.5"/>`
+- Line 1824: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 1833: `<GradientStop Color="#40000000" Offset="0"/>`
+- Line 1834: `<GradientStop Color="#20000000" Offset="0.5"/>`
+- Line 1835: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 1844: `<GradientStop Color="#40000000" Offset="0"/>`
+- Line 1845: `<GradientStop Color="#20000000" Offset="0.5"/>`
+- Line 1846: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 1855: `<GradientStop Color="#30000000" Offset="0"/>`
+- Line 1856: `<GradientStop Color="#10000000" Offset="0.5"/>`
+- Line 1857: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 1892: `<Setter Property="Foreground" Value="#FF3D7FA8"/>`
+- Line 1909: `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 1910: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 1915: `<GradientStop Color="#3FFFFFFF" Offset="0"/>`
+- Line 1916: `<GradientStop Color="#20000000" Offset="0.527"/>`
+- Line 1917: `<GradientStop Color="#41FFFFFF" Offset="1"/>`
+- Line 1932: `<GradientStop Color="#FF95C8E2" Offset="0"/>`
+- Line 1933: `<GradientStop Color="#FD3D7FA8" Offset="0.483"/>`
+- Line 1934: `<GradientStop Color="#FC286792" Offset="0.512"/>`
+- Line 1935: `<GradientStop Color="#FC46A1C9" Offset="1"/>`
+
+### `./InstallationWizard/Styles/AeroScrollBars.xaml`
+- Line 22: `<Setter TargetName="Arrow" Property="Fill" Value="#FFCCCCCC" />`
+- Line 25: `<Setter TargetName="Arrow" Property="Fill" Value="#FF999999" />`
+- Line 47: `<GradientStop Color="#0AFFFFFF" Offset="0"/>`
+- Line 48: `<GradientStop Color="#9AFFFFFF" Offset="1"/>`
+- Line 53: `<GradientStop Color="#FF707987" Offset="0"/>`
+- Line 54: `<GradientStop Color="#FF505E6C" Offset="0.448"/>`
+- Line 55: `<GradientStop Color="#FF445060" Offset="0.525"/>`
+- Line 56: `<GradientStop Color="#FF30424F" Offset="1"/>`
+- Line 77: `<GradientStop Color="#0AFFFFFF" Offset="0"/>`
+- Line 78: `<GradientStop Color="#9AFFFFFF" Offset="1"/>`
+- Line 83: `<GradientStop Color="#FF707987" Offset="0"/>`
+- Line 84: `<GradientStop Color="#FF505E6C" Offset="0.448"/>`
+- Line 85: `<GradientStop Color="#FF445060" Offset="0.525"/>`
+- Line 86: `<GradientStop Color="#FF30424F" Offset="1"/>`
+
+### `./InstallationWizard/Styles/MediaStyles.xaml`
+- Line 6: `<GradientStop Color="#40FFFFFF" Offset="0"/>`
+- Line 7: `<GradientStop Color="#10FFFFFF" Offset="0.45"/>`
+- Line 8: `<GradientStop Color="#00FFFFFF" Offset="0.45"/>`
+- Line 9: `<GradientStop Color="#05FFFFFF" Offset="1"/>`
+- Line 24: `<GradientStop Color="#FF8F939C" Offset="0.130168"/>`
+- Line 25: `<GradientStop Color="#00FFFFFF" Offset="0.513017"/>`
+- Line 26: `<GradientStop Color="#00191F34" Offset="0.519142"/>`
+- Line 27: `<GradientStop Color="#22A0A0A0" Offset="0.981623"/>`
+- Line 31: `<Pen Brush="#7F7E8DB3" Thickness="1" LineJoin="Round"/>`
+- Line 49: `<GradientStop Color="#FFCCF6FF" Offset="0.130168"/>`
+- Line 50: `<GradientStop Color="#00FFFFFF" Offset="0.503828"/>`
+- Line 51: `<GradientStop Color="#00191F34" Offset="0.513017"/>`
+- Line 52: `<GradientStop Color="#FF799197" Offset="0.981623"/>`
+- Line 56: `<Pen Brush="#7F7E8DB3" Thickness="1" LineJoin="Round"/>`
+- Line 74: `<GradientStop Color="#0FFFFFFF" Offset="0.23124"/>`
+- Line 75: `<GradientStop Color="#00FFFFFF" Offset="0.577335"/>`
+- Line 76: `<GradientStop Color="#0EFFFFFF" Offset="0.583461"/>`
+- Line 77: `<GradientStop Color="#3FFFFFFF" Offset="1"/>`
+- Line 81: `<SolidColorBrush x:Key="GlassSliceBorderBrush" Color="#34B3E1FF"/>`
+- Line 116: `<SolidColorBrush x:Key="ThumbnailLetterboxBrush" Color="#FF000000"/>`
+- Line 119: `<SolidColorBrush x:Key="ThumbnailFrameBorderBrush" Color="#40FFFFFF"/>`
+- Line 123: `<GradientStop Color="#FF1A3040" Offset="0"/>`
+- Line 124: `<GradientStop Color="#FF356080" Offset="1"/>`
+- Line 129: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 130: `<GradientStop Color="#80FFFFFF" Offset="0.5"/>`
+- Line 131: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 137: `<GradientStop Color="#CB4C87AF" Offset="0.295559"/>`
+- Line 138: `<GradientStop Color="#CD162D41" Offset="0.607963"/>`
+- Line 139: `<GradientStop Color="#CD3A576E" Offset="0.638591"/>`
+- Line 140: `<GradientStop Color="#CD6E869C" Offset="0.911179"/>`
+- Line 150: `<SolidColorBrush x:Key="ToolButtonHoverBorderBrush" Color="#67BBDDF2"/>`
+- Line 155: `<GradientStop Color="#CC2C577F" Offset="0.295559"/>`
+- Line 156: `<GradientStop Color="#CC061D31" Offset="0.607963"/>`
+- Line 157: `<GradientStop Color="#CC1A374E" Offset="0.638591"/>`
+- Line 158: `<GradientStop Color="#CC4E667C" Offset="0.911179"/>`
+- Line 168: `<SolidColorBrush x:Key="ToolButtonPressedBorderBrush" Color="#99001020"/>`
+- Line 234: `<Pen LineJoin="Round" Brush="#7F7E8DB3"/>`
+- Line 239: `<GradientStop Color="#CCFFFFFF" Offset="0.200613"/>`
+- Line 240: `<GradientStop Color="#8DCFEFFF" Offset="0.323124"/>`
+- Line 241: `<GradientStop Color="#797A99A6" Offset="0.454824"/>`
+- Line 242: `<GradientStop Color="#4C01263F" Offset="0.678407"/>`
+- Line 243: `<GradientStop Color="#8C5FCAFF" Offset="0.911179"/>`
+- Line 244: `<GradientStop Color="#FF25CFFF" Offset="1"/>`
+- Line 266: `<Pen LineJoin="Round" Brush="#7F7E8DB3"/>`
+- Line 271: `<GradientStop Color="#CCFFFFFF" Offset="0"/>`
+- Line 272: `<GradientStop Color="#4CC7EEFF" Offset="0.295559"/>`
+- Line 273: `<GradientStop Color="#47242729" Offset="0.62634"/>`
+- Line 274: `<GradientStop Color="#30D0F0FF" Offset="0.963247"/>`
+- Line 309: `<Border BorderThickness="0,0,1,1" BorderBrush="#33FFFFFF"/>`
+- Line 315: `<Border x:Name="HoverHighlight" Background="#20FFFFFF" Opacity="0"/>`
+- Line 318: `<Border x:Name="PressedHighlight" Background="#40FFFFFF" Opacity="0"/>`
+- Line 350: `<GradientStop Color="#15FFFFFF" Offset="0"/>`
+- Line 352: `<GradientStop Color="#05FFFFFF" Offset="0.4"/>`
+- Line 354: `<GradientStop Color="#1AFFFFFF" Offset="0.8"/>`
+- Line 356: `<GradientStop Color="#25FFFFFF" Offset="1"/>`
+- Line 364: `<GradientStop Color="#60FFFFFF" Offset="0"/>`
+- Line 366: `<GradientStop Color="#20FFFFFF" Offset="0.5"/>`
+- Line 368: `<GradientStop Color="#50FFFFFF" Offset="1"/>`
+- Line 375: `<DropShadowEffect Color="#FF000000" BlurRadius="10" ShadowDepth="3" Opacity="0.5"/>`
+- Line 382: `<Setter Property="Foreground" Value="#FFFFFFFF"/>`
+- Line 390: `<DropShadowEffect Color="#FF000000" BlurRadius="4" ShadowDepth="1" Opacity="0.8"/>`
+- Line 397: `<Setter Property="Foreground" Value="#99FFFFFF"/>`
+- Line 406: `<Setter Property="Foreground" Value="#FFFFFFFF"/>`
+- Line 414: `<DropShadowEffect Color="#FF000000" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>`
+- Line 433: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 434: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 443: `<GradientStop Color="#25FFFFFF" Offset="0"/>`
+- Line 444: `<GradientStop Color="#00FFFFFF" Offset="0.185299"/>`
+- Line 445: `<GradientStop Color="#1AFFFFFF" Offset="0.540582"/>`
+- Line 446: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 474: `Stroke="#7F7E8DB3" StrokeThickness="2"/>`
+- Line 481: `Stroke="#7F7E8DB3" StrokeThickness="2"/>`
+- Line 571: `<GradientStop Color="#A7FFFFFF" Offset="0"/>`
+- Line 572: `<GradientStop Color="#2DFFFFFF" Offset="1"/>`
+- Line 579: `<GradientStop Color="#7DFFFFFF" Offset="0"/>`
+- Line 580: `<GradientStop Color="#1A000000" Offset="0.467075"/>`
+- Line 581: `<GradientStop Color="#1FFFFFFF" Offset="1"/>`
+- Line 601: `<GradientStop Color="#A7FFFFFF" Offset="0"/>`
+- Line 602: `<GradientStop Color="#2DFFFFFF" Offset="1"/>`
+- Line 609: `<GradientStop Color="#7DFFFFFF" Offset="0"/>`
+- Line 610: `<GradientStop Color="#1A000000" Offset="0.467075"/>`
+- Line 611: `<GradientStop Color="#1FFFFFFF" Offset="1"/>`
+
+### `./InstallationWizard/Styles/PlayerStyles.xaml`
+- Line 13: `<Pen LineJoin="Round" Brush="#7F7E8DB3"/>`
+- Line 18: `<GradientStop Color="#FF99999C" Offset="0.182236"/>`
+- Line 19: `<GradientStop Color="#FF36394E" Offset="0.577335"/>`
+- Line 20: `<GradientStop Color="#FF1B233D" Offset="0.583461"/>`
+- Line 21: `<GradientStop Color="#FF305071" Offset="0.79173"/>`
+- Line 44: `<GradientStop Color="#7FEAF2FE" Offset="0"/>`
+- Line 45: `<GradientStop Color="#00B7D7EE" Offset="0.528331"/>`
+- Line 46: `<GradientStop Color="#7F8CC5E6" Offset="1"/>`
+- Line 55: `<GradientStop Color="#FFE4EAF8" Offset="0"/>`
+- Line 56: `<GradientStop Color="#FFA9B0BE" Offset="0.117917"/>`
+- Line 57: `<GradientStop Color="#FF173C59" Offset="0.482389"/>`
+- Line 58: `<GradientStop Color="#FF001F34" Offset="0.488515"/>`
+- Line 59: `<GradientStop Color="#FF4C9EC0" Offset="1"/>`
+- Line 75: `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 76: `<GradientStop Color="#FFC0C0C0" Offset="0.5"/>`
+- Line 77: `<GradientStop Color="#FF808080" Offset="0.5"/>`
+- Line 78: `<GradientStop Color="#FFB0B0B0" Offset="1"/>`
+- Line 142: `<Ellipse x:Name="Glow" Fill="#40FFFFFF" Opacity="0" Margin="2">`
+- Line 201: `<Ellipse x:Name="Highlight" Fill="#FF00CCFF" Opacity="0" Margin="2">`
+- Line 262: `BorderBrush="#80000000"`
+- Line 263: `Background="#40000000"`
+- Line 276: `<GradientStop Color="#FF66C2FF" Offset="0"/>`
+- Line 277: `<GradientStop Color="#FF007ACC" Offset="0.5"/>`
+- Line 278: `<GradientStop Color="#FF005C99" Offset="1"/>`
+- Line 291: `BorderBrush="#FF808080"`
+
+### `./Skyweaver/Controls/AgentConfigurationControl/Views/AgentConfigurationControl.xaml`
+- Line 165: `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 166: `<GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>`
+- Line 167: `<GradientStop Color="#07FFFFFF" Offset="0.109195"/>`
+- Line 168: `<GradientStop Color="#04FFFFFF" Offset="0.298851"/>`
+- Line 169: `<GradientStop Color="#3AFFFFFF" Offset="0.327586"/>`
+- Line 170: `<GradientStop Color="#1AFFFFFF" Offset="0.465517"/>`
+- Line 171: `<GradientStop Color="#14FFFFFF" Offset="0.591954"/>`
+- Line 172: `<GradientStop Color="#05FFFFFF" Offset="0.758621"/>`
+- Line 173: `<GradientStop Color="#44FFFFFF" Offset="1"/>`
+- Line 177: `<SolidColorBrush Color="#40000000"/>`
+- Line 196: `Background="#12000000"`
+- Line 197: `BorderBrush="#40FFFFFF"`
+- Line 214: `Foreground="#D9FFFFFF"`
+- Line 269: `Background="#18000000"`
+- Line 270: `BorderBrush="#45FFFFFF"`
+- Line 380: `Foreground="#FFD3F6FF"`
+- Line 398: `Foreground="#D9FFFFFF"`
+- Line 539: `Background="#33000000"`
+- Line 540: `BorderBrush="#44FFFFFF"`
+- Line 549: `Foreground="#D9FFFFFF"`
+- Line 554: `Foreground="#FFD3F6FF"`
+- Line 699: `Foreground="#D9FFFFFF"`
+- Line 739: `<Setter Property="Foreground" Value="#FFD3F6FF"/>`
+- Line 742: `<Setter Property="Foreground" Value="#FFFFB3B3"/>`
+- Line 765: `Foreground="#D9FFFFFF"`
+- Line 772: `<Setter Property="Foreground" Value="#FFD3F6FF"/>`
+- Line 775: `<Setter Property="Foreground" Value="#FFFFB3B3"/>`
+
+### `./Skyweaver/Controls/AgentWizardControl/Views/AgentWizardControl.xaml`
+- Line 14: `<GradientStop Color="#FF19222D" Offset="0"/>`
+- Line 15: `<GradientStop Color="#FF10161E" Offset="1"/>`
+- Line 21: `Background="#16000000"`
+- Line 22: `BorderBrush="#335596FC"`
+- Line 29: `Foreground="#FF96FCFF"/>`
+- Line 33: `Foreground="#E6FFFFFF"`
+- Line 38: `Foreground="#AAFFFFFF"`
+- Line 47: `Foreground="#D9FFFFFF"`
+- Line 52: `Foreground="#A6FFFFFF"`
+
+### `./Skyweaver/Controls/ChatSessionControl/Views/AerialCityToolInvocationCardView.xaml`
+- Line 16: `<GradientStop Color="#D6C9CACA" Offset="0"/>`
+- Line 17: `<GradientStop Color="#9B9EB4C2" Offset="0.44"/>`
+- Line 18: `<GradientStop Color="#5A445E7C" Offset="1"/>`
+- Line 34: `<GradientStop Color="#66FFFFFF" Offset="0"/>`
+- Line 35: `<GradientStop Color="#24FFFFFF" Offset="0.26"/>`
+- Line 36: `<GradientStop Color="#00FFFFFF" Offset="0.44"/>`
+- Line 44: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 45: `<GradientStop Color="#2CFFFFFF" Offset="0.25"/>`
+- Line 46: `<GradientStop Color="#00FFFFFF" Offset="0.52"/>`
+- Line 47: `<GradientStop Color="#39FFFFFF" Offset="0.70"/>`
+- Line 48: `<GradientStop Color="#00FFFFFF" Offset="0.72"/>`
+- Line 49: `<GradientStop Color="#33FFFFFF" Offset="0.86"/>`
+- Line 50: `<GradientStop Color="#00FFFFFF" Offset="0.99"/>`
+- Line 63: `<GradientStop Color="#75007BFF" Offset="0"/>`
+- Line 64: `<GradientStop Color="#1A93F2FF" Offset="0.48"/>`
+- Line 65: `<GradientStop Color="#0093F2FF" Offset="1"/>`
+- Line 68: `<SolidColorBrush x:Key="AerialCityToolBrightTextBrush" Color="#F4FBFF"/>`
+- Line 69: `<SolidColorBrush x:Key="AerialCityToolSoftTextBrush" Color="#D9E5EB"/>`
+- Line 70: `<SolidColorBrush x:Key="AerialCityToolMutedTextBrush" Color="#B8C5CD"/>`
+- Line 71: `<SolidColorBrush x:Key="AerialCityToolPlaceholderTextBrush" Color="#CBD4DA"/>`
+- Line 72: `<SolidColorBrush x:Key="AerialCityToolCoolGrayTextBrush" Color="#AAB8C2"/>`
+- Line 74: `Color="#203746"`
+- Line 101: `<Setter Property="Background" Value="#18FFFFFF"/>`
+- Line 102: `<Setter Property="BorderBrush" Value="#6793F2FF"/>`
+- Line 108: `BorderBrush="#6793F2FF"`
+- Line 427: `Foreground="#B493F2FF"`
+- Line 428: `Background="#24000000"`
+- Line 429: `BorderBrush="#4493F2FF"`
+
+### `./Skyweaver/Controls/ChatSessionControl/Views/ChatSessionControl.xaml`
+- Line 24: `<Pen Thickness="0.32" LineJoin="Round" Brush="#FF000000"/>`
+- Line 35: `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 36: `<GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>`
+- Line 37: `<GradientStop Color="#07FFFFFF" Offset="0.109195"/>`
+- Line 38: `<GradientStop Color="#04FFFFFF" Offset="0.298851"/>`
+- Line 39: `<GradientStop Color="#3AFFFFFF" Offset="0.327586"/>`
+- Line 40: `<GradientStop Color="#1AFFFFFF" Offset="0.465517"/>`
+- Line 41: `<GradientStop Color="#14FFFFFF" Offset="0.591954"/>`
+- Line 42: `<GradientStop Color="#05FFFFFF" Offset="0.758621"/>`
+- Line 43: `<GradientStop Color="#44FFFFFF" Offset="1"/>`
+- Line 58: `<GradientStop Color="#26FFFFFF" Offset="0"/>`
+- Line 59: `<GradientStop Color="#00000004" Offset="0.38"/>`
+- Line 60: `<GradientStop Color="#00FFFFFF" Offset="0.417"/>`
+- Line 61: `<GradientStop Color="#56D4FFF9" Offset="0.77"/>`
+- Line 62: `<GradientStop Color="#4A8CF1E4" Offset="0.892"/>`
+- Line 68: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 69: `<GradientStop Color="#1AFFFFFF" Offset="0.135436"/>`
+- Line 70: `<GradientStop Color="#14FFFFFF" Offset="0.487941"/>`
+- Line 71: `<GradientStop Color="#00000004" Offset="0.517625"/>`
+- Line 72: `<GradientStop Color="#FF2AAE9A" Offset="0.729128"/>`
+- Line 88: `<GradientStop Color="#FF76F1E4" Offset="0"/>`
+- Line 89: `<GradientStop Color="#00000000" Offset="0.662338"/>`
+- Line 102: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 103: `<GradientStop Color="#1AFFFFFF" Offset="0.135436"/>`
+- Line 104: `<GradientStop Color="#14FFFFFF" Offset="0.487941"/>`
+- Line 105: `<GradientStop Color="#00000004" Offset="0.517625"/>`
+- Line 106: `<GradientStop Color="#FF29E1C8" Offset="0.717996"/>`
+- Line 119: `<Setter Property="Foreground" Value="#FFF4FFFD"/>`
+- Line 121: `<Setter Property="BorderBrush" Value="#FF000000"/>`
+- Line 153: `<Setter Property="BorderBrush" TargetName="border" Value="#552FFFF2"/>`
+- Line 159: `<Setter Property="BorderBrush" TargetName="border" Value="#6634FFF0"/>`
+- Line 192: `<Setter Property="Foreground" Value="#99FFFFFF"/>`
+- Line 207: `<Setter Property="Foreground" Value="#FFF5FEFF"/>`
+- Line 216: `<Setter Property="Foreground" Value="#B9E8FAFF"/>`
+- Line 226: `<Setter Property="Background" Value="#55283A4D"/>`
+- Line 227: `<Setter Property="BorderBrush" Value="#8896FCFF"/>`
+- Line 236: `<Setter Property="Foreground" Value="#FFF4FEFF"/>`
+- Line 353: `<Setter Property="BorderBrush" Value="#332EC5C0"/>`
+- Line 360: `<Setter Property="BorderBrush" Value="#44F3C96B"/>`
+- Line 365: `<Setter Property="Foreground" Value="#CCFFFFFF"/>`
+- Line 372: `<Setter Property="Foreground" Value="#FFF3E4AE"/>`
+- Line 386: `<DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="2" Opacity="0.6"/>`
+- Line 389: `<SolidColorBrush Color="#01000000"/>`
+- Line 396: `<GradientStop Color="#F0102030" Offset="0"/>`
+- Line 397: `<GradientStop Color="#F0183050" Offset="0.3"/>`
+- Line 398: `<GradientStop Color="#F0102840" Offset="0.7"/>`
+- Line 399: `<GradientStop Color="#F0081828" Offset="1"/>`
+- Line 407: `<GradientStop Color="#25FFFFFF" Offset="0"/>`
+- Line 408: `<GradientStop Color="#10FFFFFF" Offset="0.5"/>`
+- Line 409: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 417: `<GradientStop Color="#3040A0E0" Offset="0"/>`
+- Line 418: `<GradientStop Color="#0040A0E0" Offset="1"/>`
+- Line 426: `<GradientStop Color="#60FFFFFF" Offset="0"/>`
+- Line 427: `<GradientStop Color="#30FFFFFF" Offset="0.3"/>`
+- Line 428: `<GradientStop Color="#20FFFFFF" Offset="0.7"/>`
+- Line 429: `<GradientStop Color="#4080C0E0" Offset="1"/>`
+- Line 463: `<GradientStop Color="#B36693B0" Offset="0"/>`
+- Line 464: `<GradientStop Color="#A63A6F8C" Offset="0.34"/>`
+- Line 465: `<GradientStop Color="#C1234966" Offset="1"/>`
+- Line 469: `<GradientStop Color="#B06A94AF" Offset="0"/>`
+- Line 470: `<GradientStop Color="#A040718F" Offset="0.34"/>`
+- Line 471: `<GradientStop Color="#BC203E58" Offset="1"/>`
+- Line 475: `<GradientStop Color="#66FFFFFF" Offset="0"/>`
+- Line 476: `<GradientStop Color="#22FFFFFF" Offset="0.48"/>`
+- Line 477: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 481: `<GradientStop Color="#0028B4FF" Offset="0"/>`
+- Line 482: `<GradientStop Color="#143BBBE8" Offset="0.42"/>`
+- Line 483: `<GradientStop Color="#4D43D8F3" Offset="1"/>`
+- Line 488: `<Setter Property="BorderBrush" Value="#6687CAE3"/>`
+- Line 507: `<GradientStop x:Name="gradientStop1" Color="#91007BFF" Offset="0.143"/>`
+- Line 508: `<GradientStop x:Name="gradientStop2" Color="#00FFFFFF" Offset="0.503"/>`
+- Line 509: `<GradientStop x:Name="gradientStop3" Color="#C30099FF" Offset="0.792"/>`
+- Line 530: `To="#AF00C7FF"`
+- Line 535: `To="#00FFFFFF"`
+- Line 540: `To="#FF00ECFF"`
+- Line 566: `To="#91007BFF"`
+- Line 571: `To="#00FFFFFF"`
+- Line 576: `To="#C30099FF"`
+- Line 609: `<Setter Property="Background" Value="#99000000"/>`
+- Line 610: `<Setter Property="BorderBrush" Value="#66FFFFFF"/>`
+- Line 646: `Foreground="#FFBDEBFF"`
+- Line 660: `<Border Background="#24000000"`
+- Line 661: `BorderBrush="#4496FCFF"`
+- Line 668: `Foreground="#FFBDEBFF"`
+- Line 673: `Background="#22000000"`
+- Line 674: `BorderBrush="#3388D7E8"`
+- Line 679: `<TextBlock Text="{Binding Language}" Foreground="#FF9CDCFE" FontSize="11"/>`
+- Line 683: `Foreground="#FF9CDCFE"`
+- Line 692: `<Border Background="#241C7488"`
+- Line 693: `BorderBrush="#5584E7F4"`
+- Line 699: `Foreground="#FFBDEBFF"`
+- Line 705: `Foreground="#FFE7FBFF"`
+- Line 713: `<Border Background="#15000000"`
+- Line 714: `BorderBrush="#5596FCFF"`
+- Line 720: `Foreground="#FFBDEBFF"`
+- Line 726: `Foreground="#CCFFFFFF"`
+- Line 751: `Foreground="#FFFFF2CF"`
+- Line 768: `Foreground="#CCFFFFFF"`
+- Line 776: `<Border Background="#20162B34"`
+- Line 777: `BorderBrush="#55A8F0FF"`
+- Line 784: `Foreground="#FFBDEBFF"`
+- Line 789: `Background="#22000000"`
+- Line 790: `BorderBrush="#3388D7E8"`
+- Line 794: `<TextBlock Text="{Binding BadgeText}" Foreground="#FF9CDCFE" FontSize="11"/>`
+- Line 811: `Foreground="#FFEAFDFF"`
+- Line 839: `<Border Background="#18191F32"`
+- Line 840: `BorderBrush="#55B0A7FF"`
+- Line 847: `Foreground="#FFBDEBFF"`
+- Line 852: `Background="#22000000"`
+- Line 853: `BorderBrush="#33B0A7FF"`
+- Line 857: `<TextBlock Text="{Binding BadgeText}" Foreground="#FFB0A7FF" FontSize="11"/>`
+- Line 867: `Foreground="#B8FFFFFF"`
+- Line 889: `BorderBrush="#5596FCFF"`
+- Line 908: `<GradientStop Color="#C5C9CACA" Offset="0"/>`
+- Line 909: `<GradientStop Color="#34445E7C" Offset="0.988506"/>`
+- Line 924: `<GradientStop Color="#66FFFFFF" Offset="0"/>`
+- Line 925: `<GradientStop Color="#24FFFFFF" Offset="0.247126"/>`
+- Line 926: `<GradientStop Color="#00FFFFFF" Offset="0.421456"/>`
+- Line 940: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 941: `<GradientStop Color="#2CFFFFFF" Offset="0.254789"/>`
+- Line 942: `<GradientStop Color="#00FFFFFF" Offset="0.513412"/>`
+- Line 943: `<GradientStop Color="#39FFFFFF" Offset="0.701149"/>`
+- Line 944: `<GradientStop Color="#00FFFFFF" Offset="0.720307"/>`
+- Line 945: `<GradientStop Color="#33FFFFFF" Offset="0.856322"/>`
+- Line 946: `<GradientStop Color="#03FFFFFF" Offset="0.89272"/>`
+- Line 947: `<GradientStop Color="#00FFFFFF" Offset="0.988506"/>`
+- Line 956: `BorderBrush="#6793F2FF"`
+- Line 1004: `Background="#EEFAFDFF"`
+- Line 1005: `BorderBrush="#AA182433"`
+- Line 1010: `Fill="#FFC8E7F0"`
+- Line 1016: `Foreground="#FF152635"`
+- Line 1027: `Background="#22000000"`
+- Line 1028: `BorderBrush="#55E7FBFF"`
+- Line 1034: `Foreground="#FFEAFDFF"`
+- Line 1050: `Foreground="#FFF6FEFF"`
+- Line 1059: `Foreground="#DCEAF9FF"`
+- Line 1077: `Foreground="#FFF8FEFF"`
+- Line 1083: `Foreground="#B8FFFFFF"`
+- Line 1117: `Foreground="#B8FFFFFF"`
+- Line 1139: `Background="#1414232C"`
+- Line 1140: `BorderBrush="#4476D7EE"`
+- Line 1156: `Foreground="#FFD5F5FF"`
+- Line 1162: `Foreground="#99FFFFFF"`
+- Line 1168: `Foreground="#DDEDFBFF"`
+- Line 1174: `<Border Background="#1414232C"`
+- Line 1175: `BorderBrush="#4476D7EE"`
+- Line 1192: `Foreground="#FFD5F5FF"`
+- Line 1198: `Foreground="#99FFFFFF"`
+- Line 1202: `Foreground="#DDEDFBFF"`
+- Line 1227: `Foreground="#FFBDEBFF"`
+- Line 1233: `Foreground="#99FFFFFF"`
+- Line 1288: `<Border CornerRadius="25" Margin="5" Background="#22FFFFFF">`
+- Line 1306: `<Border CornerRadius="25" Margin="5" Background="#22FFFFFF">`
+- Line 1346: `Background="#33111824"`
+- Line 1347: `BorderBrush="#5596FCFF"`
+- Line 1360: `<GradientStop Color="#40FFFFFF" Offset="0"/>`
+- Line 1361: `<GradientStop Color="#10FFFFFF" Offset="0.45"/>`
+- Line 1362: `<GradientStop Color="#00FFFFFF" Offset="0.45"/>`
+- Line 1363: `<GradientStop Color="#05FFFFFF" Offset="1"/>`
+- Line 1368: `<GradientStop Color="#CB4C87AF" Offset="0.295559"/>`
+- Line 1369: `<GradientStop Color="#CD162D41" Offset="0.607963"/>`
+- Line 1370: `<GradientStop Color="#CD3A576E" Offset="0.638591"/>`
+- Line 1371: `<GradientStop Color="#CD6E869C" Offset="0.911179"/>`
+- Line 1377: `<SolidColorBrush x:Key="ToolButtonHoverBorderBrush" Color="#67BBDDF2"/>`
+- Line 1381: `<GradientStop Color="#CC2C577F" Offset="0.295559"/>`
+- Line 1382: `<GradientStop Color="#CC061D31" Offset="0.607963"/>`
+- Line 1383: `<GradientStop Color="#CC1A374E" Offset="0.638591"/>`
+- Line 1384: `<GradientStop Color="#CC4E667C" Offset="0.911179"/>`
+- Line 1390: `<SolidColorBrush x:Key="ToolButtonPressedBorderBrush" Color="#99001020"/>`
+- Line 1456: `Foreground="#FF96FCFF"`
+- Line 1483: `<TextBlock Text="{DynamicResource ChatSessionControl.ContextWindowUsage}" Foreground="#FF96FCFF" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>`
+- Line 1491: `Foreground="#44F3C96B"`
+- Line 1510: `<Border Background="#18000000"`
+- Line 1511: `BorderBrush="#3396FCFF"`
+- Line 1553: `Foreground="#AAFFFFFF"`
+- Line 1563: `BorderBrush="#3396FCFF"`
+- Line 1583: `Foreground="#99FFFFFF"`
+- Line 1599: `BorderBrush="#5596FCFF"`
+- Line 1616: `Foreground="#FF96FCFF"/>`
+- Line 1622: `Foreground="#E6FFFFFF"/>`
+- Line 1641: `<Border Grid.Row="2" Background="{StaticResource MediaBarGlassBrush}" BorderBrush="#80FFFFFF" BorderThickness="1" Margin="0,0,0,8" CornerRadius="3" Padding="8,2">`
+- Line 1658: `<Rectangle Width="1" Height="24" Fill="#33FFFFFF" Margin="5,0"/>`
+- Line 1676: `<Rectangle Width="1" Height="24" Fill="#33FFFFFF" Margin="5,0"/>`
+- Line 1703: `Background="#14000000"`
+- Line 1705: `BorderBrush="#5596FCFF"`
+
+### `./Skyweaver/Controls/ChatSessionControl/Views/PlanItemCheckInvocationCardView.xaml`
+- Line 17: `BorderBrush="#6793F2FF"`
+- Line 56: `<Border Background="#22FFFFFF" BorderBrush="#33FFFFFF" BorderThickness="1" CornerRadius="9"/>`
+- Line 59: `Stroke="#FF7BF1A8"`
+- Line 72: `Foreground="#FFAAD7FF"`
+- Line 78: `Foreground="#FFF6FEFF"`
+
+### `./Skyweaver/Controls/ChatSessionControl/Views/ToolInvocationCardView.xaml`
+- Line 12: `<GradientStop Color="#72354954" Offset="0"/>`
+- Line 13: `<GradientStop Color="#60324451" Offset="0.38"/>`
+- Line 14: `<GradientStop Color="#4A20303C" Offset="1"/>`
+- Line 18: `<GradientStop Color="#54FFFFFF" Offset="0"/>`
+- Line 19: `<GradientStop Color="#18FFFFFF" Offset="0.45"/>`
+- Line 20: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 24: `<GradientStop Color="#0019D2FF" Offset="0"/>`
+- Line 25: `<GradientStop Color="#1223C8E7" Offset="0.42"/>`
+- Line 26: `<GradientStop Color="#3838C4D8" Offset="1"/>`
+- Line 32: `<GradientStop Color="#91007BFF" Offset="0.143"/>`
+- Line 33: `<GradientStop Color="#00FFFFFF" Offset="0.503"/>`
+- Line 34: `<GradientStop Color="#C30099FF" Offset="0.792"/>`
+- Line 41: `<Setter Property="BorderBrush" Value="#660D1320"/>`
+- Line 52: `<Setter Property="BorderBrush" Value="#55A9FFF7"/>`
+- Line 59: `BorderBrush="#365F7E8E"`
+- Line 88: `BorderBrush="#0036D9D1"`
+- Line 102: `Foreground="#FFF5FAFF"`
+- Line 108: `Foreground="#FFD6E8FF"`
+- Line 113: `Foreground="#FFE2FFF8">`
+- Line 157: `Foreground="#FFE7F3FF"`
+- Line 165: `Foreground="#FFF7FBFF"`
+- Line 182: `Foreground="#CCEAF7FF"`
+- Line 212: `Foreground="#FFF5FAFF"/>`
+- Line 246: `Foreground="#FFE7F3FF"`
+- Line 254: `Foreground="#FFF7FBFF"`
+- Line 271: `Foreground="#CCEAF7FF"`
+- Line 301: `Foreground="#FFF5FAFF"/>`
+- Line 311: `Background="#1A08131A"`
+- Line 312: `BorderBrush="#4438C4D8"`
+- Line 337: `Foreground="#FFD6E8FF">`
+- Line 353: `Foreground="#FFEAFDFF"`
+- Line 362: `Foreground="#FFE2FFF8"`
+- Line 405: `Foreground="#FFF7FBFF"`
+- Line 417: `Background="#1A08131A"`
+- Line 418: `BorderBrush="#4438C4D8"`
+- Line 436: `Foreground="#FFD6E8FF"/>`
+- Line 455: `Foreground="#FFEAFDFF"`
+
+### `./Skyweaver/Controls/ChatSessionControl/Views/WebBrowseToolInvocationCardView.xaml`
+- Line 20: `<GradientStop Color="#D6C5C9CA" Offset="0"/>`
+- Line 21: `<GradientStop Color="#8A9CAEBE" Offset="0.45"/>`
+- Line 22: `<GradientStop Color="#5434445E" Offset="1"/>`
+- Line 39: `<GradientStop Color="#7DFFFFFF" Offset="0"/>`
+- Line 40: `<GradientStop Color="#29FFFFFF" Offset="0.247"/>`
+- Line 41: `<GradientStop Color="#00FFFFFF" Offset="0.421"/>`
+- Line 50: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 51: `<GradientStop Color="#3EFFFFFF" Offset="0.255"/>`
+- Line 52: `<GradientStop Color="#00FFFFFF" Offset="0.513"/>`
+- Line 53: `<GradientStop Color="#67FFFFFF" Offset="0.701"/>`
+- Line 54: `<GradientStop Color="#00FFFFFF" Offset="0.72"/>`
+- Line 55: `<GradientStop Color="#62FFFFFF" Offset="0.856"/>`
+- Line 56: `<GradientStop Color="#03FFFFFF" Offset="0.893"/>`
+- Line 57: `<GradientStop Color="#00FFFFFF" Offset="0.989"/>`
+- Line 71: `<GradientStop Color="#75007BFF" Offset="0"/>`
+- Line 72: `<GradientStop Color="#1A93F2FF" Offset="0.48"/>`
+- Line 73: `<GradientStop Color="#0093F2FF" Offset="1"/>`
+- Line 76: `<SolidColorBrush x:Key="WebBrowseToolBrightTextBrush" Color="#F4FBFF"/>`
+- Line 77: `<SolidColorBrush x:Key="WebBrowseToolSoftTextBrush" Color="#D9E5EB"/>`
+- Line 78: `<SolidColorBrush x:Key="WebBrowseToolMutedTextBrush" Color="#B8C5CD"/>`
+- Line 79: `<SolidColorBrush x:Key="WebBrowseToolPlaceholderTextBrush" Color="#CBD4DA"/>`
+- Line 80: `<SolidColorBrush x:Key="WebBrowseToolCoolGrayTextBrush" Color="#AAB8C2"/>`
+- Line 82: `Color="#1A2D3C"`
+- Line 109: `<Setter Property="Background" Value="#18FFFFFF"/>`
+- Line 110: `<Setter Property="BorderBrush" Value="#6793F2FF"/>`
+- Line 116: `BorderBrush="#6793F2FF"`
+- Line 439: `Foreground="#B493F2FF"`
+- Line 440: `Background="#24000000"`
+- Line 441: `BorderBrush="#4493F2FF"`
+
+### `./Skyweaver/Controls/ChatSessionControl/Views/WebSearchToolInvocationCardView.xaml`
+- Line 20: `<GradientStop Color="#D6C5C9CA" Offset="0"/>`
+- Line 21: `<GradientStop Color="#8A9CAEBE" Offset="0.45"/>`
+- Line 22: `<GradientStop Color="#5434445E" Offset="1"/>`
+- Line 39: `<GradientStop Color="#7DFFFFFF" Offset="0"/>`
+- Line 40: `<GradientStop Color="#29FFFFFF" Offset="0.247"/>`
+- Line 41: `<GradientStop Color="#00FFFFFF" Offset="0.421"/>`
+- Line 50: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 51: `<GradientStop Color="#3EFFFFFF" Offset="0.255"/>`
+- Line 52: `<GradientStop Color="#00FFFFFF" Offset="0.513"/>`
+- Line 53: `<GradientStop Color="#67FFFFFF" Offset="0.701"/>`
+- Line 54: `<GradientStop Color="#00FFFFFF" Offset="0.72"/>`
+- Line 55: `<GradientStop Color="#62FFFFFF" Offset="0.856"/>`
+- Line 56: `<GradientStop Color="#03FFFFFF" Offset="0.893"/>`
+- Line 57: `<GradientStop Color="#00FFFFFF" Offset="0.989"/>`
+- Line 71: `<GradientStop Color="#75007BFF" Offset="0"/>`
+- Line 72: `<GradientStop Color="#1A93F2FF" Offset="0.48"/>`
+- Line 73: `<GradientStop Color="#0093F2FF" Offset="1"/>`
+- Line 76: `<SolidColorBrush x:Key="WebSearchToolBrightTextBrush" Color="#F4FBFF"/>`
+- Line 77: `<SolidColorBrush x:Key="WebSearchToolSoftTextBrush" Color="#D9E5EB"/>`
+- Line 78: `<SolidColorBrush x:Key="WebSearchToolMutedTextBrush" Color="#B8C5CD"/>`
+- Line 79: `<SolidColorBrush x:Key="WebSearchToolPlaceholderTextBrush" Color="#CBD4DA"/>`
+- Line 80: `<SolidColorBrush x:Key="WebSearchToolCoolGrayTextBrush" Color="#AAB8C2"/>`
+- Line 82: `Color="#1A2D3C"`
+- Line 109: `<Setter Property="Background" Value="#18FFFFFF"/>`
+- Line 110: `<Setter Property="BorderBrush" Value="#6793F2FF"/>`
+- Line 116: `BorderBrush="#6793F2FF"`
+- Line 439: `Foreground="#B493F2FF"`
+- Line 440: `Background="#24000000"`
+- Line 441: `BorderBrush="#4493F2FF"`
+
+### `./Skyweaver/Controls/EmbeddingModelConfigurationControl/Views/EmbeddingModelConfigurationControl.xaml`
+- Line 370: `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 371: `<GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>`
+- Line 372: `<GradientStop Color="#07FFFFFF" Offset="0.109195"/>`
+- Line 373: `<GradientStop Color="#04FFFFFF" Offset="0.298851"/>`
+- Line 374: `<GradientStop Color="#3AFFFFFF" Offset="0.327586"/>`
+- Line 375: `<GradientStop Color="#1AFFFFFF" Offset="0.465517"/>`
+- Line 376: `<GradientStop Color="#14FFFFFF" Offset="0.591954"/>`
+- Line 377: `<GradientStop Color="#05FFFFFF" Offset="0.758621"/>`
+- Line 378: `<GradientStop Color="#44FFFFFF" Offset="1"/>`
+- Line 382: `<SolidColorBrush Color="#40000000"/>`
+
+### `./Skyweaver/Controls/FileManagerControl/Views/FileManagerControl.xaml`
+- Line 14: `<GradientStop Color="#FF19222D" Offset="0"/>`
+- Line 15: `<GradientStop Color="#FF10161E" Offset="1"/>`
+- Line 21: `Background="#16000000"`
+- Line 22: `BorderBrush="#335596FC"`
+- Line 29: `Foreground="#FF96FCFF"/>`
+- Line 33: `Foreground="#E6FFFFFF"`
+- Line 38: `Foreground="#AAFFFFFF"`
+- Line 47: `Foreground="#D9FFFFFF"`
+- Line 52: `Foreground="#A6FFFFFF"`
+
+### `./Skyweaver/Controls/LanguageModelConfigurationControl/Views/LanguageModelConfigurationControl.xaml`
+- Line 462: `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 463: `<GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>`
+- Line 464: `<GradientStop Color="#07FFFFFF" Offset="0.109195"/>`
+- Line 465: `<GradientStop Color="#04FFFFFF" Offset="0.298851"/>`
+- Line 466: `<GradientStop Color="#3AFFFFFF" Offset="0.327586"/>`
+- Line 467: `<GradientStop Color="#1AFFFFFF" Offset="0.465517"/>`
+- Line 468: `<GradientStop Color="#14FFFFFF" Offset="0.591954"/>`
+- Line 469: `<GradientStop Color="#05FFFFFF" Offset="0.758621"/>`
+- Line 470: `<GradientStop Color="#44FFFFFF" Offset="1"/>`
+- Line 474: `<SolidColorBrush Color="#40000000"/>`
+- Line 589: `Background="#22000000"`
+- Line 590: `BorderBrush="#4496FCFF"`
+
+### `./Skyweaver/Controls/LateralFileSystemTreeControl/Views/LateralFileSystemTreeControl.xaml`
+- Line 22: `<Pen LineJoin="Round" Brush="#6793F2FF"/>`
+- Line 33: `<GradientStop Color="#55FFFFFF" Offset="0"/>`
+- Line 34: `<GradientStop Color="#053D3D3D" Offset="0.35249"/>`
+- Line 35: `<GradientStop Color="#04666666" Offset="0.670498"/>`
+- Line 36: `<GradientStop Color="#51FFFFFF" Offset="0.988506"/>`
+- Line 52: `<Pen LineJoin="Round" Brush="#6793F2FF"/>`
+- Line 63: `<GradientStop Color="#55FFFFFF" Offset="0"/>`
+- Line 64: `<GradientStop Color="#053D3D3D" Offset="0.35249"/>`
+- Line 65: `<GradientStop Color="#04666666" Offset="0.670498"/>`
+- Line 66: `<GradientStop Color="#51FFFFFF" Offset="0.988506"/>`
+- Line 82: `<Pen LineJoin="Round" Brush="#FFFFFFFF"/>`
+- Line 93: `<GradientStop Color="#55FFFFFF" Offset="0"/>`
+- Line 94: `<GradientStop Color="#053D3D3D" Offset="0.35249"/>`
+- Line 95: `<GradientStop Color="#04666666" Offset="0.670498"/>`
+- Line 96: `<GradientStop Color="#51FFFFFF" Offset="0.988506"/>`
+- Line 112: `<Pen Thickness="0.32" LineJoin="Round" Brush="#FF000000"/>`
+- Line 123: `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 124: `<GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>`
+- Line 125: `<GradientStop Color="#07FFFFFF" Offset="0.109195"/>`
+- Line 126: `<GradientStop Color="#04FFFFFF" Offset="0.298851"/>`
+- Line 127: `<GradientStop Color="#3AFFFFFF" Offset="0.327586"/>`
+- Line 128: `<GradientStop Color="#1AFFFFFF" Offset="0.465517"/>`
+- Line 129: `<GradientStop Color="#14FFFFFF" Offset="0.591954"/>`
+- Line 130: `<GradientStop Color="#05FFFFFF" Offset="0.758621"/>`
+- Line 131: `<GradientStop Color="#44FFFFFF" Offset="1"/>`
+- Line 207: `Background="#10000000">`
+- Line 224: `Stroke="#A000F3FF"`
+- Line 227: `<DropShadowEffect Color="#FF0099FF"`
+- Line 294: `<DropShadowEffect Color="#FF00F3FF"`
+- Line 322: `Foreground="#E0FFFFFF"/>`
+- Line 328: `Foreground="#B0FFFFFF"`
+- Line 404: `BorderBrush="#30FFFFFF"`
+- Line 406: `Background="#16000000">`
+- Line 416: `Foreground="#E0FFFFFF"/>`
+- Line 420: `Foreground="#A8FFFFFF"`
+- Line 496: `BorderBrush="#33FFFFFF"`
+- Line 498: `Background="#16000000">`
+- Line 503: `Foreground="#F0FFFFFF"/>`
+- Line 507: `Foreground="#C8FFFFFF"`
+- Line 517: `Foreground="#70FFFFFF"`
+- Line 548: `BorderBrush="#33FFFFFF"`
+- Line 550: `Background="#18000000">`
+- Line 554: `Foreground="#D8FFFFFF"/>`
+- Line 563: `Foreground="#B8FFFFFF"`
+- Line 571: `BorderBrush="#33FFFFFF"`
+- Line 573: `Background="#18000000">`
+- Line 583: `Foreground="#D8FFFFFF"/>`
+- Line 587: `Foreground="#D8FFFFFF"/>`
+- Line 591: `Foreground="#D8FFFFFF"/>`
+- Line 595: `Foreground="#A8FFFFFF"`
+- Line 600: `Foreground="#A8FFFFFF"`
+- Line 609: `Foreground="#A8FFFFFF"`
+- Line 637: `Foreground="#A8FFFFFF"`
+- Line 671: `Foreground="#A8FFFFFF"`
+
+### `./Skyweaver/Controls/NodeEditorControl/Views/NodeEditorControl.xaml`
+- Line 15: `Background="#1F3449">`
+- Line 38: `<SolidColorBrush Color="#1F3449"/>`
+- Line 46: `<SolidColorBrush Color="#010303"/>`
+
+### `./Skyweaver/Controls/PersonaSettingsControl/Views/PersonaSettingsControl.xaml`
+- Line 43: `<Setter TargetName="ArrowPath" Property="Stroke" Value="#D0F0FF"/>`
+- Line 46: `<DropShadowEffect Color="#A0E0FF" BlurRadius="10" ShadowDepth="0" Opacity="0.8"/>`
+- Line 51: `<Setter TargetName="ArrowPath" Property="Stroke" Value="#A0E0FF"/>`
+- Line 54: `<DropShadowEffect Color="#50A0FF" BlurRadius="6" ShadowDepth="0" Opacity="0.9"/>`
+- Line 105: `<Setter TargetName="ArrowPath" Property="Stroke" Value="#D0F0FF"/>`
+- Line 108: `<DropShadowEffect Color="#A0E0FF" BlurRadius="10" ShadowDepth="0" Opacity="0.8"/>`
+- Line 139: `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 146: `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.4"/>`
+- Line 152: `<Setter Property="Foreground" Value="#B8EAF8FF"/>`
+- Line 160: `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.35"/>`
+- Line 173: `<DropShadowEffect Color="#000000" BlurRadius="8" ShadowDepth="2" Opacity="0.6"/>`
+- Line 179: `<Setter Property="Foreground" Value="#D0F0FF"/>`
+- Line 189: `<DropShadowEffect Color="#000000" BlurRadius="4" ShadowDepth="1.5" Opacity="0.5"/>`
+- Line 223: `<GradientStop Color="#00000000" Offset="0"/>`
+- Line 224: `<GradientStop Color="#90000000" Offset="1"/>`
+- Line 233: `<GradientStop x:Name="GlowColorStop" Color="#FF808080" Offset="0"/>`
+- Line 234: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 243: `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 244: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 253: `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 254: `<GradientStop Color="#FFFFFFFF" Offset="0.32"/>`
+- Line 255: `<GradientStop Color="#00FFFFFF" Offset="0.35"/>`
+- Line 256: `<GradientStop Color="#00FFFFFF" Offset="0.58"/>`
+- Line 257: `<GradientStop Color="#50FFFFFF" Offset="0.78"/>`
+- Line 258: `<GradientStop Color="#00FFFFFF" Offset="0.9"/>`
+- Line 267: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 268: `<GradientStop Color="#AFFFFFFF" Offset="0.45"/>`
+- Line 269: `<GradientStop Color="#00FFFFFF" Offset="0.5"/>`
+- Line 270: `<GradientStop Color="#20000000" Offset="0.505"/>`
+- Line 271: `<GradientStop Color="#00000000" Offset="0.75"/>`
+- Line 280: `<GradientStop Color="#40FFFFFF" Offset="0"/>`
+- Line 281: `<GradientStop Color="#00FFFFFF" Offset="0.25"/>`
+- Line 282: `<GradientStop Color="#00000000" Offset="0.75"/>`
+- Line 283: `<GradientStop Color="#50000000" Offset="1"/>`
+- Line 325: `<Ellipse Fill="#50000000">`
+- Line 339: `<GradientStop Color="#B0FFFFFF" Offset="0"/>`
+- Line 340: `<GradientStop Color="#15FFFFFF" Offset="0.5"/>`
+- Line 341: `<GradientStop Color="#60FFFFFF" Offset="1"/>`
+- Line 350: `<GradientStop Color="#25000000" Offset="0"/>`
+- Line 351: `<GradientStop Color="#85000000" Offset="1"/>`
+- Line 360: `<GradientStop Color="#E5FFFFFF" Offset="0"/>`
+- Line 361: `<GradientStop Color="#00FFFFFF" Offset="0.85"/>`
+- Line 370: `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 371: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 433: `<DropShadowEffect Color="#000000" BlurRadius="25" ShadowDepth="6" Opacity="0.4"/>`
+- Line 441: `<DropShadowEffect Color="#000000" BlurRadius="4" ShadowDepth="1" Opacity="0.5"/>`
+- Line 549: `Foreground="#D0F0FF"`
+
+### `./Skyweaver/Controls/ScheduledTasksControl/Views/ScheduledTasksControl.xaml`
+- Line 17: `<Pen Thickness="2" LineJoin="Round" Brush="#FF2A7288"/>`
+- Line 22: `<GradientStop Color="#FF306F83" Offset="0"/>`
+- Line 23: `<GradientStop Color="#FF091023" Offset="0.992337"/>`
+- Line 40: `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 45: `<GradientStop Color="#29FFFFFF" Offset="0"/>`
+- Line 46: `<GradientStop Color="#00000004" Offset="0.380334"/>`
+- Line 47: `<GradientStop Color="#00FFFFFF" Offset="0.41744"/>`
+- Line 48: `<GradientStop Color="#5EFFFFFF" Offset="0.769944"/>`
+- Line 49: `<GradientStop Color="#4AFFFFFF" Offset="0.892393"/>`
+- Line 66: `<Pen Thickness="1" LineJoin="Round" Brush="#FFA0ABB9"/>`
+- Line 71: `<GradientStop Color="#99C5CCDD" Offset="0.323124"/>`
+- Line 72: `<GradientStop Color="#99A0AECA" Offset="0.356815"/>`
+- Line 73: `<GradientStop Color="#7528536E" Offset="0.482389"/>`
+- Line 74: `<GradientStop Color="#A401263F" Offset="0.494637"/>`
+- Line 75: `<GradientStop Color="#A6286D89" Offset="0.620214"/>`
+- Line 89: `<Setter Property="Background" Value="#35000000"/>`
+- Line 90: `<Setter Property="BorderBrush" Value="#25FFFFFF"/>`
+- Line 104: `<GradientStop Color="#50000000" Offset="0"/>`
+- Line 105: `<GradientStop Color="#20000000" Offset="0.5"/>`
+- Line 106: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 115: `<GradientStop Color="#30000000" Offset="0"/>`
+- Line 116: `<GradientStop Color="#15000000" Offset="0.5"/>`
+- Line 117: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 126: `<GradientStop Color="#30000000" Offset="0"/>`
+- Line 127: `<GradientStop Color="#15000000" Offset="0.5"/>`
+- Line 128: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 137: `<GradientStop Color="#25000000" Offset="0"/>`
+- Line 138: `<GradientStop Color="#08000000" Offset="0.5"/>`
+- Line 139: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 169: `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 170: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 175: `<GradientStop Color="#374588BD" Offset="0"/>`
+- Line 176: `<GradientStop Color="#081AD5FF" Offset="0.69"/>`
+- Line 177: `<GradientStop Color="#1FFFFFFF" Offset="1"/>`
+- Line 186: `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 187: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 192: `<GradientStop Color="#A34588BD" Offset="0"/>`
+- Line 193: `<GradientStop Color="#111AD5FF" Offset="0.69"/>`
+- Line 194: `<GradientStop Color="#31FFFFFF" Offset="1"/>`
+- Line 256: `<GradientStop Color="#50FFFFFF" Offset="0"/>`
+- Line 257: `<GradientStop Color="#15FFFFFF" Offset="0.5"/>`
+- Line 258: `<GradientStop Color="#30FFFFFF" Offset="1"/>`
+- Line 262: `<Setter Property="Background" Value="#15000000"/>`
+- Line 263: `<Setter Property="BorderBrush" Value="#25FFFFFF"/>`
+- Line 270: `<Setter Property="Foreground" Value="#FFA2D6FF"/>`
+- Line 299: `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 300: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 305: `<GradientStop Color="#374588BD" Offset="0"/>`
+- Line 306: `<GradientStop Color="#081AD5FF" Offset="0.69"/>`
+- Line 307: `<GradientStop Color="#1FFFFFFF" Offset="1"/>`
+- Line 316: `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 317: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 322: `<GradientStop Color="#A34588BD" Offset="0"/>`
+- Line 323: `<GradientStop Color="#111AD5FF" Offset="0.69"/>`
+- Line 324: `<GradientStop Color="#31FFFFFF" Offset="1"/>`
+- Line 411: `<Border Grid.Row="0" BorderThickness="0,0,0,1" BorderBrush="#20FFFFFF" Padding="0,0,0,12" Margin="0,0,0,12">`
+- Line 421: `<Border Width="8" Height="8" CornerRadius="4" Background="#FF00FF22" Margin="8,0,0,0" VerticalAlignment="Center">`
+- Line 423: `<DropShadowEffect Color="#FF00FF22" BlurRadius="6" ShadowDepth="0"/>`
+- Line 454: `<Separator Background="#20FFFFFF"/>`
+- Line 497: `<TextBlock Grid.Column="0" Text="日" Foreground="#80FFFFFF" FontSize="11" HorizontalAlignment="Center"/>`
+- Line 498: `<TextBlock Grid.Column="1" Text="一" Foreground="#80FFFFFF" FontSize="11" HorizontalAlignment="Center"/>`
+- Line 499: `<TextBlock Grid.Column="2" Text="二" Foreground="#80FFFFFF" FontSize="11" HorizontalAlignment="Center"/>`
+- Line 500: `<TextBlock Grid.Column="3" Text="三" Foreground="#80FFFFFF" FontSize="11" HorizontalAlignment="Center"/>`
+- Line 501: `<TextBlock Grid.Column="4" Text="四" Foreground="#80FFFFFF" FontSize="11" HorizontalAlignment="Center"/>`
+- Line 502: `<TextBlock Grid.Column="5" Text="五" Foreground="#80FFFFFF" FontSize="11" HorizontalAlignment="Center"/>`
+- Line 503: `<TextBlock Grid.Column="6" Text="六" Foreground="#80FFFFFF" FontSize="11" HorizontalAlignment="Center"/>`
+- Line 539: `<TextBlock Text="点击日历日期可以切换查看不同日期的激活任务详情。" FontSize="10" Foreground="#80FFFFFF"/>`
+- Line 545: `<TextBlock Text="该日期没有被激活的计划任务。" Foreground="#60FFFFFF" FontSize="12" FontStyle="Italic" HorizontalAlignment="Center" VerticalAlignment="Center"`
+- Line 572: `<TextBlock Text="{Binding SessionFlowName, StringFormat='关联会话流：{0}'}" Foreground="#B0FFFFFF" FontSize="11"/>`
+- Line 573: `<TextBlock Text="{Binding Prompt, StringFormat='任务提示词：{0}'}" Foreground="#80FFFFFF" FontSize="11" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>`
+- Line 580: `<TextBlock VerticalAlignment="Center" FontSize="11" Text="{Binding TriggersDisplayText, StringFormat='触发：{0}'}" Foreground="#FFA2D6FF"/>`
+- Line 584: `<TextBlock VerticalAlignment="Center" FontSize="11" Text="{Binding PreAction.DisplayText, StringFormat='前置：{0}'}" Foreground="#FFA2D6FF"/>`
+- Line 588: `<TextBlock VerticalAlignment="Center" FontSize="11" Text="{Binding PostAction.DisplayText, StringFormat='后置：{0}'}" Foreground="#FFA2D6FF"/>`
+
+### `./Skyweaver/Controls/ShellChatSessionControl/Views/ShellChatSessionControl.xaml`
+- Line 28: `<GradientStop Color="#2CFFFFFF" Offset="0"/>`
+- Line 29: `<GradientStop Color="#10FFFFFF" Offset="0.12"/>`
+- Line 30: `<GradientStop Color="#00FFFFFF" Offset="0.34"/>`
+- Line 31: `<GradientStop Color="#24FFFFFF" Offset="0.42"/>`
+- Line 32: `<GradientStop Color="#06FFFFFF" Offset="0.7"/>`
+- Line 33: `<GradientStop Color="#36FFFFFF" Offset="1"/>`
+- Line 43: `<GradientStop Color="#552B5B75" Offset="0"/>`
+- Line 44: `<GradientStop Color="#15122F42" Offset="0.35"/>`
+- Line 45: `<GradientStop Color="#4515324A" Offset="1"/>`
+- Line 49: `<GradientStop Color="#55395A6E" Offset="0"/>`
+- Line 50: `<GradientStop Color="#150E2838" Offset="0.35"/>`
+- Line 51: `<GradientStop Color="#45122530" Offset="1"/>`
+- Line 55: `<GradientStop Color="#30FFFFFF" Offset="0"/>`
+- Line 56: `<GradientStop Color="#10FFFFFF" Offset="0.48"/>`
+- Line 57: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 61: `<GradientStop Color="#001878A8" Offset="0"/>`
+- Line 62: `<GradientStop Color="#0A1E6585" Offset="0.42"/>`
+- Line 63: `<GradientStop Color="#25248596" Offset="1"/>`
+- Line 68: `<Setter Property="BorderBrush" Value="#4080C0D8"/>`
+- Line 73: `<DropShadowEffect Color="#000000" BlurRadius="6" ShadowDepth="1.5" Opacity="0.25"/>`
+- Line 80: `Foreground="#FFE7FBFF"`
+- Line 87: `<Border Background="#20162B34"`
+- Line 88: `BorderBrush="#55A8F0FF"`
+- Line 94: `Foreground="#FFBDEBFF"`
+- Line 100: `Foreground="#DDEDFBFF"`
+- Line 113: `BorderBrush="#448AEFFF"`
+- Line 123: `Background="#22000000"`
+- Line 124: `BorderBrush="#448AEFFF"`
+- Line 133: `Foreground="#FFF5FAFF"`
+- Line 143: `<Border Background="#20162B34"`
+- Line 144: `BorderBrush="#55A8F0FF"`
+- Line 150: `Foreground="#FFBDEBFF"`
+- Line 156: `Foreground="#FFEAFDFF"`
+- Line 165: `<Border Background="#18191F32"`
+- Line 166: `BorderBrush="#55B0A7FF"`
+- Line 171: `Foreground="#DDEDFBFF"`
+- Line 181: `BorderBrush="#5596FCFF"`
+- Line 195: `Background="#1414232C"`
+- Line 196: `BorderBrush="#4476D7EE"`
+- Line 200: `Foreground="#FFD5F5FF"`
+- Line 206: `Foreground="#DDEDFBFF"`
+- Line 228: `Foreground="#FFBDEBFF"`
+- Line 234: `Foreground="#80FFFFFF"`
+- Line 352: `Background="#33111824"`
+- Line 353: `BorderBrush="#5596FCFF"`
+- Line 383: `Foreground="#80FFFFFF"`
+- Line 400: `Background="#80C42E2E"`
+- Line 401: `BorderBrush="#60FFFFFF"`
+- Line 412: `<GradientStop Color="#70FFFFFF" Offset="0"/>`
+- Line 413: `<GradientStop Color="#10FFFFFF" Offset="1"/>`
+- Line 423: `<GradientStop Color="#B0FF9999" Offset="0"/>`
+- Line 424: `<GradientStop Color="#00FF4444" Offset="1"/>`
+- Line 437: `<DropShadowEffect Color="#80000000" BlurRadius="2" ShadowDepth="1"/>`
+- Line 457: `<Setter TargetName="bg" Property="Background" Value="#FF9E1B1B"/>`
+- Line 468: `Background="#E0050810"`
+- Line 469: `BorderBrush="#20FFFFFF"`
+- Line 496: `Foreground="#70FFFFFF"`
+- Line 515: `<Border Grid.Column="1" Background="#20FFFFFF" Margin="0,16"/>`
+- Line 599: `Foreground="#55FFFFFF"`
+
+### `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/ChatSessionPreferencesPageView.xaml`
+- Line 18: `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 32: `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 39: `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 85: `Background="#30FFFFFF"/>`
+- Line 130: `Background="#30FFFFFF"/>`
+
+### `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/ContextCompressionPreferencesPageView.xaml`
+- Line 18: `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 32: `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 39: `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 177: `Background="#30FFFFFF"/>`
+- Line 222: `Background="#30FFFFFF"/>`
+
+### `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/DirectoryLocationsPreferencesPageView.xaml`
+- Line 18: `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 32: `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 39: `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 176: `Background="#30FFFFFF"/>`
+- Line 232: `Background="#30FFFFFF"/>`
+
+### `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/ImagePreferencesPageView.xaml`
+- Line 18: `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 32: `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 39: `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 60: `Background="#30FFFFFF"/>`
+- Line 96: `Background="#30FFFFFF"/>`
+
+### `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/LateralFileSystemPreferencesPageView.xaml`
+- Line 18: `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 32: `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 39: `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 97: `Background="#30FFFFFF"/>`
+- Line 153: `Background="#30FFFFFF"/>`
+
+### `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/LocalizationPreferencesPageView.xaml`
+- Line 18: `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 32: `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 39: `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 86: `Background="#30FFFFFF"/>`
+- Line 131: `Background="#30FFFFFF"/>`
+
+### `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/MemoryPreferencesPageView.xaml`
+- Line 18: `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 32: `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 39: `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 134: `Background="#30FFFFFF"/>`
+- Line 180: `Background="#30FFFFFF"/>`
+
+### `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/OpenSourceLicensesPreferencesPageView.xaml`
+- Line 18: `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 32: `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 70: `Background="#1823384D"`
+- Line 71: `BorderBrush="#45BBDDF2"`
+- Line 89: `Background="#263F6E88"`
+- Line 90: `BorderBrush="#557FD8FF"`
+
+### `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/SearchPreferencesPageView.xaml`
+- Line 20: `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 27: `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 34: `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 41: `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 82: `<Border Height="1" Background="#20FFFFFF" Margin="0,0,0,12"/>`
+- Line 151: `<Border Height="1" Background="#20FFFFFF" Margin="0,0,0,12"/>`
+- Line 228: `<Border Height="1" Background="#20FFFFFF" Margin="0,0,0,12"/>`
+- Line 306: `Background="#30FFFFFF"/>`
+
+### `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/SemanticSearchPreferencesPageView.xaml`
+- Line 18: `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 32: `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 39: `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 134: `Background="#30FFFFFF"/>`
+
+### `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/ShellIntegrationPreferencesPageView.xaml`
+- Line 18: `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 32: `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 39: `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 95: `Foreground="#FFF4FAFF"`
+- Line 99: `Foreground="#90DBEEFF"`
+- Line 121: `Background="#30FFFFFF"/>`
+- Line 177: `Background="#30FFFFFF"/>`
+
+### `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/SkyweaverPreferencesControl.xaml`
+- Line 25: `<Rectangle Fill="#16001024"`
+- Line 95: `<Border Background="#15000000"`
+- Line 96: `BorderBrush="#30FFFFFF"`
+- Line 100: `Foreground="#50FFFFFF"`
+
+### `./Skyweaver/Controls/TextEditorControl/Views/TextEditorControl.xaml`
+- Line 18: `<GradientStop Color="#FF263A50" Offset="0"/>`
+- Line 19: `<GradientStop Color="#FF172537" Offset="0.46"/>`
+- Line 20: `<GradientStop Color="#FF0B1524" Offset="0.51"/>`
+- Line 21: `<GradientStop Color="#FF1F3854" Offset="1"/>`
+- Line 27: `<GradientStop Color="#FF122033" Offset="0"/>`
+- Line 28: `<GradientStop Color="#FF09101B" Offset="1"/>`
+- Line 34: `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 35: `<GradientStop Color="#FFF8FCFF" Offset="0.54"/>`
+- Line 36: `<GradientStop Color="#FFEAF4FA" Offset="1"/>`
+- Line 42: `<GradientStop Color="#E7355876" Offset="0"/>`
+- Line 43: `<GradientStop Color="#D2182B42" Offset="0.52"/>`
+- Line 44: `<GradientStop Color="#E50B1524" Offset="1"/>`
+- Line 48: `<Setter Property="Foreground" Value="#FFF6FBFF"/>`
+- Line 55: `<Setter Property="Foreground" Value="#FFDFF3FF"/>`
+- Line 75: `<Setter Property="CaretBrush" Value="#FF1F2D36"/>`
+- Line 112: `Foreground="#E9F8FFFF"`
+- Line 119: `Foreground="#BDE7F8FF"`
+- Line 130: `BorderBrush="#8DB6D9EE"`
+- Line 190: `Background="#55D5F3FF"/>`
+- Line 209: `Background="#55D5F3FF"`
+- Line 254: `BorderBrush="#4A9BC9E9"`
+- Line 321: `Foreground="#FFE8F8FF"`
+- Line 326: `Background="#707DA9C2"/>`
+- Line 357: `Foreground="#FFE8F8FF"`
+- Line 381: `Background="#45000000"`
+- Line 382: `BorderBrush="#406F98B7"`
+- Line 392: `Background="#DDF4FAFF"`
+- Line 393: `BorderBrush="#FFC5D8E7"`
+- Line 398: `Foreground="#FF17344A"`
+- Line 404: `Foreground="#FF4A6578"`
+- Line 419: `Background="#EEF0F5F8"`
+- Line 420: `BorderBrush="#FFC5D8E7"`
+- Line 430: `Background="#EEF0F5F8"`
+- Line 431: `Foreground="#FF7790A0"`
+- Line 451: `Foreground="#FF1F2D36"`
+- Line 457: `SelectionBrush="#804B9DCC"`
+- Line 466: `Background="#45000000"`
+- Line 467: `BorderBrush="#406F98B7"`
+- Line 477: `Background="#DDF4FAFF"`
+- Line 478: `BorderBrush="#FFC5D8E7"`
+- Line 483: `Foreground="#FF17344A"`
+- Line 489: `Foreground="#FF4A6578"`
+- Line 505: `Foreground="#FF1F2D36"`
+- Line 511: `SelectionBrush="#804B9DCC"/>`
+- Line 552: `Foreground="#A8E6F7FF"`
+- Line 570: `BorderBrush="#4589BEE0"`
+- Line 653: `Background="#30102030"`
+- Line 654: `BorderBrush="#305D91B4"`
+- Line 669: `Foreground="#D9F4FCFF"`
+- Line 679: `BorderBrush="#4A9BC9E9"`
+- Line 691: `Foreground="#E9F8FFFF"`
+- Line 700: `Foreground="#C8E8F6FF"`
+- Line 704: `Foreground="#C8E8F6FF"`
+
+### `./Skyweaver/Controls/ToolConfigurationControl/Views/ToolConfigurationControl.xaml`
+- Line 84: `Background="#15000000"`
+- Line 85: `BorderBrush="#40FFFFFF"`
+- Line 170: `Foreground="#FFD3F6FF"`
+- Line 215: `Foreground="#99FFFFFF"`
+- Line 251: `Foreground="#FFD3F6FF"/>`
+- Line 277: `Foreground="#FFD3F6FF"`
+- Line 287: `Foreground="#99FFFFFF"`
+- Line 314: `Foreground="#99FFFFFF"`
+- Line 382: `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 383: `<GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>`
+- Line 384: `<GradientStop Color="#07FFFFFF" Offset="0.109195"/>`
+- Line 385: `<GradientStop Color="#04FFFFFF" Offset="0.298851"/>`
+- Line 386: `<GradientStop Color="#3AFFFFFF" Offset="0.327586"/>`
+- Line 387: `<GradientStop Color="#1AFFFFFF" Offset="0.465517"/>`
+- Line 388: `<GradientStop Color="#14FFFFFF" Offset="0.591954"/>`
+- Line 389: `<GradientStop Color="#05FFFFFF" Offset="0.758621"/>`
+- Line 390: `<GradientStop Color="#44FFFFFF" Offset="1"/>`
+- Line 394: `<SolidColorBrush Color="#40000000"/>`
+- Line 414: `Background="#12000000"`
+- Line 415: `BorderBrush="#40FFFFFF"`
+- Line 433: `Foreground="#D9FFFFFF"`
+- Line 521: `Foreground="#FFD3F6FF"`
+
+### `./Skyweaver/Controls/WorkflowEditorControl/Views/WorkflowEditorControl.xaml`
+- Line 21: `<GradientStop Color="#FF101A25" Offset="0"/>`
+- Line 22: `<GradientStop Color="#FF0B1119" Offset="0.52"/>`
+- Line 23: `<GradientStop Color="#FF081017" Offset="1"/>`
+- Line 34: `<Pen Brush="#162B4760" Thickness="1"/>`
+- Line 54: `<Pen Brush="#2F4A6C88" Thickness="1"/>`
+- Line 71: `<GradientStop Color="#2E80B8E3" Offset="0"/>`
+- Line 72: `<GradientStop Color="#10294764" Offset="0.4"/>`
+- Line 73: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 79: `<GradientStop Color="#F3162738" Offset="0"/>`
+- Line 80: `<GradientStop Color="#ED0D1825" Offset="0.56"/>`
+- Line 81: `<GradientStop Color="#F3071018" Offset="1"/>`
+- Line 87: `<GradientStop Color="#F0738CA4" Offset="0"/>`
+- Line 88: `<GradientStop Color="#D52E4E6E" Offset="0.62"/>`
+- Line 89: `<GradientStop Color="#DD162A40" Offset="1"/>`
+- Line 95: `<GradientStop Color="#FF132030" Offset="0"/>`
+- Line 96: `<GradientStop Color="#FF0C141E" Offset="1"/>`
+- Line 102: `<GradientStop Color="#F21A2B3E" Offset="0"/>`
+- Line 103: `<GradientStop Color="#F10D1722" Offset="1"/>`
+- Line 109: `<GradientStop Color="#E36A8AA9" Offset="0"/>`
+- Line 110: `<GradientStop Color="#C52F4F6E" Offset="0.66"/>`
+- Line 111: `<GradientStop Color="#C41B3044" Offset="1"/>`
+- Line 114: `<SolidColorBrush x:Key="WorkflowNodeTextBrush" Color="#FFF5FBFF"/>`
+- Line 115: `<SolidColorBrush x:Key="WorkflowNodeMutedTextBrush" Color="#D8E8F4FF"/>`
+- Line 116: `<SolidColorBrush x:Key="WorkflowNodeFooterTextBrush" Color="#CCE5F5FF"/>`
+- Line 117: `<SolidColorBrush x:Key="WorkflowNodeDividerBrush" Color="#35516A82"/>`
+- Line 118: `<SolidColorBrush x:Key="WorkflowPortGuideBrush" Color="#45698299"/>`
+- Line 124: `<Setter Property="BorderBrush" Value="#839EB9CD"/>`
+- Line 132: `Color="#CC000000"/>`
+- Line 137: `<Setter Property="BorderBrush" Value="#86A8C4D9"/>`
+- Line 140: `<Setter Property="BorderBrush" Value="#8AB7CDE0"/>`
+- Line 143: `<Setter Property="BorderBrush" Value="#8CB6CDB0"/>`
+- Line 146: `<Setter Property="BorderBrush" Value="#8CB0C8D9"/>`
+- Line 149: `<Setter Property="BorderBrush" Value="#90B8C9B3"/>`
+- Line 152: `<Setter Property="BorderBrush" Value="#FFE6F6FF"/>`
+- Line 158: `Color="#B04E82A8"/>`
+- Line 168: `<Setter Property="BorderBrush" Value="#00FFFFFF"/>`
+- Line 173: `<Setter Property="Background" Value="#0E6AA9D3"/>`
+- Line 174: `<Setter Property="BorderBrush" Value="#BFE7FBFF"/>`
+- Line 182: `<Setter Property="Background" Value="#FF8FB6D3"/>`
+- Line 185: `<Setter Property="Background" Value="#FFA8CAE1"/>`
+- Line 188: `<Setter Property="Background" Value="#FF9CC5E2"/>`
+- Line 191: `<Setter Property="Background" Value="#FFB0CDA3"/>`
+- Line 194: `<Setter Property="Background" Value="#FFA5CBE4"/>`
+- Line 197: `<Setter Property="Background" Value="#FFB7D1A8"/>`
+- Line 200: `<Setter Property="Background" Value="#FFF4FCFF"/>`
+- Line 208: `<Setter Property="BorderBrush" Value="#8BB8D4EA"/>`
+- Line 209: `<Setter Property="Background" Value="#26364C62"/>`
+- Line 212: `<Setter Property="Background" Value="#28435A72"/>`
+- Line 213: `<Setter Property="BorderBrush" Value="#A2CDE8FF"/>`
+- Line 216: `<Setter Property="Background" Value="#253A5268"/>`
+- Line 217: `<Setter Property="BorderBrush" Value="#92C2E2F9"/>`
+- Line 220: `<Setter Property="Background" Value="#27424937"/>`
+- Line 221: `<Setter Property="BorderBrush" Value="#9AC7D7A0"/>`
+- Line 224: `<Setter Property="Background" Value="#283F566B"/>`
+- Line 225: `<Setter Property="BorderBrush" Value="#98C5E0F3"/>`
+- Line 228: `<Setter Property="Background" Value="#29444B38"/>`
+- Line 229: `<Setter Property="BorderBrush" Value="#A4C8DCA7"/>`
+- Line 235: `<Setter Property="Background" Value="#1F08131D"/>`
+- Line 236: `<Setter Property="BorderBrush" Value="#324E677D"/>`
+- Line 244: `<Setter Property="BorderBrush" Value="#FFDDF4FF"/>`
+- Line 249: `<GradientStop Color="#FFF7FCFF" Offset="0"/>`
+- Line 250: `<GradientStop Color="#FF8CC4E8" Offset="0.45"/>`
+- Line 251: `<GradientStop Color="#FF35648C" Offset="1"/>`
+- Line 257: `<Setter Property="BorderBrush" Value="#FFF1DFBF"/>`
+- Line 261: `<GradientStop Color="#FFFFFBF2" Offset="0"/>`
+- Line 262: `<GradientStop Color="#FFF2C67F" Offset="0.45"/>`
+- Line 263: `<GradientStop Color="#FFB06F28" Offset="1"/>`
+- Line 269: `<Setter Property="BorderBrush" Value="#FFE2F8EC"/>`
+- Line 273: `<GradientStop Color="#FFF8FFFC" Offset="0"/>`
+- Line 274: `<GradientStop Color="#FFB9E1CF" Offset="0.45"/>`
+- Line 275: `<GradientStop Color="#FF4E886D" Offset="1"/>`
+- Line 287: `<Setter Property="Fill" Value="#FFFFFFFF"/>`
+- Line 288: `<Setter Property="Stroke" Value="#CC6BA9D3"/>`
+- Line 301: `<Setter Property="Fill" Value="#FFFFFFFF"/>`
+- Line 302: `<Setter Property="Stroke" Value="#CCB77F37"/>`
+- Line 315: `<Setter Property="Fill" Value="#EAF7FFFC"/>`
+- Line 316: `<Setter Property="Stroke" Value="#CC5F8E76"/>`
+- Line 327: `<Setter Property="Stroke" Value="#66000000"/>`
+- Line 336: `<Setter Property="Stroke" Value="#FF8FB8D5"/>`
+- Line 344: `<Setter Property="Stroke" Value="#FFD5AE6C"/>`
+- Line 350: `<Setter Property="Stroke" Value="#DFF8FDFF"/>`
+- Line 358: `<Setter Property="Stroke" Value="#FFF7E3BF"/>`
+- Line 366: `<Setter Property="Fill" Value="#FF8FB8D5"/>`
+- Line 367: `<Setter Property="Stroke" Value="#FFF5FCFF"/>`
+- Line 371: `<Setter Property="Fill" Value="#FFD5AE6C"/>`
+- Line 372: `<Setter Property="Stroke" Value="#FFFFF7EA"/>`
+- Line 467: `BorderBrush="#33000000"`
+- Line 482: `BorderBrush="#2AFFFFFF"`
+- Line 485: `Background="#16000000">`
+- Line 493: `Foreground="#D7EDFF"`
+- Line 497: `Foreground="#A7D8F0"`
+- Line 501: `Foreground="#DDF6FFFF"`
+- Line 506: `Foreground="#A9D9F1"`
+- Line 523: `Foreground="#CCF2FFFF"`
+- Line 526: `Foreground="#DDF6FFFF"`
+- Line 532: `Foreground="#A9D9F1"`
+- Line 551: `Foreground="#FFF2FCFF"/>`
+- Line 576: `Foreground="#FFF7F7DE"/>`
+- Line 585: `Foreground="#FFF7F7DE"/>`
+- Line 594: `Foreground="#FFF7F7DE"/>`
+- Line 603: `Foreground="#FFF7F7DE"/>`
+- Line 613: `Foreground="#FFE9FDFF"/>`
+- Line 622: `Foreground="#FFE9FDEB"/>`
+- Line 707: `Background="#18000000"`
+- Line 708: `BorderBrush="#33000000"`
+- Line 720: `Foreground="#88FFFFFF"/>`
+- Line 722: `Foreground="#D7F3FF"/>`
+- Line 727: `Foreground="#FFE9FFD0"/>`
+- Line 733: `BorderBrush="#5B89AAC1"`
+- Line 735: `Background="#18000000">`
+- Line 834: `BorderBrush="#2E4A6178"`
+- Line 841: `Background="#A0FFFFFF"/>`
+- Line 984: `BorderBrush="#2E4A6178"`
+- Line 1005: `BorderBrush="#739AB8CD"`
+- Line 1011: `Background="#55FFFFFF"`
+- Line 1022: `BorderBrush="#324A6378"`
+- Line 1042: `Foreground="#D8EFFBFF"/>`
+- Line 1053: `Foreground="#D8EFFBFF"/>`
+- Line 1065: `Stroke="#FFF2FCFF"`
+- Line 1071: `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 1072: `<GradientStop Color="#FF7EE3FF" Offset="0.36"/>`
+- Line 1073: `<GradientStop Color="#FF22BFE9" Offset="1"/>`
+- Line 1089: `Stroke="#FFFFF3D8"`
+- Line 1096: `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 1097: `<GradientStop Color="#FFF3D28D" Offset="0.34"/>`
+- Line 1098: `<GradientStop Color="#FFBE8731" Offset="1"/>`
+- Line 1112: `Foreground="#B3E5F6FF"`
+- Line 1130: `BorderBrush="#5B89AAC1"`
+- Line 1147: `Foreground="#D7EDFF"`
+- Line 1200: `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 1201: `<GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>`
+- Line 1202: `<GradientStop Color="#07FFFFFF" Offset="0.109195"/>`
+- Line 1203: `<GradientStop Color="#04FFFFFF" Offset="0.298851"/>`
+- Line 1204: `<GradientStop Color="#3AFFFFFF" Offset="0.327586"/>`
+- Line 1205: `<GradientStop Color="#1AFFFFFF" Offset="0.465517"/>`
+- Line 1206: `<GradientStop Color="#14FFFFFF" Offset="0.591954"/>`
+- Line 1207: `<GradientStop Color="#05FFFFFF" Offset="0.758621"/>`
+- Line 1208: `<GradientStop Color="#44FFFFFF" Offset="1"/>`
+- Line 1212: `<SolidColorBrush Color="#40000000"/>`
+- Line 1233: `Background="#12000000"`
+- Line 1234: `BorderBrush="#40FFFFFF"`
+- Line 1254: `Background="#33000000"`
+- Line 1255: `BorderBrush="#55FFFFFF"`
+- Line 1260: `Foreground="#FFF3FCFF"`
+- Line 1266: `Foreground="#D9FFFFFF"`
+- Line 1270: `Foreground="#B5DDEFFF"`
+- Line 1304: `<TextBlock Foreground="#D9FFFFFF"`
+- Line 1308: `Foreground="#D9FFFFFF"`
+- Line 1312: `Foreground="#FFD3F6FF"`
+- Line 1316: `Foreground="#FFD3F6FF"`
+
+### `./Skyweaver/MainWindow.xaml`
+- Line 16: `Icon="/Skyweaver;component/Resources/Skyweaver.ico" Background="#FF1A1F28">`
+- Line 32: `<GradientStop Color="#FF2E4A6C" Offset="0.325"/>`
+- Line 33: `<GradientStop Color="#FF1D2E54" Offset="0.237"/>`
+- Line 34: `<GradientStop Color="#FE070714" Offset="0.325"/>`
+- Line 35: `<GradientStop Color="#FF162F67" Offset="0.562"/>`
+- Line 185: `<Border Background="#1A202C" BorderBrush="#3D4B66" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="4,0" VerticalAlignment="Center">`
+- Line 190: `<SolidColorBrush x:Name="DotBrush" Color="#00E676"/>`
+- Line 200: `From="#00E676" To="#00B0FF" Duration="0:0:1.5" AutoReverse="True"/>`
+- Line 210: `<TextBlock Text="{Binding Message}" Foreground="#E2E8F0" FontSize="11" VerticalAlignment="Center" Margin="0,0,6,0"/>`
+- Line 223: `Background="#2D3748" BorderThickness="0">`
+- Line 226: `<GradientStop Color="#A0AEC0" Offset="0"/>`
+- Line 227: `<GradientStop Color="#E2E8F0" Offset="1"/>`
+- Line 242: `Background="#2D3748" BorderThickness="0">`
+- Line 245: `<GradientStop Color="#00F2FE" Offset="0"/>`
+- Line 246: `<GradientStop Color="#4FACFE" Offset="1"/>`
+- Line 250: `<TextBlock Text="{Binding Progress, StringFormat={}{0:0}%}" Foreground="#38BDF8" FontSize="10" FontWeight="Bold" VerticalAlignment="Center"/>`
+- Line 290: `Fill="#38BDF8" Width="14" Height="14" Stretch="Uniform" Margin="4,0,8,0" VerticalAlignment="Center"/>`
+- Line 292: `Foreground="#E2E8F0" FontSize="11" VerticalAlignment="Center">`
+
+### `./Skyweaver/Panels/ChatSession/Views/ChatSessionPanelView.xaml`
+- Line 13: `<GradientStop Color="#FF19222D" Offset="0"/>`
+- Line 14: `<GradientStop Color="#FF10161E" Offset="1"/>`
+- Line 20: `Background="#16000000"`
+- Line 21: `BorderBrush="#335596FC"`
+- Line 28: `Foreground="#FF96FCFF"/>`
+- Line 32: `Foreground="#E6FFFFFF"`
+- Line 37: `Foreground="#AAFFFFFF"`
+
+### `./Skyweaver/Panels/DocumentWorkspace/Views/DocumentWorkspacePanelView.xaml`
+- Line 19: `BorderBrush="#FF000000"`
+- Line 25: `<GradientStop Color="#FF435A69" Offset="0"/>`
+- Line 26: `<GradientStop Color="#FF374D5A" Offset="0.517625"/>`
+- Line 27: `<GradientStop Color="#FE334853" Offset="0.528757"/>`
+- Line 28: `<GradientStop Color="#FF324551" Offset="1"/>`
+- Line 90: `To="#FF5A7085" Duration="0:0:0.2"/>`
+- Line 93: `To="#FF4C6370" Duration="0:0:0.2"/>`
+- Line 96: `To="#FE485E69" Duration="0:0:0.2"/>`
+- Line 99: `To="#FF475B67" Duration="0:0:0.2"/>`
+- Line 108: `To="#FF435A69" Duration="0:0:0.2"/>`
+- Line 111: `To="#FF374D5A" Duration="0:0:0.2"/>`
+- Line 114: `To="#FE334853" Duration="0:0:0.2"/>`
+- Line 117: `To="#FF324551" Duration="0:0:0.2"/>`
+- Line 129: `To="#28FFFFFF" Duration="0:0:0.3"/>`
+- Line 132: `To="#35CEEEFF" Duration="0:0:0.3"/>`
+- Line 135: `To="#652D4957" Duration="0:0:0.3"/>`
+- Line 138: `To="#FF6FD4D1" Duration="0:0:0.3"/>`
+- Line 147: `To="#FF435A69" Duration="0:0:0.3"/>`
+- Line 150: `To="#FF374D5A" Duration="0:0:0.3"/>`
+- Line 153: `To="#FE334853" Duration="0:0:0.3"/>`
+- Line 156: `To="#FF324551" Duration="0:0:0.3"/>`
+- Line 190: `Background="#22000000">`
+- Line 209: `<GradientStop Color="#B0000000" Offset="0"/>`
+- Line 210: `<GradientStop Color="#90000000" Offset="1"/>`
+- Line 215: `<TextBlock Text="{Binding Subtitle}" FontSize="13" Foreground="#FFDDEFFF" HorizontalAlignment="Center" Margin="0,8,0,0"/>`
+
+### `./Skyweaver/Panels/FileExplorer/Views/FileExplorerPanelView.xaml`
+- Line 37: `<GradientStop Color="#FF2A3240" Offset="0"/>`
+- Line 38: `<GradientStop Color="#FF1A1F28" Offset="1"/>`
+- Line 135: `<GradientStop Color="#FF1A1F28" Offset="0"/>`
+- Line 136: `<GradientStop Color="#FF141924" Offset="1"/>`
+
+### `./Skyweaver/Panels/Filmstrip/Views/FilmstripPanelView.xaml`
+- Line 30: `BorderBrush="#446FD4D1"`
+- Line 32: `Background="#12000000"/>`
+- Line 35: `Foreground="#FF96FCFF"`
+- Line 41: `Foreground="#CCFFFFFF"`
+
+### `./Skyweaver/Panels/MultiFunctionArea/Views/MultiFunctionAreaPanelView.xaml`
+- Line 23: `BorderBrush="#FF000000"`
+- Line 29: `<GradientStop Color="#FF435A69" Offset="0"/>`
+- Line 30: `<GradientStop Color="#FF374D5A" Offset="0.517625"/>`
+- Line 31: `<GradientStop Color="#FE334853" Offset="0.528757"/>`
+- Line 32: `<GradientStop Color="#FF324551" Offset="1"/>`
+- Line 92: `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[0].(GradientStop.Color)" To="#FF5A7085" Duration="0:0:0.2"/>`
+- Line 93: `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[1].(GradientStop.Color)" To="#FF4C6370" Duration="0:0:0.2"/>`
+- Line 94: `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[2].(GradientStop.Color)" To="#FE485E69" Duration="0:0:0.2"/>`
+- Line 95: `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[3].(GradientStop.Color)" To="#FF475B67" Duration="0:0:0.2"/>`
+- Line 102: `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[0].(GradientStop.Color)" To="#FF435A69" Duration="0:0:0.2"/>`
+- Line 103: `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[1].(GradientStop.Color)" To="#FF374D5A" Duration="0:0:0.2"/>`
+- Line 104: `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[2].(GradientStop.Color)" To="#FE334853" Duration="0:0:0.2"/>`
+- Line 105: `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[3].(GradientStop.Color)" To="#FF324551" Duration="0:0:0.2"/>`
+- Line 115: `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[0].(GradientStop.Color)" To="#28FFFFFF" Duration="0:0:0.3"/>`
+- Line 116: `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[1].(GradientStop.Color)" To="#35CEEEFF" Duration="0:0:0.3"/>`
+- Line 117: `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[2].(GradientStop.Color)" To="#652D4957" Duration="0:0:0.3"/>`
+- Line 118: `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[3].(GradientStop.Color)" To="#FF6FD4D1" Duration="0:0:0.3"/>`
+- Line 125: `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[0].(GradientStop.Color)" To="#FF435A69" Duration="0:0:0.3"/>`
+- Line 126: `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[1].(GradientStop.Color)" To="#FF374D5A" Duration="0:0:0.3"/>`
+- Line 127: `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[2].(GradientStop.Color)" To="#FE334853" Duration="0:0:0.3"/>`
+- Line 128: `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[3].(GradientStop.Color)" To="#FF324551" Duration="0:0:0.3"/>`
+- Line 158: `Background="#22000000">`
+- Line 170: `Foreground="#CCFFFFFF"`
+- Line 254: `Background="#22000000">`
+- Line 273: `<GradientStop Color="#B0000000" Offset="0"/>`
+- Line 274: `<GradientStop Color="#90000000" Offset="1"/>`
+- Line 279: `<TextBlock Text="{Binding Subtitle}" FontSize="13" Foreground="#FFDDEFFF" HorizontalAlignment="Center" Margin="0,8,0,0"/>`
+
+### `./Skyweaver/Panels/MultiFunctionArea/Views/PlaceholderPanelView.xaml`
+- Line 12: `<GradientStop Color="#FF19222D" Offset="0"/>`
+- Line 13: `<GradientStop Color="#FF10161E" Offset="1"/>`
+- Line 19: `Background="#16000000"`
+- Line 20: `BorderBrush="#335596FC"`
+- Line 27: `Foreground="#FF96FCFF"/>`
+- Line 31: `Foreground="#E6FFFFFF"`
+- Line 36: `Foreground="#AAFFFFFF"`
+
+### `./Skyweaver/Panels/NodeSettings/Views/NodeSettingsPanelView.xaml`
+- Line 30: `BorderBrush="#446FD4D1"`
+- Line 32: `Background="#12000000"/>`
+- Line 35: `Foreground="#FF96FCFF"`
+- Line 41: `Foreground="#CCFFFFFF"`
+
+### `./Skyweaver/Panels/SessionList/Views/SessionListPanelView.xaml`
+- Line 36: `<GradientStop Color="#FF2A3240" Offset="0"/>`
+- Line 37: `<GradientStop Color="#FF1A1F28" Offset="1"/>`
+- Line 134: `<GradientStop Color="#FF1A1F28" Offset="0"/>`
+- Line 135: `<GradientStop Color="#FF141924" Offset="1"/>`
+- Line 171: `<GradientStop Color="#FF141924" Offset="0"/>`
+- Line 172: `<GradientStop Color="#FF0F1419" Offset="1"/>`
+- Line 200: `<GradientStop Color="#FF3A4250" Offset="0"/>`
+- Line 201: `<GradientStop Color="#FF2A3240" Offset="0.5"/>`
+- Line 202: `<GradientStop Color="#FF1A1F28" Offset="1"/>`
+
+### `./Skyweaver/Resources/CheckboxBackground.xaml`
+- Line 4: `<Rectangle x:Name="Rectangle" Width="24.7915" Height="23.5403" Canvas.Left="0" Canvas.Top="0" Stretch="Fill" StrokeThickness="1" StrokeLineJoin="Round" Stroke="#FF000000">`
+- Line 8: `<GradientStop Color="#FF61FFFF" Offset="0"/>`
+- Line 9: `<GradientStop Color="#C7000000" Offset="0.173047"/>`
+- Line 10: `<GradientStop Color="#00000A11" Offset="0.378254"/>`
+- Line 11: `<GradientStop Color="#99001A2C" Offset="0.51608"/>`
+- Line 12: `<GradientStop Color="#FF0086DF" Offset="0.825421"/>`
+
+### `./Skyweaver/Resources/Controls/ActivatedButtonStyles.xaml`
+- Line 40: `<GradientStop Color="#28FFFFFF" Offset="0.265306"/>`
+- Line 41: `<GradientStop Color="#4FCEEEFF" Offset="0.591837"/>`
+- Line 42: `<GradientStop Color="#2D2D4957" Offset="0.599258"/>`
+- Line 43: `<GradientStop Color="#FF26FFF9" Offset="0.951762"/>`
+- Line 53: `<DropShadowEffect Color="#FF26FFF9"`
+- Line 73: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 74: `<GradientStop Color="#1AFFFFFF" Offset="0.135436"/>`
+- Line 75: `<GradientStop Color="#17FFFFFF" Offset="0.487941"/>`
+- Line 76: `<GradientStop Color="#00000004" Offset="0.517625"/>`
+- Line 77: `<GradientStop Color="#FF1F8EAD" Offset="0.729128"/>`
+- Line 81: `<Setter TargetName="border" Property="BorderBrush" Value="#30FFFFFF"/>`
+- Line 104: `<Setter TargetName="border" Property="Background" Value="#40FFFFFF"/>`
+- Line 105: `<Setter TargetName="border" Property="BorderBrush" Value="#40FFFFFF"/>`
+- Line 140: `<Setter TargetName="border" Property="Background" Value="#FFE0E0E0"/>`
+- Line 141: `<Setter TargetName="border" Property="BorderBrush" Value="#FFBDBDBD"/>`
+- Line 142: `<Setter Property="Foreground" Value="#FF888888"/>`
+
+### `./Skyweaver/Resources/Controls/AeroComboBoxStyles.xaml`
+- Line 5: `<GradientStop Color="#60A0D0FF" Offset="0"/>`
+- Line 6: `<GradientStop Color="#3060A0D0" Offset="0.5"/>`
+- Line 7: `<GradientStop Color="#4080C0F0" Offset="1"/>`
+- Line 11: `<GradientStop Color="#A0C0E8FF" Offset="0"/>`
+- Line 12: `<GradientStop Color="#6080B0E0" Offset="0.5"/>`
+- Line 13: `<GradientStop Color="#80A0D0FF" Offset="1"/>`
+- Line 36: `<GradientStop Color="#40FFFFFF" Offset="0"/>`
+- Line 37: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 48: `<Setter TargetName="Bg" Property="BorderBrush" Value="#5090C0E0"/>`
+- Line 53: `<Setter TargetName="Bg" Property="BorderBrush" Value="#80A0D0FF"/>`
+- Line 79: `<Border x:Name="IdleBackground" CornerRadius="3" BorderThickness="1" BorderBrush="#FF82869E">`
+- Line 82: `<GradientStop Color="#E0183858" Offset="0"/>`
+- Line 83: `<GradientStop Color="#D0285878" Offset="0.15"/>`
+- Line 84: `<GradientStop Color="#C0306888" Offset="0.5"/>`
+- Line 85: `<GradientStop Color="#D0285878" Offset="0.85"/>`
+- Line 86: `<GradientStop Color="#E0183858" Offset="1"/>`
+- Line 94: `<GradientStop Color="#30FFFFFF" Offset="0"/>`
+- Line 95: `<GradientStop Color="#10FFFFFF" Offset="0.5"/>`
+- Line 96: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 104: `<GradientStop Color="#4060B0F0" Offset="0"/>`
+- Line 105: `<GradientStop Color="#0060B0F0" Offset="1"/>`
+- Line 113: `<GradientStop Color="#50FFFFFF" Offset="0"/>`
+- Line 114: `<GradientStop Color="#20FFFFFF" Offset="0.5"/>`
+- Line 115: `<GradientStop Color="#3080B0D0" Offset="1"/>`
+- Line 120: `<Border x:Name="HoverBackground" Opacity="0" CornerRadius="3" BorderThickness="1" BorderBrush="#67BBDDF2">`
+- Line 123: `<GradientStop Color="#CD6E869C" Offset="0"/>`
+- Line 124: `<GradientStop Color="#CD3A576E" Offset="0.35"/>`
+- Line 125: `<GradientStop Color="#CD162D41" Offset="0.5"/>`
+- Line 126: `<GradientStop Color="#CB4C87AF" Offset="1"/>`
+- Line 134: `<GradientStop Color="#50FFFFFF" Offset="0"/>`
+- Line 135: `<GradientStop Color="#20FFFFFF" Offset="0.5"/>`
+- Line 136: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 141: `<Border x:Name="PressedBackground" Opacity="0" CornerRadius="3" BorderThickness="1" BorderBrush="#67BBDDF2">`
+- Line 144: `<GradientStop Color="#FF87B0CA" Offset="0"/>`
+- Line 145: `<GradientStop Color="#FF496A89" Offset="0.45"/>`
+- Line 146: `<GradientStop Color="#FF335876" Offset="0.5"/>`
+- Line 147: `<GradientStop Color="#FF559EBA" Offset="1"/>`
+- Line 155: `<GradientStop Color="#60FFFFFF" Offset="0"/>`
+- Line 156: `<GradientStop Color="#20FFFFFF" Offset="0.6"/>`
+- Line 157: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 169: `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>`
+- Line 231: `<DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="2" Opacity="0.6"/>`
+- Line 234: `<SolidColorBrush Color="#01000000"/>`
+- Line 241: `<GradientStop Color="#F0102030" Offset="0"/>`
+- Line 242: `<GradientStop Color="#F0183050" Offset="0.3"/>`
+- Line 243: `<GradientStop Color="#F0102840" Offset="0.7"/>`
+- Line 244: `<GradientStop Color="#F0081828" Offset="1"/>`
+- Line 261: `<GradientStop Color="#25FFFFFF" Offset="0"/>`
+- Line 262: `<GradientStop Color="#10FFFFFF" Offset="0.5"/>`
+- Line 263: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 271: `<GradientStop Color="#3040A0E0" Offset="0"/>`
+- Line 272: `<GradientStop Color="#0040A0E0" Offset="1"/>`
+- Line 280: `<GradientStop Color="#60FFFFFF" Offset="0"/>`
+- Line 281: `<GradientStop Color="#30FFFFFF" Offset="0.3"/>`
+- Line 282: `<GradientStop Color="#20FFFFFF" Offset="0.7"/>`
+- Line 283: `<GradientStop Color="#4080C0E0" Offset="1"/>`
+
+### `./Skyweaver/Resources/Controls/ButtonStyles.xaml`
+- Line 6: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 7: `<GradientStop Color="#1AFFFFFF" Offset="0.135436"/>`
+- Line 8: `<GradientStop Color="#17FFFFFF" Offset="0.487941"/>`
+- Line 9: `<GradientStop Color="#00000004" Offset="0.517625"/>`
+- Line 10: `<GradientStop Color="#FF1F8EAD" Offset="0.729128"/>`
+- Line 25: `<GradientStop Color="#FF61D1F0" Offset="0"/>`
+- Line 26: `<GradientStop Color="#00000000" Offset="0.662338"/>`
+- Line 40: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 41: `<GradientStop Color="#1AFFFFFF" Offset="0.135436"/>`
+- Line 42: `<GradientStop Color="#17FFFFFF" Offset="0.487941"/>`
+- Line 43: `<GradientStop Color="#00000004" Offset="0.517625"/>`
+- Line 44: `<GradientStop Color="#FF38CBF4" Offset="0.717996"/>`
+- Line 81: `<Setter TargetName="border" Property="BorderBrush" Value="#30FFFFFF"/>`
+- Line 103: `<Setter TargetName="border" Property="BorderBrush" Value="#40FFFFFF"/>`
+- Line 137: `<Setter TargetName="border" Property="BorderBrush" Value="#FFBDBDBD"/>`
+- Line 176: `<Setter TargetName="border" Property="Background" Value="#E0E0E0"/>`
+- Line 179: `<Setter TargetName="border" Property="Background" Value="#C0C0C0"/>`
+- Line 208: `<Setter Property="Foreground" Value="#FF2E5C8A"/>`
+- Line 212: `<GradientStop Color="#1A1F28" Offset="0"/>`
+- Line 213: `<GradientStop Color="#1A1F28" Offset="0.4"/>`
+- Line 214: `<GradientStop Color="#1A1F28" Offset="0.6"/>`
+- Line 215: `<GradientStop Color="#1A1F28" Offset="1"/>`
+- Line 219: `<Setter Property="BorderBrush" Value="#FF1A1F28"/>`
+- Line 227: `Background="#15000000"`
+- Line 239: `Background="#30FFFFFF"`
+- Line 253: `<GradientStop Color="#1A1F28" Offset="0"/>`
+- Line 254: `<GradientStop Color="#1A1F28" Offset="0.4"/>`
+- Line 255: `<GradientStop Color="#1A1F28" Offset="0.6"/>`
+- Line 256: `<GradientStop Color="#1A1F28" Offset="1"/>`
+- Line 260: `<Setter TargetName="mainBorder" Property="BorderBrush" Value="#FF5A9FD4"/>`
+- Line 261: `<Setter TargetName="highlightBorder" Property="Background" Value="#40FFFFFF"/>`
+- Line 267: `<GradientStop Color="#FF1A1F28" Offset="0"/>`
+- Line 268: `<GradientStop Color="#FF1A1F28" Offset="0.4"/>`
+- Line 269: `<GradientStop Color="#FF1A1F28" Offset="0.6"/>`
+- Line 270: `<GradientStop Color="#FF1A1F28" Offset="1"/>`
+- Line 274: `<Setter TargetName="mainBorder" Property="BorderBrush" Value="#FF3B79AC"/>`
+- Line 275: `<Setter TargetName="highlightBorder" Property="Background" Value="#20FFFFFF"/>`
+- Line 288: `<GradientStop Color="#FFFF6B6B" Offset="0"/>`
+- Line 289: `<GradientStop Color="#FFFF5252" Offset="0.4"/>`
+- Line 290: `<GradientStop Color="#FFE53E3E" Offset="0.6"/>`
+- Line 291: `<GradientStop Color="#FFCC0000" Offset="1"/>`
+- Line 296: `<Setter Property="BorderBrush" Value="#FFCC0000"/>`
+- Line 302: `<GradientStop Color="#FFFF8A80" Offset="0"/>`
+- Line 303: `<GradientStop Color="#FFFF6B6B" Offset="0.4"/>`
+- Line 304: `<GradientStop Color="#FFFF5252" Offset="0.6"/>`
+- Line 305: `<GradientStop Color="#FFE53E3E" Offset="1"/>`
+- Line 314: `<GradientStop Color="#FFCC0000" Offset="0"/>`
+- Line 315: `<GradientStop Color="#FFE53E3E" Offset="0.4"/>`
+- Line 316: `<GradientStop Color="#FFFF5252" Offset="0.6"/>`
+- Line 317: `<GradientStop Color="#FFFF6B6B" Offset="1"/>`
+- Line 331: `<Setter Property="Foreground" Value="#FF2E5C8A"/>`
+- Line 335: `<GradientStop Color="#1A1F28" Offset="0"/>`
+- Line 336: `<GradientStop Color="#1A1F28" Offset="0.3"/>`
+- Line 337: `<GradientStop Color="#1A1F28" Offset="0.7"/>`
+- Line 338: `<GradientStop Color="#1A1F28" Offset="1"/>`
+- Line 342: `<Setter Property="BorderBrush" Value="#FF84B2D4"/>`
+- Line 350: `Fill="#30000000"`
+- Line 360: `Fill="#50FFFFFF"`
+- Line 372: `<GradientStop Color="#1A1F28" Offset="0"/>`
+- Line 373: `<GradientStop Color="#1A1F28" Offset="0.3"/>`
+- Line 374: `<GradientStop Color="#1A1F28" Offset="0.7"/>`
+- Line 375: `<GradientStop Color="#1A1F28" Offset="1"/>`
+- Line 379: `<Setter TargetName="mainEllipse" Property="Stroke" Value="#FF7EB4EA"/>`
+- Line 385: `<GradientStop Color="#1A1F28" Offset="0"/>`
+- Line 386: `<GradientStop Color="#1A1F28" Offset="0.3"/>`
+- Line 387: `<GradientStop Color="#1A1F28" Offset="0.7"/>`
+- Line 388: `<GradientStop Color="#1A1F28" Offset="1"/>`
+- Line 392: `<Setter TargetName="highlightEllipse" Property="Fill" Value="#30FFFFFF"/>`
+- Line 439: `<Setter TargetName="border" Property="BorderBrush" Value="#30FFFFFF"/>`
+- Line 461: `<Setter TargetName="border" Property="BorderBrush" Value="#40FFFFFF"/>`
+- Line 495: `<Setter TargetName="border" Property="BorderBrush" Value="#FFBDBDBD"/>`
+
+### `./Skyweaver/Resources/Controls/CascadePreferenceImplicitStyles.xaml`
+- Line 13: `<Setter Property="SelectionBrush" Value="#804B9DCC"/>`
+- Line 26: `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 27: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 32: `<GradientStop Color="#FF4588BD" Offset="0"/>`
+- Line 33: `<GradientStop Color="#001AD5FF" Offset="0.381"/>`
+- Line 41: `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 42: `<GradientStop Color="#34C3EFFF" Offset="1"/>`
+- Line 47: `<GradientStop Color="#44FFFFFF" Offset="0"/>`
+- Line 48: `<GradientStop Color="#0BFFFFFF" Offset="0.345"/>`
+- Line 49: `<GradientStop Color="#01FFFFFF" Offset="0.351"/>`
+- Line 50: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 58: `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 59: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 64: `<GradientStop Color="#384588BD" Offset="0"/>`
+- Line 65: `<GradientStop Color="#001AD5FF" Offset="0.691"/>`
+- Line 73: `<GradientStop Color="#FF6A9FC0" Offset="0"/>`
+- Line 74: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 79: `<GradientStop Color="#FF5A9ED0" Offset="0"/>`
+- Line 80: `<GradientStop Color="#001AD5FF" Offset="0.55"/>`
+- Line 88: `<GradientStop Color="#FF6A9FC0" Offset="0"/>`
+- Line 89: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 94: `<GradientStop Color="#FF5A9ED0" Offset="0"/>`
+- Line 95: `<GradientStop Color="#001AD5FF" Offset="0.55"/>`
+- Line 103: `<GradientStop Color="#40000000" Offset="0"/>`
+- Line 104: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 112: `<GradientStop Color="#25000000" Offset="0"/>`
+- Line 113: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 121: `<GradientStop Color="#25000000" Offset="0"/>`
+- Line 122: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 135: `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.3"/>`
+- Line 217: `<Border x:Name="IdleBackground" CornerRadius="4" BorderThickness="2" BorderBrush="#67BBDDF2">`
+- Line 220: `<GradientStop Color="#FF637495" Offset="0.308"/>`
+- Line 221: `<GradientStop Color="#FF384D75" Offset="0.489"/>`
+- Line 222: `<GradientStop Color="#FF223761" Offset="0.495"/>`
+- Line 223: `<GradientStop Color="#FF284D7E" Offset="0.681"/>`
+- Line 231: `<GradientStop Color="#FF4B9DCC" Offset="0.231"/>`
+- Line 232: `<GradientStop Color="#013C4F73" Offset="1"/>`
+- Line 237: `<Border x:Name="HoverBackground" Opacity="0" CornerRadius="4" BorderThickness="2" BorderBrush="#67BBDDF2">`
+- Line 240: `<GradientStop Color="#FF7387AF" Offset="0.308"/>`
+- Line 241: `<GradientStop Color="#FF405886" Offset="0.489"/>`
+- Line 242: `<GradientStop Color="#FF284276" Offset="0.495"/>`
+- Line 243: `<GradientStop Color="#FF295691" Offset="0.681"/>`
+- Line 251: `<GradientStop Color="#FF4B9DCC" Offset="0.231"/>`
+- Line 252: `<GradientStop Color="#013C4F73" Offset="1"/>`
+- Line 260: `<GradientStop Color="#FF4B9DCC" Offset="0.231"/>`
+- Line 261: `<GradientStop Color="#013C4F73" Offset="1"/>`
+- Line 266: `<Border x:Name="PressedBackground" Opacity="0" CornerRadius="4" BorderThickness="2" BorderBrush="#67BBDDF2">`
+- Line 269: `<GradientStop Color="#FF324F80" Offset="0.308"/>`
+- Line 270: `<GradientStop Color="#FF142E74" Offset="0.489"/>`
+- Line 271: `<GradientStop Color="#FF09246B" Offset="0.501"/>`
+- Line 272: `<GradientStop Color="#FF0A348A" Offset="0.681"/>`
+- Line 280: `<GradientStop Color="#FF3A5AC6" Offset="0.213"/>`
+- Line 281: `<GradientStop Color="#013C4F73" Offset="1"/>`
+- Line 289: `<GradientStop Color="#80000000" Offset="0"/>`
+- Line 290: `<GradientStop Color="#40000000" Offset="0.15"/>`
+- Line 291: `<GradientStop Color="#00000000" Offset="0.4"/>`
+- Line 299: `<GradientStop Color="#50000000" Offset="0"/>`
+- Line 300: `<GradientStop Color="#00000000" Offset="0.1"/>`
+- Line 301: `<GradientStop Color="#00000000" Offset="0.9"/>`
+- Line 302: `<GradientStop Color="#50000000" Offset="1"/>`
+- Line 313: `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>`
+- Line 414: `<GradientStop Color="#CCD9E7F4" Offset="0"/>`
+- Line 415: `<GradientStop Color="#CC7CBEEA" Offset="1"/>`
+- Line 420: `<GradientStop Color="#CC9CB3C8" Offset="0.473"/>`
+- Line 421: `<GradientStop Color="#CC3A576E" Offset="0.593"/>`
+- Line 422: `<GradientStop Color="#CC162D41" Offset="0.623"/>`
+- Line 423: `<GradientStop Color="#CC4C87AF" Offset="0.798"/>`
+- Line 431: `<GradientStop Color="#FFE9F7FF" Offset="0"/>`
+- Line 432: `<GradientStop Color="#FF8CCEFA" Offset="1"/>`
+- Line 437: `<GradientStop Color="#FFACC3D8" Offset="0.473"/>`
+- Line 438: `<GradientStop Color="#FF4A677E" Offset="0.593"/>`
+- Line 439: `<GradientStop Color="#FF263D51" Offset="0.623"/>`
+- Line 440: `<GradientStop Color="#FF5C97BF" Offset="0.798"/>`
+- Line 455: `<GradientStop Color="#FF8AE0FF" Offset="0.093"/>`
+- Line 456: `<GradientStop Color="#FF35A6E6" Offset="0.645"/>`
+- Line 457: `<GradientStop Color="#FF4DA6E4" Offset="0.712"/>`
+- Line 458: `<GradientStop Color="#FFAED3F4" Offset="0.942"/>`
+- Line 462: `<DropShadowEffect Color="#22657C" BlurRadius="2" ShadowDepth="0" Opacity="0.8" Direction="315"/>`
+- Line 469: `<GradientStop Color="#FF8AE0FF" Offset="0.093"/>`
+- Line 470: `<GradientStop Color="#FF35A6E6" Offset="0.645"/>`
+- Line 471: `<GradientStop Color="#FF4DA6E4" Offset="0.712"/>`
+- Line 472: `<GradientStop Color="#FFAED3F4" Offset="0.942"/>`
+- Line 476: `<DropShadowEffect Color="#22657C" BlurRadius="2" ShadowDepth="0" Opacity="0.8" Direction="315"/>`
+- Line 487: `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>`
+
+### `./Skyweaver/Resources/Controls/ChatStyles.xaml`
+- Line 12: `<GradientStop Color="#66304B62" Offset="0"/>`
+- Line 13: `<GradientStop Color="#44202F3F" Offset="0.52"/>`
+- Line 14: `<GradientStop Color="#38202A36" Offset="1"/>`
+- Line 20: `<Pen Thickness="0.32" LineJoin="Round" Brush="#FF000000"/>`
+- Line 31: `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 32: `<GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>`
+- Line 33: `<GradientStop Color="#07FFFFFF" Offset="0.109195"/>`
+- Line 34: `<GradientStop Color="#04FFFFFF" Offset="0.298851"/>`
+- Line 35: `<GradientStop Color="#3AFFFFFF" Offset="0.327586"/>`
+- Line 36: `<GradientStop Color="#1AFFFFFF" Offset="0.465517"/>`
+- Line 37: `<GradientStop Color="#14FFFFFF" Offset="0.591954"/>`
+- Line 38: `<GradientStop Color="#05FFFFFF" Offset="0.758621"/>`
+- Line 39: `<GradientStop Color="#44FFFFFF" Offset="1"/>`
+- Line 68: `<Border x:Name="IdleBackground" CornerRadius="4" BorderThickness="2" BorderBrush="#67BBDDF2">`
+- Line 71: `<GradientStop Color="#FF637495" Offset="0.308"/>`
+- Line 72: `<GradientStop Color="#FF384D75" Offset="0.489"/>`
+- Line 73: `<GradientStop Color="#FF223761" Offset="0.495"/>`
+- Line 74: `<GradientStop Color="#FF284D7E" Offset="0.681"/>`
+- Line 82: `<GradientStop Color="#FF4B9DCC" Offset="0.231"/>`
+- Line 83: `<GradientStop Color="#013C4F73" Offset="1"/>`
+- Line 88: `<Border x:Name="HoverBackground" Opacity="0" CornerRadius="4" BorderThickness="2" BorderBrush="#67BBDDF2">`
+- Line 91: `<GradientStop Color="#FF7387AF" Offset="0.308"/>`
+- Line 92: `<GradientStop Color="#FF405886" Offset="0.489"/>`
+- Line 93: `<GradientStop Color="#FF284276" Offset="0.495"/>`
+- Line 94: `<GradientStop Color="#FF295691" Offset="0.681"/>`
+- Line 102: `<GradientStop Color="#FF4B9DCC" Offset="0.231"/>`
+- Line 103: `<GradientStop Color="#013C4F73" Offset="1"/>`
+- Line 111: `<GradientStop Color="#FF4B9DCC" Offset="0.231"/>`
+- Line 112: `<GradientStop Color="#013C4F73" Offset="1"/>`
+- Line 117: `<Border x:Name="PressedBackground" Opacity="0" CornerRadius="4" BorderThickness="2" BorderBrush="#67BBDDF2">`
+- Line 120: `<GradientStop Color="#FF324F80" Offset="0.308"/>`
+- Line 121: `<GradientStop Color="#FF142E74" Offset="0.489"/>`
+- Line 122: `<GradientStop Color="#FF09246B" Offset="0.501"/>`
+- Line 123: `<GradientStop Color="#FF0A348A" Offset="0.681"/>`
+- Line 131: `<GradientStop Color="#FF3A5AC6" Offset="0.213"/>`
+- Line 132: `<GradientStop Color="#013C4F73" Offset="1"/>`
+- Line 140: `<GradientStop Color="#80000000" Offset="0"/>`
+- Line 141: `<GradientStop Color="#40000000" Offset="0.15"/>`
+- Line 142: `<GradientStop Color="#00000000" Offset="0.4"/>`
+- Line 150: `<GradientStop Color="#50000000" Offset="0"/>`
+- Line 151: `<GradientStop Color="#00000000" Offset="0.1"/>`
+- Line 152: `<GradientStop Color="#00000000" Offset="0.9"/>`
+- Line 153: `<GradientStop Color="#50000000" Offset="1"/>`
+- Line 164: `<DropShadowEffect Color="#000000"`
+- Line 341: `<Pen Thickness="0.319997" LineJoin="Round" Brush="#FF96FCFF"/>`
+- Line 346: `<GradientStop Color="#38FFFFFF" Offset="0"/>`
+- Line 347: `<GradientStop Color="#00FFFFFF" Offset="0.473183"/>`
+- Line 348: `<GradientStop Color="#91FFFFFF" Offset="0.478927"/>`
+- Line 349: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 370: `<GradientStop Color="#FF6A92AA" Offset="0"/>`
+- Line 371: `<GradientStop Color="#FF2E6986" Offset="1"/>`
+- Line 380: `<GradientStop Color="#12FFFFFF" Offset="0"/>`
+- Line 381: `<GradientStop Color="#0BEEF5F8" Offset="0.250958"/>`
+- Line 382: `<GradientStop Color="#01FFFFFF" Offset="0.992337"/>`
+- Line 398: `<GradientStop Color="#FF6A92AA" Offset="0"/>`
+- Line 399: `<GradientStop Color="#FF2E6986" Offset="1"/>`
+- Line 408: `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 409: `<GradientStop Color="#00FFFFFF" Offset="0.178161"/>`
+- Line 410: `<GradientStop Color="#00000000" Offset="0.208812"/>`
+- Line 411: `<GradientStop Color="#09070E11" Offset="0.798851"/>`
+- Line 412: `<GradientStop Color="#632582AA" Offset="1"/>`
+- Line 433: `<GradientStop Color="#FF6A92AA" Offset="0"/>`
+- Line 434: `<GradientStop Color="#FF2E6986" Offset="1"/>`
+- Line 443: `<GradientStop Color="#12FFFFFF" Offset="0"/>`
+- Line 444: `<GradientStop Color="#0BEEF5F8" Offset="0.250958"/>`
+- Line 445: `<GradientStop Color="#01FFFFFF" Offset="0.992337"/>`
+- Line 461: `<GradientStop Color="#FF6A92AA" Offset="0"/>`
+- Line 462: `<GradientStop Color="#FF2E6986" Offset="1"/>`
+- Line 471: `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 472: `<GradientStop Color="#00FFFFFF" Offset="0.295019"/>`
+- Line 473: `<GradientStop Color="#00000000" Offset="0.300766"/>`
+- Line 474: `<GradientStop Color="#09070E11" Offset="0.703065"/>`
+- Line 475: `<GradientStop Color="#632582AA" Offset="1"/>`
+- Line 496: `<GradientStop Color="#FF6A92AA" Offset="0"/>`
+- Line 497: `<GradientStop Color="#FF2E6986" Offset="1"/>`
+- Line 506: `<GradientStop Color="#1AFFFFFF" Offset="0"/>`
+- Line 507: `<GradientStop Color="#0BEEF5F8" Offset="0.890805"/>`
+- Line 508: `<GradientStop Color="#0EFFFFFF" Offset="0.992337"/>`
+- Line 524: `<GradientStop Color="#FF6A92AA" Offset="0"/>`
+- Line 525: `<GradientStop Color="#FF2E6986" Offset="1"/>`
+- Line 534: `<GradientStop Color="#5BFFFFFF" Offset="0"/>`
+- Line 535: `<GradientStop Color="#00FFFFFF" Offset="0.178161"/>`
+- Line 536: `<GradientStop Color="#00000000" Offset="0.208812"/>`
+- Line 537: `<GradientStop Color="#09070E11" Offset="0.798851"/>`
+- Line 538: `<GradientStop Color="#952582AA" Offset="1"/>`
+- Line 557: `<GradientStop Color="#BF306F83" Offset="0"/>`
+- Line 558: `<GradientStop Color="#FF04071C" Offset="0.992337"/>`
+
+### `./Skyweaver/Resources/Controls/CheckBoxComboBoxStyles.xaml`
+- Line 7: `<GradientStop Color="#FF61FFFF" Offset="0"/>`
+- Line 8: `<GradientStop Color="#C7000000" Offset="0.173047"/>`
+- Line 9: `<GradientStop Color="#00000A11" Offset="0.378254"/>`
+- Line 10: `<GradientStop Color="#99001A2C" Offset="0.51608"/>`
+- Line 11: `<GradientStop Color="#FF0086DF" Offset="0.825421"/>`
+- Line 19: `<SolidColorBrush x:Key="CheckboxComboBoxBorderBrush" Color="#4400CCCC"/>`
+- Line 22: `<SolidColorBrush x:Key="CheckboxComboBoxForegroundBrush" Color="#FFFFFFFF"/>`
+- Line 71: `<Setter Property="BorderBrush" TargetName="checkBoxBorder" Value="#8800FFFF"/>`
+- Line 112: `<Setter Property="Background" Value="#3F0086DF"/>`
+- Line 115: `<Setter Property="Background" Value="#7F0086DF"/>`
+- Line 166: `<Setter Property="BorderBrush" TargetName="mainBorder" Value="#8800FFFF"/>`
+- Line 170: `<Setter Property="BorderBrush" TargetName="mainBorder" Value="#8800FFFF"/>`
+- Line 186: `Background="#FF001A2C"`
+
+### `./Skyweaver/Resources/Controls/CustomContextMenuStyles.xaml`
+- Line 16: `<GradientStop Color="#6ADDFFFD" Offset="0.00153139"/>`
+- Line 17: `<GradientStop Color="#76000000" Offset="0.148545"/>`
+- Line 18: `<GradientStop Color="#E07FCEFF" Offset="0.32925"/>`
+- Line 19: `<GradientStop Color="#FF000000" Offset="0.344564"/>`
+- Line 20: `<GradientStop Color="#FF0099FF" Offset="0.828484"/>`
+- Line 31: `<GradientStop Color="#7800F3FF" Offset="0"/>`
+- Line 32: `<GradientStop Color="#6A000000" Offset="0.148545"/>`
+- Line 33: `<GradientStop Color="#FFA5DBFF" Offset="0.316998"/>`
+- Line 34: `<GradientStop Color="#FF0099FF" Offset="0.577335"/>`
+- Line 45: `<GradientStop Color="#FF00F3FF" Offset="0"/>`
+- Line 46: `<GradientStop Color="#59000000" Offset="0.169985"/>`
+- Line 47: `<GradientStop Color="#EBA5DBFF" Offset="0.307808"/>`
+- Line 48: `<GradientStop Color="#FF0099FF" Offset="0.577335"/>`
+- Line 89: `<DropShadowEffect ShadowDepth="0.5" Color="#333333" Opacity="1" BlurRadius="3" />`
+- Line 101: `<DropShadowEffect ShadowDepth="0.5" Color="#333333" Opacity="0.8" BlurRadius="3" />`
+- Line 109: `Fill="#AAFFFFFF"`
+- Line 142: `<Setter Property="Foreground" Value="#FFFFFF"/>`
+- Line 177: `<DropShadowEffect ShadowDepth="0.5" Color="#333333" Opacity="1" BlurRadius="3" />`
+- Line 189: `<DropShadowEffect ShadowDepth="0.5" Color="#333333" Opacity="0.8" BlurRadius="3" />`
+- Line 284: `<Setter Property="Foreground" Value="#FFFFFF"/>`
+
+### `./Skyweaver/Resources/Controls/DiffStyles.xaml`
+- Line 11: `<GradientStop Color="#4DC9CACA" Offset="0"/>`
+- Line 12: `<GradientStop Color="#0E7C7A44" Offset="0.988506"/>`
+- Line 27: `<GradientStop Color="#2AFFFACC" Offset="0"/>`
+- Line 28: `<GradientStop Color="#14FFFFFF" Offset="0.247126"/>`
+- Line 29: `<GradientStop Color="#00FFFFFF" Offset="0.461686"/>`
+- Line 40: `<GradientStop Color="#67FFFFFF" Offset="0"/>`
+- Line 41: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 67: `<GradientStop Color="#4DC9CACA" Offset="0"/>`
+- Line 68: `<GradientStop Color="#0E7C4444" Offset="0.988506"/>`
+- Line 83: `<GradientStop Color="#2AFF9F9F" Offset="0"/>`
+- Line 84: `<GradientStop Color="#14FFC9C9" Offset="0.247126"/>`
+- Line 85: `<GradientStop Color="#00FCD9D9" Offset="0.461686"/>`
+- Line 96: `<GradientStop Color="#67FFFFFF" Offset="0"/>`
+- Line 97: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 123: `<GradientStop Color="#4DC9CACA" Offset="0"/>`
+- Line 124: `<GradientStop Color="#0E0B7622" Offset="0.988506"/>`
+- Line 139: `<GradientStop Color="#2A5BFC4C" Offset="0"/>`
+- Line 140: `<GradientStop Color="#1498FF8E" Offset="0.247126"/>`
+- Line 141: `<GradientStop Color="#00C8FFC3" Offset="0.464467"/>`
+- Line 152: `<GradientStop Color="#67FFFFFF" Offset="0"/>`
+- Line 153: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 171: `<SolidColorBrush x:Key="SkyweaverDiffAnchorAccentBrush" Color="#FFD8F8F2"/>`
+- Line 172: `<SolidColorBrush x:Key="SkyweaverDiffAddedAccentBrush" Color="#FFC8FFD8"/>`
+- Line 173: `<SolidColorBrush x:Key="SkyweaverDiffRemovedAccentBrush" Color="#FFFFD1D1"/>`
+- Line 174: `<SolidColorBrush x:Key="SkyweaverDiffContentBrush" Color="#FFF4FCFF"/>`
+
+### `./Skyweaver/Resources/Controls/DropdownBase.xaml`
+- Line 9: `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 14: `<GradientStop Color="#9193C7FF" Offset="0.298622"/>`
+- Line 15: `<GradientStop Color="#00FFFFFF" Offset="0.502783"/>`
+- Line 16: `<GradientStop Color="#C3ABDEFF" Offset="0.715161"/>`
+
+### `./Skyweaver/Resources/Controls/DropdownClickMask.xaml`
+- Line 9: `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 14: `<GradientStop Color="#FF00FDFF" Offset="0.267994"/>`
+- Line 15: `<GradientStop Color="#0000FDFF" Offset="0.49464"/>`
+- Line 16: `<GradientStop Color="#FF00FDFF" Offset="0.764165"/>`
+
+### `./Skyweaver/Resources/Controls/DropdownHoverMask.xaml`
+- Line 9: `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 14: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 15: `<GradientStop Color="#0535FAFF" Offset="0.258806"/>`
+- Line 16: `<GradientStop Color="#0079FDFF" Offset="0.488515"/>`
+- Line 17: `<GradientStop Color="#7100FDFF" Offset="1"/>`
+
+### `./Skyweaver/Resources/Controls/FilmPreviewTabStyles.xaml`
+- Line 11: `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 16: `<GradientStop Color="#BA2D38A0" Offset="0"/>`
+- Line 17: `<GradientStop Color="#00000004" Offset="0.506494"/>`
+- Line 18: `<GradientStop Color="#00FFFFFF" Offset="0.517625"/>`
+- Line 19: `<GradientStop Color="#3FFFFFFF" Offset="0.821892"/>`
+- Line 20: `<GradientStop Color="#4AFFFFFF" Offset="0.892393"/>`
+
+### `./Skyweaver/Resources/Controls/GroupBoxStyles.xaml`
+- Line 9: `<Setter Property="Foreground" Value="#FFB8C5D1"/>`
+- Line 21: `BorderBrush="#FFD0D0D0"`
+- Line 40: `<Setter Property="BorderBrush" Value="#FF1A1F28"/>`
+- Line 67: `<GradientStop Color="#1A1F28" Offset="0"/>`
+- Line 68: `<GradientStop Color="#1A1F28" Offset="0.5"/>`
+- Line 69: `<GradientStop Color="#1A1F28" Offset="1"/>`
+- Line 90: `<GradientStop Color="#F8F8F8" Offset="0"/>`
+- Line 91: `<GradientStop Color="#F0F0F0" Offset="1"/>`
+- Line 95: `<Setter Property="BorderBrush" Value="#D0D0D0"/>`
+
+### `./Skyweaver/Resources/Controls/ListBoxStyles.xaml`
+- Line 7: `<Setter Property="BorderBrush" Value="#C8C8C8"/>`
+- Line 42: `<Setter Property="Background" TargetName="Bd" Value="#1A1F28"/>`
+- Line 43: `<Setter Property="BorderBrush" TargetName="Bd" Value="#1A1F28"/>`
+- Line 44: `<Setter Property="Foreground" Value="#222222"/>`
+- Line 47: `<Setter Property="Background" TargetName="Bd" Value="#1A1F28"/>`
+- Line 48: `<Setter Property="BorderBrush" TargetName="Bd" Value="#1A1F28"/>`
+- Line 80: `<Setter Property="Background" Value="#1A1F28"/>`
+- Line 81: `<Setter Property="BorderBrush" Value="#1A1F28"/>`
+- Line 83: `<Setter Property="Foreground" Value="#042271"/>`
+- Line 100: `<Setter Property="Background" TargetName="Bd" Value="#FEF3B5"/>`
+- Line 101: `<Setter Property="BorderBrush" TargetName="Bd" Value="#C4AF8C"/>`
+- Line 102: `<Setter Property="Foreground" Value="#042271"/>`
+- Line 105: `<Setter Property="Background" TargetName="Bd" Value="#6A87AB"/>`
+- Line 106: `<Setter Property="BorderBrush" TargetName="Bd" Value="#1A1F28"/>`
+- Line 107: `<Setter Property="Foreground" Value="#FFFFFF"/>`
+- Line 126: `<Setter Property="BorderBrush" Value="#C8C8C8"/>`
+
+### `./Skyweaver/Resources/Controls/MarkdownTableStyles.xaml`
+- Line 35: `<SolidColorBrush x:Key="TwilightBlue_CellForegroundBrush" Color="#FF1B2A3B"/>`
+- Line 154: `<Setter Property="AlternatingRowBackground" Value="#FFF2F5F7"/>`
+
+### `./Skyweaver/Resources/Controls/MenuStateResources.xaml`
+- Line 6: `<GradientStop Color="#12FFFFFF" Offset="0"/>`
+- Line 7: `<GradientStop Color="#C30099FF" Offset="1"/>`
+- Line 11: `<GradientStop Color="#7A00F3FF" Offset="0"/>`
+- Line 12: `<GradientStop Color="#C30099FF" Offset="1"/>`
+- Line 16: `<GradientStop Color="#BA00F3FF" Offset="0"/>`
+- Line 17: `<GradientStop Color="#FF0099FF" Offset="1"/>`
+
+### `./Skyweaver/Resources/Controls/NewNodeGraphDialogStyles.xaml`
+- Line 34: `<Setter TargetName="Bd" Property="BorderBrush" Value="#30FFFFFF"/>`
+- Line 40: `<Setter TargetName="Bd" Property="BorderBrush" Value="#60FFFFFF"/>`
+
+### `./Skyweaver/Resources/Controls/PreferencesPanelStyles.xaml`
+- Line 6: `<GradientStop Color="#25102040" Offset="0"/>`
+- Line 7: `<GradientStop Color="#354080C0" Offset="0.5"/>`
+- Line 8: `<GradientStop Color="#25102040" Offset="1"/>`
+- Line 14: `<GradientStop Color="#50FFFFFF" Offset="0"/>`
+- Line 15: `<GradientStop Color="#20FFFFFF" Offset="0.5"/>`
+- Line 16: `<GradientStop Color="#40FFFFFF" Offset="1"/>`
+- Line 22: `<GradientStop Color="#FF5A5F6D" Offset="0.36"/>`
+- Line 23: `<GradientStop Color="#FF353A51" Offset="0.498"/>`
+- Line 24: `<GradientStop Color="#FF141B36" Offset="0.504"/>`
+- Line 25: `<GradientStop Color="#FF070918" Offset="0.706"/>`
+- Line 33: `<GradientStop Color="#FF79B6EE" Offset="0"/>`
+- Line 34: `<GradientStop Color="#004D4D4D" Offset="1"/>`
+- Line 42: `<GradientStop Color="#FF43ACFF" Offset="0"/>`
+- Line 43: `<GradientStop Color="#004D4D4D" Offset="1"/>`
+- Line 56: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 57: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 63: `<GradientStop Color="#FF4A5060" Offset="0"/>`
+- Line 64: `<GradientStop Color="#FF2A3040" Offset="0.5"/>`
+- Line 65: `<GradientStop Color="#FF1A2030" Offset="0.51"/>`
+- Line 66: `<GradientStop Color="#FF0A1020" Offset="1"/>`
+- Line 74: `<GradientStop Color="#8040A0FF" Offset="0"/>`
+- Line 75: `<GradientStop Color="#0040A0FF" Offset="1"/>`
+- Line 83: `<GradientStop Color="#3040A0FF" Offset="0"/>`
+- Line 84: `<GradientStop Color="#0040A0FF" Offset="1"/>`
+- Line 90: `<GradientStop Color="#60FFFFFF" Offset="0"/>`
+- Line 91: `<GradientStop Color="#20FFFFFF" Offset="0.5"/>`
+- Line 92: `<GradientStop Color="#40FFFFFF" Offset="1"/>`
+- Line 105: `<GradientStop Color="#CCFFFFFF" Offset="0"/>`
+- Line 106: `<GradientStop Color="#2EFFFFFF" Offset="0.296"/>`
+- Line 107: `<GradientStop Color="#18242729" Offset="0.626"/>`
+- Line 108: `<GradientStop Color="#34FFFFFF" Offset="0.963"/>`
+- Line 112: `Color="#7F7E8DB3"/>`
+- Line 124: `<GradientStop Color="#CCFFFFFF" Offset="0.201"/>`
+- Line 125: `<GradientStop Color="#B5CFEFFF" Offset="0.323"/>`
+- Line 126: `<GradientStop Color="#967A99A6" Offset="0.455"/>`
+- Line 127: `<GradientStop Color="#A501263F" Offset="0.678"/>`
+- Line 128: `<GradientStop Color="#BF5FCAFF" Offset="0.911"/>`
+- Line 129: `<GradientStop Color="#FF25CFFF" Offset="1"/>`
+- Line 135: `<GradientStop Color="#FF707580" Offset="0"/>`
+- Line 136: `<GradientStop Color="#20FFFFFF" Offset="0.48"/>`
+- Line 137: `<GradientStop Color="#10101520" Offset="0.52"/>`
+- Line 138: `<GradientStop Color="#FF606570" Offset="1"/>`
+- Line 144: `<GradientStop Color="#FFD0E8FF" Offset="0"/>`
+- Line 145: `<GradientStop Color="#FF90B0D0" Offset="0.12"/>`
+- Line 146: `<GradientStop Color="#CF305080" Offset="0.45"/>`
+- Line 147: `<GradientStop Color="#FF103050" Offset="0.52"/>`
+- Line 148: `<GradientStop Color="#FF4090C0" Offset="1"/>`
+- Line 152: `Color="#607080A0"/>`
+- Line 170: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 171: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 181: `<GradientStop Color="#25FFFFFF" Offset="0"/>`
+- Line 182: `<GradientStop Color="#00FFFFFF" Offset="0.185299"/>`
+- Line 183: `<GradientStop Color="#1AFFFFFF" Offset="0.540582"/>`
+- Line 184: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 196: `<GradientStop Color="#70FFFFFF" Offset="0"/>`
+- Line 197: `<GradientStop Color="#4098C4E6" Offset="0.42"/>`
+- Line 198: `<GradientStop Color="#70FFFFFF" Offset="1"/>`
+- Line 212: `<Setter Property="Background" Value="#C0141B2B"/>`
+- Line 229: `<Setter Property="Foreground" Value="#FFFFFFFF"/>`
+- Line 264: `<GradientStop Color="#30FFFFFF" Offset="0"/>`
+- Line 265: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 370: `<GradientStop Color="#40FFFFFF" Offset="0"/>`
+- Line 371: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 393: `<Setter TargetName="BgBorder" Property="BorderBrush" Value="#8060A0FF"/>`
+- Line 427: `<GradientStop Color="#35FFFFFF" Offset="0"/>`
+- Line 428: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 461: `<Setter Property="Foreground" Value="#FFF2F6FB"/>`
+- Line 469: `<Setter Property="Foreground" Value="#FFEBF6FF"/>`
+- Line 477: `<Setter Property="Foreground" Value="#BEE0EEFF"/>`
+- Line 484: `<Setter Property="Foreground" Value="#8FB7CCE4"/>`
+- Line 491: `<Setter Property="Foreground" Value="#7FC8DCF5"/>`
+- Line 499: `<Setter Property="Foreground" Value="#90FFFFFF"/>`
+
+### `./Skyweaver/Resources/Controls/ScrollBarStyles.xaml`
+- Line 6: `<Setter Property="Background" Value="#1A1F28"/>`
+- Line 7: `<Setter Property="BorderBrush" Value="#0F1419"/>`
+- Line 30: `Fill="#8A9BA8"/>`
+- Line 59: `Fill="#8A9BA8"/>`
+- Line 69: `<Setter Property="Background" Value="#1A1F28"/>`
+- Line 70: `<Setter Property="BorderBrush" Value="#0F1419"/>`
+- Line 93: `Fill="#8A9BA8"/>`
+- Line 122: `Fill="#8A9BA8"/>`
+- Line 139: `BorderBrush="#1A1F28"`
+- Line 146: `<GradientStop Color="#3A4550" Offset="0"/>`
+- Line 147: `<GradientStop Color="#2A3540" Offset="0.5"/>`
+- Line 148: `<GradientStop Color="#1A2530" Offset="1"/>`
+- Line 157: `<GradientStop Color="#4A5560" Offset="0"/>`
+- Line 158: `<GradientStop Color="#3A4550" Offset="0.5"/>`
+- Line 159: `<GradientStop Color="#2A3540" Offset="1"/>`
+- Line 163: `<Setter TargetName="ThumbBorder" Property="BorderBrush" Value="#4A5560"/>`
+- Line 169: `<GradientStop Color="#5A6570" Offset="0"/>`
+- Line 170: `<GradientStop Color="#4A5560" Offset="0.5"/>`
+- Line 171: `<GradientStop Color="#3A4550" Offset="1"/>`
+- Line 175: `<Setter TargetName="ThumbBorder" Property="BorderBrush" Value="#5A6570"/>`
+- Line 186: `<Setter Property="Background" Value="#1A1F28"/>`
+- Line 187: `<Setter Property="BorderBrush" Value="#0F1419"/>`
+- Line 203: `<Setter TargetName="ButtonBorder" Property="Background" Value="#2A3540"/>`
+- Line 207: `<Setter TargetName="ButtonBorder" Property="Background" Value="#3A4550"/>`
+- Line 270: `Fill="#1A1F28"`
+- Line 294: `<GradientStop Color="#A7FFFFFF" Offset="0"/>`
+- Line 295: `<GradientStop Color="#2DFFFFFF" Offset="1"/>`
+- Line 304: `<GradientStop Color="#29FFFFFF" Offset="0"/>`
+- Line 305: `<GradientStop Color="#00000004" Offset="0.380334"/>`
+- Line 306: `<GradientStop Color="#00FFFFFF" Offset="0.41744"/>`
+- Line 307: `<GradientStop Color="#5EFFFFFF" Offset="0.769944"/>`
+- Line 308: `<GradientStop Color="#4AFFFFFF" Offset="0.892393"/>`
+- Line 330: `<GradientStop Color="#A7FFFFFF" Offset="0"/>`
+- Line 331: `<GradientStop Color="#2DFFFFFF" Offset="1"/>`
+- Line 340: `<GradientStop Color="#29FFFFFF" Offset="0"/>`
+- Line 341: `<GradientStop Color="#00000004" Offset="0.380334"/>`
+- Line 342: `<GradientStop Color="#00FFFFFF" Offset="0.41744"/>`
+- Line 343: `<GradientStop Color="#5EFFFFFF" Offset="0.769944"/>`
+- Line 344: `<GradientStop Color="#4AFFFFFF" Offset="0.892393"/>`
+- Line 366: `<GradientStop Color="#A7FFFFFF" Offset="0"/>`
+- Line 367: `<GradientStop Color="#2DFFFFFF" Offset="1"/>`
+- Line 376: `<GradientStop Color="#29FFFFFF" Offset="0"/>`
+- Line 377: `<GradientStop Color="#00000004" Offset="0.380334"/>`
+- Line 378: `<GradientStop Color="#00FFFFFF" Offset="0.41744"/>`
+- Line 379: `<GradientStop Color="#5EFFFFFF" Offset="0.769944"/>`
+- Line 380: `<GradientStop Color="#4AFFFFFF" Offset="0.892393"/>`
+- Line 402: `<GradientStop Color="#A7FFFFFF" Offset="0"/>`
+- Line 403: `<GradientStop Color="#2DFFFFFF" Offset="1"/>`
+- Line 412: `<GradientStop Color="#7DFFFFFF" Offset="0"/>`
+- Line 413: `<GradientStop Color="#1A000000" Offset="0.467075"/>`
+- Line 414: `<GradientStop Color="#1FFFFFFF" Offset="1"/>`
+- Line 433: `<GradientStop Color="#A7FFFFFF" Offset="0"/>`
+- Line 434: `<GradientStop Color="#2DFFFFFF" Offset="1"/>`
+- Line 443: `<GradientStop Color="#7DFFFFFF" Offset="0"/>`
+- Line 444: `<GradientStop Color="#1AD3D3D3" Offset="0.467075"/>`
+- Line 445: `<GradientStop Color="#1FFFFFFF" Offset="1"/>`
+- Line 464: `<GradientStop Color="#A7FFFFFF" Offset="0"/>`
+- Line 465: `<GradientStop Color="#2DFFFFFF" Offset="1"/>`
+- Line 474: `<GradientStop Color="#29FFFFFF" Offset="0"/>`
+- Line 475: `<GradientStop Color="#00000004" Offset="0.380334"/>`
+- Line 476: `<GradientStop Color="#00FFFFFF" Offset="0.41744"/>`
+- Line 477: `<GradientStop Color="#5EFFFFFF" Offset="0.769944"/>`
+- Line 478: `<GradientStop Color="#4AFFFFFF" Offset="0.892393"/>`
+- Line 502: `<GradientStop Color="#A7FFFFFF" Offset="0"/>`
+- Line 503: `<GradientStop Color="#2DFFFFFF" Offset="1"/>`
+- Line 512: `<GradientStop Color="#7DFFFFFF" Offset="0"/>`
+- Line 513: `<GradientStop Color="#1A000000" Offset="0.467075"/>`
+- Line 514: `<GradientStop Color="#1FFFFFFF" Offset="1"/>`
+- Line 536: `<GradientStop Color="#A7FFFFFF" Offset="0"/>`
+- Line 537: `<GradientStop Color="#2DFFFFFF" Offset="1"/>`
+- Line 546: `<GradientStop Color="#7DFFFFFF" Offset="0"/>`
+- Line 547: `<GradientStop Color="#1AD3D3D3" Offset="0.467075"/>`
+- Line 548: `<GradientStop Color="#1FFFFFFF" Offset="1"/>`
+- Line 682: `Fill="#8A9BA8"/>`
+- Line 713: `Fill="#8A9BA8"/>`
+- Line 750: `Fill="#8A9BA8"/>`
+- Line 781: `Fill="#8A9BA8"/>`
+
+### `./Skyweaver/Resources/Controls/SliderStyles.xaml`
+- Line 48: `<GradientStop Color="#6060B0F0" Offset="0"/>`
+- Line 49: `<GradientStop Color="#0060B0F0" Offset="1"/>`
+- Line 60: `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 61: `<GradientStop Color="#FFF0F0F0" Offset="0.4"/>`
+- Line 62: `<GradientStop Color="#FFE0E0E0" Offset="0.5"/>`
+- Line 63: `<GradientStop Color="#FFF5F5F5" Offset="1"/>`
+- Line 68: `<GradientStop Color="#FF909090" Offset="0"/>`
+- Line 69: `<GradientStop Color="#FF707070" Offset="1"/>`
+- Line 73: `<DropShadowEffect Color="#000000" BlurRadius="3" ShadowDepth="1" Opacity="0.4"/>`
+- Line 81: `<GradientStop Color="#80FFFFFF" Offset="0"/>`
+- Line 82: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 93: `<GradientStop Color="#FFE8F4FF" Offset="0"/>`
+- Line 94: `<GradientStop Color="#FFD0E8FF" Offset="0.4"/>`
+- Line 95: `<GradientStop Color="#FFC0D8F0" Offset="0.5"/>`
+- Line 96: `<GradientStop Color="#FFD8ECFF" Offset="1"/>`
+- Line 103: `<GradientStop Color="#FF60A0D0" Offset="0"/>`
+- Line 104: `<GradientStop Color="#FF4080B0" Offset="1"/>`
+- Line 114: `<GradientStop Color="#FFD0E8FF" Offset="0"/>`
+- Line 115: `<GradientStop Color="#FFB0D0F0" Offset="0.4"/>`
+- Line 116: `<GradientStop Color="#FFA0C0E0" Offset="0.5"/>`
+- Line 117: `<GradientStop Color="#FFC0D8F0" Offset="1"/>`
+- Line 150: `<GradientStop Color="#60000000" Offset="0"/>`
+- Line 151: `<GradientStop Color="#40000000" Offset="0.5"/>`
+- Line 152: `<GradientStop Color="#30000000" Offset="1"/>`
+- Line 157: `<GradientStop Color="#40000000" Offset="0"/>`
+- Line 158: `<GradientStop Color="#20FFFFFF" Offset="1"/>`
+- Line 173: `<GradientStop Color="#FF80D0FF" Offset="0"/>`
+- Line 174: `<GradientStop Color="#FF40A0E0" Offset="0.4"/>`
+- Line 175: `<GradientStop Color="#FF0080D0" Offset="0.5"/>`
+- Line 176: `<GradientStop Color="#FF60B0E0" Offset="1"/>`
+- Line 182: `<DropShadowEffect Color="#4080C0FF" BlurRadius="4" ShadowDepth="0" Opacity="0.6"/>`
+
+### `./Skyweaver/Resources/Controls/SplitterStyles.xaml`
+- Line 12: `<GradientStop Color="#2A3540" Offset="0"/>`
+- Line 13: `<GradientStop Color="#1A1F28" Offset="0.3"/>`
+- Line 14: `<GradientStop Color="#0F1419" Offset="0.5"/>`
+- Line 15: `<GradientStop Color="#1A1F28" Offset="0.7"/>`
+- Line 16: `<GradientStop Color="#2A3540" Offset="1"/>`
+- Line 28: `<Line x:Name="Line1" X1="0" Y1="2" X2="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}, Path=ActualWidth}" Y2="2" Stroke="#3A4550" StrokeThickness="1"/>`
+- Line 30: `<Line x:Name="Line2" X1="0" Y1="3" X2="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}, Path=ActualWidth}" Y2="3" Stroke="#0A0F14" StrokeThickness="1"/>`
+- Line 38: `<GradientStop Color="#FEF3B5" Offset="0"/>`
+- Line 39: `<GradientStop Color="#FFD02E" Offset="1"/>`
+- Line 58: `<GradientStop Color="#2A3540" Offset="0"/>`
+- Line 59: `<GradientStop Color="#1A1F28" Offset="0.3"/>`
+- Line 60: `<GradientStop Color="#0F1419" Offset="0.5"/>`
+- Line 61: `<GradientStop Color="#1A1F28" Offset="0.7"/>`
+- Line 62: `<GradientStop Color="#2A3540" Offset="1"/>`
+- Line 74: `<Line x:Name="Line1" X1="2" Y1="0" X2="2" Y2="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}, Path=ActualHeight}" Stroke="#3A4550" StrokeThickness="1"/>`
+- Line 76: `<Line x:Name="Line2" X1="3" Y1="0" X2="3" Y2="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}, Path=ActualHeight}" Stroke="#0A0F14" StrokeThickness="1"/>`
+- Line 84: `<GradientStop Color="#FEF3B5" Offset="0"/>`
+- Line 85: `<GradientStop Color="#FFD02E" Offset="1"/>`
+
+### `./Skyweaver/Resources/Controls/StatusBarStyles.xaml`
+- Line 9: `<GradientStop Color="#FF7C7C7C" Offset="0"/>`
+- Line 10: `<GradientStop Color="#FF2B2B2B" Offset="0.54731"/>`
+- Line 11: `<GradientStop Color="#FE000004" Offset="0.562152"/>`
+- Line 12: `<GradientStop Color="#FF260075" Offset="1"/>`
+- Line 16: `<Setter Property="Foreground" Value="#FFFFFF"/>`
+- Line 17: `<Setter Property="BorderBrush" Value="#1A1F28"/>`
+- Line 31: `<Setter Property="Foreground" Value="#FFFFFF"/>`
+- Line 46: `<Rectangle Width="1" Fill="#0F1419" HorizontalAlignment="Center"/>`
+- Line 48: `<Rectangle Width="1" Fill="#05080B" HorizontalAlignment="Center" Margin="1,0,0,0" Opacity="0.6"/>`
+
+### `./Skyweaver/Resources/Controls/TabControlStyles.xaml`
+- Line 11: `<Setter Property="Foreground" Value="#99FFFFFF"/>`
+- Line 35: `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 36: `<GradientStop Color="#35CEEEFF" Offset="0.55102"/>`
+- Line 37: `<GradientStop Color="#652D4957" Offset="0.554731"/>`
+- Line 38: `<GradientStop Color="#55FFFFFF" Offset="1"/>`
+- Line 57: `To="#FFECF5FF" Duration="0:0:0.12" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 60: `To="#55CEEEFF" Duration="0:0:0.12" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 63: `To="#752D4957" Duration="0:0:0.12" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 66: `To="#75FFFFFF" Duration="0:0:0.12" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 75: `To="#FFFFFFFF" Duration="0:0:0.15" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 78: `To="#35CEEEFF" Duration="0:0:0.15" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 81: `To="#652D4957" Duration="0:0:0.15" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 84: `To="#55FFFFFF" Duration="0:0:0.15" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 103: `To="#28FFFFFF" Duration="0:0:0.18" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 106: `To="#35CEEEFF" Duration="0:0:0.18" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 109: `To="#652D4957" Duration="0:0:0.18" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 112: `To="#FF6FD4D1" Duration="0:0:0.18" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 121: `To="#FFFFFFFF" Duration="0:0:0.22" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 124: `To="#35CEEEFF" Duration="0:0:0.22" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 127: `To="#652D4957" Duration="0:0:0.22" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 130: `To="#55FFFFFF" Duration="0:0:0.22" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 167: `<Setter TargetName="border" Property="BorderBrush" Value="#979AA2"/>`
+- Line 168: `<Setter Property="Foreground" Value="#000000"/>`
+- Line 175: `<GradientStop Color="#FFFFFF" Offset="0"/>`
+- Line 176: `<GradientStop Color="#F3F3F3" Offset="0.15"/>`
+- Line 177: `<GradientStop Color="#F3F3F3" Offset="0.45"/>`
+- Line 178: `<GradientStop Color="#EBEBEB" Offset="0.46"/>`
+- Line 179: `<GradientStop Color="#D6D6D5" Offset="1"/>`
+- Line 183: `<Setter TargetName="border" Property="BorderBrush" Value="#94979F"/>`
+- Line 184: `<Setter Property="Foreground" Value="#333333"/>`
+- Line 191: `<GradientStop Color="#1A1F28" Offset="0"/>`
+- Line 192: `<GradientStop Color="#1A1F28" Offset="1"/>`
+- Line 196: `<Setter TargetName="border" Property="BorderBrush" Value="#1A1F28"/>`
+- Line 199: `<Setter TargetName="border" Property="Background" Value="#E0E0E0"/>`
+- Line 200: `<Setter TargetName="border" Property="BorderBrush" Value="#C0C0C0"/>`
+- Line 201: `<Setter Property="Foreground" Value="#888888"/>`
+- Line 213: `<Setter Property="BorderBrush" Value="#FF000000"/>`
+- Line 256: `BorderBrush="#FF000000"`
+- Line 262: `<GradientStop Color="#FF435A69" Offset="0"/>`
+- Line 263: `<GradientStop Color="#FF374D5A" Offset="0.517625"/>`
+- Line 264: `<GradientStop Color="#FE334853" Offset="0.528757"/>`
+- Line 265: `<GradientStop Color="#FF324551" Offset="1"/>`
+- Line 326: `To="#28FFFFFF" Duration="0:0:0.3"/>`
+- Line 329: `To="#35CEEEFF" Duration="0:0:0.3"/>`
+- Line 332: `To="#652D4957" Duration="0:0:0.3"/>`
+- Line 335: `To="#FF6FD4D1" Duration="0:0:0.3"/>`
+- Line 344: `To="#FF435A69" Duration="0:0:0.3"/>`
+- Line 347: `To="#FF374D5A" Duration="0:0:0.3"/>`
+- Line 350: `To="#FE334853" Duration="0:0:0.3"/>`
+- Line 353: `To="#FF324551" Duration="0:0:0.3"/>`
+
+### `./Skyweaver/Resources/Controls/ToolTipStyles.xaml`
+- Line 7: `<GradientStop Color="#4561FFFF" Offset="0"/>`
+- Line 8: `<GradientStop Color="#53000000" Offset="0.160796"/>`
+- Line 9: `<GradientStop Color="#5A000A11" Offset="0.341501"/>`
+- Line 10: `<GradientStop Color="#EC001A2C" Offset="0.562021"/>`
+- Line 11: `<GradientStop Color="#3F0086DF" Offset="1"/>`
+- Line 19: `<SolidColorBrush x:Key="ToolTipBorderBrush" Color="#990099FF"/>`
+- Line 22: `<SolidColorBrush x:Key="ToolTipForegroundBrush" Color="#FFFFFFFF"/>`
+- Line 45: `<DropShadowEffect ShadowDepth="0.5" Color="#333333" Opacity="0.8" BlurRadius="2" />`
+
+### `./Skyweaver/Resources/Controls/TreeViewStyles.xaml`
+- Line 89: `<GradientStop Color="#FF1A1F28" Offset="0"/>`
+- Line 90: `<GradientStop Color="#FF1A1F28" Offset="1"/>`
+
+### `./Skyweaver/Resources/ScriptsControls/DropdownBase.xaml`
+- Line 9: `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 14: `<GradientStop Color="#9193C7FF" Offset="0.298622"/>`
+- Line 15: `<GradientStop Color="#00FFFFFF" Offset="0.502783"/>`
+- Line 16: `<GradientStop Color="#C3ABDEFF" Offset="0.715161"/>`
+
+### `./Skyweaver/Resources/ScriptsControls/DropdownClickMask.xaml`
+- Line 9: `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 14: `<GradientStop Color="#FF00FDFF" Offset="0.267994"/>`
+- Line 15: `<GradientStop Color="#0000FDFF" Offset="0.49464"/>`
+- Line 16: `<GradientStop Color="#FF00FDFF" Offset="0.764165"/>`
+
+### `./Skyweaver/Resources/ScriptsControls/DropdownHoverMask.xaml`
+- Line 9: `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 14: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 15: `<GradientStop Color="#0535FAFF" Offset="0.258806"/>`
+- Line 16: `<GradientStop Color="#0079FDFF" Offset="0.488515"/>`
+- Line 17: `<GradientStop Color="#7100FDFF" Offset="1"/>`
+
+### `./Skyweaver/Resources/ScriptsControls/GlassBallStyles.xaml`
+- Line 9: `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 14: `<GradientStop Color="#63FFFFFF" Offset="0"/>`
+- Line 15: `<GradientStop Color="#00FFFFFF" Offset="0.320505"/>`
+- Line 16: `<GradientStop Color="#7000E3FF" Offset="0.711365"/>`
+- Line 17: `<GradientStop Color="#8E00FFF6" Offset="0.890559"/>`
+- Line 18: `<GradientStop Color="#B853FFEC" Offset="1"/>`
+
+### `./Skyweaver/Resources/ScriptsControls/GlassPipeStyles.xaml`
+- Line 13: `<GradientStop Color="#AF00C7FF" Offset="0"/>`
+- Line 14: `<GradientStop Color="#00FFFFFF" Offset="0.209647"/>`
+- Line 15: `<GradientStop Color="#58FFFFFF" Offset="0.54731"/>`
+- Line 16: `<GradientStop Color="#00FFFFFF" Offset="0.751391"/>`
+- Line 17: `<GradientStop Color="#00FFFFFF" Offset="0.862709"/>`
+- Line 18: `<GradientStop Color="#FF00ECFF" Offset="1"/>`
+- Line 27: `<GradientStop Color="#2600C7FF" Offset="0.48166"/>`
+- Line 28: `<GradientStop Color="#00FFFFFF" Offset="0.500902"/>`
+- Line 29: `<GradientStop Color="#2500E3FF" Offset="0.50932"/>`
+
+### `./Skyweaver/Resources/ScriptsControls/PanelStyles.xaml`
+- Line 5: `<GradientStop Color="#FF1A1F28" Offset="0"/>`
+- Line 6: `<GradientStop Color="#FF1C2432" Offset="0.51"/>`
+- Line 7: `<GradientStop Color="#FE1C2533" Offset="0.56"/>`
+- Line 8: `<GradientStop Color="#FE30445F" Offset="0.87"/>`
+- Line 9: `<GradientStop Color="#FE384F6C" Offset="0.92"/>`
+- Line 10: `<GradientStop Color="#FF405671" Offset="0.97"/>`
+
+### `./Skyweaver/Resources/ScriptsControls/ScriptButtonHoverStyles.xaml`
+- Line 6: `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 7: `<GradientStop Color="#1AFFFFFF" Offset="0.135"/>`
+- Line 8: `<GradientStop Color="#17FFFFFF" Offset="0.488"/>`
+- Line 9: `<GradientStop Color="#00000004" Offset="0.518"/>`
+- Line 10: `<GradientStop Color="#FF1F8EAD" Offset="0.729"/>`
+
+### `./Skyweaver/Resources/ScriptsControls/ScriptButtonIdleStyles.xaml`
+- Line 6: `<GradientStop Color="#29FFFFFF" Offset="0"/>`
+- Line 7: `<GradientStop Color="#00000004" Offset="0.38"/>`
+- Line 8: `<GradientStop Color="#00FFFFFF" Offset="0.417"/>`
+- Line 9: `<GradientStop Color="#5EFFFFFF" Offset="0.77"/>`
+- Line 10: `<GradientStop Color="#4AFFFFFF" Offset="0.892"/>`
+
+### `./Skyweaver/Resources/ScriptsControls/ScriptButtonPressedStyles.xaml`
+- Line 6: `<GradientStop Color="#FF38CBF4" Offset="0.043"/>`
+- Line 7: `<GradientStop Color="#00000004" Offset="0.506"/>`
+- Line 8: `<GradientStop Color="#00FFFFFF" Offset="0.518"/>`
+- Line 9: `<GradientStop Color="#5EFFFFFF" Offset="0.737"/>`
+- Line 10: `<GradientStop Color="#4AFFFFFF" Offset="0.892"/>`
+
+### `./Skyweaver/Resources/ScriptsControls/ScriptButtonStyles.xaml`
+- Line 10: `<SolidColorBrush x:Key="ScriptButtonBorderBrush" Color="#FF000000"/>`
+
+### `./Skyweaver/Resources/ScriptsControls/ScriptsControlsDictionary.xaml`
+- Line 32: `<SolidColorBrush x:Key="NearWhiteForeground" Color="#F0F4FF"/>`
+- Line 136: `BorderBrush="#FF000000"`
+- Line 143: `<GradientStop Color="#FF435A69" Offset="0"/>`
+- Line 144: `<GradientStop Color="#FF374D5A" Offset="0.517625"/>`
+- Line 145: `<GradientStop Color="#FE334853" Offset="0.528757"/>`
+- Line 146: `<GradientStop Color="#FF324551" Offset="1"/>`
+- Line 164: `To="#FF5A7085" Duration="0:0:0.2"/>`
+- Line 167: `To="#FF4C6370" Duration="0:0:0.2"/>`
+- Line 170: `To="#FE485E69" Duration="0:0:0.2"/>`
+- Line 173: `To="#FF475B67" Duration="0:0:0.2"/>`
+- Line 182: `To="#FF435A69" Duration="0:0:0.2"/>`
+- Line 185: `To="#FF374D5A" Duration="0:0:0.2"/>`
+- Line 188: `To="#FE334853" Duration="0:0:0.2"/>`
+- Line 191: `To="#FF324551" Duration="0:0:0.2"/>`
+- Line 204: `To="#28FFFFFF" Duration="0:0:0.3"/>`
+- Line 207: `To="#35CEEEFF" Duration="0:0:0.3"/>`
+- Line 210: `To="#652D4957" Duration="0:0:0.3"/>`
+- Line 213: `To="#FF6FD4D1" Duration="0:0:0.3"/>`
+- Line 222: `To="#FF435A69" Duration="0:0:0.3"/>`
+- Line 225: `To="#FF374D5A" Duration="0:0:0.3"/>`
+- Line 228: `To="#FE334853" Duration="0:0:0.3"/>`
+- Line 231: `To="#FF324551" Duration="0:0:0.3"/>`
+
+### `./Skyweaver/Resources/ScriptsControls/SharedBrushes.xaml`
+- Line 3: `<SolidColorBrush x:Key="Layer_2" Color="#FF1A1F28"/>`
+- Line 4: `<SolidColorBrush x:Key="PrimaryForeground" Color="#FFFFFF"/>`
+- Line 5: `<SolidColorBrush x:Key="SecondaryForeground" Color="#777777"/>`
+- Line 6: `<SolidColorBrush x:Key="BorderBrush" Color="#1A1F28"/>`
+- Line 7: `<SolidColorBrush x:Key="Layer_2_M" Color="#FF2A3240"/>`
+- Line 8: `<SolidColorBrush x:Key="Layer_1_M" Color="#FF141924"/>`
+- Line 9: `<SolidColorBrush x:Key="AccentColor" Color="#FF4466FF"/>`
+
+### `./Skyweaver/Resources/ScriptsControls/Sideline.xaml`
+- Line 9: `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 14: `<GradientStop Color="#5E00E3FF" Offset="0"/>`
+- Line 15: `<GradientStop Color="#2F7FF1FF" Offset="0.341302"/>`
+- Line 16: `<GradientStop Color="#00FFFFFF" Offset="0.669219"/>`
+
+### `./Skyweaver/Resources/ScriptsControls/SidelineHighlighting.xaml`
+- Line 9: `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 14: `<GradientStop Color="#7F26E7FF" Offset="0"/>`
+- Line 15: `<GradientStop Color="#4092F3FF" Offset="0.51"/>`
+- Line 16: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+
+### `./Skyweaver/Resources/ScriptsControls/SliderHandleStyles.xaml`
+- Line 9: `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 14: `<GradientStop Color="#63FFFFFF" Offset="0"/>`
+- Line 15: `<GradientStop Color="#00FFFFFF" Offset="0.320505"/>`
+- Line 16: `<GradientStop Color="#7000E3FF" Offset="0.711365"/>`
+- Line 17: `<GradientStop Color="#8E00FFF6" Offset="0.890559"/>`
+- Line 18: `<GradientStop Color="#B853FFEC" Offset="1"/>`
+
+### `./Skyweaver/Resources/ScriptsControls/SliderStyles.xaml`
+- Line 29: `<GradientStop Color="#6060B0F0" Offset="0"/>`
+- Line 30: `<GradientStop Color="#0060B0F0" Offset="1"/>`
+- Line 41: `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 42: `<GradientStop Color="#FFF0F0F0" Offset="0.4"/>`
+- Line 43: `<GradientStop Color="#FFE0E0E0" Offset="0.5"/>`
+- Line 44: `<GradientStop Color="#FFF5F5F5" Offset="1"/>`
+- Line 49: `<GradientStop Color="#FF909090" Offset="0"/>`
+- Line 50: `<GradientStop Color="#FF707070" Offset="1"/>`
+- Line 54: `<DropShadowEffect Color="#000000" BlurRadius="3" ShadowDepth="1" Opacity="0.4"/>`
+- Line 62: `<GradientStop Color="#80FFFFFF" Offset="0"/>`
+- Line 63: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 74: `<GradientStop Color="#FFE8F4FF" Offset="0"/>`
+- Line 75: `<GradientStop Color="#FFD0E8FF" Offset="0.4"/>`
+- Line 76: `<GradientStop Color="#FFC0D8F0" Offset="0.5"/>`
+- Line 77: `<GradientStop Color="#FFD8ECFF" Offset="1"/>`
+- Line 84: `<GradientStop Color="#FF60A0D0" Offset="0"/>`
+- Line 85: `<GradientStop Color="#FF4080B0" Offset="1"/>`
+- Line 95: `<GradientStop Color="#FFD0E8FF" Offset="0"/>`
+- Line 96: `<GradientStop Color="#FFB0D0F0" Offset="0.4"/>`
+- Line 97: `<GradientStop Color="#FFA0C0E0" Offset="0.5"/>`
+- Line 98: `<GradientStop Color="#FFC0D8F0" Offset="1"/>`
+- Line 129: `<GradientStop Color="#60000000" Offset="0"/>`
+- Line 130: `<GradientStop Color="#40000000" Offset="0.5"/>`
+- Line 131: `<GradientStop Color="#30000000" Offset="1"/>`
+- Line 136: `<GradientStop Color="#40000000" Offset="0"/>`
+- Line 137: `<GradientStop Color="#20FFFFFF" Offset="1"/>`
+- Line 151: `<GradientStop Color="#FF80D0FF" Offset="0"/>`
+- Line 152: `<GradientStop Color="#FF40A0E0" Offset="0.4"/>`
+- Line 153: `<GradientStop Color="#FF0080D0" Offset="0.5"/>`
+- Line 154: `<GradientStop Color="#FF60B0E0" Offset="1"/>`
+- Line 160: `<DropShadowEffect Color="#4080C0FF" BlurRadius="4" ShadowDepth="0" Opacity="0.6"/>`
+
+### `./Skyweaver/Resources/ScriptsControls/TextBoxActivatedStyles.xaml`
+- Line 8: `<GradientStop Color="#AF00C7FF" Offset="0.414"/>`
+- Line 9: `<GradientStop Color="#00FFFFFF" Offset="0.495"/>`
+- Line 10: `<GradientStop Color="#FF00ECFF" Offset="0.692"/>`
+
+### `./Skyweaver/Resources/ScriptsControls/TextBoxIdleStyles.xaml`
+- Line 8: `<GradientStop Color="#91007BFF" Offset="0.143"/>`
+- Line 9: `<GradientStop Color="#00FFFFFF" Offset="0.503"/>`
+- Line 10: `<GradientStop Color="#C30099FF" Offset="0.792"/>`
+
+### `./Skyweaver/Resources/ScriptsControls/TextBoxStyles.xaml`
+- Line 15: `<GradientStop Color="#91007BFF" Offset="0.143"/>`
+- Line 16: `<GradientStop Color="#00FFFFFF" Offset="0.503"/>`
+- Line 17: `<GradientStop Color="#C30099FF" Offset="0.792"/>`
+- Line 22: `<GradientStop Color="#AF00C7FF" Offset="0.414"/>`
+- Line 23: `<GradientStop Color="#00FFFFFF" Offset="0.495"/>`
+- Line 24: `<GradientStop Color="#FF00ECFF" Offset="0.692"/>`
+- Line 45: `<GradientStop x:Name="gradientStop1" Color="#91007BFF" Offset="0.143"/>`
+- Line 46: `<GradientStop x:Name="gradientStop2" Color="#00FFFFFF" Offset="0.503"/>`
+- Line 47: `<GradientStop x:Name="gradientStop3" Color="#C30099FF" Offset="0.792"/>`
+- Line 67: `To="#AF00C7FF"`
+- Line 73: `To="#00FFFFFF"`
+- Line 79: `To="#FF00ECFF"`
+- Line 107: `To="#91007BFF"`
+- Line 112: `To="#00FFFFFF"`
+- Line 117: `To="#C30099FF"`
+
+### `./Skyweaver/Resources/Themes/MainWindowResources.xaml`
+- Line 5: `<SolidColorBrush x:Key="WorkAreaBackgroundBrush" Color="#FF1A1F28"/>`
+- Line 6: `<SolidColorBrush x:Key="WorkAreaBorderBrush" Color="#FF1A1F28"/>`
+- Line 8: `<SolidColorBrush x:Key="StatusActiveBrush" Color="#FF00FF00"/>`
+- Line 10: `<SolidColorBrush x:Key="DarkBorderBrush" Color="#FF000000"/>`
+- Line 11: `<SolidColorBrush x:Key="TextBrush" Color="#E0E0E0"/>`
+- Line 47: `<Setter Property="Foreground" Value="#2C3E50"/>`
+- Line 53: `<Setter Property="Foreground" Value="#34495E"/>`
+- Line 59: `<Setter Property="Foreground" Value="#7F8C8D"/>`
+- Line 63: `<Setter Property="Background" Value="#FAFAFA"/>`
+- Line 64: `<Setter Property="BorderBrush" Value="#BDC3C7"/>`
+- Line 71: `<Setter Property="Background" Value="#3498DB"/>`
+- Line 77: `<Setter Property="Background" Value="#2980B9"/>`
+- Line 91: `<Pen Thickness="1" LineJoin="Round" Brush="#7F7E8DB3"/>`
+- Line 96: `<GradientStop Color="#FF445E74" Offset="0.139847"/>`
+- Line 97: `<GradientStop Color="#C12A394C" Offset="0.277778"/>`
+- Line 98: `<GradientStop Color="#C324334A" Offset="0.327586"/>`
+- Line 99: `<GradientStop Color="#FF334B62" Offset="0.496169"/>`
+- Line 106: `<Pen Thickness="1" LineJoin="Round" Brush="#7F7E8DB3"/>`
+- Line 111: `<GradientStop Color="#CF49EAFF" Offset="0.210728"/>`
+- Line 112: `<GradientStop Color="#0034637B" Offset="0.522988"/>`
+- Line 129: `<GradientStop Color="#6BDDFFFD" Offset="0.0811639"/>`
+- Line 130: `<GradientStop Color="#3A000000" Offset="0.243492"/>`
+- Line 131: `<GradientStop Color="#907FCEFF" Offset="0.500766"/>`
+- Line 132: `<GradientStop Color="#FF000000" Offset="0.586524"/>`
+- Line 133: `<GradientStop Color="#FF0099FF" Offset="0.828484"/>`
+- Line 144: `<GradientStop Color="#7800F3FF" Offset="0.0597243"/>`
+- Line 145: `<GradientStop Color="#2B000000" Offset="0.234303"/>`
+- Line 146: `<GradientStop Color="#FFA5DBFF" Offset="0.372129"/>`
+- Line 147: `<GradientStop Color="#FF0099FF" Offset="0.577335"/>`
+- Line 158: `<GradientStop Color="#FC00F3FF" Offset="0"/>`
+- Line 159: `<GradientStop Color="#28000000" Offset="0.169985"/>`
+- Line 160: `<GradientStop Color="#EBA5DBFF" Offset="0.304747"/>`
+- Line 161: `<GradientStop Color="#FF0099FF" Offset="0.577335"/>`
+- Line 226: `<Setter Property="BorderBrush" Value="#FF000000"/>`
+- Line 299: `<Setter Property="BorderBrush" Value="#FF000000"/>`
+- Line 365: `<GradientStop Color="#FF3A4250" Offset="0"/>`
+- Line 366: `<GradientStop Color="#FF2A3240" Offset="0.5"/>`
+- Line 367: `<GradientStop Color="#FF1A1F28" Offset="1"/>`
+- Line 388: `<GradientStop Color="#FF66FF66" Offset="0"/>`
+- Line 389: `<GradientStop Color="#FF44CC44" Offset="1"/>`
+- Line 395: `<DropShadowEffect Color="#FF44CC44" Direction="270" ShadowDepth="1" BlurRadius="2" Opacity="0.8"/>`
+
+### `./Skyweaver/Resources/Themes/ThemeBase.xaml`
+- Line 34: `<GradientStop Color="#FF18202B" Offset="0"/>`
+- Line 35: `<GradientStop Color="#FF0A0E16" Offset="1"/>`
+- Line 42: `<SolidColorBrush x:Key="ButtonIdleBrush" Color="#FF2A3240"/>`
+- Line 43: `<SolidColorBrush x:Key="ButtonHoverBrush" Color="#FF3A4250"/>`
+- Line 44: `<SolidColorBrush x:Key="ButtonActiveBrush" Color="#FF4A5260"/>`
+- Line 45: `<SolidColorBrush x:Key="ButtonPressedBrush" Color="#FF1A2230"/>`
+- Line 46: `<SolidColorBrush x:Key="AccentBrush" Color="#FF4466FF"/>`
+- Line 57: `<GradientStop Color="#FF3E5E85" Offset="0"/>`
+- Line 58: `<GradientStop Color="#FF1D2E54" Offset="0.480519"/>`
+- Line 59: `<GradientStop Color="#FE000004" Offset="0.487941"/>`
+- Line 60: `<GradientStop Color="#FF385EB2" Offset="1"/>`
+- Line 65: `<GradientStop Color="#FF1A1F28" Offset="0"/>`
+- Line 66: `<GradientStop Color="#FF1C2432" Offset="0.510204"/>`
+- Line 67: `<GradientStop Color="#FE1C2533" Offset="0.562152"/>`
+- Line 68: `<GradientStop Color="#FE30445F" Offset="0.87013"/>`
+- Line 69: `<GradientStop Color="#FE384F6C" Offset="0.918367"/>`
+- Line 70: `<GradientStop Color="#FF405671" Offset="0.974026"/>`
+- Line 74: `<GradientStop Color="#FF040912" Offset="1"/>`
+- Line 75: `<GradientStop Color="#FF1E242E" Offset="0.387"/>`
+- Line 90: `<GradientStop Color="#FF6A94C5" Offset="0"/>`
+- Line 91: `<GradientStop Color="#FF4679B3" Offset="0.0871985"/>`
+- Line 92: `<GradientStop Color="#FF052C63" Offset="0.410019"/>`
+- Line 93: `<GradientStop Color="#FE03133E" Offset="0.576994"/>`
+- Line 94: `<GradientStop Color="#FF000B2D" Offset="0.706865"/>`
+- Line 99: `<GradientStop Color="#3B6A94C5" Offset="0"/>`
+- Line 100: `<GradientStop Color="#264679B3" Offset="0.0871985"/>`
+- Line 101: `<GradientStop Color="#3C052C63" Offset="0.317254"/>`
+- Line 102: `<GradientStop Color="#5203133E" Offset="0.576994"/>`
+- Line 103: `<GradientStop Color="#C5000B2D" Offset="0.862709"/>`
+- Line 112: `<GradientStop Color="#BA2D72A0" Offset="0"/>`
+- Line 113: `<GradientStop Color="#00000004" Offset="0.506494"/>`
+- Line 114: `<GradientStop Color="#00FFFFFF" Offset="0.517625"/>`
+- Line 115: `<GradientStop Color="#3FFFFFFF" Offset="0.821892"/>`
+- Line 116: `<GradientStop Color="#4AFFFFFF" Offset="0.892393"/>`
+- Line 128: `<DropShadowEffect Color="#20000000" Direction="270" ShadowDepth="1" BlurRadius="3" Opacity="0.5"/>`
+- Line 139: `<Setter Property="Foreground" Value="#FFFAFAFA"/>`
+- Line 142: `<DropShadowEffect Color="#FF002244" Direction="320" ShadowDepth="1" BlurRadius="1" Opacity="0.8"/>`
+- Line 151: `<Setter Property="Foreground" Value="#FFE8F4FF"/>`
+- Line 156: `<DropShadowEffect Color="#FF001122" Direction="320" ShadowDepth="1" BlurRadius="1" Opacity="0.65"/>`
+
+### `./Skyweaver/Resources/ToolTipBackground.xaml`
+- Line 4: `<Rectangle x:Name="Rectangle" Width="202.834" Height="91.501" Canvas.Left="0" Canvas.Top="0.00012207" Stretch="Fill" StrokeThickness="1" StrokeLineJoin="Round" Stroke="#FF000000">`
+- Line 8: `<GradientStop Color="#4561FFFF" Offset="0"/>`
+- Line 9: `<GradientStop Color="#53000000" Offset="0.160796"/>`
+- Line 10: `<GradientStop Color="#5A000A11" Offset="0.341501"/>`
+- Line 11: `<GradientStop Color="#EC001A2C" Offset="0.562021"/>`
+- Line 12: `<GradientStop Color="#3F0086DF" Offset="1"/>`
+
+### `./Skyweaver/Tools/ShowLiveXamlToolInvocationView.xaml`
+- Line 8: `<Border Background="#1B152434"`
+- Line 9: `BorderBrush="#5598E8FF"`
+- Line 16: `Foreground="#FFF0FBFF"`
+- Line 22: `Foreground="#FFB9E7FF"`
+- Line 29: `Foreground="#FFD7F7FF"`
+- Line 36: `Foreground="#CCFFFFFF"`
+- Line 42: `Background="#22FFFFFF"`
+- Line 43: `BorderBrush="#3347C8FF"`
+- Line 51: `Foreground="#FFFFE4D9"`
+- Line 60: `Background="#12F7FBFF"`
+- Line 61: `BorderBrush="#447FDFFF"`
+- Line 73: `Foreground="#CCFFFFFF"`
+
+### `./Skyweaver/Tools/WorkspaceNoteTemplateToolConfigurationView.xaml`
+- Line 13: `<Setter Property="Background" Value="#11000000"/>`
+- Line 14: `<Setter Property="BorderBrush" Value="#33FFFFFF"/>`
+- Line 28: `BorderBrush="#40FFFFFF"`
+- Line 32: `<GradientStop Color="#1A6FA9FF" Offset="0"/>`
+- Line 33: `<GradientStop Color="#0BFFFFFF" Offset="0.45"/>`
+- Line 34: `<GradientStop Color="#1528E5B0" Offset="1"/>`
+- Line 65: `Foreground="#FFD3F6FF"`
+- Line 76: `Foreground="#99FFFFFF"`
+- Line 90: `Foreground="#FFD3F6FF"`
+- Line 111: `Background="#12000000"`
+- Line 112: `BorderBrush="#33FFFFFF"`
+- Line 123: `Foreground="#99FFFFFF"`
+
+### `./Skyweaver/Windows/CreateChatSessionDialog.xaml`
+- Line 11: `<SolidColorBrush Color="#FF111326"/>`
+- Line 28: `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 29: `<GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>`
+- Line 30: `<GradientStop Color="#07FFFFFF" Offset="0.109195"/>`
+- Line 31: `<GradientStop Color="#04FFFFFF" Offset="0.298851"/>`
+- Line 32: `<GradientStop Color="#3AFFFFFF" Offset="0.327586"/>`
+- Line 33: `<GradientStop Color="#1AFFFFFF" Offset="0.465517"/>`
+- Line 34: `<GradientStop Color="#14FFFFFF" Offset="0.591954"/>`
+- Line 35: `<GradientStop Color="#05FFFFFF" Offset="0.758621"/>`
+- Line 36: `<GradientStop Color="#44FFFFFF" Offset="1"/>`
+- Line 52: `<Pen LineJoin="Round" Brush="#6793F2FF"/>`
+- Line 57: `<GradientStop Color="#FF8E89CA" Offset="0"/>`
+- Line 58: `<GradientStop Color="#3444477C" Offset="0.988506"/>`
+- Line 71: `<Pen LineJoin="Round" Brush="#6793F2FF"/>`
+- Line 76: `<GradientStop Color="#95FFFFFF" Offset="0"/>`
+- Line 77: `<GradientStop Color="#2DFFFFFF" Offset="0.247126"/>`
+- Line 78: `<GradientStop Color="#00FFFFFF" Offset="0.421456"/>`
+- Line 94: `<Pen LineJoin="Round" Brush="#FFFFFFFF"/>`
+- Line 105: `<GradientStop Color="#55FFFFFF" Offset="0"/>`
+- Line 106: `<GradientStop Color="#053D3D3D" Offset="0.35249"/>`
+- Line 107: `<GradientStop Color="#04666666" Offset="0.670498"/>`
+- Line 108: `<GradientStop Color="#51FFFFFF" Offset="0.988506"/>`
+- Line 124: `<Pen LineJoin="Round" Brush="#6793F2FF"/>`
+- Line 135: `<GradientStop Color="#55D0F3FF" Offset="0"/>`
+- Line 136: `<GradientStop Color="#053D3D3D" Offset="0.515326"/>`
+- Line 137: `<GradientStop Color="#04666666" Offset="0.563218"/>`
+- Line 138: `<GradientStop Color="#51B4FFFD" Offset="0.988506"/>`
+- Line 177: `<GradientStop Color="#70976BDB" Offset="0"/>`
+- Line 178: `<GradientStop Color="#506443AE" Offset="0.52"/>`
+- Line 179: `<GradientStop Color="#608A64D5" Offset="1"/>`
+- Line 183: `<GradientStop Color="#C7C9AAFF" Offset="0"/>`
+- Line 184: `<GradientStop Color="#A67C5DCA" Offset="0.48"/>`
+- Line 185: `<GradientStop Color="#B79F85F2" Offset="1"/>`
+- Line 213: `<GradientStop Color="#4FFFFFFF" Offset="0"/>`
+- Line 214: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 225: `<Setter TargetName="Bg" Property="BorderBrush" Value="#88CCB7FF"/>`
+- Line 231: `<Setter TargetName="Bg" Property="BorderBrush" Value="#A7E0D3FF"/>`
+- Line 261: `BorderBrush="#FF9B8CCF">`
+- Line 264: `<GradientStop Color="#E026173E" Offset="0"/>`
+- Line 265: `<GradientStop Color="#D03D2464" Offset="0.18"/>`
+- Line 266: `<GradientStop Color="#C0553490" Offset="0.5"/>`
+- Line 267: `<GradientStop Color="#D03D2464" Offset="0.82"/>`
+- Line 268: `<GradientStop Color="#E026173E" Offset="1"/>`
+- Line 284: `<GradientStop Color="#46FFFFFF" Offset="0"/>`
+- Line 285: `<GradientStop Color="#14FFFFFF" Offset="0.55"/>`
+- Line 286: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 297: `<GradientStop Color="#50C87CFF" Offset="0"/>`
+- Line 298: `<GradientStop Color="#00C87CFF" Offset="1"/>`
+- Line 308: `<GradientStop Color="#70FFFFFF" Offset="0"/>`
+- Line 309: `<GradientStop Color="#28FFFFFF" Offset="0.45"/>`
+- Line 310: `<GradientStop Color="#40A88BE8" Offset="1"/>`
+- Line 319: `BorderBrush="#88D8BFFF">`
+- Line 322: `<GradientStop Color="#D2714CB8" Offset="0"/>`
+- Line 323: `<GradientStop Color="#CD4E2D89" Offset="0.38"/>`
+- Line 324: `<GradientStop Color="#CD30195B" Offset="0.55"/>`
+- Line 325: `<GradientStop Color="#CB8558D0" Offset="1"/>`
+- Line 338: `<GradientStop Color="#56FFFFFF" Offset="0"/>`
+- Line 339: `<GradientStop Color="#20FFFFFF" Offset="0.5"/>`
+- Line 340: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 349: `BorderBrush="#9AE5D3FF">`
+- Line 352: `<GradientStop Color="#FFB18AF5" Offset="0"/>`
+- Line 353: `<GradientStop Color="#FF6A45B6" Offset="0.44"/>`
+- Line 354: `<GradientStop Color="#FF47267D" Offset="0.56"/>`
+- Line 355: `<GradientStop Color="#FF8C66E3" Offset="1"/>`
+- Line 374: `<GradientStop Color="#66FFFFFF" Offset="0"/>`
+- Line 375: `<GradientStop Color="#24FFFFFF" Offset="0.6"/>`
+- Line 376: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 388: `<DropShadowEffect Color="#22000000" BlurRadius="2" ShadowDepth="1" Opacity="0.7"/>`
+- Line 452: `<DropShadowEffect Color="#2A000000" BlurRadius="16" ShadowDepth="3" Opacity="0.75"/>`
+- Line 455: `<SolidColorBrush Color="#01000000"/>`
+- Line 464: `<GradientStop Color="#F226163E" Offset="0"/>`
+- Line 465: `<GradientStop Color="#F2351F63" Offset="0.28"/>`
+- Line 466: `<GradientStop Color="#F022143C" Offset="0.72"/>`
+- Line 467: `<GradientStop Color="#F0140C26" Offset="1"/>`
+- Line 492: `<GradientStop Color="#2EFFFFFF" Offset="0"/>`
+- Line 493: `<GradientStop Color="#12FFFFFF" Offset="0.48"/>`
+- Line 494: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 505: `<GradientStop Color="#3EB676FF" Offset="0"/>`
+- Line 506: `<GradientStop Color="#00B676FF" Offset="1"/>`
+- Line 516: `<GradientStop Color="#7AFFFFFF" Offset="0"/>`
+- Line 517: `<GradientStop Color="#38FFFFFF" Offset="0.34"/>`
+- Line 518: `<GradientStop Color="#28FFFFFF" Offset="0.72"/>`
+- Line 519: `<GradientStop Color="#50B597F2" Offset="1"/>`
+- Line 545: `<GradientStop Color="#FF191D3A" Offset="0"/>`
+- Line 546: `<GradientStop Color="#FF231B40" Offset="0.5"/>`
+- Line 547: `<GradientStop Color="#FF0B0B19" Offset="1"/>`
+- Line 552: `<Ellipse Width="600" Height="400" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-200,-150,0,0" Fill="#304153C2">`
+- Line 557: `<Ellipse Width="700" Height="500" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-250,-200" Fill="#207638B5">`
+- Line 568: `<Ellipse Width="1.5" Height="1.5" Fill="#15FFFFFF" Canvas.Left="0" Canvas.Top="0"/>`
+- Line 569: `<Ellipse Width="1.5" Height="1.5" Fill="#15FFFFFF" Canvas.Left="3" Canvas.Top="3"/>`
+- Line 576: `<Path Data="M 200,-100 Q 500,100 850,50 L 850,100 Q 400,200 100,550 L 0,550 Q 300,100 200,-100 Z" Fill="#15FFFFFF">`
+- Line 581: `<Path Data="M 300,-100 Q 550,50 850,0 L 850,20 Q 500,100 250,550 L 200,550 Q 450,50 300,-100 Z" Fill="#25FFFFFF">`
+- Line 586: `<Path Data="M -100,200 Q 150,150 850,-50 L 850,-10 Q 100,200 -100,250 Z" Fill="#10FFFFFF">`
+- Line 619: `Foreground="#E0FFFFFF"`
+- Line 632: `Foreground="#E0FFFFFF"`
+- Line 679: `Foreground="#A0FFFFFF"`
+- Line 702: `<Border Width="28" Height="28" CornerRadius="6" Background="#18000000" Margin="0,0,10,0">`
+- Line 716: `Foreground="#B0FFFFFF"`
+- Line 721: `Foreground="#90FFFFFF"`
+- Line 742: `<Border BorderThickness="0" CornerRadius="6" Background="#1A000000"/>`
+- Line 749: `Background="#12000000"`
+- Line 754: `Foreground="#B0FFFFFF"`
+- Line 763: `Foreground="#E0FFFFFF"`
+- Line 768: `Foreground="#A0FFFFFF"`
+- Line 773: `Foreground="#D8FFFFFF"`
+- Line 790: `<TextBlock Text="{DynamicResource Common.Agent}" Foreground="#A0FFFFFF" FontSize="10"/>`
+- Line 797: `<TextBlock Text="{DynamicResource Common.Model}" Foreground="#A0FFFFFF" FontSize="10"/>`
+- Line 804: `<TextBlock Text="{DynamicResource Common.Node}" Foreground="#A0FFFFFF" FontSize="10"/>`
+- Line 811: `<TextBlock Text="{DynamicResource Common.Connection}" Foreground="#A0FFFFFF" FontSize="10"/>`
+- Line 820: `Background="#12000000"`
+- Line 829: `Foreground="#A0FFFFFF"`
+- Line 834: `Foreground="#A0FFFFFF"`
+- Line 845: `Background="#10000000"`
+- Line 855: `<Border Width="44" Height="44" CornerRadius="8" Background="#16000000" Margin="0,0,12,0">`
+- Line 869: `Foreground="#A0FFFFFF"`
+- Line 873: `Foreground="#B0FFFFFF"`
+- Line 878: `<Border Background="#18000000" CornerRadius="4" Padding="6,2" Margin="0,0,6,4">`
+- Line 879: `<TextBlock Text="{Binding ModeText}" Foreground="#E0FFFFFF" FontSize="10"/>`
+- Line 881: `<Border Background="#18000000" CornerRadius="4" Padding="6,2" Margin="0,0,6,4">`
+- Line 882: `<TextBlock Text="{Binding SelectionModeText}" Foreground="#E0FFFFFF" FontSize="10"/>`
+- Line 886: `Foreground="#E0FFFFFF"`
+- Line 891: `Foreground="#90FFFFFF"`
+- Line 917: `Background="#12000000"`
+- Line 926: `Foreground="#A0FFFFFF"`
+- Line 931: `Foreground="#A0FFFFFF"`
+- Line 950: `Background="#10000000">`
+- Line 958: `Foreground="#B0FFFFFF"`
+- Line 963: `<Border Background="#18000000" CornerRadius="4" Padding="6,2" Margin="0,0,6,4">`
+- Line 964: `<TextBlock Text="{Binding InterfaceTypeText}" Foreground="#E0FFFFFF" FontSize="10"/>`
+- Line 966: `<Border Background="#18000000" CornerRadius="4" Padding="6,2" Margin="0,0,6,4">`
+- Line 967: `<TextBlock Text="{Binding SourceTypeText}" Foreground="#E0FFFFFF" FontSize="10"/>`
+- Line 971: `Foreground="#90FFFFFF"`
+- Line 984: `Background="#12000000"`
+- Line 992: `Foreground="#A0FFFFFF"`
+
+### `./Skyweaver/Windows/CreateScheduledTaskDialog.xaml`
+- Line 18: `<Pen Thickness="2" LineJoin="Round" Brush="#FF2A7288"/>`
+- Line 23: `<GradientStop Color="#FF306F83" Offset="0"/>`
+- Line 24: `<GradientStop Color="#FF091023" Offset="0.992337"/>`
+- Line 37: `<Setter Property="Background" Value="#35000000"/>`
+- Line 38: `<Setter Property="BorderBrush" Value="#25FFFFFF"/>`
+- Line 52: `<GradientStop Color="#50000000" Offset="0"/>`
+- Line 53: `<GradientStop Color="#20000000" Offset="0.5"/>`
+- Line 54: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 63: `<GradientStop Color="#30000000" Offset="0"/>`
+- Line 64: `<GradientStop Color="#15000000" Offset="0.5"/>`
+- Line 65: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 74: `<GradientStop Color="#30000000" Offset="0"/>`
+- Line 75: `<GradientStop Color="#15000000" Offset="0.5"/>`
+- Line 76: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 85: `<GradientStop Color="#25000000" Offset="0"/>`
+- Line 86: `<GradientStop Color="#08000000" Offset="0.5"/>`
+- Line 87: `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 117: `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 118: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 123: `<GradientStop Color="#374588BD" Offset="0"/>`
+- Line 124: `<GradientStop Color="#081AD5FF" Offset="0.69"/>`
+- Line 125: `<GradientStop Color="#1FFFFFFF" Offset="1"/>`
+- Line 134: `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 135: `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 140: `<GradientStop Color="#A34588BD" Offset="0"/>`
+- Line 141: `<GradientStop Color="#111AD5FF" Offset="0.69"/>`
+- Line 142: `<GradientStop Color="#31FFFFFF" Offset="1"/>`
+- Line 210: `<GradientStop Color="#25FFFFFF" Offset="0"/>`
+- Line 211: `<GradientStop Color="#08FFFFFF" Offset="0.3"/>`
+- Line 212: `<GradientStop Color="#02FFFFFF" Offset="0.7"/>`
+- Line 213: `<GradientStop Color="#18FFFFFF" Offset="1"/>`
+- Line 222: `<Setter Property="BorderBrush" Value="#40FFFFFF"/>`
+- Line 225: `<Setter Property="Background" Value="#1A000000"/>`
+- Line 231: `<Setter Property="Foreground" Value="#FFA3D8FF"/>`
+- Line 263: `<GradientStop Color="#CCD9E7F4" Offset="0"/>`
+- Line 264: `<GradientStop Color="#CC7CBEEA" Offset="1"/>`
+- Line 269: `<GradientStop Color="#CC9CB3C8" Offset="0.473"/>`
+- Line 270: `<GradientStop Color="#CC3A576E" Offset="0.593"/>`
+- Line 271: `<GradientStop Color="#CC162D41" Offset="0.623"/>`
+- Line 272: `<GradientStop Color="#CC4C87AF" Offset="0.798"/>`
+- Line 280: `<GradientStop Color="#FFE9F7FF" Offset="0"/>`
+- Line 281: `<GradientStop Color="#FF8CCEFA" Offset="1"/>`
+- Line 286: `<GradientStop Color="#FFACC3D8" Offset="0.473"/>`
+- Line 287: `<GradientStop Color="#FF4A677E" Offset="0.593"/>`
+- Line 288: `<GradientStop Color="#FF263D51" Offset="0.623"/>`
+- Line 289: `<GradientStop Color="#FF5C97BF" Offset="0.798"/>`
+- Line 304: `<GradientStop Color="#FF8AE0FF" Offset="0.093"/>`
+- Line 305: `<GradientStop Color="#FF35A6E6" Offset="0.645"/>`
+- Line 306: `<GradientStop Color="#FF4DA6E4" Offset="0.712"/>`
+- Line 307: `<GradientStop Color="#FFAED3F4" Offset="0.942"/>`
+- Line 311: `<DropShadowEffect Color="#22657C" BlurRadius="2" ShadowDepth="0" Opacity="0.8" Direction="315"/>`
+- Line 318: `<GradientStop Color="#FF8AE0FF" Offset="0.093"/>`
+- Line 319: `<GradientStop Color="#FF35A6E6" Offset="0.645"/>`
+- Line 320: `<GradientStop Color="#FF4DA6E4" Offset="0.712"/>`
+- Line 321: `<GradientStop Color="#FFAED3F4" Offset="0.942"/>`
+- Line 325: `<DropShadowEffect Color="#22657C" BlurRadius="2" ShadowDepth="0" Opacity="0.8" Direction="315"/>`
+- Line 336: `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>`
+- Line 417: `<TextBlock Text="配置计划任务的触发条件、执行流程以及附加操作。" FontSize="11" Foreground="#A0FFFFFF" Margin="0,4,0,0"/>`
+- Line 440: `<TextBox x:Name="TaskNameTextBox" Height="28" VerticalContentAlignment="Center" Background="#30000000" BorderBrush="#50FFFFFF" Foreground="White" CaretBrush="White"/>`
+- Line 446: `<ComboBox x:Name="SessionFlowComboBox" Height="28" Background="#30000000" Foreground="Black" BorderBrush="#50FFFFFF" DisplayMemberPath="Name" SelectedValuePath="FilePath"/>`
+- Line 458: `<TextBox x:Name="PromptTextBox" Height="90" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Background="#30000000" BorderBrush="#50FFFFFF" Foreground="White" CaretBrush="White" Padding="6"/>`
+- Line 500: `<TextBlock Text="触发器类型" Foreground="#E0FFFFFF" FontSize="11" Margin="0,0,0,4"/>`
+- Line 511: `<Border Grid.Column="2" BorderThickness="1,0,0,0" BorderBrush="#30FFFFFF" Padding="12,0,0,0">`
+- Line 603: `<TextBlock Text="不需要额外参数（占位）" Foreground="#70FFFFFF" FontSize="11" VerticalAlignment="Center" FontStyle="Italic"/>`
+- Line 626: `<TextBlock Text="任务开始前执行..." Foreground="#E0FFFFFF" FontSize="11" Margin="0,0,0,4"/>`
+- Line 635: `<TextBlock Text="Powershell 脚本内容" Foreground="#E0FFFFFF" FontSize="11" Margin="0,0,0,4"/>`
+- Line 636: `<TextBox x:Name="PreActionScriptTextBox" Height="26" VerticalContentAlignment="Center" Background="#30000000" BorderBrush="#50FFFFFF" Foreground="White" CaretBrush="White"/>`
+- Line 648: `<TextBlock Text="任务结束后执行..." Foreground="#E0FFFFFF" FontSize="11" Margin="0,0,0,4"/>`
+- Line 657: `<TextBlock Text="Powershell 脚本内容" Foreground="#E0FFFFFF" FontSize="11" Margin="0,0,0,4"/>`
+- Line 658: `<TextBox x:Name="PostActionScriptTextBox" Height="26" VerticalContentAlignment="Center" Background="#30000000" BorderBrush="#50FFFFFF" Foreground="White" CaretBrush="White"/>`
+
+### `./Skyweaver/Windows/LateralFileSystemFolderDialog.xaml`
+- Line 37: `Foreground="#FFD6E8FF"`
+
+### `./Skyweaver/Windows/ResourceManagerWindow.xaml`
+- Line 14: `<GradientStop Color="#6BDDFFFD" Offset="0.0811639"/>`
+- Line 15: `<GradientStop Color="#3A000000" Offset="0.243492"/>`
+- Line 16: `<GradientStop Color="#907FCEFF" Offset="0.500766"/>`
+- Line 17: `<GradientStop Color="#FF000000" Offset="0.586524"/>`
+- Line 18: `<GradientStop Color="#FF0099FF" Offset="0.828484"/>`
+- Line 29: `<GradientStop Color="#7800F3FF" Offset="0.0597243"/>`
+- Line 30: `<GradientStop Color="#2B000000" Offset="0.234303"/>`
+- Line 31: `<GradientStop Color="#FFA5DBFF" Offset="0.372129"/>`
+- Line 32: `<GradientStop Color="#FF0099FF" Offset="0.577335"/>`
+
+### `./Skyweaver/Windows/ShellChatWindow.xaml`
+- Line 52: `<GradientStop Color="#38080D1A" Offset="0"/>`
+- Line 53: `<GradientStop Color="#22101530" Offset="0.5"/>`
+- Line 54: `<GradientStop Color="#3204060F" Offset="1"/>`
+- Line 72: `<GradientStop Color="#1AFFFFFF" Offset="0"/>`
+- Line 73: `<GradientStop Color="#0DFFFFFF" Offset="0.1"/>`
+- Line 74: `<GradientStop Color="#00FFFFFF" Offset="0.3"/>`
+- Line 75: `<GradientStop Color="#1CFFFFFF" Offset="0.33"/>`
+- Line 76: `<GradientStop Color="#08FFFFFF" Offset="0.6"/>`
+- Line 77: `<GradientStop Color="#20FFFFFF" Offset="1"/>`
+- Line 100: `<DropShadowEffect Color="#FF00A8FF" BlurRadius="20" ShadowDepth="0" Opacity="0.3"/>`
+- Line 112: `<GradientStop Color="#80FFFFFF" Offset="0"/>`
+- Line 113: `<GradientStop Color="#25FFFFFF" Offset="0.2"/>`
+- Line 114: `<GradientStop Color="#15FFFFFF" Offset="0.8"/>`
+- Line 115: `<GradientStop Color="#4580D0FF" Offset="1"/>`
+- Line 123: `<Ellipse Width="350" Height="280" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-120,-80,0" Fill="#222B5BC2">`
+- Line 130: `<Ellipse Width="320" Height="250" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="-80,0,0,-100" Fill="#187638B5">`
+- Line 145: `<Ellipse Width="1" Height="1" Fill="#20FFFFFF" Canvas.Left="0" Canvas.Top="0"/>`
+- Line 146: `<Ellipse Width="1" Height="1" Fill="#20FFFFFF" Canvas.Left="2.5" Canvas.Top="2.5"/>`
+- Line 164: `Background="#20101530"`
+- Line 166: `BorderBrush="#60FFFFFF" BorderThickness="1.5"`
+- Line 172: `<DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="4" Opacity="0.6"/>`
+- Line 174: `<Border CornerRadius="26" Margin="3" ClipToBounds="True" Background="#60000000">`
+
+### `./Skyweaver/Windows/ToolConfirmationDialog.xaml`
+- Line 12: `<SolidColorBrush Color="#FF111326"/>`
+- Line 17: `<GradientStop Color="#FF191D3A" Offset="0"/>`
+- Line 18: `<GradientStop Color="#FF231B40" Offset="0.52"/>`
+- Line 19: `<GradientStop Color="#FF0B0B19" Offset="1"/>`
+- Line 23: `<GradientStop Color="#AAFFFFFF" Offset="0"/>`
+- Line 24: `<GradientStop Color="#45FFFFFF" Offset="0.36"/>`
+- Line 25: `<GradientStop Color="#669B8CCF" Offset="1"/>`
+- Line 29: `<GradientStop Color="#E722173A" Offset="0"/>`
+- Line 30: `<GradientStop Color="#D61E1532" Offset="0.44"/>`
+- Line 31: `<GradientStop Color="#CC0F1123" Offset="1"/>`
+- Line 35: `<GradientStop Color="#4E314B77" Offset="0"/>`
+- Line 36: `<GradientStop Color="#35223349" Offset="0.5"/>`
+- Line 37: `<GradientStop Color="#28111A2B" Offset="1"/>`
+- Line 49: `Fill="#304153C2">`
+- Line 60: `Fill="#1E7638B5">`
+- Line 71: `<Ellipse Width="1.4" Height="1.4" Fill="#15FFFFFF" Canvas.Left="0" Canvas.Top="0"/>`
+- Line 72: `<Ellipse Width="1.4" Height="1.4" Fill="#15FFFFFF" Canvas.Left="3" Canvas.Top="3"/>`
+- Line 93: `<GradientStop Color="#43FFFFFF" Offset="0"/>`
+- Line 94: `<GradientStop Color="#18FFFFFF" Offset="0.58"/>`
+- Line 95: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 108: `<GradientStop Color="#3AA585FF" Offset="0"/>`
+- Line 109: `<GradientStop Color="#00A585FF" Offset="1"/>`
+- Line 133: `Foreground="#F2F7FFFF"`
+- Line 139: `Foreground="#D4DDF8FF"`
+- Line 146: `BorderBrush="#6E86AEE2"`
+- Line 155: `<GradientStop Color="#34FFFFFF" Offset="0"/>`
+- Line 156: `<GradientStop Color="#10FFFFFF" Offset="0.35"/>`
+- Line 157: `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 174: `Background="#2C101A2D"`
+- Line 175: `BorderBrush="#5E7DA7DA"`
+- Line 182: `Foreground="#FFF3F8FF"/>`
+- Line 187: `Foreground="#FFF7FBFF"`
