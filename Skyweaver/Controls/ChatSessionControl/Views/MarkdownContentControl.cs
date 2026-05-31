@@ -7,6 +7,9 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using Skyweaver.Services.Localization;
+using WpfMath;
+using WpfMath.Controls;
+using WpfMath.Parsers;
 
 namespace Skyweaver.Controls.ChatSessionControl.Views
 {
@@ -424,8 +427,10 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
 
                 case MarkdownMathBlock math:
                     var mathBorder = (Border)element;
-                    var mathText = (TextBlock)mathBorder.Child;
-                    mathText.Text = $"\\[{math.Content}\\]";
+                    if (mathBorder.Child is LaTeXElement laTeXElement)
+                    {
+                        laTeXElement.LaTeX = math.Content;
+                    }
                     break;
 
                 case MarkdownTableBlock table:
@@ -581,13 +586,9 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
 
         private Border CreateMathBlock(MarkdownMathBlock block)
         {
-            var textBlock = new TextBlock
+            var latexElement = new LaTeXElement(MathForegroundBrush, MathBackgroundBrush, Math.Max(12.0, ResolveBaseFontSize() - 0.5), isDisplayStyle: true)
             {
-                Foreground = MathForegroundBrush,
-                FontFamily = new FontFamily("Consolas"),
-                FontSize = Math.Max(12.0, ResolveBaseFontSize() - 0.5),
-                TextWrapping = TextWrapping.Wrap,
-                TextAlignment = TextAlignment.Center
+                LaTeX = block.Content
             };
 
             var border = new Border
@@ -598,10 +599,9 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
                 BorderThickness = new Thickness(1),
                 CornerRadius = new CornerRadius(8),
                 Padding = new Thickness(10, 8, 10, 8),
-                Child = textBlock
+                Child = latexElement
             };
 
-            textBlock.Text = $"\\[{block.Content}\\]";
             return border;
         }
 
@@ -764,11 +764,14 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
 
         private Inline CreateMathInline(MarkdownMathInline math)
         {
-            var delimiter = math.IsDisplayStyle ? ('[', ']') : ('(', ')');
-            return new Run($"\\{delimiter.Item1}{math.Content}\\{delimiter.Item2}")
+            var latexElement = new LaTeXElement(MathForegroundBrush, Brushes.Transparent, ResolveBaseFontSize(), isDisplayStyle: math.IsDisplayStyle)
             {
-                Foreground = MathForegroundBrush,
-                FontFamily = new FontFamily("Consolas")
+                LaTeX = math.Content
+            };
+
+            return new InlineUIContainer(latexElement)
+            {
+                BaselineAlignment = BaselineAlignment.Center
             };
         }
 
@@ -899,4 +902,118 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             return string.Format(L(resourceKey, fallbackFormat), args);
         }
     }
+
+    internal class LaTeXElement : ContentControl
+    {
+        private readonly Brush _mathForeground;
+        private readonly Brush _mathBackground;
+        private readonly double _fontSize;
+        private readonly bool _isDisplayStyle;
+
+        public LaTeXElement(Brush foreground, Brush background, double fontSize, bool isDisplayStyle = true)
+        {
+            _mathForeground = foreground;
+            _mathBackground = background;
+            _fontSize = fontSize;
+            _isDisplayStyle = isDisplayStyle;
+            Focusable = false;
+            IsTabStop = false;
+        }
+
+        public string LaTeX
+        {
+            get => (string)GetValue(LaTeXProperty);
+            set => SetValue(LaTeXProperty, value);
+        }
+
+        public static readonly DependencyProperty LaTeXProperty =
+            DependencyProperty.Register(
+                nameof(LaTeX),
+                typeof(string),
+                typeof(LaTeXElement),
+                new PropertyMetadata(string.Empty, OnLaTeXChanged));
+
+        private static void OnLaTeXChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            ((LaTeXElement)d).UpdateContent();
+        }
+
+        private static string PreprocessLaTeX(string latex)
+        {
+            if (string.IsNullOrEmpty(latex))
+                return latex;
+
+            // 替换 WpfMath 不支持但常见的 LaTeX 字体和样式宏，使其能顺利被解析并保持基本的视觉格式
+            latex = latex.Replace("\\mathbf", "\\mathrm")
+                         .Replace("\\mathbb", "\\mathrm")
+                         .Replace("\\boldsymbol", "\\mathit")
+                         .Replace("\\bm", "\\mathit")
+                         .Replace("\\textbf", "\\text")
+                         .Replace("\\mathsf", "\\mathrm")
+                         .Replace("\\mathtt", "\\mathrm");
+
+            // 替换 WpfMath 不支持但常见的 LaTeX 箭头与逻辑运算符号，提升公式解析成功率
+            latex = latex.Replace("\\implies", "\\Rightarrow")
+                         .Replace("\\Longrightarrow", "\\Rightarrow")
+                         .Replace("\\iff", "\\Leftrightarrow")
+                         .Replace("\\Longleftrightarrow", "\\Leftrightarrow")
+                         .Replace("\\impliedby", "\\Leftarrow")
+                         .Replace("\\LongSecondary", "\\Leftarrow")
+                         .Replace("\\Longleftarrow", "\\Leftarrow");
+
+            return latex;
+        }
+
+        private void UpdateContent()
+        {
+            var rawLatex = LaTeX;
+            if (string.IsNullOrEmpty(rawLatex))
+            {
+                Content = null;
+                return;
+            }
+
+            // 对用于解析和渲染的 LaTeX 进行预处理，替换不支持的样式命令
+            var cleanLatex = PreprocessLaTeX(rawLatex);
+
+            try
+            {
+                // 用 WpfTeXFormulaParser.Instance 安全地验证/解析 LaTeX
+                var parser = WpfTeXFormulaParser.Instance;
+                parser.Parse(cleanLatex);
+
+                // 解析成功后，使用 FormulaControl 来渲染 LaTeX 公式
+                var formulaCtrl = new FormulaControl
+                {
+                    Formula = cleanLatex,
+                    Foreground = _mathForeground,
+                    Background = Brushes.Transparent,
+                    SnapsToDevicePixels = true,
+                    Focusable = false,
+                    IsTabStop = false
+                };
+
+                // 根据字体大小微调缩放比例
+                formulaCtrl.Scale = _fontSize * 1.3;
+
+                Content = formulaCtrl;
+            }
+            catch (Exception)
+            {
+                // 解析失败时，降级显示为最原始的普通文本（避免公式输入不完整时抛错崩溃）
+                var textBlock = new TextBlock
+                {
+                    Text = _isDisplayStyle ? $"\\[{rawLatex}\\]" : $"\\({rawLatex}\\)",
+                    Foreground = _mathForeground,
+                    FontFamily = new FontFamily("Consolas"),
+                    FontSize = _fontSize,
+                    TextWrapping = TextWrapping.Wrap,
+                    TextAlignment = _isDisplayStyle ? TextAlignment.Center : TextAlignment.Left,
+                    Focusable = false
+                };
+                Content = textBlock;
+            }
+        }
+    }
 }
+

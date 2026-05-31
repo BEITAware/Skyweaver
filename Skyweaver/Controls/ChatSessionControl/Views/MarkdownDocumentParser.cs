@@ -155,16 +155,38 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
         private static bool TryParseMathBlock(string[] lines, int lineCount, ref int index, out MarkdownMathBlock block)
         {
             var line = lines[index];
-            var openIndex = line.IndexOf("\\[", StringComparison.Ordinal);
-            if (openIndex < 0 || line[..openIndex].Trim().Length != 0)
+            var trimmed = line.Trim();
+
+            string openDelimiter;
+            string closeDelimiter;
+
+            if (trimmed.StartsWith("\\[", StringComparison.Ordinal))
+            {
+                openDelimiter = "\\[";
+                closeDelimiter = "\\]";
+            }
+            else if (trimmed.StartsWith("$$", StringComparison.Ordinal))
+            {
+                openDelimiter = "$$";
+                closeDelimiter = "$$";
+            }
+            else
+            {
+                block = null!;
+                return false;
+            }
+
+            var openIndex = line.IndexOf(openDelimiter, StringComparison.Ordinal);
+            // 确保定界符前没有其他非空白字符
+            if (line[..openIndex].Trim().Length != 0)
             {
                 block = null!;
                 return false;
             }
 
             var contentLines = new List<string>();
-            var remainder = line[(openIndex + 2)..];
-            var closeIndex = remainder.IndexOf("\\]", StringComparison.Ordinal);
+            var remainder = line[(openIndex + openDelimiter.Length)..];
+            var closeIndex = remainder.IndexOf(closeDelimiter, StringComparison.Ordinal);
             if (closeIndex >= 0)
             {
                 contentLines.Add(remainder[..closeIndex]);
@@ -179,7 +201,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             while (index < lineCount)
             {
                 var currentLine = lines[index];
-                closeIndex = currentLine.IndexOf("\\]", StringComparison.Ordinal);
+                closeIndex = currentLine.IndexOf(closeDelimiter, StringComparison.Ordinal);
                 if (closeIndex >= 0)
                 {
                     contentLines.Add(currentLine[..closeIndex]);
@@ -195,6 +217,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
             block = new MarkdownMathBlock(string.Join(Environment.NewLine, contentLines));
             return true;
         }
+
 
         private static bool TryParseQuote(string[] lines, int lineCount, ref int index, out MarkdownQuoteBlock block, bool isUserMessage)
         {
@@ -389,22 +412,78 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
         {
             var isDisplayStyle = false;
             string closingDelimiter;
+            int openingLen = 2;
+
             if (StartsWith(text, index, "\\("))
             {
                 closingDelimiter = "\\)";
+                openingLen = 2;
             }
             else if (StartsWith(text, index, "\\["))
             {
                 closingDelimiter = "\\]";
                 isDisplayStyle = true;
+                openingLen = 2;
+            }
+            else if (text[index] == '$' && (index == 0 || text[index - 1] != '\\'))
+            {
+                if (StartsWith(text, index, "$$"))
+                {
+                    closingDelimiter = "$$";
+                    isDisplayStyle = true;
+                    openingLen = 2;
+                }
+                else
+                {
+                    // 单个 $ 符号的前瞻性检查，避免和货币符号混淆
+                    if (index + 1 < text.Length)
+                    {
+                        var nextChar = text[index + 1];
+                        if (char.IsWhiteSpace(nextChar) || nextChar == '$' || nextChar == ',' || nextChar == '.')
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
+
+                    closingDelimiter = "$";
+                    isDisplayStyle = false;
+                    openingLen = 1;
+                }
             }
             else
             {
                 return false;
             }
 
-            var contentStart = index + 2;
-            var closingIndex = text.IndexOf(closingDelimiter, contentStart, StringComparison.Ordinal);
+            var contentStart = index + openingLen;
+            var closingIndex = -1;
+
+            // 查找未转义的结束定界符
+            for (int i = contentStart; i < text.Length; i++)
+            {
+                if (StartsWith(text, i, closingDelimiter))
+                {
+                    // 确保未被转义
+                    if (i > 0 && text[i - 1] == '\\')
+                    {
+                        continue;
+                    }
+
+                    // 确保单 $ 结束时，前面不是空白字符
+                    if (closingDelimiter == "$" && i > contentStart && char.IsWhiteSpace(text[i - 1]))
+                    {
+                        continue;
+                    }
+
+                    closingIndex = i;
+                    break;
+                }
+            }
+
             if (closingIndex < 0)
             {
                 return false;
