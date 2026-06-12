@@ -22,6 +22,7 @@ namespace Skyweaver.Services.ChatSession
         private readonly SessionFlowExecutionService _executionService;
         private readonly ChatSessionTranscriptWriter _transcriptWriter;
         private readonly ChatSessionRepository _sessionRepository;
+        private readonly ChatSessionPersistenceScheduler _persistenceScheduler;
         private readonly SemaphoreSlim _executionGate = new(1, 1);
 
         private CancellationTokenSource? _activeExecutionCancellationSource;
@@ -68,6 +69,7 @@ namespace Skyweaver.Services.ChatSession
             _executionService = executionService ?? throw new ArgumentNullException(nameof(executionService));
             _transcriptWriter = transcriptWriter ?? throw new ArgumentNullException(nameof(transcriptWriter));
             _sessionRepository = sessionRepository ?? throw new ArgumentNullException(nameof(sessionRepository));
+            _persistenceScheduler = new ChatSessionPersistenceScheduler(_sessionRepository);
         }
 
         public bool IsExecutionActive => _isExecutionActive;
@@ -160,7 +162,7 @@ namespace Skyweaver.Services.ChatSession
                         Text = trimmedUserText,
                         ContentBlocks = userContentBlocks
                     });
-                PersistSession(request.Session);
+                SchedulePersistSession(request.Session);
 
                 await PublishRuntimeEventAsync(
                     new ChatSessionRuntimeEvent
@@ -324,7 +326,7 @@ namespace Skyweaver.Services.ChatSession
             {
                 if (hasRegisteredExecution)
                 {
-                    PersistSession(request.Session);
+                    FlushPersistSession(request.Session);
                 }
 
                 if (hasRegisteredExecution)
@@ -348,14 +350,26 @@ namespace Skyweaver.Services.ChatSession
                 return;
             }
 
-            PersistSession(session);
+            SchedulePersistSession(session);
         }
 
-        private void PersistSession(ChatSessionModel session)
+        private void SchedulePersistSession(ChatSessionModel session)
         {
             try
             {
-                _sessionRepository.Save(session);
+                _persistenceScheduler.ScheduleSave(session);
+            }
+            catch
+            {
+                // Runtime persistence must not mask the original agent failure path.
+            }
+        }
+
+        private void FlushPersistSession(ChatSessionModel session)
+        {
+            try
+            {
+                _persistenceScheduler.Flush(session);
             }
             catch
             {

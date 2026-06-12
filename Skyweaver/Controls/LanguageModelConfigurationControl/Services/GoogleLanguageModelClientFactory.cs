@@ -732,7 +732,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
         {
             var textBuilder = new StringBuilder();
             var reasoningBuilder = new StringBuilder();
-            var debugItems = new List<LanguageModelStreamingContentDebugItem>();
+            List<LanguageModelStreamingContentDebugItem>? debugItems = null;
 
             if (rootElement.TryGetProperty("candidates", out var candidatesElement) &&
                 candidatesElement.ValueKind == JsonValueKind.Array)
@@ -760,7 +760,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 SanitizeModelText(textBuilder.ToString()),
                 SanitizeModelText(reasoningBuilder.ToString()),
                 GetOptionalString(rootElement, "modelVersion") ?? fallbackModelId,
-                debugItems,
+                debugItems ?? (IReadOnlyList<LanguageModelStreamingContentDebugItem>)Array.Empty<LanguageModelStreamingContentDebugItem>(),
                 NormalizeUsageCount(GetUsageMetadataNumber(rootElement, "promptTokenCount")),
                 NormalizeUsageCount(GetUsageMetadataNumber(rootElement, "totalTokenCount")));
         }
@@ -777,15 +777,12 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 TextDelta = parsed.Text,
                 ReasoningTextDelta = parsed.ReasoningText,
                 ModelId = parsed.ModelId,
-                RawText = rawText,
+                RawText = string.Equals(rawText, parsed.Text, StringComparison.Ordinal) ? null : rawText,
                 WasTextSanitized = !string.Equals(rawText, parsed.Text, StringComparison.Ordinal),
                 Role = "assistant",
                 FinishReason = GetFirstCandidateProperty(document.RootElement, "finishReason"),
                 ResponseId = responseId,
-                RawRepresentationType = typeof(JsonDocument).FullName,
-                RawRepresentationSummary = TruncateText(payload, 512),
-                AdditionalProperties = BuildStreamingAdditionalProperties(document.RootElement),
-                Contents = parsed.DebugItems
+                AdditionalProperties = BuildStreamingAdditionalProperties(document.RootElement)
             };
         }
 
@@ -818,7 +815,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             JsonElement partElement,
             StringBuilder textBuilder,
             StringBuilder reasoningBuilder,
-            ICollection<LanguageModelStreamingContentDebugItem> debugItems)
+            ICollection<LanguageModelStreamingContentDebugItem>? debugItems)
         {
             var isThought = partElement.TryGetProperty("thought", out var thoughtElement) &&
                             thoughtElement.ValueKind == JsonValueKind.True;
@@ -839,7 +836,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 }
             }
 
-            if (partElement.ValueKind == JsonValueKind.Object)
+            if (debugItems != null && partElement.ValueKind == JsonValueKind.Object)
             {
                 var additionalProperties = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
                 var thoughtSignature = GetOptionalString(partElement, "thoughtSignature");

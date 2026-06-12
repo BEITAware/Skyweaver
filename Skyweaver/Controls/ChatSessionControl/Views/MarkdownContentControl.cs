@@ -17,7 +17,7 @@ namespace Skyweaver.Controls.ChatSessionControl.Views
     {
         private const double TableMaxHeight = 360.0;
         private const double TableMinColumnWidth = 72.0;
-        private const int StreamingRefreshThrottleMilliseconds = 60;
+        private const int StreamingRefreshThrottleMilliseconds = 32;
 
         private static readonly Brush HeadingForegroundBrush = CreateFrozenBrush(Color.FromRgb(0xBD, 0xEB, 0xFF));
         private static readonly Brush QuoteForegroundBrush = CreateFrozenBrush(Color.FromArgb(0xE0, 0xEA, 0xFD, 0xFF));

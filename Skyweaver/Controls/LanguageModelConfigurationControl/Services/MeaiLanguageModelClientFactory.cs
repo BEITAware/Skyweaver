@@ -123,15 +123,15 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
             var sanitizedText = SanitizeModelText(rawText);
             var rawReasoningText = ExtractReasoningText(update.Contents);
             var sanitizedReasoningText = SanitizeModelText(rawReasoningText);
-            var rawRepresentation = update.RawRepresentation;
-            var continuationToken = GetContinuationToken(update);
 
             return new LanguageModelStreamingChatUpdate
             {
                 TextDelta = sanitizedText,
                 ReasoningTextDelta = sanitizedReasoningText,
                 ModelId = NormalizeMetadataText(update.ModelId),
-                RawText = rawText,
+                RawText = string.Equals(rawText ?? string.Empty, sanitizedText, StringComparison.Ordinal)
+                    ? null
+                    : rawText,
                 WasTextSanitized = !string.Equals(rawText ?? string.Empty, sanitizedText, StringComparison.Ordinal),
                 Role = NormalizeMetadataText(update.Role.ToString()),
                 AuthorName = NormalizeMetadataText(update.AuthorName),
@@ -139,12 +139,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 ResponseId = NormalizeMetadataText(update.ResponseId),
                 MessageId = NormalizeMetadataText(update.MessageId),
                 ConversationId = NormalizeMetadataText(update.ConversationId),
-                CreatedAt = update.CreatedAt,
-                ContinuationToken = DescribeContinuationToken(continuationToken),
-                RawRepresentationType = rawRepresentation?.GetType().FullName,
-                RawRepresentationSummary = DescribeDebugValue(rawRepresentation),
-                AdditionalProperties = BuildAdditionalProperties(update.AdditionalProperties),
-                Contents = BuildContentDebugItems(update.Contents)
+                CreatedAt = update.CreatedAt
             };
         }
 

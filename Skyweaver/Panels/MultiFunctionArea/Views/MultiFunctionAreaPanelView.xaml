@@ -214,8 +214,7 @@
                             <ContextMenu Style="{DynamicResource AnimatedContextMenuStyle}"
                                          DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
                                          ItemsSource="{Binding AvailableTabDefinitions}"
-                                          Placement="Bottom"
-                                          PlacementTarget="{Binding ElementName=CreateTabButton}">
+                                          Placement="Bottom">
                                 <ContextMenu.ItemContainerStyle>
                                     <Style TargetType="MenuItem" BasedOn="{StaticResource AnimatedMenuItemStyle}">
                                         <Setter Property="Command" Value="{Binding DataContext.CreateTabCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>

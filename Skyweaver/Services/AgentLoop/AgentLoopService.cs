@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -830,25 +831,34 @@ namespace Skyweaver.Services.AgentLoop
                             .OrderBy(model => model.EffectiveContextWindowTokens)
                             .First();
                         var contextWindowTokens = maxCompactionModel.EffectiveContextWindowTokens;
+                        var triggerTokenCount = (int)(contextWindowTokens * 0.95d);
                         
                         int currentTokenCount = 0;
-                        try
+                        var estimatedTokens = AgentLoopTokenCounter.EstimateMessages(preparedContext.PreparedMessages);
+                        if (estimatedTokens * 10 < triggerTokenCount)
                         {
-                            var tokenCountResult = await _tokenCounter.CountAsync(
-                                maxCompactionModel,
-                                preparedContext.PreparedMessages,
-                                request.CompactionFilePath,
-                                mediaProgressCallback,
-                                cancellationToken).ConfigureAwait(false);
-                            currentTokenCount = tokenCountResult.TokenCount;
+                            currentTokenCount = estimatedTokens;
                         }
-                        catch
+                        else
                         {
-                            currentTokenCount = 0;
+                            try
+                            {
+                                var tokenCountResult = await _tokenCounter.CountAsync(
+                                    maxCompactionModel,
+                                    preparedContext.PreparedMessages,
+                                    request.CompactionFilePath,
+                                    mediaProgressCallback,
+                                    cancellationToken).ConfigureAwait(false);
+                                currentTokenCount = tokenCountResult.TokenCount;
+                            }
+                            catch
+                            {
+                                currentTokenCount = 0;
+                            }
                         }
 
                         bool isCompactionPreconditionMet = !request.MinCompactionEnabled || isMinCompacted;
-                        if (isCompactionPreconditionMet && currentTokenCount >= (int)(contextWindowTokens * 0.95d))
+                        if (isCompactionPreconditionMet && currentTokenCount >= triggerTokenCount)
                         {
                             isMinCompacted = false;
 
@@ -1148,6 +1158,13 @@ namespace Skyweaver.Services.AgentLoop
                 .First();
             var contextWindowTokens = compactionModel.EffectiveContextWindowTokens;
             var triggerTokenCount = Math.Max(1, (int)Math.Floor(contextWindowTokens * MinCompactionTriggerRatio));
+            
+            var estimatedTokens = AgentLoopTokenCounter.EstimateMessages(preparedContext.PreparedMessages);
+            if (estimatedTokens * 10 < triggerTokenCount)
+            {
+                return null;
+            }
+
             AgentLoopTokenCountResult tokenCount;
             try
             {
@@ -1372,8 +1389,10 @@ namespace Skyweaver.Services.AgentLoop
                 List<AgentLoopStreamingUpdateDebugSnapshot>? streamingUpdates = debugRunContext == null
                     ? null
                     : new List<AgentLoopStreamingUpdateDebugSnapshot>();
-                var lastStreamingTokenUsageRefreshUtc = DateTime.MinValue;
-                var lastStreamingProtocolRefreshUtc = DateTime.MinValue;
+                var lastStreamingTokenUsageRefreshTicks = 0L;
+                var lastStreamingProtocolRefreshTicks = 0L;
+                var streamingTokenUsageRefreshIntervalTicks = (long)(Stopwatch.Frequency * StreamingTokenUsageRefreshInterval.TotalSeconds);
+                var streamingProtocolRefreshIntervalTicks = (long)(Stopwatch.Frequency * StreamingProtocolRefreshInterval.TotalSeconds);
 
                 AgentLoopTokenUsageInfo BuildStreamingTokenUsage()
                 {
@@ -1402,13 +1421,13 @@ namespace Skyweaver.Services.AgentLoop
                         return null;
                     }
 
-                    var now = DateTime.UtcNow;
-                    if (!force && now - lastStreamingTokenUsageRefreshUtc < StreamingTokenUsageRefreshInterval)
+                    var now = Stopwatch.GetTimestamp();
+                    if (!force && now - lastStreamingTokenUsageRefreshTicks < streamingTokenUsageRefreshIntervalTicks)
                     {
                         return null;
                     }
 
-                    lastStreamingTokenUsageRefreshUtc = now;
+                    lastStreamingTokenUsageRefreshTicks = now;
                     return BuildStreamingTokenUsage();
                 }
 
@@ -1423,17 +1442,17 @@ namespace Skyweaver.Services.AgentLoop
                 {
                     if (force)
                     {
-                        lastStreamingProtocolRefreshUtc = DateTime.UtcNow;
+                        lastStreamingProtocolRefreshTicks = Stopwatch.GetTimestamp();
                         return true;
                     }
 
-                    var now = DateTime.UtcNow;
-                    if (now - lastStreamingProtocolRefreshUtc < StreamingProtocolRefreshInterval)
+                    var now = Stopwatch.GetTimestamp();
+                    if (now - lastStreamingProtocolRefreshTicks < streamingProtocolRefreshIntervalTicks)
                     {
                         return false;
                     }
 
-                    lastStreamingProtocolRefreshUtc = now;
+                    lastStreamingProtocolRefreshTicks = now;
                     return true;
                 }
 

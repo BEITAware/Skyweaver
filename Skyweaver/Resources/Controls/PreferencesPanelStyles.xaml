@@ -209,9 +209,34 @@
 
     <Style x:Key="PreferencesContentShellBorderStyle"
            TargetType="Border">
-        <Setter Property="Background" Value="#C0141B2B"/>
-        <Setter Property="BorderBrush" Value="{StaticResource PreferencesContentBorderBrush}"/>
-        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Background">
+            <Setter.Value>
+                <VisualBrush Stretch="Fill">
+                    <VisualBrush.Visual>
+                        <Canvas Width="1616.92" Height="1055.95" Clip="F1 M 0,0L 1616.92,0L 1616.92,1055.95L 0,1055.95L 0,0">
+                            <Canvas Width="1121.94" Height="1587.92" Canvas.Left="0" Canvas.Top="0">
+                                <Path Width="1616.92" Height="1055.95" Canvas.Left="0" Canvas.Top="-0.00012207" Stretch="Fill" Data="F1 M 4.5,1.49988L 1612.42,1.49988C 1614.08,1.49988 1615.42,2.8429 1615.42,4.49988L 1615.42,1051.45C 1615.42,1053.1 1614.08,1054.45 1612.42,1054.45L 4.5,1054.45C 2.84302,1054.45 1.5,1053.1 1.5,1051.45L 1.5,4.49988C 1.5,2.8429 2.84302,1.49988 4.5,1.49988 Z ">
+                                    <Path.Fill>
+                                        <RadialGradientBrush RadiusX="0.67375" RadiusY="1.15171" Center="0.5,-0.00904722" GradientOrigin="0.5,-0.00904722">
+                                            <RadialGradientBrush.GradientStops>
+                                                <GradientStop Color="#82E0FBFF" Offset="0.0766283"/>
+                                                <GradientStop Color="#00298996" Offset="1"/>
+                                            </RadialGradientBrush.GradientStops>
+                                            <RadialGradientBrush.RelativeTransform>
+                                                <TransformGroup>
+                                                    <RotateTransform CenterX="0.5" CenterY="-0.00904722" Angle="180"/>
+                                                </TransformGroup>
+                                            </RadialGradientBrush.RelativeTransform>
+                                        </RadialGradientBrush>
+                                    </Path.Fill>
+                                </Path>
+                            </Canvas>
+                        </Canvas>
+                    </VisualBrush.Visual>
+                </VisualBrush>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="CornerRadius" Value="6"/>
     </Style>
 
@@ -245,28 +270,7 @@
                                       IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
                             <ToggleButton.Template>
                                 <ControlTemplate TargetType="ToggleButton">
-                                    <Grid>
-                                        <Border x:Name="BgBorder"
-                                                Background="{StaticResource PreferencesGroupHeaderBackgroundBrush}"
-                                                BorderBrush="{StaticResource PreferencesGroupHeaderBorderBrush}"
-                                                BorderThickness="1"
-                                                CornerRadius="3"/>
-                                        <Border x:Name="HighlightBorder"
-                                                Background="{StaticResource PreferencesGroupHeaderHighlightInactiveBrush}"
-                                                CornerRadius="3"
-                                                Opacity="0.5"/>
-                                        <Border Height="14"
-                                                VerticalAlignment="Top"
-                                                CornerRadius="3,3,0,0">
-                                            <Border.Background>
-                                                <LinearGradientBrush StartPoint="0.5,0"
-                                                                     EndPoint="0.5,1">
-                                                    <GradientStop Color="#30FFFFFF" Offset="0"/>
-                                                    <GradientStop Color="#00FFFFFF" Offset="1"/>
-                                                </LinearGradientBrush>
-                                            </Border.Background>
-                                        </Border>
-
+                                    <Grid Background="Transparent">
                                         <Grid Margin="10,0">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
@@ -276,7 +280,8 @@
                                             <TextBlock Grid.Column="0"
                                                        VerticalAlignment="Center"
                                                        Foreground="White"
-                                                       FontSize="13"
+                                                       FontSize="14"
+                                                       FontFamily="Microsoft YaHei Light"
                                                        Text="{Binding Header, RelativeSource={RelativeSource AncestorType=Expander}}"/>
                                             <Path x:Name="ArrowExpanded"
                                                   Grid.Column="1"
@@ -302,11 +307,8 @@
                                         <Trigger Property="IsChecked" Value="True">
                                             <Setter TargetName="ArrowExpanded" Property="Visibility" Value="Visible"/>
                                             <Setter TargetName="ArrowCollapsed" Property="Visibility" Value="Collapsed"/>
-                                            <Setter TargetName="HighlightBorder" Property="Background" Value="{StaticResource PreferencesGroupHeaderHighlightBrush}"/>
-                                            <Setter TargetName="HighlightBorder" Property="Opacity" Value="0.75"/>
                                         </Trigger>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="HighlightBorder" Property="Opacity" Value="0.95"/>
                                             <Setter TargetName="ArrowExpanded" Property="Opacity" Value="1"/>
                                             <Setter TargetName="ArrowCollapsed" Property="Opacity" Value="1"/>
                                         </Trigger>
@@ -339,7 +341,7 @@
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="12,8"/>
-        <Setter Property="Margin" Value="0,1"/>
+        <Setter Property="Margin" Value="0,4"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -348,51 +350,265 @@
                 <ControlTemplate TargetType="Button">
                     <Grid x:Name="RootGrid"
                           MinHeight="42"
-                          RenderTransformOrigin="0.5,0.5">
-                        <Grid.RenderTransform>
-                            <ScaleTransform ScaleX="1" ScaleY="1"/>
-                        </Grid.RenderTransform>
+                          Margin="0,0,0,0"
+                          RenderTransformOrigin="0.5,0.5"
+                          ClipToBounds="False">
+                        <Grid.LayoutTransform>
+                            <ScaleTransform x:Name="RootScale" ScaleX="1" ScaleY="1"/>
+                        </Grid.LayoutTransform>
 
-                        <Border x:Name="BgBorder"
-                                Background="{StaticResource PreferencesSidebarItemNormalBrush}"
-                                BorderBrush="{StaticResource PreferencesSidebarItemBorderBrush}"
-                                BorderThickness="1"
+                        <Border x:Name="HoverBackground"
+                                Background="#15FFFFFF"
                                 CornerRadius="3"
-                                Opacity="0.92"/>
-                        <Border x:Name="GlassHighlight"
-                                Height="18"
-                                VerticalAlignment="Top"
-                                CornerRadius="3,3,0,0"
-                                Opacity="0.6">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0.5,0"
-                                                     EndPoint="0.5,1">
-                                    <GradientStop Color="#40FFFFFF" Offset="0"/>
-                                    <GradientStop Color="#00FFFFFF" Offset="1"/>
-                                </LinearGradientBrush>
-                            </Border.Background>
-                        </Border>
-                        <ContentPresenter Margin="{TemplateBinding Padding}"
-                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                Opacity="0"/>
+
+                        <Grid x:Name="SelectedBackground" Opacity="0">
+                            <Border CornerRadius="3">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0.071416,-0.446799" EndPoint="2.14998,-0.446799">
+                                        <LinearGradientBrush.RelativeTransform>
+                                            <TransformGroup>
+                                                <SkewTransform CenterX="0.071416" CenterY="-0.446799" AngleX="56.3637" AngleY="0"/>
+                                                <RotateTransform CenterX="0.071416" CenterY="-0.446799" Angle="65.6454"/>
+                                            </TransformGroup>
+                                        </LinearGradientBrush.RelativeTransform>
+                                        <GradientStop Color="#00F8F8F8" Offset="0"/>
+                                        <GradientStop Color="#7CFFFFFF" Offset="0.218391"/>
+                                        <GradientStop Color="#00FFFFFF" Offset="0.245211"/>
+                                        <GradientStop Color="#59FFFFFF" Offset="0.551724"/>
+                                        <GradientStop Color="#00FFFFFF" Offset="0.570881"/>
+                                        <GradientStop Color="#67FFFFFF" Offset="0.768199"/>
+                                        <GradientStop Color="#00FFFFFF" Offset="0.798851"/>
+                                        <GradientStop Color="#33FFFFFF" Offset="0.875479"/>
+                                        <GradientStop Color="#00FFFFFF" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                            </Border>
+                            <Border CornerRadius="3" BorderThickness="1">
+                                <Border.BorderBrush>
+                                    <RadialGradientBrush RadiusX="0.724451" RadiusY="2.64442" Center="0.00604858,0.122312" GradientOrigin="0.00604858,0.122312">
+                                        <GradientStop Color="#FF4BEAFF" Offset="0.0766283"/>
+                                        <GradientStop Color="#00298996" Offset="1"/>
+                                    </RadialGradientBrush>
+                                </Border.BorderBrush>
+                                <Border.Background>
+                                    <RadialGradientBrush RadiusX="0.726411" RadiusY="2.67073" Center="0.0047117,0.118554" GradientOrigin="0.0047117,0.118554">
+                                        <GradientStop Color="#6B4BEAFF" Offset="0.0766283"/>
+                                        <GradientStop Color="#00298996" Offset="1"/>
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                            </Border>
+                        </Grid>
+
+                        <Grid Margin="{TemplateBinding Padding}" ClipToBounds="False">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            <Image x:Name="IconImage"
+                                   Source="pack://application:,,,/Resources/Setup.png"
+                                   Width="16" Height="16"
+                                   HorizontalAlignment="Left"
+                                   VerticalAlignment="Center"
+                                   Margin="4,0,0,0"
+                                   RenderTransformOrigin="0.5,0.5">
+                                <Image.RenderTransform>
+                                    <ScaleTransform x:Name="IconScale" ScaleX="1" ScaleY="1"/>
+                                </Image.RenderTransform>
+                            </Image>
+                        </Grid>
                     </Grid>
 
                     <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="BgBorder" Property="Opacity" Value="1"/>
-                            <Setter TargetName="GlassHighlight" Property="Opacity" Value="0.82"/>
-                        </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="BgBorder" Property="Opacity" Value="0.84"/>
+                            <Setter TargetName="HoverBackground" Property="Opacity" Value="0.6"/>
                         </Trigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
+                                <Condition Binding="{Binding IsSelected}" Value="False"/>
+                            </MultiDataTrigger.Conditions>
+                            <MultiDataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="RootScale"
+                                                         Storyboard.TargetProperty="ScaleX"
+                                                         To="1.04" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="RootScale"
+                                                         Storyboard.TargetProperty="ScaleY"
+                                                         To="1.04" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="IconScale"
+                                                         Storyboard.TargetProperty="ScaleX"
+                                                         To="1.6" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <BackEase EasingMode="EaseOut" Amplitude="0.8"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="IconScale"
+                                                         Storyboard.TargetProperty="ScaleY"
+                                                         To="1.6" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <BackEase EasingMode="EaseOut" Amplitude="0.8"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <ThicknessAnimation Storyboard.TargetName="RootGrid"
+                                                            Storyboard.TargetProperty="Margin"
+                                                            To="0,4,0,4" Duration="0:0:0.2">
+                                            <ThicknessAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </ThicknessAnimation.EasingFunction>
+                                        </ThicknessAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </MultiDataTrigger.EnterActions>
+                            <MultiDataTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="RootScale"
+                                                         Storyboard.TargetProperty="ScaleX"
+                                                         To="1.0" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="RootScale"
+                                                         Storyboard.TargetProperty="ScaleY"
+                                                         To="1.0" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="IconScale"
+                                                         Storyboard.TargetProperty="ScaleX"
+                                                         To="1.0" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="IconScale"
+                                                         Storyboard.TargetProperty="ScaleY"
+                                                         To="1.0" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <ThicknessAnimation Storyboard.TargetName="RootGrid"
+                                                            Storyboard.TargetProperty="Margin"
+                                                            To="0,0,0,0" Duration="0:0:0.2">
+                                            <ThicknessAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </ThicknessAnimation.EasingFunction>
+                                        </ThicknessAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </MultiDataTrigger.ExitActions>
+                        </MultiDataTrigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.45"/>
                         </Trigger>
-                        <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
-                            <Setter TargetName="BgBorder" Property="Background" Value="{StaticResource PreferencesSidebarItemSelectedBrush}"/>
-                            <Setter TargetName="BgBorder" Property="BorderBrush" Value="#8060A0FF"/>
-                            <Setter TargetName="BgBorder" Property="Opacity" Value="1"/>
-                            <Setter TargetName="GlassHighlight" Property="Opacity" Value="0.86"/>
+                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="SelectedBackground"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="1" Duration="0:0:0.3">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="RootScale"
+                                                         Storyboard.TargetProperty="ScaleX"
+                                                         To="1.12" Duration="0:0:0.3">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="RootScale"
+                                                         Storyboard.TargetProperty="ScaleY"
+                                                         To="1.12" Duration="0:0:0.3">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="IconScale"
+                                                         Storyboard.TargetProperty="ScaleX"
+                                                         To="3.5" Duration="0:0:0.3">
+                                            <DoubleAnimation.EasingFunction>
+                                                <BackEase EasingMode="EaseOut" Amplitude="0.8"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="IconScale"
+                                                         Storyboard.TargetProperty="ScaleY"
+                                                         To="3.5" Duration="0:0:0.3">
+                                            <DoubleAnimation.EasingFunction>
+                                                <BackEase EasingMode="EaseOut" Amplitude="0.8"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <ThicknessAnimation Storyboard.TargetName="RootGrid"
+                                                            Storyboard.TargetProperty="Margin"
+                                                            To="0,10,0,10" Duration="0:0:0.3">
+                                            <ThicknessAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </ThicknessAnimation.EasingFunction>
+                                        </ThicknessAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="SelectedBackground"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         To="0" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="RootScale"
+                                                         Storyboard.TargetProperty="ScaleX"
+                                                         To="1.0" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="RootScale"
+                                                         Storyboard.TargetProperty="ScaleY"
+                                                         To="1.0" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="IconScale"
+                                                         Storyboard.TargetProperty="ScaleX"
+                                                         To="1.0" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="IconScale"
+                                                         Storyboard.TargetProperty="ScaleY"
+                                                         To="1.0" Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <ThicknessAnimation Storyboard.TargetName="RootGrid"
+                                                            Storyboard.TargetProperty="Margin"
+                                                            To="0,0,0,0" Duration="0:0:0.2">
+                                            <ThicknessAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </ThicknessAnimation.EasingFunction>
+                                        </ThicknessAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.ExitActions>
                         </DataTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

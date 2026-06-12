@@ -8,9 +8,9 @@ using Skyweaver.Models.LateralFileSystem;
 using Skyweaver.Services.Localization;
 using Skyweaver.Services.LateralFileSystem;
 
-namespace Skyweaver.Controls.LateralFileSystemConfigurationControl.ViewModels
+namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
 {
-    public sealed class LateralFileSystemConfigurationControlViewModel : ObservableObject
+    public sealed class LateralFileSystemPreferencesPageViewModel : ObservableObject
     {
         private readonly LateralFileSystemRuntime _runtime;
         private readonly LateralFileSystemConfiguration _configuration;
@@ -80,7 +80,7 @@ namespace Skyweaver.Controls.LateralFileSystemConfigurationControl.ViewModels
 
         public ICommand OpenConfigurationDirectoryCommand { get; }
 
-        public LateralFileSystemConfigurationControlViewModel()
+        public LateralFileSystemPreferencesPageViewModel()
         {
             _runtime = LateralFileSystemRuntime.Instance;
             _configuration = _runtime.GetConfiguration();

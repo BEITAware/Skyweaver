@@ -23,7 +23,7 @@ namespace Skyweaver.Controls.ShellChatSessionControl.ViewModels
 {
     public sealed class ShellChatSessionControlViewModel : ObservableObject
     {
-        private static readonly TimeSpan StreamingProjectionRefreshInterval = TimeSpan.FromMilliseconds(100);
+        private static readonly TimeSpan StreamingProjectionRefreshInterval = TimeSpan.FromMilliseconds(32);
         private const string ShellIdleAvatarPath = "pack://application:,,,/Resources/SkyweaverAppLogo.png";
 
         private readonly ShellChatStartupContext _startupContext;
@@ -37,10 +37,11 @@ namespace Skyweaver.Controls.ShellChatSessionControl.ViewModels
 
         private ChatSessionModel? _sessionModel;
         private CancellationTokenSource? _executionCancellationSource;
-        private DateTime _lastStreamingProjectionRefreshUtc = DateTime.MinValue;
         private readonly object _streamingRuntimeEventSync = new();
         private ChatSessionRuntimeEvent? _pendingStreamingRuntimeEvent;
         private bool _isStreamingRuntimeEventDispatchQueued;
+        private System.Windows.Threading.DispatcherTimer? _streamingProjectionTimer;
+        private int _streamingProjectionIdleTickCount;
         private string _inputText = string.Empty;
         private string _statusText = L("ShellChat.Status.Ready", "Ready");
         private bool _isExecutionActive;
@@ -259,7 +260,7 @@ namespace Skyweaver.Controls.ShellChatSessionControl.ViewModels
             ArgumentNullException.ThrowIfNull(runtimeEvent);
 
             var dispatcher = Application.Current?.Dispatcher;
-            if (dispatcher == null || dispatcher.CheckAccess())
+            if (dispatcher == null)
             {
                 ApplyRuntimeEvent(runtimeEvent);
                 return ValueTask.CompletedTask;
@@ -271,8 +272,23 @@ namespace Skyweaver.Controls.ShellChatSessionControl.ViewModels
                 return ValueTask.CompletedTask;
             }
 
-            ClearPendingStreamingRuntimeEvent();
-            return new ValueTask(dispatcher.InvokeAsync(() => ApplyRuntimeEvent(runtimeEvent)).Task);
+            if (dispatcher.CheckAccess())
+            {
+                FlushPendingStreamingRuntimeEvent();
+                ApplyRuntimeEvent(runtimeEvent);
+                ClearPendingStreamingRuntimeEvent();
+                return ValueTask.CompletedTask;
+            }
+
+            dispatcher.BeginInvoke(
+                new Action(() =>
+                {
+                    FlushPendingStreamingRuntimeEvent();
+                    ApplyRuntimeEvent(runtimeEvent);
+                    ClearPendingStreamingRuntimeEvent();
+                }),
+                System.Windows.Threading.DispatcherPriority.Normal);
+            return ValueTask.CompletedTask;
         }
 
         private void QueueStreamingRuntimeEvent(
@@ -282,6 +298,7 @@ namespace Skyweaver.Controls.ShellChatSessionControl.ViewModels
             lock (_streamingRuntimeEventSync)
             {
                 _pendingStreamingRuntimeEvent = runtimeEvent;
+                _streamingProjectionIdleTickCount = 0;
                 if (_isStreamingRuntimeEventDispatchQueued)
                 {
                     return;
@@ -291,23 +308,64 @@ namespace Skyweaver.Controls.ShellChatSessionControl.ViewModels
             }
 
             dispatcher.BeginInvoke(
-                new Action(FlushPendingStreamingRuntimeEvent),
-                System.Windows.Threading.DispatcherPriority.Background);
+                new Action(StartStreamingProjectionPump),
+                System.Windows.Threading.DispatcherPriority.Render);
+        }
+
+        private void StartStreamingProjectionPump()
+        {
+            _streamingProjectionTimer ??= CreateStreamingProjectionTimer();
+            if (!_streamingProjectionTimer.IsEnabled)
+            {
+                _streamingProjectionTimer.Start();
+            }
+
+            FlushPendingStreamingRuntimeEvent();
+        }
+
+        private System.Windows.Threading.DispatcherTimer CreateStreamingProjectionTimer()
+        {
+            var timer = new System.Windows.Threading.DispatcherTimer(
+                System.Windows.Threading.DispatcherPriority.Render)
+            {
+                Interval = StreamingProjectionRefreshInterval
+            };
+            timer.Tick += (_, _) => FlushPendingStreamingRuntimeEvent();
+            return timer;
         }
 
         private void FlushPendingStreamingRuntimeEvent()
         {
             ChatSessionRuntimeEvent? runtimeEvent;
+            var shouldStopPump = false;
             lock (_streamingRuntimeEventSync)
             {
                 runtimeEvent = _pendingStreamingRuntimeEvent;
                 _pendingStreamingRuntimeEvent = null;
-                _isStreamingRuntimeEventDispatchQueued = false;
+                if (runtimeEvent == null)
+                {
+                    _streamingProjectionIdleTickCount++;
+                    if (_streamingProjectionIdleTickCount >= 2)
+                    {
+                        _isStreamingRuntimeEventDispatchQueued = false;
+                        _streamingProjectionIdleTickCount = 0;
+                        shouldStopPump = true;
+                    }
+                }
+                else
+                {
+                    _streamingProjectionIdleTickCount = 0;
+                }
             }
 
             if (runtimeEvent != null)
             {
                 ApplyRuntimeEvent(runtimeEvent);
+            }
+
+            if (shouldStopPump)
+            {
+                _streamingProjectionTimer?.Stop();
             }
         }
 
@@ -316,7 +374,11 @@ namespace Skyweaver.Controls.ShellChatSessionControl.ViewModels
             lock (_streamingRuntimeEventSync)
             {
                 _pendingStreamingRuntimeEvent = null;
+                _isStreamingRuntimeEventDispatchQueued = false;
+                _streamingProjectionIdleTickCount = 0;
             }
+
+            _streamingProjectionTimer?.Stop();
         }
 
         private void ApplyRuntimeEvent(ChatSessionRuntimeEvent runtimeEvent)
@@ -410,19 +472,6 @@ namespace Skyweaver.Controls.ShellChatSessionControl.ViewModels
 
         private bool ShouldRefreshProjection(ChatSessionRuntimeEvent runtimeEvent)
         {
-            if (!IsHighFrequencyStreamingProjectionEvent(runtimeEvent))
-            {
-                _lastStreamingProjectionRefreshUtc = DateTime.UtcNow;
-                return true;
-            }
-
-            var now = DateTime.UtcNow;
-            if (now - _lastStreamingProjectionRefreshUtc < StreamingProjectionRefreshInterval)
-            {
-                return false;
-            }
-
-            _lastStreamingProjectionRefreshUtc = now;
             return true;
         }
 
@@ -430,6 +479,7 @@ namespace Skyweaver.Controls.ShellChatSessionControl.ViewModels
         {
             return (runtimeEvent.Kind is ChatSessionRuntimeEventKind.TextDelta
                     or ChatSessionRuntimeEventKind.ReasoningDelta
+                    or ChatSessionRuntimeEventKind.MediaProcessingProgressUpdated
                     or ChatSessionRuntimeEventKind.ToolProgressUpdated) ||
                 runtimeEvent.Kind == ChatSessionRuntimeEventKind.ToolCallUpdated &&
                 runtimeEvent.ToolCallSnapshot?.IsInvocationClosed != true &&

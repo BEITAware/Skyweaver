@@ -3,9 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:viewModels="clr-namespace:Skyweaver.Controls.LateralFileSystemConfigurationControl.ViewModels"
+             xmlns:viewModels="clr-namespace:Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance Type=viewModels:LateralFileSystemConfigurationControlViewModel, IsDesignTimeCreatable=True}"
+             d:DataContext="{d:DesignInstance Type=viewModels:LateralFileSystemPreferencesPageViewModel, IsDesignTimeCreatable=True}"
              d:DesignHeight="640"
              d:DesignWidth="860">
     <UserControl.Resources>

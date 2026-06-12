@@ -7,15 +7,15 @@ using Skyweaver.Models.PresentationUI;
 using Skyweaver.Services.Localization;
 using Skyweaver.Services.PresentationUI;
 
-namespace Skyweaver.Controls.PresentationUIConfigurationControl.ViewModels
+namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
 {
-    public sealed class PresentationUIConfigurationControlViewModel : ObservableObject
+    public sealed class ChatSessionPreferencesPageViewModel : ObservableObject
     {
         private readonly PresentationUIRuntime _runtime;
         private readonly PresentationUIConfiguration _configuration;
         private string _statusMessage;
 
-        public PresentationUIConfigurationControlViewModel()
+        public ChatSessionPreferencesPageViewModel()
         {
             _runtime = PresentationUIRuntime.Instance;
             _configuration = _runtime.GetConfiguration();

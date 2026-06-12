@@ -59,7 +59,7 @@
 
                     <ScrollViewer Grid.Row="1"
                                   Margin="5,5,5,8"
-                                  VerticalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Hidden"
                                   HorizontalScrollBarVisibility="Disabled">
                         <ItemsControl ItemsSource="{Binding Groups}">
                             <ItemsControl.ItemTemplate>
@@ -79,7 +79,11 @@
                                                                    FontSize="13"
                                                                    FontWeight="SemiBold"
                                                                    HorizontalAlignment="Center"
-                                                                   VerticalAlignment="Center"/>
+                                                                   VerticalAlignment="Center">
+                                                            <TextBlock.Effect>
+                                                                <DropShadowEffect Color="Black" BlurRadius="5" ShadowDepth="1" Opacity="0.5"/>
+                                                            </TextBlock.Effect>
+                                                        </TextBlock>
                                                     </Button>
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
@@ -167,10 +171,6 @@
                     Margin="10,20,20,20"
                     Style="{StaticResource PreferencesContentShellBorderStyle}">
                 <Grid>
-                    <Border Background="{StaticResource PreferencesContentBackgroundBrush}"
-                            Opacity="0.26"
-                            IsHitTestVisible="False"/>
-
                     <Grid Margin="20">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>

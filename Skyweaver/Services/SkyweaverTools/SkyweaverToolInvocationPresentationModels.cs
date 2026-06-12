@@ -20,6 +20,10 @@ namespace Skyweaver.Services.SkyweaverTools
 
         public int ToolCallIndex { get; init; }
 
+        public int RawStartIndex { get; init; }
+
+        public int RawEndIndex { get; init; }
+
         public string ToolName { get; init; } = string.Empty;
 
         public bool IsAsyncInvocation { get; init; }

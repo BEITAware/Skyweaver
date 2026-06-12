@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Input;
@@ -8,61 +9,84 @@ using Skyweaver.Models.ContextManagement;
 using Skyweaver.Services.ContextManagement;
 using Skyweaver.Services.Localization;
 
-namespace Skyweaver.Controls.ContextManagementConfigurationControl.ViewModels
+namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
 {
-    public sealed class ContextArrangementPreferencesPageViewModel : ObservableObject
+    public sealed class MemoryPreferencesPageViewModel : ObservableObject
     {
-        private readonly ContextArrangementRuntime _runtime;
-        private readonly ContextArrangementConfiguration _configuration;
+        private readonly ContextManagementRuntime _runtime;
+        private readonly ContextManagementConfiguration _configuration;
         private string _statusMessage;
 
-        public ContextArrangementPreferencesPageViewModel()
+        public MemoryPreferencesPageViewModel()
         {
-            _runtime = ContextArrangementRuntime.Instance;
+            _runtime = ContextManagementRuntime.Instance;
             _configuration = _runtime.GetConfiguration();
-            _statusMessage = L("ContextArrangement.Status.Loaded", "上下文编排配置已加载。");
+            _statusMessage = L("Common.Status.ConfigurationLoaded", "配置已加载。");
 
             OpenConfigurationDirectoryCommand = new RelayCommand(OpenConfigurationDirectory);
             LocalizationRuntime.Instance.LanguageChanged += (_, _) => RefreshLocalizedText();
         }
 
-        public string Title => L("ContextArrangement.Page.Title", "上下文编排");
+        public string Title => L("Memory.Page.Title", "记忆");
 
-        public string Description => L("ContextArrangement.Page.Description", "配置上下文编排策略，优化大语言模型工具调用与提示词结构。");
+        public string Description => L("Memory.Page.Description", "配置 Skyweaver 记忆机制，允许代理记忆并共享以往的会话内容。");
 
-        public string Hint => L("ContextArrangement.Page.Hint", "修改后会立即写入 ContextArrangement.xml。");
+        public string Hint => L("Memory.Page.Hint", "修改后会立即写入 ContextManagement.xml。");
 
         public string ConfigurationFilePath => _runtime.ConfigurationFilePath;
 
-        public bool OptimizeToolCallPrompt
+        public bool MemoryEnabled
         {
-            get => _configuration.OptimizeToolCallPrompt;
+            get => _configuration.MemoryEnabled;
             set
             {
-                if (_configuration.OptimizeToolCallPrompt == value)
+                if (_configuration.MemoryEnabled == value)
                 {
                     return;
                 }
 
-                _configuration.OptimizeToolCallPrompt = value;
+                _configuration.MemoryEnabled = value;
                 OnPropertyChanged();
-                PersistConfiguration(L("ContextArrangement.Status.OptimizeToolCallPromptSaved", "工具调用优化提示词设置已保存。"));
+                PersistConfiguration(L("Memory.Status.MemoryEnabledSaved", "启用记忆设置已保存。"));
             }
         }
 
-        public bool ToolCallIdTable
+        public MemoryShareScope SelectedShareScope
         {
-            get => _configuration.ToolCallIdTable;
+            get => _configuration.MemoryShareScope;
             set
             {
-                if (_configuration.ToolCallIdTable == value)
+                if (_configuration.MemoryShareScope == value)
                 {
                     return;
                 }
 
-                _configuration.ToolCallIdTable = value;
+                _configuration.MemoryShareScope = value;
                 OnPropertyChanged();
-                PersistConfiguration(L("ContextArrangement.Status.ToolCallIdTableSaved", "Tool Call ID表设置已保存。"));
+                PersistConfiguration(L("Memory.Status.ShareScopeSaved", "记忆共享范围已保存。"));
+            }
+        }
+
+        public IEnumerable<MemoryShareScopeOption> MemoryShareScopes => new[]
+        {
+            new MemoryShareScopeOption { Scope = MemoryShareScope.SessionFlow, DisplayName = L("Memory.ShareScope.SessionFlow", "会话流") },
+            new MemoryShareScopeOption { Scope = MemoryShareScope.Agent, DisplayName = L("Memory.ShareScope.Agent", "代理") },
+            new MemoryShareScopeOption { Scope = MemoryShareScope.Application, DisplayName = L("Memory.ShareScope.Application", "应用程序") }
+        };
+
+        public int MemoryRetrievalCount
+        {
+            get => _configuration.MemoryRetrievalCount;
+            set
+            {
+                if (_configuration.MemoryRetrievalCount == value)
+                {
+                    return;
+                }
+
+                _configuration.MemoryRetrievalCount = value;
+                OnPropertyChanged();
+                PersistConfiguration(string.Format(L("Memory.Status.RetrievalCountSavedFormat", "记忆取回数量已设为 {0}。"), value));
             }
         }
 
@@ -116,11 +140,18 @@ namespace Skyweaver.Controls.ContextManagementConfigurationControl.ViewModels
             OnPropertyChanged(nameof(Title));
             OnPropertyChanged(nameof(Description));
             OnPropertyChanged(nameof(Hint));
+            OnPropertyChanged(nameof(MemoryShareScopes));
         }
 
         private static string L(string resourceKey, string fallback)
         {
             return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
+    }
+
+    public sealed class MemoryShareScopeOption
+    {
+        public MemoryShareScope Scope { get; init; }
+        public required string DisplayName { get; init; }
     }
 }

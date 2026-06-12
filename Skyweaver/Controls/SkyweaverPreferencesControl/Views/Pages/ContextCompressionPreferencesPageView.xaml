@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:viewModels="clr-namespace:Skyweaver.Controls.ContextManagementConfigurationControl.ViewModels"
+             xmlns:viewModels="clr-namespace:Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewModels:ContextCompressionPreferencesPageViewModel, IsDesignTimeCreatable=True}"
              d:DesignHeight="720"
@@ -87,7 +87,7 @@
                 <StackPanel Grid.Row="4"
                             Grid.Column="1">
                     <CheckBox IsChecked="{Binding MaxCompactionEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                              Content="{DynamicResource ContextCompression.MaxCompaction.Content}"/>
+                               Content="{DynamicResource ContextCompression.MaxCompaction.Content}"/>
                     <TextBlock Margin="0,6,0,0"
                                Text="{DynamicResource ContextCompression.MaxCompaction.Hint}"
                                Style="{StaticResource PreferenceMetaStyle}"/>
@@ -100,7 +100,7 @@
                 <StackPanel Grid.Row="6"
                             Grid.Column="1">
                     <CheckBox IsChecked="{Binding LifeCycleEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                              Content="{DynamicResource ContextCompression.LifeCycle.Content}"/>
+                               Content="{DynamicResource ContextCompression.LifeCycle.Content}"/>
                     <TextBlock Margin="0,6,0,0"
                                Text="{DynamicResource ContextCompression.LifeCycle.Hint}"
                                Style="{StaticResource PreferenceMetaStyle}"/>
@@ -165,7 +165,7 @@
                 <StackPanel Grid.Row="10"
                             Grid.Column="1">
                     <CheckBox IsChecked="{Binding RnnOptimizedCompactionEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                              Content="{DynamicResource ContextCompression.RnnOptimization.Content}"/>
+                               Content="{DynamicResource ContextCompression.RnnOptimization.Content}"/>
                     <TextBlock Margin="0,6,0,0"
                                Text="{DynamicResource ContextCompression.RnnOptimization.Hint}"
                                Style="{StaticResource PreferenceMetaStyle}"/>

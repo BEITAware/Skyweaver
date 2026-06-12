@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Input;
@@ -9,15 +8,15 @@ using Skyweaver.Models.ContextManagement;
 using Skyweaver.Services.ContextManagement;
 using Skyweaver.Services.Localization;
 
-namespace Skyweaver.Controls.ContextManagementConfigurationControl.ViewModels
+namespace Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages
 {
-    public sealed class MemoryPreferencesPageViewModel : ObservableObject
+    public sealed class ContextCompressionPreferencesPageViewModel : ObservableObject
     {
         private readonly ContextManagementRuntime _runtime;
         private readonly ContextManagementConfiguration _configuration;
         private string _statusMessage;
 
-        public MemoryPreferencesPageViewModel()
+        public ContextCompressionPreferencesPageViewModel()
         {
             _runtime = ContextManagementRuntime.Instance;
             _configuration = _runtime.GetConfiguration();
@@ -27,68 +26,102 @@ namespace Skyweaver.Controls.ContextManagementConfigurationControl.ViewModels
             LocalizationRuntime.Instance.LanguageChanged += (_, _) => RefreshLocalizedText();
         }
 
-        public string Title => L("Memory.Page.Title", "记忆");
+        public string Title => L("ContextCompression.Page.Title", "压缩");
 
-        public string Description => L("Memory.Page.Description", "配置 Skyweaver 记忆机制，允许代理记忆并共享以往的会话内容。");
+        public string Description => L("ContextCompression.Page.Description", "配置上下文压缩与上下文生命周期相关的保留开关。");
 
-        public string Hint => L("Memory.Page.Hint", "修改后会立即写入 ContextManagement.xml。");
+        public string Hint => L("ContextCompression.Page.Hint", "修改后会立即写入 ContextManagement.xml。");
 
         public string ConfigurationFilePath => _runtime.ConfigurationFilePath;
 
-        public bool MemoryEnabled
+        public bool MinCompactionEnabled
         {
-            get => _configuration.MemoryEnabled;
+            get => _configuration.MinCompactionEnabled;
             set
             {
-                if (_configuration.MemoryEnabled == value)
+                if (_configuration.MinCompactionEnabled == value)
                 {
                     return;
                 }
 
-                _configuration.MemoryEnabled = value;
+                _configuration.MinCompactionEnabled = value;
                 OnPropertyChanged();
-                PersistConfiguration(L("Memory.Status.MemoryEnabledSaved", "启用记忆设置已保存。"));
+                OnPropertyChanged(nameof(MinCompactionBehaviorText));
+                PersistConfiguration(L("ContextCompression.Status.MinCompactionSaved", "MinCompaction 设置已保存。"));
             }
         }
 
-        public MemoryShareScope SelectedShareScope
+        public bool MaxCompactionEnabled
         {
-            get => _configuration.MemoryShareScope;
+            get => _configuration.MaxCompactionEnabled;
             set
             {
-                if (_configuration.MemoryShareScope == value)
+                if (_configuration.MaxCompactionEnabled == value)
                 {
                     return;
                 }
 
-                _configuration.MemoryShareScope = value;
+                _configuration.MaxCompactionEnabled = value;
                 OnPropertyChanged();
-                PersistConfiguration(L("Memory.Status.ShareScopeSaved", "记忆共享范围已保存。"));
+                PersistConfiguration(L("ContextCompression.Status.MaxCompactionSaved", "MaxCompaction 设置已保存。"));
             }
         }
 
-        public IEnumerable<MemoryShareScopeOption> MemoryShareScopes => new[]
+        public bool LifeCycleEnabled
         {
-            new MemoryShareScopeOption { Scope = MemoryShareScope.SessionFlow, DisplayName = L("Memory.ShareScope.SessionFlow", "会话流") },
-            new MemoryShareScopeOption { Scope = MemoryShareScope.Agent, DisplayName = L("Memory.ShareScope.Agent", "代理") },
-            new MemoryShareScopeOption { Scope = MemoryShareScope.Application, DisplayName = L("Memory.ShareScope.Application", "应用程序") }
-        };
-
-        public int MemoryRetrievalCount
-        {
-            get => _configuration.MemoryRetrievalCount;
+            get => _configuration.LifeCycleEnabled;
             set
             {
-                if (_configuration.MemoryRetrievalCount == value)
+                if (_configuration.LifeCycleEnabled == value)
                 {
                     return;
                 }
 
-                _configuration.MemoryRetrievalCount = value;
+                _configuration.LifeCycleEnabled = value;
                 OnPropertyChanged();
-                PersistConfiguration(string.Format(L("Memory.Status.RetrievalCountSavedFormat", "记忆取回数量已设为 {0}。"), value));
+                PersistConfiguration(L("ContextCompression.Status.LifeCycleSaved", "LifeCycle 设置已保存。"));
             }
         }
+
+        public double LifeCycleRatioPercent
+        {
+            get => _configuration.LifeCycleRatioPercent;
+            set
+            {
+                var normalized = Math.Clamp(value, 10d, 500d);
+                if (Math.Abs(_configuration.LifeCycleRatioPercent - normalized) < 0.01d)
+                {
+                    return;
+                }
+
+                _configuration.LifeCycleRatioPercent = normalized;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(LifeCycleRatioDisplayText));
+                PersistConfiguration(L("ContextCompression.Status.LifeCycleRatioSaved", "LifeCycle 比率已保存。"));
+            }
+        }
+
+        public bool RnnOptimizedCompactionEnabled
+        {
+            get => _configuration.RnnOptimizedCompactionEnabled;
+            set
+            {
+                if (_configuration.RnnOptimizedCompactionEnabled == value)
+                {
+                    return;
+                }
+
+                _configuration.RnnOptimizedCompactionEnabled = value;
+                OnPropertyChanged();
+                PersistConfiguration(L("ContextCompression.Status.RnnOptimizationSaved", "循环神经网络优化压缩设置已保存。"));
+            }
+        }
+
+        public string MinCompactionBehaviorText => MinCompactionEnabled
+            ? L("ContextCompression.MinCompaction.EnabledText", "上下文达到 80% 后会在后台压缩过时工具调用。")
+            : L("ContextCompression.MinCompaction.DisabledText", "MinCompaction 当前关闭。");
+
+        public string LifeCycleRatioDisplayText => $"{Math.Round(LifeCycleRatioPercent):0}%";
 
         public string StatusMessage
         {
@@ -140,18 +173,12 @@ namespace Skyweaver.Controls.ContextManagementConfigurationControl.ViewModels
             OnPropertyChanged(nameof(Title));
             OnPropertyChanged(nameof(Description));
             OnPropertyChanged(nameof(Hint));
-            OnPropertyChanged(nameof(MemoryShareScopes));
+            OnPropertyChanged(nameof(MinCompactionBehaviorText));
         }
 
         private static string L(string resourceKey, string fallback)
         {
             return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
-    }
-
-    public sealed class MemoryShareScopeOption
-    {
-        public MemoryShareScope Scope { get; init; }
-        public required string DisplayName { get; init; }
     }
 }

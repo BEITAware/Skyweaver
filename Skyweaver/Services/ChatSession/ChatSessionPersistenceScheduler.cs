@@ -70,6 +70,10 @@ namespace Skyweaver.Services.ChatSession
             catch (OperationCanceledException)
             {
             }
+            catch
+            {
+                // Background persistence is best-effort; callers explicitly flush when durability matters.
+            }
         }
     }
 }

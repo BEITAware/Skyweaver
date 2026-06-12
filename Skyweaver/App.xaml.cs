@@ -59,7 +59,7 @@ namespace Skyweaver
             {
                 if (ShouldAggregateShellStartup(shellChatStartupContext))
                 {
-                    _ = ShowShellChatWindowAfterStartupAggregationAsync(shellChatStartupContext);
+                    _ = ShowShellChatWindowAfterStartupAggregationAsync(shellChatStartupContext, isStartup: true);
                 }
                 else
                 {
@@ -110,7 +110,7 @@ namespace Skyweaver
                 {
                     if (ShouldAggregateShellStartup(shellChatStartupContext))
                     {
-                        _ = ShowShellChatWindowAfterStartupAggregationAsync(shellChatStartupContext);
+                        _ = ShowShellChatWindowAfterStartupAggregationAsync(shellChatStartupContext, isStartup: false);
                     }
                     else
                     {
@@ -221,14 +221,18 @@ namespace Skyweaver
         }
 
         private async Task ShowShellChatWindowAfterStartupAggregationAsync(
-            ShellChatStartupContext startupContext)
+            ShellChatStartupContext startupContext,
+            bool isStartup)
         {
             var aggregatedContext = await ShellChatStartupCoordinator
                 .TryAggregateOrForwardAsync(startupContext)
                 .ConfigureAwait(true);
             if (aggregatedContext == null)
             {
-                Shutdown();
+                if (isStartup)
+                {
+                    Shutdown();
+                }
                 return;
             }
 

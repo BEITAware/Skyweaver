@@ -20,7 +20,10 @@ namespace Skyweaver.Services.SkyweaverTools
                 .ToDictionary(group => group.Key, group => group.Last(), StringComparer.OrdinalIgnoreCase);
         }
 
-        public IReadOnlyList<SkyweaverStreamingToolCallSnapshot> Parse(string? rawContent)
+        public IReadOnlyList<SkyweaverStreamingToolCallSnapshot> Parse(
+            string? rawContent,
+            int initialPartIndex = 0,
+            int initialToolCallIndex = 0)
         {
             if (string.IsNullOrEmpty(rawContent))
             {
@@ -29,8 +32,8 @@ namespace Skyweaver.Services.SkyweaverTools
 
             var snapshots = new List<SkyweaverStreamingToolCallSnapshot>();
             var searchIndex = 0;
-            var partIndex = 0;
-            var toolCallIndex = 0;
+            var partIndex = initialPartIndex;
+            var toolCallIndex = initialToolCallIndex;
 
             while (searchIndex < rawContent.Length)
             {
@@ -89,6 +92,8 @@ namespace Skyweaver.Services.SkyweaverTools
                     {
                         PartIndex = currentPartIndex,
                         ToolCallIndex = toolCallIndex,
+                        RawStartIndex = toolStartIndex,
+                        RawEndIndex = Math.Min(toolEndIndex, rawContent.Length),
                         ToolName = normalizedToolName,
                         IsAsyncInvocation = string.Equals(toolElementName, "ToolAsync", StringComparison.OrdinalIgnoreCase),
                         ToolXmlFragment = rawContent[toolStartIndex..Math.Min(toolEndIndex, rawContent.Length)],

@@ -1,6 +1,3 @@
-using Skyweaver.Controls.ContextManagementConfigurationControl.ViewModels;
-using Skyweaver.Controls.LateralFileSystemConfigurationControl.ViewModels;
-using Skyweaver.Controls.PresentationUIConfigurationControl.ViewModels;
 using Skyweaver.Controls.SkyweaverPreferencesControl.Models;
 using Skyweaver.Controls.SkyweaverPreferencesControl.ViewModels.Pages;
 using Skyweaver.Controls.SkyweaverPreferencesControl.Views.Pages;
@@ -44,7 +41,7 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.Services
                     DisplayName = "侧向文件系统配置",
                     DisplayNameResourceKey = "Preferences.Page.LateralFileSystem",
                     ViewType = typeof(LateralFileSystemPreferencesPageView),
-                    ViewModelType = typeof(LateralFileSystemConfigurationControlViewModel),
+                    ViewModelType = typeof(LateralFileSystemPreferencesPageViewModel),
                     Order = 10
                 });
 
@@ -74,7 +71,7 @@ namespace Skyweaver.Controls.SkyweaverPreferencesControl.Services
                     DisplayName = "聊天会话",
                     DisplayNameResourceKey = "Preferences.Page.ChatSession",
                     ViewType = typeof(ChatSessionPreferencesPageView),
-                    ViewModelType = typeof(PresentationUIConfigurationControlViewModel),
+                    ViewModelType = typeof(ChatSessionPreferencesPageViewModel),
                     Order = 10
                 });
 

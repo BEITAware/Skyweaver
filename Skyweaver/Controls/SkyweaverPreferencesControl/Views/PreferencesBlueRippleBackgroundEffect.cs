@@ -13,11 +13,13 @@ sampler2D inputSampler : register(s0);
 float time : register(c0);
 float aspectRatio : register(c1);
 
+// 伪随机哈希函数
 float hash(float n)
 {
     return frac(sin(n) * 43758.5453);
 }
 
+// 二维噪声函数
 float noise(float2 x)
 {
     float2 i = floor(x);
@@ -33,6 +35,7 @@ float noise(float2 x)
     return lerp(lerp(a, b, f.x), lerp(c, d, f.x), f.y);
 }
 
+// 动态极光波带生成函数
 float softBand(float2 p, float center, float width, float amp, float freq, float speed, float phase)
 {
     float curve = center;
@@ -42,6 +45,7 @@ float softBand(float2 p, float center, float width, float amp, float freq, float
     return exp(-abs(p.y - curve) * width);
 }
 
+// 水面涟漪生成函数
 float ripple(float2 p, float2 center, float radius, float speed, float phase)
 {
     float2 q = p - center;
@@ -52,70 +56,81 @@ float ripple(float2 p, float2 center, float radius, float speed, float phase)
     return ring * envelope;
 }
 
+// 像素着色器主入口
 float4 main(float2 uv : TEXCOORD) : COLOR
 {
     float4 source = tex2D(inputSampler, uv);
+    
+    // 将纹理坐标映射到 [-aspectRatio, aspectRatio] 和 [-1.0, 1.0] 空间
     float2 p = float2((uv.x - 0.5) * 2.0 * aspectRatio, (0.5 - uv.y) * 2.0);
 
-    float waterShift = sin(p.y * 2.35 + time * 0.42) * 0.045;
-    waterShift += sin(p.x * 1.65 - time * 0.31) * 0.032;
+    // 计算水面/扰动偏移以增加动态细节
+    float waterShift = sin(p.y * 2.35 + time * 0.32) * 0.035;
+    waterShift += sin(p.x * 1.65 - time * 0.25) * 0.025;
     float2 q = p + float2(waterShift, -waterShift * 0.55);
 
-    float topMix = smoothstep(0.0, 0.62, uv.y);
-    float bottomMix = smoothstep(0.52, 1.0, uv.y);
-    float3 topBlue = float3(0.04, 0.64, 0.98);
-    float3 centerBlue = float3(0.0, 0.20, 0.58);
-    float3 bottomBlue = float3(0.0, 0.52, 0.98);
-    float3 baseColor = lerp(topBlue, centerBlue, topMix);
-    baseColor = lerp(baseColor, bottomBlue, bottomMix * 0.45);
+    // 1. 极暗蓝黑色基底设计，实现设计图般的高对比度
+    float topMix = smoothstep(0.0, 0.7, uv.y);
+    float3 topDarkBlue = float3(0.003, 0.01, 0.028);      // 顶部深黑蓝色
+    float3 bottomDarkBlue = float3(0.002, 0.014, 0.038);   // 底部深黑蓝色
+    float3 baseColor = lerp(topDarkBlue, bottomDarkBlue, topMix);
 
-    float leftTopGlow = exp(-dot(q - float2(-aspectRatio * 0.9, 0.94), q - float2(-aspectRatio * 0.9, 0.94)) * 1.15);
-    float leftBottomGlow = exp(-dot(q - float2(-aspectRatio * 0.88, -0.92), q - float2(-aspectRatio * 0.88, -0.92)) * 1.05);
-    float centerGlow = exp(-dot(q - float2(-0.22, 0.02), q - float2(-0.22, 0.02)) * 0.58);
-    float rightShade = exp(-dot(q - float2(aspectRatio * 0.82, 0.04), q - float2(aspectRatio * 0.82, 0.04)) * 0.5);
+    // 2. 局部微弱环境光与辉光效果
+    float leftTopGlow = exp(-dot(q - float2(-aspectRatio * 0.9, 0.8), q - float2(-aspectRatio * 0.9, 0.8)) * 1.5);
+    baseColor += float3(0.0, 0.12, 0.32) * leftTopGlow * 0.45;
+
+    float leftBottomGlow = exp(-dot(q - float2(-aspectRatio * 0.85, -0.65), q - float2(-aspectRatio * 0.85, -0.65)) * 0.8);
+    baseColor += float3(0.01, 0.25, 0.65) * leftBottomGlow * 0.6;
+
+    // 3. 动态极光设计 - 聚焦在下半部分（y < 0），并在右侧平滑衰减，保持高对比度
     float normalizedX = q.x / max(aspectRatio, 0.0001);
-    float leftHalfMask = saturate((-normalizedX + 0.18) / 1.15);
-    float leftEdgeMask = saturate((-normalizedX - 0.12) / 0.78);
+    float auroraMask = saturate(1.0 - (normalizedX + 0.35) / 1.15); // 右侧淡出遮罩
 
-    baseColor += float3(0.02, 0.48, 0.82) * leftTopGlow * 0.40;
-    baseColor += float3(0.0, 0.50, 0.92) * leftBottomGlow * 0.36;
-    baseColor += float3(0.02, 0.18, 0.42) * centerGlow * 0.30;
-    baseColor -= float3(0.01, 0.07, 0.18) * leftEdgeMask * 0.22;
-    baseColor -= float3(0.03, 0.10, 0.27) * rightShade * 0.82;
+    // 使用噪声扭曲极光坐标，使其更具流动感
+    float2 noiseCoord = q * 1.5 + float2(time * 0.05, -time * 0.04);
+    float auroraNoise = noise(noiseCoord) - 0.5;
+    float2 qAurora = q + float2(auroraNoise * 0.08, auroraNoise * 0.05);
 
-    float broadA = softBand(q, 0.28, 2.35, 0.24, 0.82, 0.26, 0.4);
-    float broadB = softBand(q, -0.06, 3.0, 0.18, 1.05, -0.22, 2.2);
-    float broadC = softBand(q, -0.52, 3.55, 0.19, 0.72, 0.18, 4.1);
+    // 第一层：中等宽度的背景极光带（中心偏中下 -0.38）
+    float auroraLayer1 = softBand(qAurora, -0.38, 4.2, 0.18, 0.85, 0.25, 0.5);
+    float3 colorLayer1 = float3(0.0, 0.35, 0.85) * auroraLayer1;
 
-    float sheen = softBand(q, 0.08, 8.8, 0.07, 1.65, 0.42, 1.4);
-    sheen += softBand(q, -0.33, 10.5, 0.06, 1.42, -0.35, 3.2) * 0.7;
+    // 第二层：核心高度集中的亮蓝色极光带（中心偏下 -0.52，波带更窄）
+    float auroraLayer2 = softBand(qAurora, -0.52, 7.8, 0.15, 1.25, -0.32, 2.8);
+    float3 colorLayer2 = float3(0.02, 0.68, 1.0) * auroraLayer2;
 
-    float rippleA = ripple(q, float2(-0.12, 0.14), 8.0, 0.78, 0.6);
-    float rippleB = ripple(q, float2(0.56, -0.2), 6.6, -0.62, 2.4);
-    float linearRipple = sin(q.x * 3.2 + q.y * 1.7 + time * 0.58) * 0.5;
-    linearRipple += sin(q.x * 1.7 - q.y * 2.3 - time * 0.46) * 0.5;
-    float rollingWave = sin(q.x * 1.15 + q.y * 3.8 + time * 0.36);
-    rollingWave += sin(q.x * 2.8 - q.y * 1.45 - time * 0.52) * 0.55;
+    // 第三层：底部的柔和宽极光晕（中心在最下方 -0.68）
+    float auroraLayer3 = softBand(qAurora, -0.68, 2.8, 0.12, 0.65, 0.15, 4.2);
+    float3 colorLayer3 = float3(0.0, 0.18, 0.55) * auroraLayer3;
 
-    float rippleMask = saturate(0.96 - length(q * float2(0.38, 0.72)) * 0.2);
-    float fineNoise = noise(q * 2.1 + float2(time * 0.02, -time * 0.018)) - 0.5;
+    // 极光耀眼核心高亮：在最亮处叠加亮白色至淡蓝色核心
+    float totalAuroraVal = auroraLayer1 * 0.4 + auroraLayer2 * 0.8 + auroraLayer3 * 0.2;
+    float coreHighlight = pow(saturate(totalAuroraVal * 1.2), 3.5);
+    float3 colorCore = float3(0.55, 0.90, 1.0) * coreHighlight * 0.95;
 
-    float3 bandColor = float3(0.03, 0.22, 0.60) * broadA * 0.34;
-    bandColor += float3(0.08, 0.42, 0.86) * broadB * 0.28;
-    bandColor += float3(0.0, 0.30, 0.72) * broadC * 0.30;
-    bandColor += float3(0.58, 0.84, 1.0) * sheen * 0.16;
+    // 组合极光图层并应用淡出遮罩
+    float3 finalAurora = (colorLayer1 + colorLayer2 + colorLayer3 + colorCore) * auroraMask;
 
-    float rippleLight = (rippleA * 0.45 + rippleB * 0.32 + linearRipple * 0.18) * rippleMask;
-    float3 finalColor = baseColor + bandColor;
-    finalColor += float3(0.10, 0.30, 0.58) * rippleLight * 0.24;
-    finalColor += float3(0.05, 0.20, 0.46) * rollingWave * rippleMask * 0.055;
-    finalColor += fineNoise * 0.026;
-    finalColor *= 1.0 - leftHalfMask * 0.18;
+    // 4. 微弱水面涟漪效果
+    float rippleA = ripple(q, float2(-0.2, -0.2), 6.5, 0.68, 0.8);
+    float rippleB = ripple(q, float2(0.4, -0.5), 5.2, -0.52, 2.0);
+    float rippleMask = saturate(0.88 - length(q * float2(0.35, 0.65)) * 0.25);
+    float rippleLight = (rippleA * 0.35 + rippleB * 0.25) * rippleMask;
 
-    float vignette = saturate(1.08 - length(p * float2(0.62, 0.96)) * 0.34);
-    finalColor *= 0.56 + vignette * 0.12;
-    finalColor = finalColor / (1.0 + finalColor * 0.18);
-    finalColor *= 0.90;
+    float3 finalColor = baseColor + finalAurora;
+    finalColor += float3(0.02, 0.42, 0.85) * rippleLight * (0.2 + totalAuroraVal * 0.8);
+
+    // 注入微弱细腻噪声颗粒
+    float fineNoise = noise(q * 3.5 + float2(time * 0.03, -time * 0.028)) - 0.5;
+    finalColor += fineNoise * 0.015;
+
+    // 暗角处理，让边缘更深邃
+    float vignette = saturate(1.15 - length(p * float2(0.55, 0.85)) * 0.42);
+    finalColor *= 0.42 + vignette * 0.58;
+
+    // 对比度与高光调谐
+    finalColor = finalColor / (1.0 + finalColor * 0.12);
+    finalColor *= 1.08;
     finalColor = saturate(finalColor);
 
     return float4(finalColor * max(source.a, 0.0001), source.a);
