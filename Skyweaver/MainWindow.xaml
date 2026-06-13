@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:Skyweaver.Controls"
         xmlns:local="clr-namespace:Skyweaver"
         xmlns:documentWorkspace="clr-namespace:Skyweaver.Panels.DocumentWorkspace.Views"
         xmlns:liveTasks="clr-namespace:Skyweaver.Panels.LiveTasks.Views"
@@ -388,6 +389,19 @@
         </StatusBar>
 
         <!-- 主工作区域 -->
-        <ContentControl Content="{Binding CurrentPageViewModel}"/>
+        <Grid>
+            <controls:CachedPageContentControl x:Name="MainPageContentHost"
+                                               PageContent="{Binding CurrentPageViewModel}"/>
+            <ContentControl x:Name="PageWarmupHost"
+                            Width="1280"
+                            Height="720"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Opacity="0.001"
+                            IsHitTestVisible="False"
+                            Focusable="False"
+                            Visibility="Collapsed"
+                            Panel.ZIndex="10"/>
+        </Grid>
     </DockPanel>
 </Window>

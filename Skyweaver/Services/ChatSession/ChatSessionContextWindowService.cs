@@ -93,6 +93,42 @@ namespace Skyweaver.Services.ChatSession
             };
         }
 
+        public ChatSessionContextWindowSnapshot CreateSnapshot(
+            ChatSessionModel session,
+            SessionFlowCompilationResult compilationResult)
+        {
+            ArgumentNullException.ThrowIfNull(session);
+            ArgumentNullException.ThrowIfNull(compilationResult);
+
+            if (!session.HasBoundFlow)
+            {
+                return ChatSessionContextWindowSnapshot.Unavailable("Current session is not bound to a session flow.");
+            }
+
+            if (!compilationResult.IsSuccess || compilationResult.Graph == null)
+            {
+                var message = compilationResult.Errors.FirstOrDefault()?.Message
+                    ?? compilationResult.Issues.FirstOrDefault()?.Message
+                    ?? "The bound session flow did not pass runtime validation.";
+                return ChatSessionContextWindowSnapshot.Unavailable(message);
+            }
+
+            var window = ResolveSmallestContextWindow(compilationResult.Graph);
+            if (window == null)
+            {
+                return ChatSessionContextWindowSnapshot.Unavailable("No agent node with a resolvable context window was found in the session flow.");
+            }
+
+            var projectedMessages = ChatSessionTurnHistoryBuilder.BuildForNextTurn(session, currentUserText: null);
+            return new ChatSessionContextWindowSnapshot
+            {
+                EstimatedTokenCount = EstimateTokens(projectedMessages),
+                ContextWindowTokens = window.ContextWindowTokens,
+                AgentName = window.AgentName,
+                ModelName = window.ModelName
+            };
+        }
+
         private ContextWindowCandidate? ResolveSmallestContextWindow(SessionFlowCompiledGraph graph)
         {
             var agentsById = LoadAgentMap();

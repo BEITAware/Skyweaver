@@ -53,7 +53,7 @@ namespace Skyweaver.Services.ChatSession
                 EnsureDefaultGraphExists();
             }
 
-            return _sessionFlowRepository.LoadAll()
+            return _sessionFlowRepository.LoadAllMetadata()
                 .OrderByDescending(document => document.UpdatedAtUtc)
                 .ThenBy(document => document.Name, StringComparer.CurrentCultureIgnoreCase)
                 .Select(document => new ChatSessionFlowBindingOption
@@ -142,7 +142,7 @@ namespace Skyweaver.Services.ChatSession
 
         private void EnsureDefaultGraphExists()
         {
-            var existingDocuments = _sessionFlowRepository.LoadAll();
+            var existingDocuments = _sessionFlowRepository.LoadAllMetadata();
             if (existingDocuments.Count > 0)
             {
                 return;

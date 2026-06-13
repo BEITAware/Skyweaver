@@ -97,7 +97,7 @@ namespace Skyweaver.Panels.SessionList.ViewModels
         private void CreateSession()
         {
             var owner = Application.Current?.MainWindow;
-            var dialog = new CreateChatSessionDialog(
+            var dialog = new CreateChatSessionUniversalDialog(
                 _flowBindingService.GetAvailableBindings(ensureDefaultGraph: true),
                 GetNextAvailableDefaultSessionName());
 

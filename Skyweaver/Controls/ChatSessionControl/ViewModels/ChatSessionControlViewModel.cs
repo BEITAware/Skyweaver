@@ -8,6 +8,7 @@ using Skyweaver.Commands;
 using Skyweaver.Controls.ChatSessionControl.Models;
 using Skyweaver.Controls.ChatSessionControl.Services;
 using Skyweaver.Controls.LanguageModelConfigurationControl.Services;
+using Skyweaver.Controls.WorkflowEditorControl.Services;
 using Skyweaver.Infrastructure.Mvvm;
 using Skyweaver.Models.ChatSession;
 using Skyweaver.Panels.DocumentWorkspace.Contracts;
@@ -34,8 +35,8 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         private readonly ChatComposerImageAttachmentService _composerImageAttachmentService;
         private readonly ToolInvocationPresentationService _toolInvocationPresentationService;
         private readonly ChatSessionPresentationProjector _presentationProjector;
-        private readonly MemoryService _memoryService;
-        private readonly string _sessionFlowValidationSummary;
+        private MemoryService? _memoryService;
+        private string _sessionFlowValidationSummary = L("ChatSessionControl.BoundFlow.ValidationPending", "Session flow validation is pending.");
 
         private string _draftMessageText = string.Empty;
         private ChatMessageModel? _selectedMessage;
@@ -50,6 +51,8 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         private CancellationTokenSource? _executionCancellationSource;
 
         private static readonly TimeSpan StreamingProjectionRefreshInterval = TimeSpan.FromMilliseconds(33);
+
+        private MemoryService MemoryService => _memoryService ??= new MemoryService();
 
         private double _contextWindowUsageRatio;
         private string _contextWindowUsageText = L("ChatSessionControl.ContextWindow.Reading", "正在读取上下文窗口。");
@@ -75,7 +78,11 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             ? LF("ChatSessionControl.BoundFlow.SummaryFormat", "当前会话流：{0}", BoundSessionFlowName)
             : L("ChatSessionControl.BoundFlow.UnboundSummary", "未绑定会话流。");
 
-        public string SessionFlowValidationSummary => _sessionFlowValidationSummary;
+        public string SessionFlowValidationSummary
+        {
+            get => _sessionFlowValidationSummary;
+            private set => SetProperty(ref _sessionFlowValidationSummary, value ?? string.Empty);
+        }
 
         public string MessageCountText => LF("ChatSessionControl.MessageCountFormat", "当前消息 {0} 条", Messages.Count);
 
@@ -214,9 +221,8 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             _composerImageAttachmentService = new ChatComposerImageAttachmentService();
             _toolInvocationPresentationService = new ToolInvocationPresentationService();
             _presentationProjector = new ChatSessionPresentationProjector();
-            _memoryService = new MemoryService();
             _flowBindingService = new ChatSessionFlowBindingService();
-            _sessionFlowValidationSummary = BuildSessionFlowValidationSummary(sessionModel);
+            _sessionFlowValidationSummary = BuildInitialSessionFlowValidationSummary(sessionModel);
 
             SendMessageCommand = new AsyncRelayCommand(SendMessageAsync, () => CanSendMessage);
             CancelExecutionCommand = new RelayCommand(CancelExecution, () => CanCancelExecution);
@@ -252,7 +258,8 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
 
             if (_sessionModel != null)
             {
-                RefreshMessagesFromTranscript();
+                RefreshMessagesFromTranscript(refreshContextWindow: false);
+                QueueInitialSessionDiagnostics();
             }
             else
             {
@@ -308,7 +315,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                         Session = sessionModel,
                         UserText = trimmedText,
                         UserContentBlocks = userContentBlocks,
-                        HostInjectedHistoryMessageFactory = ct => _memoryService.RetrieveBackfillMessagesAsync(
+                        HostInjectedHistoryMessageFactory = ct => MemoryService.RetrieveBackfillMessagesAsync(
                             sessionModel,
                             trimmedText,
                             userContentBlocks,
@@ -931,6 +938,66 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             CommandManager.InvalidateRequerySuggested();
         }
 
+        private void QueueInitialSessionDiagnostics()
+        {
+            if (_sessionModel == null)
+            {
+                return;
+            }
+
+            _ = RefreshInitialSessionDiagnosticsAsync(_sessionModel);
+        }
+
+        private async Task RefreshInitialSessionDiagnosticsAsync(ChatSessionModel sessionModel)
+        {
+            try
+            {
+                var diagnostics = await Task.Run(() =>
+                {
+                    var compilationResult = _flowBindingService.CompileBinding(sessionModel.FlowBinding);
+                    var validationSummary = BuildSessionFlowValidationSummary(sessionModel, compilationResult);
+                    var snapshot = _contextWindowService.CreateSnapshot(sessionModel, compilationResult);
+                    return new InitialSessionDiagnostics(validationSummary, snapshot);
+                }).ConfigureAwait(false);
+
+                await ApplyOnUiThreadAsync(() =>
+                {
+                    if (!ReferenceEquals(_sessionModel, sessionModel))
+                    {
+                        return;
+                    }
+
+                    SessionFlowValidationSummary = diagnostics.ValidationSummary;
+                    ApplyContextWindowSnapshot(diagnostics.ContextWindowSnapshot);
+                }).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                await ApplyOnUiThreadAsync(() =>
+                {
+                    if (!ReferenceEquals(_sessionModel, sessionModel))
+                    {
+                        return;
+                    }
+
+                    SessionFlowValidationSummary = ex.Message;
+                    ApplyUnavailableContextWindowStatus(ex.Message);
+                }).ConfigureAwait(false);
+            }
+        }
+
+        private static Task ApplyOnUiThreadAsync(Action action)
+        {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher == null || dispatcher.CheckAccess())
+            {
+                action();
+                return Task.CompletedTask;
+            }
+
+            return dispatcher.InvokeAsync(action).Task;
+        }
+
         private void RefreshMessagesFromTranscript(bool refreshContextWindow = true)
         {
             if (_sessionModel == null)
@@ -1341,7 +1408,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
         {
             return _sessionModel == null
                 ? Task.CompletedTask
-                : _memoryService.GenerateForClosedSessionAsync(_sessionModel);
+                : MemoryService.GenerateForClosedSessionAsync(_sessionModel);
         }
 
         public void OnWorkspaceDocumentClosed()
@@ -1401,6 +1468,34 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             };
         }
 
+        private static string BuildInitialSessionFlowValidationSummary(ChatSessionModel? sessionModel)
+        {
+            return sessionModel?.HasBoundFlow == true
+                ? L("ChatSessionControl.BoundFlow.ValidationPending", "Session flow validation is pending.")
+                : L("ChatSessionControl.BoundFlow.UnboundSummary", "No session flow is bound.");
+        }
+
+        private static string BuildSessionFlowValidationSummary(
+            ChatSessionModel? sessionModel,
+            SessionFlowCompilationResult compilationResult)
+        {
+            ArgumentNullException.ThrowIfNull(compilationResult);
+
+            if (sessionModel?.HasBoundFlow != true)
+            {
+                return L("ChatSessionControl.BoundFlow.UnboundSummary", "No session flow is bound.");
+            }
+
+            if (compilationResult.IsSuccess)
+            {
+                return L("ChatSessionControl.BoundFlow.ValidationSucceeded", "The bound session flow passed runtime validation.");
+            }
+
+            return compilationResult.Errors.FirstOrDefault()?.Message
+                ?? compilationResult.Issues.FirstOrDefault()?.Message
+                ?? L("ChatSessionControl.BoundFlow.ValidationFailed", "The bound session flow did not pass runtime validation.");
+        }
+
         private string BuildSessionFlowValidationSummary(ChatSessionModel? sessionModel)
         {
             if (sessionModel?.HasBoundFlow != true)
@@ -1418,6 +1513,10 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
                 ?? compilationResult.Issues.FirstOrDefault()?.Message
                 ?? L("ChatSessionControl.BoundFlow.ValidationFailed", "绑定的会话流未通过运行时验证。");
         }
+
+        private sealed record InitialSessionDiagnostics(
+            string ValidationSummary,
+            ChatSessionContextWindowSnapshot ContextWindowSnapshot);
 
         private static string L(string resourceKey, string fallback)
         {

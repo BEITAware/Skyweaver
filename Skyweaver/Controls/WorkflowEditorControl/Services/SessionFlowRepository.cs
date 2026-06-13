@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.IO;
 using System.Xml.Linq;
+using System.Xml;
 using Skyweaver.Controls.WorkflowEditorControl.Models;
 
 namespace Skyweaver.Controls.WorkflowEditorControl.Services
@@ -29,6 +30,32 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
                     try
                     {
                         documents.Add(LoadCore(filePath));
+                    }
+                    catch
+                    {
+                        // Ignore malformed node graph files so the rest of the library can still load.
+                    }
+                }
+
+                return documents
+                    .OrderByDescending(document => document.UpdatedAtUtc)
+                    .ThenBy(document => document.Name, StringComparer.CurrentCultureIgnoreCase)
+                    .ToList();
+            }
+        }
+
+        public IReadOnlyList<SessionFlowGraphDocumentModel> LoadAllMetadata()
+        {
+            lock (_syncRoot)
+            {
+                EnsureConfigurationDirectory();
+
+                var documents = new List<SessionFlowGraphDocumentModel>();
+                foreach (var filePath in Directory.EnumerateFiles(ConfigurationDirectoryPath, "*.xml", SearchOption.TopDirectoryOnly))
+                {
+                    try
+                    {
+                        documents.Add(LoadMetadataCore(filePath));
                     }
                     catch
                     {
@@ -203,6 +230,47 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Services
                     (string?)root.Attribute("UpdatedAtUtc"),
                     File.GetLastWriteTimeUtc(filePath)),
                 Graph = graph
+            };
+        }
+
+        private static SessionFlowGraphDocumentModel LoadMetadataCore(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                throw new InvalidOperationException("Session flow file path cannot be empty.");
+            }
+
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException("Session flow file does not exist.", filePath);
+            }
+
+            var settings = new XmlReaderSettings
+            {
+                DtdProcessing = DtdProcessing.Prohibit,
+                IgnoreComments = true,
+                IgnoreWhitespace = true
+            };
+
+            using var stream = File.OpenRead(filePath);
+            using var reader = XmlReader.Create(stream, settings);
+            reader.MoveToContent();
+            if (reader.NodeType != XmlNodeType.Element)
+            {
+                throw new InvalidDataException("Session flow XML is missing a root element.");
+            }
+
+            return new SessionFlowGraphDocumentModel
+            {
+                GraphId = (reader.GetAttribute("GraphId") ?? Guid.NewGuid().ToString("N")).Trim(),
+                Name = (reader.GetAttribute("Name") ?? Path.GetFileNameWithoutExtension(filePath)).Trim(),
+                FilePath = filePath,
+                CreatedAtUtc = ParseDateTime(
+                    reader.GetAttribute("CreatedAtUtc"),
+                    File.GetCreationTimeUtc(filePath)),
+                UpdatedAtUtc = ParseDateTime(
+                    reader.GetAttribute("UpdatedAtUtc"),
+                    File.GetLastWriteTimeUtc(filePath))
             };
         }
 

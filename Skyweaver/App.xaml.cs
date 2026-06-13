@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using Skyweaver.Controls.SkyweaverPreferencesControl.Services;
+using Skyweaver.Rendering;
 using Skyweaver.Services.Localization;
 using Skyweaver.Services.ShellIntegration;
 using Skyweaver.Services.Daemon;
@@ -70,16 +71,22 @@ namespace Skyweaver
 
             _ = ShellIntegrationRuntime.Instance.ApplyConfiguredRegistration();
 
+            bool isDaemonStartup = IsDaemonOnlyStartup(e.Args);
+            SplashWindow? splashWindow = null;
+            if (!isDaemonStartup)
+            {
+                splashWindow = new SplashWindow();
+                splashWindow.Show();
+            }
+
+            DirectXResourcePreloader.PreloadAll();
+
             // 初始化主窗口，若为 daemon 静默启动则保持隐藏
             _mainWindow = new MainWindow();
             MainWindow = _mainWindow;
 
-            bool isDaemonStartup = IsDaemonOnlyStartup(e.Args);
             if (!isDaemonStartup)
             {
-                var splashWindow = new SplashWindow();
-                splashWindow.Show();
-
                 Action showMainWindow = () =>
                 {
                     if (_mainWindowShown)
@@ -93,7 +100,7 @@ namespace Skyweaver
                     {
                         _mainWindow.Show();
                         _mainWindow.Activate();
-                        splashWindow.Close();
+                        splashWindow?.Close();
                     });
                 };
 
@@ -128,6 +135,8 @@ namespace Skyweaver
         {
             Dispatcher.Invoke(() =>
             {
+                DirectXResourcePreloader.PreloadAll();
+
                 if (_mainWindow == null)
                 {
                     _mainWindow = new MainWindow();

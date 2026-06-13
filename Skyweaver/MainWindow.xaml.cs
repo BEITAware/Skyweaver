@@ -1,11 +1,13 @@
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Threading;
+using System.Windows.Media.Imaging;
+using Skyweaver.Rendering;
 using Skyweaver.ViewModels;
 
 namespace Skyweaver
@@ -21,8 +23,68 @@ namespace Skyweaver
             InitializeComponent();
             _viewModel = new MainViewModel();
             DataContext = _viewModel;
+            WarmUpTilePageForStartup();
             Closing += MainWindow_Closing;
             KeyDown += MainWindow_KeyDown;
+        }
+
+        private void WarmUpTilePageForStartup()
+        {
+            try
+            {
+                DirectXResourcePreloader.PreloadAll();
+
+                var tilePageView = MainPageContentHost.GetOrCreateCachedView(_viewModel.TilesPage);
+                if (tilePageView is not UIElement tilePageElement)
+                {
+                    return;
+                }
+
+                PageWarmupHost.Content = tilePageView;
+                PageWarmupHost.Visibility = Visibility.Visible;
+
+                double warmupWidth = Math.Max(ActualWidth, 1280);
+                double warmupHeight = Math.Max(MainPageContentHost.ActualHeight, 720);
+                var warmupSize = new Size(warmupWidth, warmupHeight);
+
+                PageWarmupHost.Width = warmupWidth;
+                PageWarmupHost.Height = warmupHeight;
+                tilePageElement.Measure(warmupSize);
+                tilePageElement.Arrange(new Rect(warmupSize));
+                tilePageElement.UpdateLayout();
+                PageWarmupHost.Measure(warmupSize);
+                PageWarmupHost.Arrange(new Rect(warmupSize));
+                PageWarmupHost.UpdateLayout();
+                RenderWarmupVisual(tilePageElement, warmupSize);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Tile page warmup failed: {ex}");
+            }
+            finally
+            {
+                PageWarmupHost.Content = null;
+                PageWarmupHost.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private static void RenderWarmupVisual(UIElement element, Size size)
+        {
+            if (size.Width <= 0 || size.Height <= 0)
+            {
+                return;
+            }
+
+            int pixelWidth = Math.Max(1, (int)Math.Ceiling(size.Width));
+            int pixelHeight = Math.Max(1, (int)Math.Ceiling(size.Height));
+            var bitmap = new RenderTargetBitmap(
+                pixelWidth,
+                pixelHeight,
+                96,
+                96,
+                PixelFormats.Pbgra32);
+            bitmap.Render(element);
+            bitmap.Freeze();
         }
 
         private void MainWindow_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
