@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using Skyweaver.Controls.ScheduledTasksControl.Models;
 using Skyweaver.Controls.WorkflowEditorControl.Models;
 using Skyweaver.Controls.WorkflowEditorControl.Services;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Windows
 {
@@ -106,7 +107,7 @@ namespace Skyweaver.Windows
             }
             catch
             {
-                MessageBox.Show(this, "加载会话流失败，请检查会话流配置。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(this, L("ScheduledTaskDialog.Error.LoadFlowFailed", "加载会话流失败，请检查会话流配置。"), L("ScheduledTaskDialog.Title.Error", "错误"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
             TriggersListBox.ItemsSource = _triggers;
@@ -391,20 +392,20 @@ namespace Skyweaver.Windows
             var taskName = TaskNameTextBox.Text.Trim();
             if (string.IsNullOrEmpty(taskName))
             {
-                MessageBox.Show(this, "请输入计划任务名称。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(this, L("ScheduledTaskDialog.Warning.NameRequired", "请输入计划任务名称。"), L("ScheduledTaskDialog.Title.Tip", "提示"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             if (SessionFlowComboBox.SelectedValue == null)
             {
-                MessageBox.Show(this, "请选择关联的会话流。如果没有会话流，请先在会话流编辑器中创建。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(this, L("ScheduledTaskDialog.Warning.FlowRequired", "请选择关联的会话流。如果没有会话流，请先在会话流编辑器中创建。"), L("ScheduledTaskDialog.Title.Tip", "提示"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             var prompt = PromptTextBox.Text.Trim();
             if (string.IsNullOrEmpty(prompt))
             {
-                MessageBox.Show(this, "请输入任务提示词内容。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(this, L("ScheduledTaskDialog.Warning.PromptRequired", "请输入任务提示词内容。"), L("ScheduledTaskDialog.Title.Tip", "提示"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -454,6 +455,11 @@ namespace Skyweaver.Windows
             int.TryParse(m.SelectedItem?.ToString(), out int minutes);
             int.TryParse(s.SelectedItem?.ToString(), out int seconds);
             return new TimeSpan(hours, minutes, seconds);
+        }
+
+        private static string L(string resourceKey, string fallback)
+        {
+            return LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
 }

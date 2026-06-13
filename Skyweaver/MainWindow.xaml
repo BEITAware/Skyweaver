@@ -1,19 +1,42 @@
 <Window x:Class="Skyweaver.MainWindow"
-xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-xmlns:local="clr-namespace:Skyweaver"
-xmlns:documentWorkspace="clr-namespace:Skyweaver.Panels.DocumentWorkspace.Views"
-xmlns:liveTasks="clr-namespace:Skyweaver.Panels.LiveTasks.Views"
-xmlns:multiFunctionArea="clr-namespace:Skyweaver.Panels.MultiFunctionArea.Views"
-xmlns:sessionList="clr-namespace:Skyweaver.Panels.SessionList.Views"
-xmlns:notifications="clr-namespace:Skyweaver.Services.Notifications"
-mc:Ignorable="d"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Skyweaver"
+        xmlns:documentWorkspace="clr-namespace:Skyweaver.Panels.DocumentWorkspace.Views"
+        xmlns:liveTasks="clr-namespace:Skyweaver.Panels.LiveTasks.Views"
+        xmlns:multiFunctionArea="clr-namespace:Skyweaver.Panels.MultiFunctionArea.Views"
+        xmlns:sessionList="clr-namespace:Skyweaver.Panels.SessionList.Views"
+        xmlns:notifications="clr-namespace:Skyweaver.Services.Notifications"
+        xmlns:session="clr-namespace:Skyweaver.PageControls.Session.Views"
+        xmlns:desk="clr-namespace:Skyweaver.PageControls.Desk.Views"
+        xmlns:marvelous="clr-namespace:Skyweaver.PageControls.Marvelous.Views"
+        xmlns:tiles="clr-namespace:Skyweaver.PageControls.Tiles.Views"
+        xmlns:sessionVm="clr-namespace:Skyweaver.PageControls.Session.ViewModels"
+        xmlns:deskVm="clr-namespace:Skyweaver.PageControls.Desk.ViewModels"
+        xmlns:marvelousVm="clr-namespace:Skyweaver.PageControls.Marvelous.ViewModels"
+        xmlns:tilesVm="clr-namespace:Skyweaver.PageControls.Tiles.ViewModels"
+        mc:Ignorable="d"
         Title="{DynamicResource MainWindow.Title}" Height="720" Width="1280"
         MinHeight="576" MinWidth="1024"
         WindowState="Maximized"
         Icon="/Skyweaver;component/Resources/Skyweaver.ico" Background="#FF1A1F28">
+
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type sessionVm:SessionPageViewModel}">
+            <session:SessionPageView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type deskVm:DeskPageViewModel}">
+            <desk:DeskPageView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type marvelousVm:MarvelousPageViewModel}">
+            <marvelous:MarvelousPageView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type tilesVm:TilesPageViewModel}">
+            <tiles:TilesPageView/>
+        </DataTemplate>
+    </Window.Resources>
 
     <!-- 任务栏图标信息 -->
     <Window.TaskbarItemInfo>
@@ -50,12 +73,13 @@ mc:Ignorable="d"
                         Background="Transparent"/>
 
                 <!-- Ribbon 标签页控件 -->
-                <TabControl x:Name="RibbonTabControl"
-                            Grid.Row="1"
-                            Background="{DynamicResource ToolbarBackgroundBrush}"
-                            BorderThickness="{DynamicResource ZeroThickness}"
-                            Height="120"
-                            Margin="{DynamicResource TabControlMargin}">
+                <TabControl x:Name="RibbonTabControl" SelectionChanged="RibbonTabControl_SelectionChanged"
+                             Grid.Row="1"
+                             Background="{DynamicResource ToolbarBackgroundBrush}"
+                             BorderThickness="{DynamicResource ZeroThickness}"
+                             Height="120"
+                             Margin="{DynamicResource TabControlMargin}"
+                             SelectedIndex="{Binding SelectedPageIndex, Mode=TwoWay}">
                     <TabControl.Resources>
                         <Style TargetType="{x:Type TabItem}" BasedOn="{StaticResource RibbonTabStyle}"/>
                     </TabControl.Resources>
@@ -79,49 +103,51 @@ mc:Ignorable="d"
                                         Grid.Row="1"
                                         Background="{TemplateBinding Background}"
                                         BorderBrush="{TemplateBinding BorderBrush}"
-                                        BorderThickness="{TemplateBinding BorderThickness}">
-                                    <ContentPresenter x:Name="PART_SelectedContentHost"
-                                                      ContentSource="SelectedContent"
-                                                      Margin="{TemplateBinding Padding}"/>
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        ClipToBounds="True">
+                                    <Grid x:Name="TransitionGrid">
+                                        <!-- 用于展示源页面的镜像，播放滑出动画 -->
+                                        <Border x:Name="OldContentVisualHost"
+                                                Visibility="Collapsed"
+                                                RenderTransformOrigin="0.5,0.5">
+                                            <Border.RenderTransform>
+                                                <TranslateTransform X="0" Y="0"/>
+                                            </Border.RenderTransform>
+                                        </Border>
+
+                                        <!-- 用于展示目标页面的真实内容，播放滑入动画 -->
+                                        <ContentPresenter x:Name="PART_SelectedContentHost"
+                                                          ContentSource="SelectedContent"
+                                                          Margin="{TemplateBinding Padding}"
+                                                          RenderTransformOrigin="0.5,0.5">
+                                            <ContentPresenter.RenderTransform>
+                                                <TranslateTransform X="0" Y="0"/>
+                                            </ContentPresenter.RenderTransform>
+                                        </ContentPresenter>
+                                    </Grid>
                                 </Border>
                             </Grid>
                         </ControlTemplate>
                     </TabControl.Template>
 
-                    <!-- 状态标签页 -->
-                    <TabItem Header="{DynamicResource MainWindow.Ribbon.StatusTab}">
-                        <Grid>
-                            <!-- 背景层 -->
-
-                            <!-- 背景层 -->
-                            <!-- 背景层 -->
-                            <Border Style="{DynamicResource TabContentBorderStyle}"/>
-                            <!-- 遮罩层 -->
-                            <Border Background="{DynamicResource RibbonContentCoverMaskBrush}" Padding="0"/>
-
-                            <!-- 内容层 -->
-                            <Grid Margin="8,4"
-                                  HorizontalAlignment="Left"
-                                  VerticalAlignment="Center">
-                                <local:VfdClockControl Width="420"
-                                                       Height="56"
-                                                       HorizontalAlignment="Left"
-                                                       VerticalAlignment="Center"/>
-                            </Grid>
-                        </Grid>
-                    </TabItem>
-
-                    <!-- 视图标签页 -->
-                    <TabItem Header="{DynamicResource MainWindow.Ribbon.ViewTab}">
+                    <!-- 会话标签页 (状态和视图合二为一) -->
+                    <TabItem Header="{DynamicResource MainWindow.Ribbon.SessionTab}">
                         <Grid>
                             <!-- 背景层 -->
                             <Border Style="{DynamicResource TabContentBorderStyle}"/>
-
                             <!-- 遮罩层 -->
                             <Border Background="{DynamicResource RibbonContentCoverMaskBrush}" Padding="0"/>
 
                             <!-- 内容层 -->
                             <StackPanel Orientation="Horizontal" Margin="8,4">
+                                <!-- 状态组 -->
+                                <GroupBox Header="{DynamicResource MainWindow.Ribbon.StatusTab}" Style="{DynamicResource RibbonGroupStyle}" Padding="4,2,14,2">
+                                    <local:VfdClockControl Width="368"
+                                                           Height="56"
+                                                           HorizontalAlignment="Left"
+                                                           VerticalAlignment="Center"/>
+                                </GroupBox>
+
                                 <!-- 缩放组 -->
                                 <GroupBox Header="{DynamicResource MainWindow.Ribbon.ZoomGroup}" Style="{DynamicResource RibbonGroupStyle}">
                                     <StackPanel Orientation="Horizontal">
@@ -169,6 +195,44 @@ mc:Ignorable="d"
                                     </StackPanel>
                                 </GroupBox>
                             </StackPanel>
+                        </Grid>
+                    </TabItem>
+
+                    <!-- Desk 标签页 -->
+                    <TabItem Header="{DynamicResource MainWindow.Ribbon.DeskTab}">
+                        <Grid>
+                            <Border Style="{DynamicResource TabContentBorderStyle}"/>
+                            <Border Background="{DynamicResource RibbonContentCoverMaskBrush}" Padding="0"/>
+                            <StackPanel Orientation="Horizontal" Margin="8,4">
+                                <GroupBox Header="Desk 控制项" Style="{DynamicResource RibbonGroupStyle}">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="Desk 页面占位 Ribbon 元素" Foreground="#94A3B8" FontSize="11" Margin="8,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </Grid>
+                    </TabItem>
+
+                    <!-- Marvelous 标签页 -->
+                    <TabItem Header="{DynamicResource MainWindow.Ribbon.MarvelousTab}">
+                        <Grid>
+                            <Border Style="{DynamicResource TabContentBorderStyle}"/>
+                            <Border Background="{DynamicResource RibbonContentCoverMaskBrush}" Padding="0"/>
+                            <StackPanel Orientation="Horizontal" Margin="8,4">
+                                <GroupBox Header="Marvelous 控制项" Style="{DynamicResource RibbonGroupStyle}">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="Marvelous 页面占位 Ribbon 元素" Foreground="#D8B4FE" FontSize="11" Margin="8,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </Grid>
+                    </TabItem>
+
+                    <!-- Tiles 标签页 -->
+                    <TabItem Header="{DynamicResource MainWindow.Ribbon.TilesTab}">
+                        <Grid>
+                            <Border Style="{DynamicResource TabContentBorderStyle}"/>
+                            <Border Background="{DynamicResource RibbonContentCoverMaskBrush}" Padding="0"/>
                         </Grid>
                     </TabItem>
 
@@ -324,42 +388,6 @@ mc:Ignorable="d"
         </StatusBar>
 
         <!-- 主工作区域 -->
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition x:Name="ColSessionList" Width="1*" MinWidth="200"/>
-                <ColumnDefinition Width="5"/>
-                <ColumnDefinition x:Name="ColChatArea" Width="3*" MinWidth="0"/>
-                <ColumnDefinition Width="5"/>
-                <ColumnDefinition x:Name="ColFullView" Width="2.5*" MinWidth="0"/>
-            </Grid.ColumnDefinitions>
-
-            <Grid Grid.Column="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="1*" MinHeight="150"/>
-                    <RowDefinition Height="5"/>
-                    <RowDefinition Height="1*" MinHeight="150"/>
-                </Grid.RowDefinitions>
-
-                <sessionList:SessionListPanelView Grid.Row="0"
-                                                  DataContext="{Binding SessionListPanel}"/>
-                <GridSplitter Grid.Row="1" Style="{DynamicResource AeroHorizontalSplitterStyle}"/>
-                <liveTasks:LiveTasksPanelView Grid.Row="2"
-                                              DataContext="{Binding LiveTasksPanel}"/>
-            </Grid>
-
-            <GridSplitter Grid.Column="1" Style="{DynamicResource AeroVerticalSplitterStyle}"
-                          DragStarted="GridSplitter_DragStarted" DragCompleted="GridSplitter_DragCompleted"/>
-
-            <Grid Grid.Column="2">
-                <documentWorkspace:DocumentWorkspacePanelView DataContext="{Binding DocumentWorkspacePanel}"/>
-            </Grid>
-
-            <GridSplitter x:Name="ChatFullViewSplitter" Grid.Column="3" Style="{DynamicResource AeroVerticalSplitterStyle}"
-                          DragStarted="GridSplitter_DragStarted" DragDelta="ChatFullViewSplitter_DragDelta" DragCompleted="GridSplitter_DragCompleted"/>
-
-            <Grid Grid.Column="4">
-                <multiFunctionArea:MultiFunctionAreaPanelView DataContext="{Binding MultiFunctionAreaPanel}"/>
-            </Grid>
-        </Grid>
+        <ContentControl Content="{Binding CurrentPageViewModel}"/>
     </DockPanel>
 </Window>

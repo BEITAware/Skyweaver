@@ -1,6 +1,10 @@
+using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using Skyweaver.ViewModels;
 
@@ -9,6 +13,8 @@ namespace Skyweaver
     public partial class MainWindow : Window
     {
         private readonly MainViewModel _viewModel;
+        private int _oldSelectedIndex = 0;
+        private Guid _currentTransitionToken;
 
         public MainWindow()
         {
@@ -69,72 +75,121 @@ namespace Skyweaver
             });
         }
 
-        private void ChatFullViewSplitter_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
+        private void RibbonTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // 获取当前两列的实际宽度
-            double chatWidth = ColChatArea.ActualWidth;
-            double fullViewWidth = ColFullView.ActualWidth;
+            if (e.Source != RibbonTabControl)
+                return;
 
-            // 设定折叠吸附阈值（120像素）
-            const double threshold = 120;
-            double total = chatWidth + fullViewWidth;
+            int newIndex = RibbonTabControl.SelectedIndex;
+            int oldIndex = _oldSelectedIndex;
+            _oldSelectedIndex = newIndex;
 
-            // 向左拖拽 (e.HorizontalChange < 0)，聊天区域（左侧）变小，全视图（右侧）变大
-            if (e.HorizontalChange < 0)
+            // 如果是第一次加载，或者 index 没有变，或者 oldIndex 不合法，我们不播放动画
+            if (oldIndex < 0 || oldIndex == newIndex || 
+                oldIndex >= RibbonTabControl.Items.Count || 
+                newIndex < 0 || newIndex >= RibbonTabControl.Items.Count)
             {
-                if (chatWidth < threshold)
-                {
-                    ColChatArea.Width = new GridLength(0);
-                    ColFullView.Width = new GridLength(total);
-                }
+                return;
             }
-            // 向右拖拽 (e.HorizontalChange > 0)，聊天区域（左侧）变大，全视图（右侧）变小
-            else if (e.HorizontalChange > 0)
-            {
-                if (fullViewWidth < threshold)
-                {
-                    ColFullView.Width = new GridLength(0);
-                    ColChatArea.Width = new GridLength(total);
-                }
-            }
+
+            PlayRibbonTransitionAnimation(oldIndex, newIndex);
         }
 
-        private void GridSplitter_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
+        private void PlayRibbonTransitionAnimation(int oldIndex, int newIndex)
         {
-            // 在拖拽开始时，将所有受影响的可调整列宽度转换为绝对像素（Pixel），防止拖拽非相邻列时互相干扰
-            ColSessionList.Width = new GridLength(ColSessionList.ActualWidth, GridUnitType.Pixel);
-            ColChatArea.Width = new GridLength(ColChatArea.ActualWidth, GridUnitType.Pixel);
-            ColFullView.Width = new GridLength(ColFullView.ActualWidth, GridUnitType.Pixel);
-        }
+            var oldTabItem = RibbonTabControl.Items[oldIndex] as TabItem;
+            var newTabItem = RibbonTabControl.Items[newIndex] as TabItem;
 
-        private void GridSplitter_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
-        {
-            // 拖拽结束时，确保两列不会停留在小于阈值的尴尬宽度
-            double w0 = ColSessionList.ActualWidth;
-            double w2 = ColChatArea.ActualWidth;
-            double w4 = ColFullView.ActualWidth;
+            if (oldTabItem == null || newTabItem == null) return;
 
-            const double threshold = 120;
+            var oldContent = oldTabItem.Content as FrameworkElement;
+            if (oldContent == null) return;
 
-            if (w2 < threshold)
+            // 寻找模板中的命名元素
+            var oldHost = RibbonTabControl.Template.FindName("OldContentVisualHost", RibbonTabControl) as Border;
+            var newHost = RibbonTabControl.Template.FindName("PART_SelectedContentHost", RibbonTabControl) as FrameworkElement;
+
+            if (oldHost == null || newHost == null) return;
+
+            // 用唯一的 Token 解决多重/快速连续动画触发时的状态清理冲突问题
+            var myToken = Guid.NewGuid();
+            _currentTransitionToken = myToken;
+
+            // 使用旧内容渲染 VisualBrush 并绑定到 host 上
+            var visualBrush = new VisualBrush(oldContent)
             {
-                // 聊天区域折叠为 0。多出来的空间分配给全视图
-                double total = w2 + w4;
-                w2 = 0;
-                w4 = total;
-            }
-            else if (w4 < threshold)
-            {
-                // 全视图折叠为 0。多出来的空间分配给聊天区域
-                double total = w2 + w4;
-                w4 = 0;
-                w2 = total;
-            }
+                Stretch = Stretch.Fill,
+                AlignmentX = AlignmentX.Left,
+                AlignmentY = AlignmentY.Top
+            };
+            oldHost.Background = visualBrush;
+            oldHost.Width = newHost.ActualWidth;
+            oldHost.Height = newHost.ActualHeight;
+            oldHost.Visibility = Visibility.Visible;
+            oldHost.Opacity = 1.0;
 
-            // 重新应用为 Star 比例，保持窗口自适应能力
-            ColSessionList.Width = w0 > 0 ? new GridLength(w0, GridUnitType.Star) : new GridLength(0);
-            ColChatArea.Width = w2 > 0 ? new GridLength(w2, GridUnitType.Star) : new GridLength(0);
-            ColFullView.Width = w4 > 0 ? new GridLength(w4, GridUnitType.Star) : new GridLength(0);
+            // 判定切换方向
+            bool isGoingRight = newIndex > oldIndex;
+            double offset = 200.0;
+            double slideOutDestination = isGoingRight ? -offset : offset;
+            double slideInStart = isGoingRight ? offset : -offset;
+
+            // 初始化变换
+            var oldTransform = new TranslateTransform(0, 0);
+            oldHost.RenderTransform = oldTransform;
+
+            var newTransform = new TranslateTransform(slideInStart, 0);
+            newHost.RenderTransform = newTransform;
+            newHost.Opacity = 0.0;
+
+            var duration = TimeSpan.FromSeconds(0.3);
+
+            // --- 旧页面滑出 & 高速淡出动画 ---
+            var oldOpacityAnimation = new DoubleAnimation
+            {
+                To = 0.0,
+                Duration = TimeSpan.FromSeconds(0.18), // 中途高速变得透明
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+            };
+
+            var oldSlideAnimation = new DoubleAnimation
+            {
+                To = slideOutDestination,
+                Duration = duration,
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            // --- 新页面滑入 & 渐显动画 ---
+            var newOpacityAnimation = new DoubleAnimation
+            {
+                To = 1.0,
+                Duration = duration,
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            var newSlideAnimation = new DoubleAnimation
+            {
+                To = 0.0,
+                Duration = duration,
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            // 清理事件处理
+            oldSlideAnimation.Completed += (s, ev) =>
+            {
+                if (_currentTransitionToken == myToken)
+                {
+                    oldHost.Visibility = Visibility.Collapsed;
+                    oldHost.Background = null;
+                }
+            };
+
+            // 播放动画
+            oldTransform.BeginAnimation(TranslateTransform.XProperty, oldSlideAnimation);
+            oldHost.BeginAnimation(UIElement.OpacityProperty, oldOpacityAnimation);
+
+            newTransform.BeginAnimation(TranslateTransform.XProperty, newSlideAnimation);
+            newHost.BeginAnimation(UIElement.OpacityProperty, newOpacityAnimation);
         }
     }
 }

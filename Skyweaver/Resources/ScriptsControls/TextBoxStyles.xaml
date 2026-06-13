@@ -47,7 +47,16 @@
                                 <GradientStop x:Name="gradientStop3" Color="#C30099FF" Offset="0.792"/>
                             </LinearGradientBrush>
                         </Border.Background>
-                        <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+                        <Border.Effect>
+                            <!-- Aero 风格柔和外阴影 -->
+                            <DropShadowEffect Color="Black" BlurRadius="8" ShadowDepth="2" Direction="315" Opacity="0.4"/>
+                        </Border.Effect>
+                        <!-- 文本宿主，并加入文字阴影 -->
+                        <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden">
+                            <ScrollViewer.Effect>
+                                <DropShadowEffect Color="Black" BlurRadius="1.5" ShadowDepth="1.2" Opacity="0.65" Direction="315"/>
+                            </ScrollViewer.Effect>
+                        </ScrollViewer>
                     </Border>
                     <ControlTemplate.Triggers>
                         <!-- 鼠标悬停效果 -->

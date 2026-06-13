@@ -643,6 +643,10 @@
 
     <system:String x:Key="MainWindow.Ribbon.StatusTab">状态</system:String>
     <system:String x:Key="MainWindow.Ribbon.ViewTab">视图</system:String>
+    <system:String x:Key="MainWindow.Ribbon.SessionTab">会话</system:String>
+    <system:String x:Key="MainWindow.Ribbon.DeskTab">Desk</system:String>
+    <system:String x:Key="MainWindow.Ribbon.MarvelousTab">Marvelous</system:String>
+    <system:String x:Key="MainWindow.Ribbon.TilesTab">Tiles</system:String>
     <system:String x:Key="MainWindow.Ribbon.ZoomGroup">缩放</system:String>
     <system:String x:Key="MainWindow.Ribbon.ZoomFit">适应</system:String>
     <system:String x:Key="MainWindow.Ribbon.ZoomFit.ToolTip">缩放适应 (Ctrl+0)</system:String>
@@ -1811,4 +1815,64 @@
     <!-- WorkspaceNoteTemplate Tool -->
     <system:String x:Key="Tool.WorkspaceNoteTemplate.DisplayName">工作区笔记模板</system:String>
     <system:String x:Key="Tool.WorkspaceNoteTemplate.Description">生成一个工作区笔记模板。宿主可以通过工具自身配置扩展默认值、摘要布局和运行时行为。</system:String>
+
+    <!-- CreateScheduledTaskDialog Localization -->
+    <system:String x:Key="ScheduledTaskDialog.Title">计划任务配置</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Header.Title">新建 / 编辑计划任务</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Header.Description">配置计划任务的触发条件、执行流程以及附加操作。</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TaskName.Label">任务名称</system:String>
+    <system:String x:Key="ScheduledTaskDialog.SessionFlow.Label">关联会话流</system:String>
+    <system:String x:Key="ScheduledTaskDialog.AutoApproveTools">批准需确认的工具调用</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Prompt.Label">任务提示词内容</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggersConfig.Label">触发器配置 (多触发器)</system:String>
+    <system:String x:Key="ScheduledTaskDialog.AddTrigger">添加触发器</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DeleteTrigger">删除触发器</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggerType.Label">触发器类型</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggerType.Daily">每天</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggerType.Weekly">每周</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggerType.Monthly">每月</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggerType.Yearly">每年</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggerType.Custom">自定义（暂不可用）</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Label.Month">月份:</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Label.Day">日期:</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Label.Time">时间:</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Label.DayOfWeek">星期:</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Sunday">星期日</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Monday">星期一</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Tuesday">星期二</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Wednesday">星期三</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Thursday">星期四</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Friday">星期五</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Saturday">星期六</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Label.TriggerTime">触发时间:</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Label.NoExtraParams">不需要额外参数（占位）</system:String>
+    <system:String x:Key="ScheduledTaskDialog.ActionsConfig.Label">前置与后置动作配置</system:String>
+    <system:String x:Key="ScheduledTaskDialog.PreAction.Label">任务开始前执行...</system:String>
+    <system:String x:Key="ScheduledTaskDialog.PostAction.Label">任务结束后执行...</system:String>
+    <system:String x:Key="ScheduledTaskDialog.ActionType.None">无操作</system:String>
+    <system:String x:Key="ScheduledTaskDialog.ActionType.Powershell">执行 Powershell 指令</system:String>
+    <system:String x:Key="ScheduledTaskDialog.ActionType.Shutdown">系统关机</system:String>
+    <system:String x:Key="ScheduledTaskDialog.ActionType.Restart">系统重新启动</system:String>
+    <system:String x:Key="ScheduledTaskDialog.PowershellScript.Label">Powershell 脚本内容</system:String>
+    
+    <!-- Code-Behind Dialog Messages & Errors -->
+    <system:String x:Key="ScheduledTaskDialog.Error.LoadFlowFailed">加载会话流失败，请检查会话流配置。</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Title.Error">错误</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Title.Tip">提示</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Warning.NameRequired">请输入计划任务名称。</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Warning.FlowRequired">请选择关联的会话流。如果没有会话流，请先在会话流编辑器中创建。</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Warning.PromptRequired">请输入任务提示词内容。</system:String>
+
+    <!-- Model Localization -->
+    <system:String x:Key="ScheduledTask.Trigger.YearlyFormat">每年 {0}月{1}日 {2}</system:String>
+    <system:String x:Key="ScheduledTask.Trigger.MonthlyFormat">每月 {0}日 {1}</system:String>
+    <system:String x:Key="ScheduledTask.Trigger.WeeklyFormat">每周 {0} {1}</system:String>
+    <system:String x:Key="ScheduledTask.Trigger.DailyFormat">每天 {0}</system:String>
+    <system:String x:Key="ScheduledTask.Trigger.Custom">自定义触发器</system:String>
+    <system:String x:Key="ScheduledTask.Trigger.Unknown">未知</system:String>
+    <system:String x:Key="ScheduledTask.Action.None">无操作</system:String>
+    <system:String x:Key="ScheduledTask.Action.PowershellFormat">执行 Powershell: {0}</system:String>
+    <system:String x:Key="ScheduledTask.Action.Shutdown">系统关机</system:String>
+    <system:String x:Key="ScheduledTask.Action.Restart">系统重启</system:String>
+    <system:String x:Key="ScheduledTask.Action.Unknown">未知</system:String>
 </ResourceDictionary>

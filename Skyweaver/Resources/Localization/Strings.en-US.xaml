@@ -644,6 +644,10 @@
 
     <system:String x:Key="MainWindow.Ribbon.StatusTab">Status</system:String>
     <system:String x:Key="MainWindow.Ribbon.ViewTab">View</system:String>
+    <system:String x:Key="MainWindow.Ribbon.SessionTab">Session</system:String>
+    <system:String x:Key="MainWindow.Ribbon.DeskTab">Desk</system:String>
+    <system:String x:Key="MainWindow.Ribbon.MarvelousTab">Marvelous</system:String>
+    <system:String x:Key="MainWindow.Ribbon.TilesTab">Tiles</system:String>
     <system:String x:Key="MainWindow.Ribbon.ZoomGroup">Zoom</system:String>
     <system:String x:Key="MainWindow.Ribbon.ZoomFit">Fit</system:String>
     <system:String x:Key="MainWindow.Ribbon.ZoomFit.ToolTip">Zoom to fit (Ctrl+0)</system:String>
@@ -1873,4 +1877,64 @@
     <!-- WorkspaceNoteTemplate Tool -->
     <system:String x:Key="Tool.WorkspaceNoteTemplate.DisplayName">Workspace Note Template</system:String>
     <system:String x:Key="Tool.WorkspaceNoteTemplate.Description">Description placeholder</system:String>
+
+    <!-- CreateScheduledTaskDialog Localization -->
+    <system:String x:Key="ScheduledTaskDialog.Title">Scheduled Task Configuration</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Header.Title">New / Edit Scheduled Task</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Header.Description">Configure trigger conditions, execution flows, and additional actions for the scheduled task.</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TaskName.Label">Task Name</system:String>
+    <system:String x:Key="ScheduledTaskDialog.SessionFlow.Label">Associated Session Flow</system:String>
+    <system:String x:Key="ScheduledTaskDialog.AutoApproveTools">Auto-approve tool calls requiring confirmation</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Prompt.Label">Task Prompt Content</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggersConfig.Label">Trigger Configuration (Multiple Triggers)</system:String>
+    <system:String x:Key="ScheduledTaskDialog.AddTrigger">Add Trigger</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DeleteTrigger">Delete Trigger</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggerType.Label">Trigger Type</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggerType.Daily">Daily</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggerType.Weekly">Weekly</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggerType.Monthly">Monthly</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggerType.Yearly">Yearly</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggerType.Custom">Custom (Currently Unavailable)</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Label.Month">Month:</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Label.Day">Day:</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Label.Time">Time:</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Label.DayOfWeek">Day of Week:</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Sunday">Sunday</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Monday">Monday</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Tuesday">Tuesday</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Wednesday">Wednesday</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Thursday">Thursday</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Friday">Friday</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Saturday">Saturday</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Label.TriggerTime">Trigger Time:</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Label.NoExtraParams">No extra parameters required (Placeholder)</system:String>
+    <system:String x:Key="ScheduledTaskDialog.ActionsConfig.Label">Pre and Post Action Configuration</system:String>
+    <system:String x:Key="ScheduledTaskDialog.PreAction.Label">Execute before task starts...</system:String>
+    <system:String x:Key="ScheduledTaskDialog.PostAction.Label">Execute after task ends...</system:String>
+    <system:String x:Key="ScheduledTaskDialog.ActionType.None">No Action</system:String>
+    <system:String x:Key="ScheduledTaskDialog.ActionType.Powershell">Execute Powershell Script</system:String>
+    <system:String x:Key="ScheduledTaskDialog.ActionType.Shutdown">Shutdown System</system:String>
+    <system:String x:Key="ScheduledTaskDialog.ActionType.Restart">Restart System</system:String>
+    <system:String x:Key="ScheduledTaskDialog.PowershellScript.Label">Powershell Script Content</system:String>
+    
+    <!-- Code-Behind Dialog Messages & Errors -->
+    <system:String x:Key="ScheduledTaskDialog.Error.LoadFlowFailed">Failed to load session flows. Please check the session flow configuration.</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Title.Error">Error</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Title.Tip">Tip</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Warning.NameRequired">Please enter the scheduled task name.</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Warning.FlowRequired">Please select an associated session flow. If none exist, create one in the session flow editor first.</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Warning.PromptRequired">Please enter the task prompt content.</system:String>
+
+    <!-- Model Localization -->
+    <system:String x:Key="ScheduledTask.Trigger.YearlyFormat">Every year on {0}/{1} at {2}</system:String>
+    <system:String x:Key="ScheduledTask.Trigger.MonthlyFormat">Monthly on day {0} at {1}</system:String>
+    <system:String x:Key="ScheduledTask.Trigger.WeeklyFormat">Weekly on {0} at {1}</system:String>
+    <system:String x:Key="ScheduledTask.Trigger.DailyFormat">Daily at {0}</system:String>
+    <system:String x:Key="ScheduledTask.Trigger.Custom">Custom Trigger</system:String>
+    <system:String x:Key="ScheduledTask.Trigger.Unknown">Unknown</system:String>
+    <system:String x:Key="ScheduledTask.Action.None">No Action</system:String>
+    <system:String x:Key="ScheduledTask.Action.PowershellFormat">Execute Powershell: {0}</system:String>
+    <system:String x:Key="ScheduledTask.Action.Shutdown">Shutdown System</system:String>
+    <system:String x:Key="ScheduledTask.Action.Restart">Restart System</system:String>
+    <system:String x:Key="ScheduledTask.Action.Unknown">Unknown</system:String>
 </ResourceDictionary>

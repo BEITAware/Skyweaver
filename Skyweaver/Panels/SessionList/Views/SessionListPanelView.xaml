@@ -165,7 +165,7 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Row="3" Style="{DynamicResource ResourcePanelStyle}">
+            <Border Grid.Row="3" Style="{DynamicResource ResourcePanelStyle}" BorderThickness="0">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                         <GradientStop Color="#FF141924" Offset="0"/>
@@ -175,6 +175,7 @@
 
                 <ListBox Margin="4"
                           Background="Transparent"
+                          BorderBrush="Transparent"
                           BorderThickness="0"
                           ItemsSource="{Binding Sessions}"
                           SelectedItem="{Binding SelectedSession, Mode=TwoWay}"

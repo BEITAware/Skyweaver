@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Skyweaver.Services.Localization;
 
 namespace Skyweaver.Controls.ScheduledTasksControl.Models
 {
@@ -35,29 +36,30 @@ namespace Skyweaver.Controls.ScheduledTasksControl.Models
         {
             get
             {
+                var runtime = LocalizationRuntime.Instance;
                 return Type switch
                 {
-                    TriggerType.Yearly => $"每年 {Month}月{Day}日 {TimeOfDay:hh\\:mm\\:ss}",
-                    TriggerType.Monthly => $"每月 {Day}日 {TimeOfDay:hh\\:mm\\:ss}",
-                    TriggerType.Weekly => $"每周 {GetChineseDayOfWeek(DayOfWeek)} {TimeOfDay:hh\\:mm\\:ss}",
-                    TriggerType.Daily => $"每天 {TimeOfDay:hh\\:mm\\:ss}",
-                    TriggerType.Custom => "自定义触发器",
-                    _ => "未知"
+                    TriggerType.Yearly => string.Format(runtime.GetString("ScheduledTask.Trigger.YearlyFormat", "每年 {0}月{1}日 {2}"), Month, Day, $"{TimeOfDay:hh\\:mm\\:ss}"),
+                    TriggerType.Monthly => string.Format(runtime.GetString("ScheduledTask.Trigger.MonthlyFormat", "每月 {0}日 {1}"), Day, $"{TimeOfDay:hh\\:mm\\:ss}"),
+                    TriggerType.Weekly => string.Format(runtime.GetString("ScheduledTask.Trigger.WeeklyFormat", "每周 {0} {1}"), GetLocalizedDayOfWeek(DayOfWeek, runtime), $"{TimeOfDay:hh\\:mm\\:ss}"),
+                    TriggerType.Daily => string.Format(runtime.GetString("ScheduledTask.Trigger.DailyFormat", "每天 {0}"), $"{TimeOfDay:hh\\:mm\\:ss}"),
+                    TriggerType.Custom => runtime.GetString("ScheduledTask.Trigger.Custom", "自定义触发器"),
+                    _ => runtime.GetString("ScheduledTask.Trigger.Unknown", "未知")
                 };
             }
         }
 
-        private static string GetChineseDayOfWeek(DayOfWeek dayOfWeek)
+        private static string GetLocalizedDayOfWeek(DayOfWeek dayOfWeek, LocalizationRuntime runtime)
         {
             return dayOfWeek switch
             {
-                DayOfWeek.Sunday => "星期日",
-                DayOfWeek.Monday => "星期一",
-                DayOfWeek.Tuesday => "星期二",
-                DayOfWeek.Wednesday => "星期三",
-                DayOfWeek.Thursday => "星期四",
-                DayOfWeek.Friday => "星期五",
-                DayOfWeek.Saturday => "星期六",
+                DayOfWeek.Sunday => runtime.GetString("ScheduledTaskDialog.DayOfWeek.Sunday", "星期日"),
+                DayOfWeek.Monday => runtime.GetString("ScheduledTaskDialog.DayOfWeek.Monday", "星期一"),
+                DayOfWeek.Tuesday => runtime.GetString("ScheduledTaskDialog.DayOfWeek.Tuesday", "星期二"),
+                DayOfWeek.Wednesday => runtime.GetString("ScheduledTaskDialog.DayOfWeek.Wednesday", "星期三"),
+                DayOfWeek.Thursday => runtime.GetString("ScheduledTaskDialog.DayOfWeek.Thursday", "星期四"),
+                DayOfWeek.Friday => runtime.GetString("ScheduledTaskDialog.DayOfWeek.Friday", "星期五"),
+                DayOfWeek.Saturday => runtime.GetString("ScheduledTaskDialog.DayOfWeek.Saturday", "星期六"),
                 _ => dayOfWeek.ToString()
             };
         }
@@ -77,13 +79,14 @@ namespace Skyweaver.Controls.ScheduledTasksControl.Models
         {
             get
             {
+                var runtime = LocalizationRuntime.Instance;
                 return Type switch
                 {
-                    ActionType.None => "无操作",
-                    ActionType.Powershell => $"执行 Powershell: {Script}",
-                    ActionType.Shutdown => "系统关机",
-                    ActionType.Restart => "系统重启",
-                    _ => "未知"
+                    ActionType.None => runtime.GetString("ScheduledTask.Action.None", "无操作"),
+                    ActionType.Powershell => string.Format(runtime.GetString("ScheduledTask.Action.PowershellFormat", "执行 Powershell: {0}"), Script),
+                    ActionType.Shutdown => runtime.GetString("ScheduledTask.Action.Shutdown", "系统关机"),
+                    ActionType.Restart => runtime.GetString("ScheduledTask.Action.Restart", "系统重启"),
+                    _ => runtime.GetString("ScheduledTask.Action.Unknown", "未知")
                 };
             }
         }

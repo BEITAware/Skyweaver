@@ -28,6 +28,31 @@ namespace Skyweaver.ViewModels
 
         public SessionWorkspaceBridgeViewModel SessionWorkspaceBridge { get; }
 
+        public Skyweaver.PageControls.Session.ViewModels.SessionPageViewModel SessionPage { get; }
+        public Skyweaver.PageControls.Desk.ViewModels.DeskPageViewModel DeskPage { get; }
+        public Skyweaver.PageControls.Marvelous.ViewModels.MarvelousPageViewModel MarvelousPage { get; }
+        public Skyweaver.PageControls.Tiles.ViewModels.TilesPageViewModel TilesPage { get; }
+
+        private object _currentPageViewModel;
+        public object CurrentPageViewModel
+        {
+            get => _currentPageViewModel;
+            set => SetProperty(ref _currentPageViewModel, value);
+        }
+
+        private int _selectedPageIndex;
+        public int SelectedPageIndex
+        {
+            get => _selectedPageIndex;
+            set
+            {
+                if (SetProperty(ref _selectedPageIndex, value))
+                {
+                    UpdateCurrentPage();
+                }
+            }
+        }
+
         public MainViewModel()
         {
             _chatSessionRepository = new ChatSessionRepository();
@@ -38,6 +63,33 @@ namespace Skyweaver.ViewModels
             LiveTasksPanel = new LiveTasksPanelViewModel();
             FilmstripPanel = new FilmstripPanelViewModel();
             MultiFunctionAreaPanel = new MultiFunctionAreaPanelViewModel();
+
+            SessionPage = new Skyweaver.PageControls.Session.ViewModels.SessionPageViewModel(SessionListPanel, LiveTasksPanel, DocumentWorkspacePanel, MultiFunctionAreaPanel);
+            DeskPage = new Skyweaver.PageControls.Desk.ViewModels.DeskPageViewModel();
+            MarvelousPage = new Skyweaver.PageControls.Marvelous.ViewModels.MarvelousPageViewModel();
+            TilesPage = new Skyweaver.PageControls.Tiles.ViewModels.TilesPageViewModel();
+
+            _currentPageViewModel = SessionPage;
+            _selectedPageIndex = 0;
+        }
+
+        private void UpdateCurrentPage()
+        {
+            switch (SelectedPageIndex)
+            {
+                case 0:
+                    CurrentPageViewModel = SessionPage;
+                    break;
+                case 1:
+                    CurrentPageViewModel = DeskPage;
+                    break;
+                case 2:
+                    CurrentPageViewModel = MarvelousPage;
+                    break;
+                case 3:
+                    CurrentPageViewModel = TilesPage;
+                    break;
+            }
         }
 
         public async Task HandleGuiClosingAsync()

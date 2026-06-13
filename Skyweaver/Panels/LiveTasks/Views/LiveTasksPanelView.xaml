@@ -12,8 +12,8 @@
         <Style x:Key="LiveTaskListBoxStyle" TargetType="ListBox">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Background" Value="#35000000"/>
-            <Setter Property="BorderBrush" Value="#25FFFFFF"/>
-            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="4"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
@@ -333,7 +333,7 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Row="3" Style="{DynamicResource ResourcePanelStyle}">
+            <Border Grid.Row="3" Style="{DynamicResource ResourcePanelStyle}" BorderThickness="0">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                         <GradientStop Color="#FF141924" Offset="0"/>

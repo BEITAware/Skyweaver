@@ -3106,4 +3106,64 @@
     <system:String x:Key="Search.Status.VertexMaxResultsSavedFormat">Vertex AI の最大結果数が {0} に設定されました。</system:String>
     <system:String x:Key="Search.Status.VertexSearchModelSaved">Vertex AI 検索モデルが保存されました。</system:String>
     <system:String x:Key="MainWindow.Status.Welcome">Skyweaverへようこそ！</system:String>
+
+    <!-- CreateScheduledTaskDialog Localization -->
+    <system:String x:Key="ScheduledTaskDialog.Title">スケジュールタスク設定</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Header.Title">新規 / 編集スケジュールタスク</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Header.Description">スケジュールタスクのトリガー条件、実行プロセス、および追加のアクションを設定します。</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TaskName.Label">タスク名</system:String>
+    <system:String x:Key="ScheduledTaskDialog.SessionFlow.Label">関連セッションフロー</system:String>
+    <system:String x:Key="ScheduledTaskDialog.AutoApproveTools">確認が必要なツール呼び出しを自動承認する</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Prompt.Label">タスクプロンプト内容</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggersConfig.Label">トリガー設定 (複数トリガー)</system:String>
+    <system:String x:Key="ScheduledTaskDialog.AddTrigger">トリガーを追加</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DeleteTrigger">トリガーを削除</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggerType.Label">トリガータイプ</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggerType.Daily">毎日</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggerType.Weekly">毎週</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggerType.Monthly">毎月</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggerType.Yearly">毎年</system:String>
+    <system:String x:Key="ScheduledTaskDialog.TriggerType.Custom">カスタム（現在利用不可）</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Label.Month">月:</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Label.Day">日:</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Label.Time">時間:</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Label.DayOfWeek">曜日:</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Sunday">日曜日</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Monday">月曜日</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Tuesday">火曜日</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Wednesday">水曜日</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Thursday">木曜日</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Friday">金曜日</system:String>
+    <system:String x:Key="ScheduledTaskDialog.DayOfWeek.Saturday">土曜日</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Label.TriggerTime">トリガー時刻:</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Label.NoExtraParams">追加のパラメータは不要（プレースホルダー）</system:String>
+    <system:String x:Key="ScheduledTaskDialog.ActionsConfig.Label">前後のアクション設定</system:String>
+    <system:String x:Key="ScheduledTaskDialog.PreAction.Label">タスク開始前に実行...</system:String>
+    <system:String x:Key="ScheduledTaskDialog.PostAction.Label">タスク終了後に実行...</system:String>
+    <system:String x:Key="ScheduledTaskDialog.ActionType.None">アクションなし</system:String>
+    <system:String x:Key="ScheduledTaskDialog.ActionType.Powershell">Powershellスクリプトを実行</system:String>
+    <system:String x:Key="ScheduledTaskDialog.ActionType.Shutdown">システムシャットダウン</system:String>
+    <system:String x:Key="ScheduledTaskDialog.ActionType.Restart">システム再起動</system:String>
+    <system:String x:Key="ScheduledTaskDialog.PowershellScript.Label">Powershellスクリプト内容</system:String>
+    
+    <!-- Code-Behind Dialog Messages & Errors -->
+    <system:String x:Key="ScheduledTaskDialog.Error.LoadFlowFailed">セッションフローの読み込みに失敗しました。セッションフローの設定を確認してください。</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Title.Error">エラー</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Title.Tip">ヒント</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Warning.NameRequired">スケジュールタスク名を入力してください。</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Warning.FlowRequired">関連するセッションフローを選択してください。セッションフローがない場合は、先にセッションフローエディタで作成してください。</system:String>
+    <system:String x:Key="ScheduledTaskDialog.Warning.PromptRequired">タスクプロンプト内容を入力してください。</system:String>
+
+    <!-- Model Localization -->
+    <system:String x:Key="ScheduledTask.Trigger.YearlyFormat">毎年 {0}月{1}日 {2}</system:String>
+    <system:String x:Key="ScheduledTask.Trigger.MonthlyFormat">毎月 {0}日 {1}</system:String>
+    <system:String x:Key="ScheduledTask.Trigger.WeeklyFormat">毎週 {0} {1}</system:String>
+    <system:String x:Key="ScheduledTask.Trigger.DailyFormat">毎日 {0}</system:String>
+    <system:String x:Key="ScheduledTask.Trigger.Custom">カスタムトリガー</system:String>
+    <system:String x:Key="ScheduledTask.Trigger.Unknown">未知</system:String>
+    <system:String x:Key="ScheduledTask.Action.None">アクションなし</system:String>
+    <system:String x:Key="ScheduledTask.Action.PowershellFormat">Powershell実行: {0}</system:String>
+    <system:String x:Key="ScheduledTask.Action.Shutdown">システムシャットダウン</system:String>
+    <system:String x:Key="ScheduledTask.Action.Restart">システム再起動</system:String>
+    <system:String x:Key="ScheduledTask.Action.Unknown">未知</system:String>
 </ResourceDictionary>

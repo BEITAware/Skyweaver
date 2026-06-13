@@ -1,0 +1,7 @@
+ActualWidth: 420
+ActualHeight: 56
+scale: 1
+left: 26
+baseWidth: 368
+x: 38
+digitTop: 8

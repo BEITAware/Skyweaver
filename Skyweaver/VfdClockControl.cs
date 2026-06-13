@@ -7,7 +7,7 @@ namespace Skyweaver;
 
 public sealed class VfdClockControl : FrameworkElement
 {
-    private const double DesiredWidth = 420;
+    private const double DesiredWidth = 368;
     private const double DesiredHeight = 56;
     private const double SidePadding = 12;
     private const double TopPadding = 8;
