@@ -1,4 +1,4 @@
-<UserControl x:Class="Skyweaver.Controls.ShellChatSessionControl.Views.ShellChatSessionControl"
+﻿<UserControl x:Class="Skyweaver.Controls.ShellChatSessionControl.Views.ShellChatSessionControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -589,7 +589,7 @@
                              VerticalScrollBarVisibility="Auto"
                              HorizontalScrollBarVisibility="Disabled"
                              AcceptsReturn="True"
-                             PreviewKeyDown="InputTextBox_PreviewKeyDown"
+                             PreviewKeyDown="InputTextBox_PreviewKeyDown" TextChanged="InputTextBox_TextChanged"
                              AllowDrop="True"
                              PreviewDragOver="InputTextBox_PreviewDragOver"
                              PreviewDrop="InputTextBox_PreviewDrop"/>
