@@ -5,6 +5,7 @@ using Skyweaver.Controls.ChatSessionControl.Views;
 using Skyweaver.Services.Localization;
 using Skyweaver.Services.SkyweaverTools;
 
+
 namespace Skyweaver.Tools
 {
     public sealed class LoadToolKitsTool : ISkyweaverTool, ISkyweaverToolInvocationPresentationProvider, ISkyweaverToolPromptDescriptionProvider
@@ -13,18 +14,21 @@ namespace Skyweaver.Tools
 
         private readonly SkyweaverToolKitService _toolKitService;
         private readonly SkyweaverPromptToolCatalogService _promptToolCatalogService;
+        private readonly SkyweaverToolManager _toolManager;
 
         public LoadToolKitsTool()
-            : this(new SkyweaverToolKitService(), new SkyweaverPromptToolCatalogService())
+            : this(new SkyweaverToolKitService(), new SkyweaverPromptToolCatalogService(), new SkyweaverToolManager())
         {
         }
 
         public LoadToolKitsTool(
             SkyweaverToolKitService toolKitService,
-            SkyweaverPromptToolCatalogService promptToolCatalogService)
+            SkyweaverPromptToolCatalogService promptToolCatalogService,
+            SkyweaverToolManager toolManager)
         {
             _toolKitService = toolKitService ?? throw new ArgumentNullException(nameof(toolKitService));
             _promptToolCatalogService = promptToolCatalogService ?? throw new ArgumentNullException(nameof(promptToolCatalogService));
+            _toolManager = toolManager ?? throw new ArgumentNullException(nameof(toolManager));
         }
 
         public SkyweaverToolDefinition Definition => CreateDefinition();
@@ -33,11 +37,31 @@ namespace Skyweaver.Tools
         {
             ArgumentNullException.ThrowIfNull(context);
 
-            var availableToolKitNames = context.AvailableToolKits
-                .Select(GetToolKitDisplayName)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderBy(item => item, StringComparer.OrdinalIgnoreCase)
-                .ToArray();
+            var enabledToolNames = _toolManager.GetEnabledTools(resolveIcons: false)
+                .Select(t => t.Definition.Name)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var availableToolKitNamesList = new List<string>();
+            foreach (var toolKit in context.AvailableToolKits.OrderBy(tk => GetToolKitDisplayName(tk), StringComparer.OrdinalIgnoreCase))
+            {
+                var displayName = GetToolKitDisplayName(toolKit);
+                var nonDisabledTools = toolKit.Tools
+                    .Select(t => t.ToolName?.Trim() ?? string.Empty)
+                    .Where(name => name.Length > 0 && enabledToolNames.Contains(name))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
+
+                if (nonDisabledTools.Length > 0)
+                {
+                    availableToolKitNamesList.Add($"{displayName} (\u5305\u542b\u5de5\u5177: {string.Join("\u3001", nonDisabledTools)})");
+                }
+                else
+                {
+                    availableToolKitNamesList.Add($"{displayName} (\u65e0\u53ef\u7528\u5de5\u5177)");
+                }
+            }
+            var availableToolKitNames = availableToolKitNamesList.ToArray();
 
             if (availableToolKitNames.Length == 0)
             {

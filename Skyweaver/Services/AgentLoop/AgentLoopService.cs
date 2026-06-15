@@ -783,6 +783,7 @@ namespace Skyweaver.Services.AgentLoop
                     iterationNumber,
                     ResolveSessionResourcesFolderPath(request),
                     runtimeToolCallNotice,
+                    request.OptimizeToolCallPromptEnabled,
                     cancellationToken).ConfigureAwait(false);
 
                 persistentHistory = preparedContext.PersistentHistory
@@ -817,6 +818,7 @@ namespace Skyweaver.Services.AgentLoop
                         iterationNumber,
                         ResolveSessionResourcesFolderPath(request),
                         runtimeToolCallNotice,
+                        request.OptimizeToolCallPromptEnabled,
                         cancellationToken).ConfigureAwait(false);
                 }
 
@@ -953,6 +955,7 @@ namespace Skyweaver.Services.AgentLoop
                                 iterationNumber,
                                 ResolveSessionResourcesFolderPath(request),
                                 runtimeToolCallNotice,
+                                request.OptimizeToolCallPromptEnabled,
                                 cancellationToken).ConfigureAwait(false);
 
                             persistentHistory = preparedContext.PersistentHistory
@@ -1235,6 +1238,7 @@ namespace Skyweaver.Services.AgentLoop
                     request.CompactionFilePath,
                     sessionResourcesFolderPath: ResolveSessionResourcesFolderPath(request),
                     runtimeToolCallNotice: BuildRuntimeToolCallNotice(request),
+                    forceOptimizeToolCallPrompt: request.OptimizeToolCallPromptEnabled,
                     cancellationToken: cancellationToken).ConfigureAwait(false);
                 var afterCount = await _tokenCounter.CountAsync(
                     compactionModel,

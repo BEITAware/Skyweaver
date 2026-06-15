@@ -21,9 +21,10 @@ namespace Skyweaver.Services.Daemon
 
         public static ScheduledTasksDaemonService Instance => LazyInstance.Value;
 
+        public event EventHandler<string>? ManualTaskCompleted;
+
         private readonly ScheduledTasksRepository _repository = new();
         private readonly ChatSessionRepository _sessionRepository = new();
-        private readonly ChatSessionRuntimeService _runtimeService = new();
         private readonly CancellationTokenSource _cancellationTokenSource = new();
         private readonly object _gate = new();
         private Task? _workerTask;
@@ -43,6 +44,63 @@ namespace Skyweaver.Services.Daemon
                     _workerTask = Task.Run(() => CheckLoopAsync(_cancellationTokenSource.Token));
                 }
             }
+        }
+
+        public void RunTask(ScheduledTask task)
+        {
+            if (task == null) return;
+            lock (_gate)
+            {
+                if (_runningTaskIds.Contains(task.Id))
+                {
+                    return;
+                }
+                _runningTaskIds.Add(task.Id);
+            }
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var now = DateTime.Now;
+                    var binding = new ChatSessionFlowBinding
+                    {
+                        FilePath = task.SessionFlowPath,
+                        GraphName = task.SessionFlowName
+                    };
+                    var sessionName = $"{task.Name}_{now:yyyyMMdd_HHmmss}";
+                    var session = _sessionRepository.Create(sessionName, binding);
+                    session.IsScheduledTaskSession = true;
+                    _sessionRepository.Save(session);
+
+                    var request = new ChatSessionRuntimeRequest
+                    {
+                        Session = session,
+                        UserText = task.Prompt,
+                        UserContentBlocks = Array.Empty<LanguageModelChatContentBlock>(),
+                        ToolConfirmationCallback = task.AutoApproveTools
+                            ? (confirmationRequest, ct) => Task.FromResult(AgentToolConfirmationResult.Approve())
+                            : null
+                    };
+
+                    var runtimeService = new ChatSessionRuntimeService();
+                    await runtimeService.ExecuteTurnAsync(request, cancellationToken: _cancellationTokenSource.Token).ConfigureAwait(false);
+
+                    NotificationService.Instance.ShowTransient(string.Format("计划任务 {0} 已完成！", task.Name));
+                    ManualTaskCompleted?.Invoke(this, task.Name);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed to run scheduled task: {ex.Message}");
+                }
+                finally
+                {
+                    lock (_gate)
+                    {
+                        _runningTaskIds.Remove(task.Id);
+                    }
+                }
+            }, _cancellationTokenSource.Token);
         }
 
         private async Task CheckLoopAsync(CancellationToken cancellationToken)
@@ -169,7 +227,8 @@ namespace Skyweaver.Services.Daemon
                                         : null
                                 };
 
-                                await _runtimeService.ExecuteTurnAsync(request, cancellationToken: cancellationToken).ConfigureAwait(false);
+                                var runtimeService = new ChatSessionRuntimeService();
+                                await runtimeService.ExecuteTurnAsync(request, cancellationToken: cancellationToken).ConfigureAwait(false);
 
                                 NotificationService.Instance.ShowTransient(string.Format("计划任务 {0} 已完成！", task.Name));
                             }

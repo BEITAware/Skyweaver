@@ -22,16 +22,33 @@ namespace Skyweaver.Windows
         /// </summary>
         public bool IsLiveSessionSelected { get; private set; }
 
+        /// <summary>
+        /// 用户是否选择了“便笺”
+        /// </summary>
+        public bool IsStickyNoteSelected { get; private set; }
+
         public AddTileUniversalDialog(IReadOnlyList<ScheduledTask> allTasks)
         {
-            MainTitle = "添加磁贴";
-            MainDescription = "选择要添加到 Live Tiles 页面的任务或实时会话。";
+            MainTitle = GetString("AddTileDialog.Title", "添加磁贴");
+            MainDescription = GetString("AddTileDialog.Description", "选择要添加到 Live Tiles 页面的任务或实时会话。");
             SetMainIcon("/Skyweaver;component/Resources/SkyweaverLogo.png");
+
+            // 0. 固定存在一个按钮：便笺
+            AddTriggerOption(
+                GetString("AddTileDialog.Option.StickyNote", "便笺"),
+                GetString("AddTileDialog.Option.StickyNote.Description", "添加一个空白便笺磁贴以记录临时信息"),
+                "/Skyweaver;component/Resources/EditDocument.png",
+                _ =>
+                {
+                    IsStickyNoteSelected = true;
+                    CloseWithResult(true);
+                    return true;
+                });
 
             // 1. 固定存在一个按钮：开始实时会话......
             AddTriggerOption(
-                "开始实时会话......",
-                "添加一个实时会话控制磁贴",
+                GetString("AddTileDialog.Option.LiveSession", "开始实时会话......"),
+                GetString("AddTileDialog.Option.LiveSession.Description", "添加一个实时会话控制磁贴"),
                 "/Skyweaver;component/Resources/NewNodeGraph.png",
                 _ =>
                 {
@@ -41,10 +58,12 @@ namespace Skyweaver.Windows
                 });
 
             // 2. 固定存在一个按钮：更多任务...... (弹出面板为ComboBox)
-            var panel = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+            var panel = new Grid { VerticalAlignment = VerticalAlignment.Center };
+            panel.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            panel.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
             var comboBox = new ComboBox
             {
-                MinWidth = 220,
                 MinHeight = 32,
                 DisplayMemberPath = "Name",
                 ItemsSource = allTasks,
@@ -58,7 +77,7 @@ namespace Skyweaver.Windows
 
             var confirmBtn = new Button
             {
-                Content = "添加",
+                Content = GetString("AddTileDialog.Button.Add", "添加"),
                 MinWidth = 70,
                 MinHeight = 32,
                 VerticalAlignment = VerticalAlignment.Center
@@ -72,12 +91,14 @@ namespace Skyweaver.Windows
                 }
             };
 
+            Grid.SetColumn(comboBox, 0);
+            Grid.SetColumn(confirmBtn, 1);
             panel.Children.Add(comboBox);
             panel.Children.Add(confirmBtn);
 
             AddSettingOption(
-                "更多任务......",
-                "从所有已保存的计划任务中选择并添加磁贴",
+                GetString("AddTileDialog.Option.MoreTasks", "更多任务......"),
+                GetString("AddTileDialog.Option.MoreTasks.Description", "从所有已保存的计划任务中选择并添加磁贴"),
                 "/Skyweaver;component/Resources/ContextMenuSubMenu.png",
                 panel,
                 _ =>
@@ -96,7 +117,7 @@ namespace Skyweaver.Windows
 
                 AddTriggerOption(
                     task.Name,
-                    $"关联会话流：{task.SessionFlowName}",
+                    string.Format(GetString("AddTileDialog.Task.SessionFlowFormat", "关联会话流：{0}"), task.SessionFlowName),
                     $"/Skyweaver;component/Resources/{iconName}",
                     _ =>
                     {
@@ -105,6 +126,11 @@ namespace Skyweaver.Windows
                         return true;
                     });
             }
+        }
+
+        private string GetString(string resourceKey, string fallback)
+        {
+            return Skyweaver.Services.Localization.LocalizationRuntime.Instance.GetString(resourceKey, fallback);
         }
     }
 }

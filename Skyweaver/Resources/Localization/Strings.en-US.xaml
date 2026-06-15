@@ -1937,4 +1937,46 @@
     <system:String x:Key="ScheduledTask.Action.Shutdown">Shutdown System</system:String>
     <system:String x:Key="ScheduledTask.Action.Restart">Restart System</system:String>
     <system:String x:Key="ScheduledTask.Action.Unknown">Unknown</system:String>
+
+    <!-- Tiles Page -->
+    <system:String x:Key="TilesPage.Header.LiveTiles">Live Tiles</system:String>
+    <system:String x:Key="TilesPage.Header.LiveSession">Live Session</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.Run">Run</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.RemoveTile">Remove tile</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.LockUnlock">Lock/Unlock</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.Size">Size</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.Size.Small">Small (1x1)</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.Size.Wide">Wide (2x1)</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.Size.Large">Large (2x2)</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.CustomImage">Custom image...</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.CustomIcon">Custom Icon...</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.CustomIcon.Create">Create</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.CustomIcon.Chores">Chores</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.CustomIcon.Investigate">Investigate</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.CustomIcon.Default">Default</system:String>
+    <system:String x:Key="TilesPage.LiveSession.Title">Live Session</system:String>
+    <system:String x:Key="TilesPage.LiveSession.Description">Real-time interactive session control workspace.</system:String>
+    <system:String x:Key="TilesPage.Group.DefaultName.0">Daily</system:String>
+    <system:String x:Key="TilesPage.Group.DefaultName.1">Productivity</system:String>
+    <system:String x:Key="TilesPage.Group.DefaultName.2">Briefing</system:String>
+    <system:String x:Key="TilesPage.Group.DefaultName.3">Entertainment</system:String>
+    <system:String x:Key="TilesPage.Group.DefaultName.4">Applications</system:String>
+    <system:String x:Key="TilesPage.Group.Format">Group {0}</system:String>
+    <system:String x:Key="TilesPage.Message.RunningFormat">Running {0}...</system:String>
+    <system:String x:Key="TilesPage.Message.Title">Tile system</system:String>
+    <system:String x:Key="TilesPage.Dialog.ImageFilter">Image files (*.png;*.jpg;*.jpeg;*.gif;*.bmp)|*.png;*.jpg;*.jpeg;*.gif;*.bmp</system:String>
+    <system:String x:Key="TilesPage.Dialog.ChooseImageTitle">Choose tile image</system:String>
+    <system:String x:Key="TilesPage.LiveSession.StartText">Start Live Session</system:String>
+
+    <!-- Add Tile Dialog -->
+    <system:String x:Key="AddTileDialog.Title">Add Tile</system:String>
+    <system:String x:Key="AddTileDialog.Description">Choose a task or a live session to add to the Live Tiles page.</system:String>
+    <system:String x:Key="AddTileDialog.Option.StickyNote">Sticky Note</system:String>
+    <system:String x:Key="AddTileDialog.Option.StickyNote.Description">Add a blank sticky note tile to record temporary information</system:String>
+    <system:String x:Key="AddTileDialog.Option.LiveSession">Start Live Session...</system:String>
+    <system:String x:Key="AddTileDialog.Option.LiveSession.Description">Add a live session control tile</system:String>
+    <system:String x:Key="AddTileDialog.Option.MoreTasks">More Tasks...</system:String>
+    <system:String x:Key="AddTileDialog.Option.MoreTasks.Description">Choose and add a tile from all saved scheduled tasks</system:String>
+    <system:String x:Key="AddTileDialog.Button.Add">Add</system:String>
+    <system:String x:Key="AddTileDialog.Task.SessionFlowFormat">Associated session flow: {0}</system:String>
 </ResourceDictionary>

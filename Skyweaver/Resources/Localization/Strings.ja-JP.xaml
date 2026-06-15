@@ -3166,4 +3166,46 @@
     <system:String x:Key="ScheduledTask.Action.Shutdown">システムシャットダウン</system:String>
     <system:String x:Key="ScheduledTask.Action.Restart">システム再起動</system:String>
     <system:String x:Key="ScheduledTask.Action.Unknown">未知</system:String>
+
+    <!-- Tiles Page -->
+    <system:String x:Key="TilesPage.Header.LiveTiles">ライブ タイル</system:String>
+    <system:String x:Key="TilesPage.Header.LiveSession">ライブ セッション</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.Run">実行</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.RemoveTile">タイルを削除</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.LockUnlock">固定/固定解除</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.Size">サイズ</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.Size.Small">小 (1x1)</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.Size.Wide">ワイド (2x1)</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.Size.Large">大 (2x2)</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.CustomImage">カスタム画像...</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.CustomIcon">カスタムアイコン...</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.CustomIcon.Create">作成</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.CustomIcon.Chores">家事</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.CustomIcon.Investigate">調査</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.CustomIcon.Default">デフォルト</system:String>
+    <system:String x:Key="TilesPage.LiveSession.Title">ライブ セッション</system:String>
+    <system:String x:Key="TilesPage.LiveSession.Description">リアルタイムのインタラクティブなセッション制御ワークスペース。</system:String>
+    <system:String x:Key="TilesPage.Group.DefaultName.0">日常</system:String>
+    <system:String x:Key="TilesPage.Group.DefaultName.1">生産性</system:String>
+    <system:String x:Key="TilesPage.Group.DefaultName.2">ブリーフィング</system:String>
+    <system:String x:Key="TilesPage.Group.DefaultName.3">エンターテインメント</system:String>
+    <system:String x:Key="TilesPage.Group.DefaultName.4">アプリケーション</system:String>
+    <system:String x:Key="TilesPage.Group.Format">グループ {0}</system:String>
+    <system:String x:Key="TilesPage.Message.RunningFormat">{0} を実行中...</system:String>
+    <system:String x:Key="TilesPage.Message.Title">タイルシステム</system:String>
+    <system:String x:Key="TilesPage.Dialog.ImageFilter">画像ファイル (*.png;*.jpg;*.jpeg;*.gif;*.bmp)|*.png;*.jpg;*.jpeg;*.gif;*.bmp</system:String>
+    <system:String x:Key="TilesPage.Dialog.ChooseImageTitle">タイル画像を選択</system:String>
+    <system:String x:Key="TilesPage.LiveSession.StartText">ライブセッションを開始...</system:String>
+
+    <!-- Add Tile Dialog -->
+    <system:String x:Key="AddTileDialog.Title">タイルを追加</system:String>
+    <system:String x:Key="AddTileDialog.Description">ライブタイルページに追加するタスクまたはライブセッションを選択します。</system:String>
+    <system:String x:Key="AddTileDialog.Option.StickyNote">付箋</system:String>
+    <system:String x:Key="AddTileDialog.Option.StickyNote.Description">一時的な情報を記録するための空の付箋タイルを追加します</system:String>
+    <system:String x:Key="AddTileDialog.Option.LiveSession">ライブセッションを開始...</system:String>
+    <system:String x:Key="AddTileDialog.Option.LiveSession.Description">ライブセッション制御タイルを追加します</system:String>
+    <system:String x:Key="AddTileDialog.Option.MoreTasks">その他のタスク...</system:String>
+    <system:String x:Key="AddTileDialog.Option.MoreTasks.Description">保存されているすべてのスケジュールタスクから選択してタイルを追加します</system:String>
+    <system:String x:Key="AddTileDialog.Button.Add">追加</system:String>
+    <system:String x:Key="AddTileDialog.Task.SessionFlowFormat">関連付けられたセッションフロー: {0}</system:String>
 </ResourceDictionary>

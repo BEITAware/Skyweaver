@@ -132,6 +132,24 @@ namespace Skyweaver.Tools
 
             var inputBlocks = await BuildInputBlocksAsync(resourcePaths, cancellationToken).ConfigureAwait(false);
             var toolContext = context.WithSubAgentMode(true).WithRuntimeAgent(subAgent, context.SupportsHostToolConfirmation);
+
+            // 为子代理创建专属的临时资源目录与 Compaction 文件，实现主子代理运行时的完全解耦
+            var tempSubAgentDir = Path.Combine(Path.GetTempPath(), "SkyweaverSubAgents", $"{subAgent.AgentId}_{System.Guid.NewGuid():N}");
+            var toolCallFolder = Path.Combine(tempSubAgentDir, "ToolCalls");
+            Directory.CreateDirectory(toolCallFolder);
+            var compactionFilePath = Path.Combine(tempSubAgentDir, "Compaction.xml");
+            await File.WriteAllTextAsync(compactionFilePath, """
+            <?xml version="1.0" encoding="utf-8"?>
+            <Compaction SchemaVersion="1">
+              <ToolCalls />
+              <TokenCounts />
+            </Compaction>
+            """, cancellationToken).ConfigureAwait(false);
+
+            context.Properties.TryGetValue("sessionId", out var parentSessionIdObj);
+            var parentSessionId = parentSessionIdObj as string ?? "unknown_session";
+            var subAgentScopeId = $"{parentSessionId}_sub_{subAgent.AgentId}_{System.Guid.NewGuid():N}";
+
             var result = await _agentLoopService.RunAsync(new AgentLoopRequest
             {
                 Agent = subAgent.DeepClone(),
@@ -141,6 +159,12 @@ namespace Skyweaver.Tools
                 ToolContext = toolContext,
                 EnableGemmaThoughtCompatibility = true,
                 IsSubAgent = true,
+                MinCompactionEnabled = true,
+                MaxCompactionEnabled = true,
+                OptimizeToolCallPromptEnabled = true,
+                CompactionFilePath = compactionFilePath,
+                ToolCallResourceFolderPath = toolCallFolder,
+                AsyncToolStateScopeId = subAgentScopeId,
                 ToolCallIdFactory = new TransientToolCallIdFactory().Create,
                 ToolConfirmationCallback = null
             }, cancellationToken).ConfigureAwait(false);

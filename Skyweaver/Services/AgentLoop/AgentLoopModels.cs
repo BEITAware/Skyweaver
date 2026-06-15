@@ -57,6 +57,8 @@ namespace Skyweaver.Services.AgentLoop
         public Func<AgentToolConfirmationRequest, CancellationToken, Task<AgentToolConfirmationResult>>? ToolConfirmationCallback { get; init; }
 
         public bool IsScheduledTaskSession { get; init; }
+
+        public bool OptimizeToolCallPromptEnabled { get; init; }
     }
 
     public sealed class AgentLoopMediaProcessingProgress

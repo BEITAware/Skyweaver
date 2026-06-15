@@ -29,6 +29,8 @@ namespace Skyweaver.Services.ChatSession
 
         public string? UserTextPreview { get; init; }
 
+        public string LatestOutput { get; init; } = string.Empty;
+
         public DateTime StartedAtUtc { get; init; }
 
         public DateTime UpdatedAtUtc { get; init; }
@@ -56,6 +58,8 @@ namespace Skyweaver.Services.ChatSession
 
             public string? UserTextPreview { get; init; }
 
+            public string LatestOutput { get; set; } = string.Empty;
+
             public DateTime StartedAtUtc { get; init; }
 
             public DateTime UpdatedAtUtc { get; set; }
@@ -75,6 +79,7 @@ namespace Skyweaver.Services.ChatSession
                     CurrentAgentId = CurrentAgentId,
                     ModelId = ModelId,
                     UserTextPreview = UserTextPreview,
+                    LatestOutput = LatestOutput,
                     StartedAtUtc = StartedAtUtc,
                     UpdatedAtUtc = UpdatedAtUtc
                 };
@@ -181,6 +186,10 @@ namespace Skyweaver.Services.ChatSession
                 }
 
                 record.StatusText = ResolveStatusText(runtimeEvent, record.StatusText);
+                if (runtimeEvent.Kind == ChatSessionRuntimeEventKind.TextDelta && !string.IsNullOrEmpty(runtimeEvent.TextDelta))
+                {
+                    record.LatestOutput += runtimeEvent.TextDelta;
+                }
                 record.UpdatedAtUtc = DateTime.UtcNow;
                 changed = true;
             }

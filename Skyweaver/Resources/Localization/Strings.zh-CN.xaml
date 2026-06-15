@@ -1875,4 +1875,46 @@
     <system:String x:Key="ScheduledTask.Action.Shutdown">系统关机</system:String>
     <system:String x:Key="ScheduledTask.Action.Restart">系统重启</system:String>
     <system:String x:Key="ScheduledTask.Action.Unknown">未知</system:String>
+
+    <!-- Tiles Page -->
+    <system:String x:Key="TilesPage.Header.LiveTiles">Live Tiles</system:String>
+    <system:String x:Key="TilesPage.Header.LiveSession">Live Session</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.Run">运行</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.RemoveTile">移除磁贴</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.LockUnlock">锁定/解锁</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.Size">大小</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.Size.Small">小 (1x1)</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.Size.Wide">宽 (2x1)</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.Size.Large">大 (2x2)</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.CustomImage">自定义图片...</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.CustomIcon">自定义图标...</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.CustomIcon.Create">创建</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.CustomIcon.Chores">家务</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.CustomIcon.Investigate">调查</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.CustomIcon.Default">默认</system:String>
+    <system:String x:Key="TilesPage.LiveSession.Title">实时会话</system:String>
+    <system:String x:Key="TilesPage.LiveSession.Description">实时交互式会话控制工作空间。</system:String>
+    <system:String x:Key="TilesPage.Group.DefaultName.0">日常</system:String>
+    <system:String x:Key="TilesPage.Group.DefaultName.1">生产力</system:String>
+    <system:String x:Key="TilesPage.Group.DefaultName.2">简报</system:String>
+    <system:String x:Key="TilesPage.Group.DefaultName.3">娱乐</system:String>
+    <system:String x:Key="TilesPage.Group.DefaultName.4">应用</system:String>
+    <system:String x:Key="TilesPage.Group.Format">分组 {0}</system:String>
+    <system:String x:Key="TilesPage.Message.RunningFormat">正在运行 {0}...</system:String>
+    <system:String x:Key="TilesPage.Message.Title">磁贴系统</system:String>
+    <system:String x:Key="TilesPage.Dialog.ImageFilter">图片文件 (*.png;*.jpg;*.jpeg;*.gif;*.bmp)|*.png;*.jpg;*.jpeg;*.gif;*.bmp</system:String>
+    <system:String x:Key="TilesPage.Dialog.ChooseImageTitle">选择磁贴图片</system:String>
+    <system:String x:Key="TilesPage.LiveSession.StartText">开始实时对话...</system:String>
+
+    <!-- Add Tile Dialog -->
+    <system:String x:Key="AddTileDialog.Title">添加磁贴</system:String>
+    <system:String x:Key="AddTileDialog.Description">选择要添加到 Live Tiles 页面的任务或实时会话。</system:String>
+    <system:String x:Key="AddTileDialog.Option.StickyNote">便笺</system:String>
+    <system:String x:Key="AddTileDialog.Option.StickyNote.Description">添加一个空白便笺磁贴以记录临时信息</system:String>
+    <system:String x:Key="AddTileDialog.Option.LiveSession">开始实时会话......</system:String>
+    <system:String x:Key="AddTileDialog.Option.LiveSession.Description">添加一个实时会话控制磁贴</system:String>
+    <system:String x:Key="AddTileDialog.Option.MoreTasks">更多任务......</system:String>
+    <system:String x:Key="AddTileDialog.Option.MoreTasks.Description">从所有已保存的计划任务中选择并添加磁贴</system:String>
+    <system:String x:Key="AddTileDialog.Button.Add">添加</system:String>
+    <system:String x:Key="AddTileDialog.Task.SessionFlowFormat">关联会话流：{0}</system:String>
 </ResourceDictionary>

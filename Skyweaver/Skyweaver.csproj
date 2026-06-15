@@ -50,9 +50,20 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Resources\*.png" />
+    <None Remove="Resources\*.ico" />
+    <None Remove="Resources\*.jpg" />
+    <Content Remove="Resources\*.png" />
+    <Content Remove="Resources\*.ico" />
+    <Content Remove="Resources\*.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Resources\*.png" />
-    <Resource Include="Resources\*.ico" />
     <Resource Include="Resources\*.jpg" />
+    <Resource Include="Resources\SkyweaverAppLogo.ico" />
+    <Resource Include="Resources\WorkFolder.ico" />
+    <Resource Include="Resources\Setup.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -85,6 +96,10 @@
   <ItemGroup>
     <None Remove="Controls\aurora.png" />
     <None Remove="Controls\Aurora4.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Skyweaver.ico" />
   </ItemGroup>
 
   <ItemGroup>

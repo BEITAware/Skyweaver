@@ -245,6 +245,15 @@
                                                 <TextBlock Text="添加磁贴" HorizontalAlignment="Center" FontSize="10"/>
                                             </StackPanel>
                                         </Button>
+
+                                        <Button Style="{DynamicResource RibbonLargeButtonStyle}"
+                                                Command="{Binding TilesPage.ResetAllCompletedCommand}">
+                                            <StackPanel>
+                                                <Image Source="pack://application:,,,/Resources/Refresh.png" Width="32" Height="32" Margin="0,2,0,2"
+                                                       RenderOptions.BitmapScalingMode="HighQuality" UseLayoutRounding="True"/>
+                                                <TextBlock Text="重置已完成" HorizontalAlignment="Center" FontSize="10"/>
+                                            </StackPanel>
+                                        </Button>
                                     </StackPanel>
                                 </GroupBox>
                             </StackPanel>

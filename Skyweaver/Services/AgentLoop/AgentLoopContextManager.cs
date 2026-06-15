@@ -59,7 +59,8 @@ namespace Skyweaver.Services.AgentLoop
                 iterationNumber: 0,
                 sessionResourcesFolderPath: null,
                 runtimeToolCallNotice: null,
-                cancellationToken);
+                forceOptimizeToolCallPrompt: false,
+                cancellationToken: cancellationToken);
         }
 
         internal Task<AgentLoopContextPreparationResult> PrepareAsync(
@@ -74,6 +75,7 @@ namespace Skyweaver.Services.AgentLoop
             int iterationNumber = 0,
             string? sessionResourcesFolderPath = null,
             string? runtimeToolCallNotice = null,
+            bool forceOptimizeToolCallPrompt = false,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(agent);
@@ -92,7 +94,8 @@ namespace Skyweaver.Services.AgentLoop
                 upstreamContentBlocks,
                 currentTurnHistory,
                 sessionResourcesFolderPath,
-                runtimeToolCallNotice);
+                runtimeToolCallNotice,
+                forceOptimizeToolCallPrompt);
             var compactedPreparedMessages = _compactionStore.ApplyCompaction(
                 compactionFilePath,
                 preparedMessages);
@@ -112,7 +115,8 @@ namespace Skyweaver.Services.AgentLoop
             IReadOnlyList<LanguageModelChatContentBlock>? upstreamContentBlocks,
             IReadOnlyList<LanguageModelChatMessage> turnHistory,
             string? sessionResourcesFolderPath,
-            string? runtimeToolCallNotice)
+            string? runtimeToolCallNotice,
+            bool forceOptimizeToolCallPrompt)
         {
             var messages = new List<LanguageModelChatMessage>(persistentHistory.Count + turnHistory.Count + 4)
             {
@@ -122,14 +126,15 @@ namespace Skyweaver.Services.AgentLoop
             messages.AddRange(persistentHistory.Select(message => message.Clone()));
             messages.Add(CreateInputMessage(upstreamInput, upstreamContentBlocks));
             messages.AddRange(turnHistory.Select(message => message.Clone()));
-            InsertToolProtocolTailReminder(messages, sessionResourcesFolderPath, runtimeToolCallNotice);
+            InsertToolProtocolTailReminder(messages, sessionResourcesFolderPath, runtimeToolCallNotice, forceOptimizeToolCallPrompt);
             return messages;
         }
 
         private static void InsertToolProtocolTailReminder(
             List<LanguageModelChatMessage> messages,
             string? sessionResourcesFolderPath,
-            string? runtimeToolCallNotice)
+            string? runtimeToolCallNotice,
+            bool forceOptimizeToolCallPrompt)
         {
             ArgumentNullException.ThrowIfNull(messages);
 
@@ -159,7 +164,7 @@ namespace Skyweaver.Services.AgentLoop
 
             var config = ContextArrangementRuntime.Instance.GetConfiguration();
             LanguageModelChatMessage? reminder = null;
-            if (config.OptimizeToolCallPrompt)
+            if (config.OptimizeToolCallPrompt || forceOptimizeToolCallPrompt)
             {
                 reminder = CreateToolProtocolTailReminder();
             }

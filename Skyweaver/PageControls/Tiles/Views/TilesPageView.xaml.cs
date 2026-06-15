@@ -12,6 +12,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Skyweaver.PageControls.Tiles.ViewModels;
+using Skyweaver.Services.StickyNotes;
 
 namespace Skyweaver.PageControls.Tiles.Views
 {
@@ -135,6 +136,7 @@ namespace Skyweaver.PageControls.Tiles.Views
             {
                 _subscribedViewModel.TileLayoutChanging -= OnTileLayoutChanging;
                 _subscribedViewModel.TileLayoutChanged -= OnTileLayoutChanged;
+                _subscribedViewModel.RequestNavigateToLiveSession -= ViewModel_RequestNavigateToLiveSession;
             }
 
             _subscribedViewModel = viewModel;
@@ -143,7 +145,13 @@ namespace Skyweaver.PageControls.Tiles.Views
             {
                 _subscribedViewModel.TileLayoutChanging += OnTileLayoutChanging;
                 _subscribedViewModel.TileLayoutChanged += OnTileLayoutChanged;
+                _subscribedViewModel.RequestNavigateToLiveSession += ViewModel_RequestNavigateToLiveSession;
             }
+        }
+
+        private void ViewModel_RequestNavigateToLiveSession(object? sender, EventArgs e)
+        {
+            SwitchToPage(1);
         }
 
         private void OnTileLayoutChanging(object? sender, TileLayoutTransitionEventArgs e)
@@ -335,14 +343,28 @@ namespace Skyweaver.PageControls.Tiles.Views
 
         private void OnTilePreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton != MouseButton.Left ||
-                sender is not Button button ||
-                button.DataContext is not TileItemViewModel tile)
+            if (e.ChangedButton != MouseButton.Left)
             {
                 return;
             }
 
-            var presenter = FindVisualParent<ContentPresenter>(button);
+            // 如果点击发生在 TextBox 中，不要触发拖动，以允许文本编辑和选择
+            if (e.OriginalSource is DependencyObject depObj)
+            {
+                var textBox = FindVisualParent<TextBox>(depObj);
+                if (textBox != null)
+                {
+                    return;
+                }
+            }
+
+            if (sender is not FrameworkElement element ||
+                element.DataContext is not TileItemViewModel tile)
+            {
+                return;
+            }
+
+            var presenter = FindVisualParent<ContentPresenter>(element);
             if (presenter == null)
             {
                 return;
@@ -1049,6 +1071,15 @@ namespace Skyweaver.PageControls.Tiles.Views
 
             return parent is T typedParent ? typedParent : FindVisualParent<T>(parent);
         }
+
+        private void AeroWarningIcon_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.DataContext is TileItemViewModel tileVm)
+            {
+                tileVm.HasUnreadReplies = false;
+                StickyNotesService.MarkRepliesAsRead(tileVm.Code);
+            }
+        }
     }
 
     public sealed class SizeToBoolConverter : IValueConverter
@@ -1119,6 +1150,68 @@ namespace Skyweaver.PageControls.Tiles.Views
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return Binding.DoNothing;
+        }
+    }
+
+    /// <summary>
+    /// ScrollViewer 辅助类，提供自动滚动到底部的附加属性
+    /// </summary>
+    public static class ScrollViewerHelper
+    {
+        // 自动滚动到末尾的附加属性
+        public static readonly DependencyProperty AutoScrollToEndProperty =
+            DependencyProperty.RegisterAttached(
+                "AutoScrollToEnd",
+                typeof(bool),
+                typeof(ScrollViewerHelper),
+                new PropertyMetadata(false, OnAutoScrollToEndChanged));
+
+        public static bool GetAutoScrollToEnd(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(AutoScrollToEndProperty);
+        }
+
+        public static void SetAutoScrollToEnd(DependencyObject obj, bool value)
+        {
+            obj.SetValue(AutoScrollToEndProperty, value);
+        }
+
+        // 当属性值变化时，订阅或取消订阅滚动事件
+        private static void OnAutoScrollToEndChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is not ScrollViewer scrollViewer) return;
+
+            bool autoScroll = (bool)e.NewValue;
+            if (autoScroll)
+            {
+                scrollViewer.ScrollChanged += ScrollViewer_ScrollChanged;
+                scrollViewer.Loaded += ScrollViewer_Loaded;
+            }
+            else
+            {
+                scrollViewer.ScrollChanged -= ScrollViewer_ScrollChanged;
+                scrollViewer.Loaded -= ScrollViewer_Loaded;
+            }
+        }
+
+        private static void ScrollViewer_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is ScrollViewer scrollViewer)
+            {
+                scrollViewer.ScrollToEnd();
+            }
+        }
+
+        // 内容变化时自动滚动到底部
+        private static void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            if (sender is ScrollViewer scrollViewer)
+            {
+                if (e.ExtentHeightChange > 0)
+                {
+                    scrollViewer.ScrollToEnd();
+                }
+            }
         }
     }
 }

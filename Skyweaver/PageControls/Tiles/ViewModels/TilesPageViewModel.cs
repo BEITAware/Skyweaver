@@ -11,11 +11,13 @@ using Skyweaver.Commands;
 using Skyweaver.Infrastructure.Mvvm;
 using Skyweaver.Services.Directories;
 using Skyweaver.Windows;
+using Skyweaver.Services.StickyNotes;
 
 namespace Skyweaver.PageControls.Tiles.ViewModels
 {
     public sealed class TileItemViewModel : ObservableObject
     {
+        private string _code = string.Empty;
         private string _name = string.Empty;
         private string _icon = string.Empty;
         private string _size = "1x1";
@@ -27,12 +29,28 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
         private bool _isDragging;
         private int _groupIndex = -1;
         private bool _isLocked;
+        private bool _isCompletedState;
+        private bool _isManuallyTriggered;
+
+        // 运行状态字段
+        private bool _isRunning;
+        private string _statusText = string.Empty;
+        private string _currentNodeTitle = string.Empty;
+        private string _currentAgentId = string.Empty;
+        private string _modelId = string.Empty;
+        private string _latestOutput = string.Empty;
+        private DateTime _startedAtUtc;
+        private DateTime _updatedAtUtc;
+        private string _flowName = string.Empty;
 
         public TileItemViewModel()
         {
+            Skyweaver.Services.Localization.LocalizationRuntime.Instance.LanguageChanged += OnLanguageChanged;
+            StickyNotesService.ReplyAdded += OnReplyAdded;
+
             RunCommand = new RelayCommand(() =>
             {
-                MessageBox.Show($"Running {Name}...", "Tile system", MessageBoxButton.OK, MessageBoxImage.Information);
+                RequestRun?.Invoke(this, EventArgs.Empty);
             });
 
             RemoveCommand = new RelayCommand(() =>
@@ -52,8 +70,8 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
             {
                 var openFileDialog = new Microsoft.Win32.OpenFileDialog
                 {
-                    Filter = "Image files (*.png;*.jpg;*.jpeg;*.gif;*.bmp)|*.png;*.jpg;*.jpeg;*.gif;*.bmp",
-                    Title = "Choose tile image"
+                    Filter = Skyweaver.Services.Localization.LocalizationRuntime.Instance.GetString("TilesPage.Dialog.ImageFilter", "Image files (*.png;*.jpg;*.jpeg;*.gif;*.bmp)|*.png;*.jpg;*.jpeg;*.gif;*.bmp"),
+                    Title = Skyweaver.Services.Localization.LocalizationRuntime.Instance.GetString("TilesPage.Dialog.ChooseImageTitle", "Choose tile image")
                 };
 
                 if (openFileDialog.ShowDialog() == true)
@@ -74,6 +92,39 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
                     Icon = iconPath;
                 }
             });
+
+            ViewRepliesCommand = new RelayCommand(() =>
+            {
+                if (IsStickyNote && !string.IsNullOrEmpty(Code))
+                {
+                    StickyNotesService.MarkRepliesAsRead(Code);
+                    HasUnreadReplies = false;
+
+                    var owner = System.Windows.Application.Current?.MainWindow;
+                    var dialog = new StickyNoteRepliesWindow(ThreeDaysReplies, DisplayName + " - 回复列表");
+                    if (owner != null)
+                    {
+                        dialog.Owner = owner;
+                        dialog.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner;
+                    }
+                    dialog.ShowDialog();
+                }
+            });
+        }
+
+        public string Code
+        {
+            get => _code;
+            set
+            {
+                if (SetProperty(ref _code, value ?? string.Empty))
+                {
+                    if (IsStickyNote)
+                    {
+                        RefreshReplies();
+                    }
+                }
+            }
         }
 
         public string Name
@@ -83,9 +134,33 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
             {
                 if (SetProperty(ref _name, value))
                 {
+                    OnPropertyChanged(nameof(DisplayName));
                     RequestLayoutUpdate?.Invoke(this, EventArgs.Empty);
                 }
             }
+        }
+
+        public string DisplayName
+        {
+            get
+            {
+                if (Name == "Live Session")
+                {
+                    return Skyweaver.Services.Localization.LocalizationRuntime.Instance.GetString("TilesPage.Header.LiveSession", "Live Session");
+                }
+                return Name;
+            }
+        }
+
+        private void OnLanguageChanged(object? sender, EventArgs e)
+        {
+            OnPropertyChanged(nameof(DisplayName));
+        }
+
+        public void Cleanup()
+        {
+            Skyweaver.Services.Localization.LocalizationRuntime.Instance.LanguageChanged -= OnLanguageChanged;
+            StickyNotesService.ReplyAdded -= OnReplyAdded;
         }
 
         public string Icon
@@ -199,7 +274,7 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
 
         public bool IsNon2x2 => Size != "2x2";
 
-        public bool HasCustomImage => IsLarge && !string.IsNullOrEmpty(CustomImageSource);
+        public bool HasCustomImage => !string.IsNullOrEmpty(CustomImageSource);
 
         public bool IsImageIcon
         {
@@ -230,6 +305,128 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
 
         public event EventHandler? RequestRemove;
 
+        public event EventHandler? RequestRun;
+
+        public bool IsRunning
+        {
+            get => _isRunning;
+            set => SetProperty(ref _isRunning, value);
+        }
+
+        public bool IsCompletedState
+        {
+            get => _isCompletedState;
+            set => SetProperty(ref _isCompletedState, value);
+        }
+
+        public bool IsManuallyTriggered
+        {
+            get => _isManuallyTriggered;
+            set => SetProperty(ref _isManuallyTriggered, value);
+        }
+
+        public string StatusText
+        {
+            get => _statusText;
+            set => SetProperty(ref _statusText, value ?? string.Empty);
+        }
+
+        public string CurrentNodeTitle
+        {
+            get => _currentNodeTitle;
+            set
+            {
+                if (SetProperty(ref _currentNodeTitle, value ?? string.Empty))
+                {
+                    OnPropertyChanged(nameof(AgentLoopStatus));
+                }
+            }
+        }
+
+        public string CurrentAgentId
+        {
+            get => _currentAgentId;
+            set
+            {
+                if (SetProperty(ref _currentAgentId, value ?? string.Empty))
+                {
+                    OnPropertyChanged(nameof(AgentLoopStatus));
+                }
+            }
+        }
+
+        public string ModelId
+        {
+            get => _modelId;
+            set
+            {
+                if (SetProperty(ref _modelId, value ?? string.Empty))
+                {
+                    OnPropertyChanged(nameof(AgentLoopStatus));
+                }
+            }
+        }
+
+        public string LatestOutput
+        {
+            get => _latestOutput;
+            set => SetProperty(ref _latestOutput, value ?? string.Empty);
+        }
+
+        public DateTime StartedAtUtc
+        {
+            get => _startedAtUtc;
+            set
+            {
+                if (SetProperty(ref _startedAtUtc, value))
+                {
+                    OnPropertyChanged(nameof(RunningDurationText));
+                }
+            }
+        }
+
+        public DateTime UpdatedAtUtc
+        {
+            get => _updatedAtUtc;
+            set => SetProperty(ref _updatedAtUtc, value);
+        }
+
+        public string FlowName
+        {
+            get => _flowName;
+            set => SetProperty(ref _flowName, value ?? string.Empty);
+        }
+
+        public string RunningDurationText
+        {
+            get
+            {
+                if (StartedAtUtc == DateTime.MinValue) return "00:00";
+                var duration = DateTime.UtcNow - StartedAtUtc;
+                if (duration < TimeSpan.Zero) duration = TimeSpan.Zero;
+                return duration.TotalHours >= 1
+                    ? $"{(int)duration.TotalHours}:{duration.Minutes:00}:{duration.Seconds:00}"
+                    : $"{duration.Minutes:00}:{duration.Seconds:00}";
+            }
+        }
+
+        public string AgentLoopStatus
+        {
+            get
+            {
+                var parts = new List<string>();
+                if (!string.IsNullOrWhiteSpace(CurrentNodeTitle)) parts.Add($"节点: {CurrentNodeTitle}");
+                if (!string.IsNullOrWhiteSpace(CurrentAgentId)) parts.Add($"代理: {CurrentAgentId}");
+                if (!string.IsNullOrWhiteSpace(ModelId)) parts.Add($"模型: {ModelId}");
+                return parts.Count > 0 ? string.Join(" | ", parts) : "初始化中...";
+            }
+        }
+
+        public void RefreshDuration()
+        {
+            OnPropertyChanged(nameof(RunningDurationText));
+        }
+
         private static string NormalizeSize(string? size)
         {
             return size is "1x2" or "2x2" ? size : "1x1";
@@ -257,6 +454,111 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
             OnPropertyChanged(nameof(IsNon2x2));
             OnPropertyChanged(nameof(HasCustomImage));
         }
+
+        private bool _isStickyNote;
+        private string _stickyNoteText = string.Empty;
+        private string _stickyNoteMetadata = "未完成";
+
+        public bool IsStickyNote
+        {
+            get => _isStickyNote;
+            set
+            {
+                if (SetProperty(ref _isStickyNote, value))
+                {
+                    if (value && !string.IsNullOrEmpty(Code))
+                    {
+                        RefreshReplies();
+                    }
+                    RequestLayoutUpdate?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        public string StickyNoteText
+        {
+            get => _stickyNoteText;
+            set
+            {
+                if (SetProperty(ref _stickyNoteText, value ?? string.Empty))
+                {
+                    RequestLayoutUpdate?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        public string StickyNoteMetadata
+        {
+            get => _stickyNoteMetadata;
+            set
+            {
+                if (SetProperty(ref _stickyNoteMetadata, value ?? "未完成"))
+                {
+                    RequestLayoutUpdate?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        private string _stickyNoteColor = "Beige";
+        public string StickyNoteColor
+        {
+            get => _stickyNoteColor;
+            set
+            {
+                if (SetProperty(ref _stickyNoteColor, value ?? "Beige"))
+                {
+                    RequestLayoutUpdate?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        private bool _hasUnreadReplies;
+        public bool HasUnreadReplies
+        {
+            get => _hasUnreadReplies;
+            set => SetProperty(ref _hasUnreadReplies, value);
+        }
+
+        public ObservableCollection<StickyNoteReplyViewModel> ThreeDaysReplies { get; } = new ObservableCollection<StickyNoteReplyViewModel>();
+
+        public ICommand ViewRepliesCommand { get; }
+
+        private void OnReplyAdded(string tileCode)
+        {
+            if (string.Equals(Code, tileCode, StringComparison.OrdinalIgnoreCase))
+            {
+                RefreshReplies();
+            }
+        }
+
+        public void RefreshReplies()
+        {
+            if (!IsStickyNote || string.IsNullOrEmpty(Code)) return;
+
+            var replies = StickyNotesService.GetReplies(Code);
+            var threeDaysAgo = DateTime.Now.AddDays(-3);
+            
+            var threeDaysRepliesList = replies
+                .Where(r => r.DateTime >= threeDaysAgo)
+                .OrderByDescending(r => r.DateTime)
+                .Select(r => new StickyNoteReplyViewModel
+                {
+                    Creator = r.Creator,
+                    DateTime = r.DateTime,
+                    Content = r.Content
+                })
+                .ToList();
+
+            System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
+            {
+                ThreeDaysReplies.Clear();
+                foreach (var reply in threeDaysRepliesList)
+                {
+                    ThreeDaysReplies.Add(reply);
+                }
+                HasUnreadReplies = replies.Any(r => !r.IsRead && r.DateTime >= threeDaysAgo);
+            });
+        }
     }
 
     public sealed class TileGroupViewModel : ObservableObject
@@ -269,6 +571,21 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
         private int _dropRowSpan = 1;
         private bool _isDropPreviewVisible;
 
+        public TileGroupViewModel()
+        {
+            Skyweaver.Services.Localization.LocalizationRuntime.Instance.LanguageChanged += OnLanguageChanged;
+        }
+
+        private void OnLanguageChanged(object? sender, EventArgs e)
+        {
+            OnPropertyChanged(nameof(DisplayName));
+        }
+
+        public void Cleanup()
+        {
+            Skyweaver.Services.Localization.LocalizationRuntime.Instance.LanguageChanged -= OnLanguageChanged;
+        }
+
         public int Index
         {
             get => _index;
@@ -278,7 +595,61 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
         public string Name
         {
             get => _name;
-            set => SetProperty(ref _name, string.IsNullOrWhiteSpace(value) ? DefaultName(Index) : value.Trim());
+            set
+            {
+                if (SetProperty(ref _name, string.IsNullOrWhiteSpace(value) ? DefaultName(Index) : value.Trim()))
+                {
+                    OnPropertyChanged(nameof(DisplayName));
+                }
+            }
+        }
+
+        public string DisplayName
+        {
+            get
+            {
+                string trimName = Name.Trim();
+                int defaultIndex = GetDefaultNameIndex(trimName);
+                if (defaultIndex >= 0)
+                {
+                    return DefaultName(defaultIndex);
+                }
+                return Name;
+            }
+            set
+            {
+                Name = value;
+            }
+        }
+
+        private static readonly string[][] s_defaultNamesByLang = new string[][]
+        {
+            new string[] { "日常", "生产力", "简报", "娱乐", "应用" },
+            new string[] { "Daily", "Productivity", "Briefing", "Entertainment", "Applications" },
+            new string[] { "日常", "生産性", "ブリーフィング", "エンターテインメント", "アプリケーション" }
+        };
+
+        private static int GetDefaultNameIndex(string name)
+        {
+            for (int langIndex = 0; langIndex < s_defaultNamesByLang.Length; langIndex++)
+            {
+                for (int i = 0; i < s_defaultNamesByLang[langIndex].Length; i++)
+                {
+                    if (string.Equals(s_defaultNamesByLang[langIndex][i], name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return i;
+                    }
+                }
+            }
+            if (name.StartsWith("分组 ") || name.StartsWith("Group ") || name.StartsWith("グループ "))
+            {
+                string numStr = name.Substring(name.IndexOf(' ') + 1);
+                if (int.TryParse(numStr, out int num) && num > 0)
+                {
+                    return num - 1 + 5;
+                }
+            }
+            return -1;
         }
 
         public int DropColumn
@@ -329,8 +700,20 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
 
         internal static string DefaultName(int index)
         {
-            string[] names = { "Essentials", "Productivity", "System Tools", "Entertainment", "Applications" };
-            return index >= 0 && index < names.Length ? names[index] : $"Group {index + 1}";
+            string key = $"TilesPage.Group.DefaultName.{index}";
+            string fallback;
+            switch (index)
+            {
+                case 0: fallback = "日常"; break;
+                case 1: fallback = "生产力"; break;
+                case 2: fallback = "简报"; break;
+                case 3: fallback = "娱乐"; break;
+                case 4: fallback = "应用"; break;
+                default:
+                    string groupFormat = Skyweaver.Services.Localization.LocalizationRuntime.Instance.GetString("TilesPage.Group.Format", "分组 {0}");
+                    return string.Format(groupFormat, index + 1);
+            }
+            return Skyweaver.Services.Localization.LocalizationRuntime.Instance.GetString(key, fallback);
         }
     }
 
@@ -343,10 +726,25 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
         private readonly List<string> _rememberedGroupNames = new();
         private bool _isPacking;
         private bool _isAnyTileDragging;
+        private readonly System.Windows.Threading.DispatcherTimer _runningTimer;
+
+        public event EventHandler? RequestNavigateToLiveSession;
 
         public TilesPageViewModel()
         {
             InitializeDefaultTiles();
+
+            Skyweaver.Services.ChatSession.ActiveChatSessionExecutionRegistry.Instance.Changed += Registry_Changed;
+            Skyweaver.Services.Daemon.ScheduledTasksDaemonService.Instance.ManualTaskCompleted += DaemonService_ManualTaskCompleted;
+
+            _runningTimer = new System.Windows.Threading.DispatcherTimer(System.Windows.Threading.DispatcherPriority.Background)
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
+            _runningTimer.Tick += (_, _) => RefreshRunningDurations();
+            _runningTimer.Start();
+
+            UpdateTilesRunningStatus();
         }
 
         public ObservableCollection<TileItemViewModel> Tiles { get; } = new ObservableCollection<TileItemViewModel>();
@@ -436,6 +834,11 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
 
                 if (Tiles.Count == 0)
                 {
+                    foreach (var group in TileGroups)
+                    {
+                        group.PropertyChanged -= OnGroupPropertyChanged;
+                        group.Cleanup();
+                    }
                     TileGroups.Clear();
                     return;
                 }
@@ -565,6 +968,7 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
         {
             tile.RequestLayoutUpdate += OnTileRequestLayoutUpdate;
             tile.RequestRemove += OnTileRequestRemove;
+            tile.RequestRun += OnTileRequestRun;
             Tiles.Add(tile);
         }
 
@@ -597,8 +1001,182 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
 
             tile.RequestLayoutUpdate -= OnTileRequestLayoutUpdate;
             tile.RequestRemove -= OnTileRequestRemove;
+            tile.RequestRun -= OnTileRequestRun;
+            tile.Cleanup();
             Tiles.Remove(tile);
             PackTiles();
+        }
+
+        private ICommand? _resetAllCompletedCommand;
+        public ICommand ResetAllCompletedCommand => _resetAllCompletedCommand ??= new RelayCommand(() =>
+        {
+            foreach (var tile in Tiles)
+            {
+                tile.IsCompletedState = false;
+                tile.IsManuallyTriggered = false;
+                tile.StatusText = string.Empty;
+                tile.CurrentNodeTitle = string.Empty;
+                tile.CurrentAgentId = string.Empty;
+                tile.ModelId = string.Empty;
+                tile.LatestOutput = string.Empty;
+                tile.FlowName = string.Empty;
+            }
+        });
+
+        private void OnTileRequestRun(object? sender, EventArgs e)
+        {
+            if (sender is TileItemViewModel tile)
+            {
+                if (tile.Name == "Live Session")
+                {
+                    RequestNavigateToLiveSession?.Invoke(this, EventArgs.Empty);
+                }
+                else
+                {
+                    var matchedTiles = Tiles.Where(t => string.Equals(t.Name, tile.Name, StringComparison.OrdinalIgnoreCase)).ToList();
+                    if (tile.IsCompletedState)
+                    {
+                        foreach (var t in matchedTiles)
+                        {
+                            t.IsCompletedState = false;
+                            t.IsManuallyTriggered = false;
+                            t.StatusText = string.Empty;
+                            t.CurrentNodeTitle = string.Empty;
+                            t.CurrentAgentId = string.Empty;
+                            t.ModelId = string.Empty;
+                            t.LatestOutput = string.Empty;
+                            t.FlowName = string.Empty;
+                        }
+                    }
+                    else
+                    {
+                        foreach (var t in matchedTiles)
+                        {
+                            t.IsManuallyTriggered = true;
+                        }
+                        RunScheduledTask(tile.Name);
+                    }
+                }
+            }
+        }
+
+        private void DaemonService_ManualTaskCompleted(object? sender, string taskName)
+        {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher == null) return;
+
+            if (dispatcher.CheckAccess())
+            {
+                SetTilesCompletedState(taskName);
+            }
+            else
+            {
+                dispatcher.BeginInvoke(new Action(() => SetTilesCompletedState(taskName)), System.Windows.Threading.DispatcherPriority.Background);
+            }
+        }
+
+        private void SetTilesCompletedState(string taskName)
+        {
+            var matchedTiles = Tiles.Where(t => string.Equals(t.Name, taskName, StringComparison.OrdinalIgnoreCase)).ToList();
+            foreach (var tile in matchedTiles)
+            {
+                tile.IsCompletedState = true;
+                tile.IsManuallyTriggered = false;
+                tile.StatusText = "已完成";
+            }
+        }
+
+        private void RunScheduledTask(string taskName)
+        {
+            try
+            {
+                var repository = new Skyweaver.Controls.ScheduledTasksControl.Services.ScheduledTasksRepository();
+                var tasks = repository.LoadAll();
+                var task = tasks.FirstOrDefault(t => t.Name == taskName);
+                if (task != null)
+                {
+                    Skyweaver.Services.Daemon.ScheduledTasksDaemonService.Instance.RunTask(task);
+                }
+                else
+                {
+                    MessageBox.Show($"未找到计划任务「{taskName}」", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"启动计划任务失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void Registry_Changed(object? sender, EventArgs e)
+        {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher == null || dispatcher.CheckAccess())
+            {
+                UpdateTilesRunningStatus();
+                return;
+            }
+            dispatcher.BeginInvoke(new Action(UpdateTilesRunningStatus), System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+        private void UpdateTilesRunningStatus()
+        {
+            var snapshots = Skyweaver.Services.ChatSession.ActiveChatSessionExecutionRegistry.Instance.GetSnapshot();
+            foreach (var tile in Tiles)
+            {
+                if (tile.Name == "Live Session")
+                {
+                    continue;
+                }
+
+                var snapshot = snapshots.FirstOrDefault(s =>
+                    s.SessionTitle.StartsWith($"{tile.Name}_", StringComparison.OrdinalIgnoreCase) ||
+                    s.SessionTitle.Equals(tile.Name, StringComparison.OrdinalIgnoreCase));
+
+                if (snapshot != null)
+                {
+                    tile.IsRunning = true;
+                    tile.StatusText = snapshot.StatusText;
+                    tile.CurrentNodeTitle = snapshot.CurrentNodeTitle ?? string.Empty;
+                    tile.CurrentAgentId = snapshot.CurrentAgentId ?? string.Empty;
+                    tile.ModelId = snapshot.ModelId ?? string.Empty;
+                    tile.LatestOutput = snapshot.LatestOutput;
+                    tile.StartedAtUtc = snapshot.StartedAtUtc;
+                    tile.UpdatedAtUtc = snapshot.UpdatedAtUtc;
+                    tile.FlowName = snapshot.FlowName;
+                }
+                else
+                {
+                    if (tile.IsRunning && tile.IsManuallyTriggered)
+                    {
+                        tile.IsCompletedState = true;
+                        tile.IsManuallyTriggered = false;
+                        tile.StatusText = "已完成";
+                    }
+                    else if (!tile.IsCompletedState)
+                    {
+                        tile.StatusText = string.Empty;
+                        tile.CurrentNodeTitle = string.Empty;
+                        tile.CurrentAgentId = string.Empty;
+                        tile.ModelId = string.Empty;
+                        tile.LatestOutput = string.Empty;
+                        tile.FlowName = string.Empty;
+                    }
+                    tile.IsRunning = false;
+                    tile.StartedAtUtc = DateTime.MinValue;
+                }
+            }
+        }
+
+        private void RefreshRunningDurations()
+        {
+            foreach (var tile in Tiles)
+            {
+                if (tile.IsRunning)
+                {
+                    tile.RefreshDuration();
+                }
+            }
         }
 
         private string GetTilesXmlPath()
@@ -614,6 +1192,13 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
                 var filePath = GetTilesXmlPath();
                 if (!File.Exists(filePath))
                 {
+                    foreach (var tile in Tiles)
+                    {
+                        tile.RequestLayoutUpdate -= OnTileRequestLayoutUpdate;
+                        tile.RequestRemove -= OnTileRequestRemove;
+                        tile.RequestRun -= OnTileRequestRun;
+                        tile.Cleanup();
+                    }
                     Tiles.Clear();
                     PackTiles();
                     return;
@@ -623,10 +1208,19 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
                 var root = doc.Root;
                 if (root == null) return;
 
+                foreach (var tile in Tiles)
+                {
+                    tile.RequestLayoutUpdate -= OnTileRequestLayoutUpdate;
+                    tile.RequestRemove -= OnTileRequestRemove;
+                    tile.RequestRun -= OnTileRequestRun;
+                    tile.Cleanup();
+                }
                 Tiles.Clear();
+                var loadedCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 foreach (var tileEl in root.Elements("Tile"))
                 {
                     var name = (string?)tileEl.Attribute("Name") ?? string.Empty;
+                    var code = (string?)tileEl.Attribute("Code");
                     var icon = (string?)tileEl.Attribute("Icon") ?? string.Empty;
                     var size = (string?)tileEl.Attribute("Size") ?? "1x1";
                     var col = int.Parse((string?)tileEl.Attribute("Column") ?? "0");
@@ -634,9 +1228,20 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
                     var groupIndex = int.Parse((string?)tileEl.Attribute("GroupIndex") ?? "-1");
                     var isLocked = bool.Parse((string?)tileEl.Attribute("IsLocked") ?? "false");
                     var customImageSource = (string?)tileEl.Attribute("CustomImageSource");
+                    var isStickyNote = bool.Parse((string?)tileEl.Attribute("IsStickyNote") ?? "false");
+                    var stickyNoteText = (string?)tileEl.Attribute("StickyNoteText") ?? string.Empty;
+                    var stickyNoteMetadata = (string?)tileEl.Attribute("StickyNoteMetadata") ?? "未完成";
+                    var stickyNoteColor = (string?)tileEl.Attribute("StickyNoteColor") ?? "Beige";
+
+                    if (string.IsNullOrWhiteSpace(code) || loadedCodes.Contains(code))
+                    {
+                        code = GenerateUniqueTileCode(name, isStickyNote, loadedCodes);
+                    }
+                    loadedCodes.Add(code);
 
                     var tile = new TileItemViewModel
                     {
+                        Code = code,
                         Name = name,
                         Icon = icon,
                         Size = size,
@@ -644,7 +1249,11 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
                         Row = row,
                         GroupIndex = groupIndex,
                         IsLocked = isLocked,
-                        CustomImageSource = customImageSource
+                        CustomImageSource = customImageSource,
+                        IsStickyNote = isStickyNote,
+                        StickyNoteText = stickyNoteText,
+                        StickyNoteMetadata = stickyNoteMetadata,
+                        StickyNoteColor = stickyNoteColor
                     };
 
                     AddTile(tile);
@@ -656,6 +1265,51 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading tiles: {ex.Message}");
             }
+        }
+
+        public void CreateStickyNoteFromAgent(string text, string size)
+        {
+            int targetGroupIndex = -1;
+            for (int i = 0; i < TileGroups.Count; i++)
+            {
+                if (string.Equals(TileGroups[i].Name, "代理", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(TileGroups[i].DisplayName, "代理", StringComparison.OrdinalIgnoreCase))
+                {
+                    targetGroupIndex = i;
+                    break;
+                }
+            }
+
+            if (targetGroupIndex == -1)
+            {
+                targetGroupIndex = TileGroups.Count;
+                RememberGroupName(targetGroupIndex, "代理");
+            }
+
+            string wpfSize = "1x1";
+            if (size == "2x2") wpfSize = "2x2";
+            else if (size == "2x1" || size == "1x2") wpfSize = "1x2";
+
+            var colors = new[] { "Beige", "Green", "Purple" };
+            var randomColor = colors[new Random().Next(colors.Length)];
+
+            var newTile = new TileItemViewModel
+            {
+                Name = "便笺",
+                Size = wpfSize,
+                IsStickyNote = true,
+                StickyNoteText = text,
+                StickyNoteMetadata = "未完成",
+                StickyNoteColor = randomColor,
+                GroupIndex = targetGroupIndex
+            };
+
+            var existingCodes = Tiles.Select(t => t.Code).Where(c => !string.IsNullOrEmpty(c));
+            newTile.Code = GenerateUniqueTileCode(newTile.Name, newTile.IsStickyNote, existingCodes);
+
+            AddTile(newTile);
+            PackTiles();
+            SaveTiles();
         }
 
         private bool _isSaving;
@@ -713,12 +1367,17 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
                     new XElement("Tiles",
                         Tiles.Select(t => new XElement("Tile",
                             new XAttribute("Name", t.Name),
+                            new XAttribute("Code", t.Code ?? string.Empty),
                             new XAttribute("Icon", t.Icon ?? string.Empty),
                             new XAttribute("Size", t.Size ?? "1x1"),
                             new XAttribute("Column", t.Column),
                             new XAttribute("Row", t.Row),
                             new XAttribute("GroupIndex", t.GroupIndex),
                             new XAttribute("IsLocked", t.IsLocked),
+                            new XAttribute("IsStickyNote", t.IsStickyNote),
+                            new XAttribute("StickyNoteText", t.StickyNoteText ?? string.Empty),
+                            new XAttribute("StickyNoteMetadata", t.StickyNoteMetadata ?? "未完成"),
+                            new XAttribute("StickyNoteColor", t.StickyNoteColor ?? "Beige"),
                             t.CustomImageSource != null ? new XAttribute("CustomImageSource", t.CustomImageSource) : null
                         ))
                     )
@@ -760,7 +1419,21 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
             if (dialog.ShowDialog() == true)
             {
                 TileItemViewModel? newTile = null;
-                if (dialog.IsLiveSessionSelected)
+                if (dialog.IsStickyNoteSelected)
+                {
+                    var colors = new[] { "Beige", "Green", "Purple" };
+                    var randomColor = colors[new Random().Next(colors.Length)];
+                    newTile = new TileItemViewModel
+                    {
+                        Name = "便笺",
+                        Size = "1x1",
+                        IsStickyNote = true,
+                        StickyNoteMetadata = "未完成",
+                        StickyNoteColor = randomColor,
+                        GroupIndex = -1
+                    };
+                }
+                else if (dialog.IsLiveSessionSelected)
                 {
                     newTile = new TileItemViewModel
                     {
@@ -783,6 +1456,8 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
 
                 if (newTile != null)
                 {
+                    var existingCodes = Tiles.Select(t => t.Code).Where(c => !string.IsNullOrEmpty(c));
+                    newTile.Code = GenerateUniqueTileCode(newTile.Name, newTile.IsStickyNote, existingCodes);
                     AddTile(newTile);
                     PackTiles();
                 }
@@ -876,6 +1551,7 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
                 var group = TileGroups[^1];
                 RememberGroupName(TileGroups.Count - 1, group.Name);
                 group.PropertyChanged -= OnGroupPropertyChanged;
+                group.Cleanup();
                 TileGroups.RemoveAt(TileGroups.Count - 1);
             }
 
@@ -956,6 +1632,82 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
             }
         }
 
+        private static string GenerateUniqueTileCode(string name, bool isStickyNote, IEnumerable<string> existingCodes)
+        {
+            string prefix = "tile";
+            if (isStickyNote)
+            {
+                prefix = "sticky_note";
+            }
+            else if (name == "Live Session")
+            {
+                prefix = "live_session";
+            }
+            else if (!string.IsNullOrWhiteSpace(name))
+            {
+                string cleanName = CleanNameForCode(name);
+                if (!string.IsNullOrEmpty(cleanName))
+                {
+                    prefix = cleanName;
+                }
+            }
+
+            string candidate = prefix;
+            int counter = 1;
+            var existingSet = new HashSet<string>(existingCodes, StringComparer.OrdinalIgnoreCase);
+            while (existingSet.Contains(candidate))
+            {
+                candidate = $"{prefix}_{counter}";
+                counter++;
+            }
+            return candidate;
+        }
+
+        private static string CleanNameForCode(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return "tile";
+
+            string lowerName = name.Trim().ToLowerInvariant();
+            
+            var commonTranslations = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "便笺", "sticky_note" },
+                { "日常", "daily" },
+                { "生产力", "productivity" },
+                { "简报", "briefing" },
+                { "娱乐", "entertainment" },
+                { "应用", "applications" }
+            };
+
+            if (commonTranslations.TryGetValue(lowerName, out var translation))
+            {
+                return translation;
+            }
+
+            var sb = new System.Text.StringBuilder();
+            foreach (char c in name)
+            {
+                if (char.IsAsciiLetterOrDigit(c))
+                {
+                    sb.Append(char.ToLowerInvariant(c));
+                }
+                else if (c == '_' || c == '-' || char.IsWhiteSpace(c))
+                {
+                    if (sb.Length > 0 && sb[sb.Length - 1] != '_')
+                    {
+                        sb.Append('_');
+                    }
+                }
+            }
+            string englishPart = sb.ToString().Trim('_');
+            if (englishPart.Length >= 2)
+            {
+                return englishPart;
+            }
+
+            return "tile";
+        }
+
     }
 
     public sealed class TileLayoutTransitionEventArgs : EventArgs
@@ -966,5 +1718,38 @@ namespace Skyweaver.PageControls.Tiles.ViewModels
         }
 
         public TileItemViewModel Tile { get; }
+    }
+
+    public class StickyNoteReplyViewModel : ObservableObject
+    {
+        private string _creator = string.Empty;
+        private DateTime _dateTime;
+        private string _content = string.Empty;
+
+        public string Creator
+        {
+            get => _creator;
+            set => SetProperty(ref _creator, value ?? string.Empty);
+        }
+
+        public DateTime DateTime
+        {
+            get => _dateTime;
+            set
+            {
+                if (SetProperty(ref _dateTime, value))
+                {
+                    OnPropertyChanged(nameof(DisplayDateTime));
+                }
+            }
+        }
+
+        public string Content
+        {
+            get => _content;
+            set => SetProperty(ref _content, value ?? string.Empty);
+        }
+
+        public string DisplayDateTime => DateTime.ToString("yyyy-MM-dd HH:mm:ss");
     }
 }
