@@ -94,7 +94,7 @@ namespace Skyweaver.Services.ChatSession
                             }
                             else
                             {
-                                preservedXml = SkyweaverPreservedTextContentXml.Build(
+                                preservedXml = PreservedTextContentXml.Build(
                                     string.Empty,
                                     att.DisplayName,
                                     att.ResourcePath,

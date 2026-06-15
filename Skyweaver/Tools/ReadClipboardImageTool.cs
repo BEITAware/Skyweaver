@@ -98,7 +98,7 @@ namespace Skyweaver.Tools
                             encoder.Save(fileStream);
                         }
 
-                        var xmlReturn = $"<SkyweaverPreservedContent><Image Path=\"{System.Security.SecurityElement.Escape(targetFilePath)}\" /></SkyweaverPreservedContent>\nClipboard image captured successfully.";
+                        var xmlReturn = $"<PreservedContent><Image Path=\"{System.Security.SecurityElement.Escape(targetFilePath)}\" /></PreservedContent>\nClipboard image captured successfully.";
                         tcs.TrySetResult(SkyweaverToolResult.Success(xmlReturn));
                     }
                     else
