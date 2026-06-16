@@ -73,7 +73,7 @@ namespace Skyweaver.Tools
                     var tempFilePath = Path.Combine(Path.GetTempPath(), $"Screenshot_{DateTime.Now:yyyyMMdd_HHmmss}.png");
                     bitmap.Save(tempFilePath, ImageFormat.Png);
 
-                    var xmlReturn = $"<SkyweaverPreservedContent><Image Path=\"{System.Security.SecurityElement.Escape(tempFilePath)}\" /></SkyweaverPreservedContent>\nScreenshot captured successfully.";
+                    var xmlReturn = $"<PreservedContent><Image Path=\"{System.Security.SecurityElement.Escape(tempFilePath)}\" /></PreservedContent>\nScreenshot captured successfully.";
                     tcs.TrySetResult(SkyweaverToolResult.Success(xmlReturn));
                 }
                 catch (OperationCanceledException)

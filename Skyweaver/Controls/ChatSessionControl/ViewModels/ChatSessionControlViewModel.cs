@@ -764,7 +764,7 @@ namespace Skyweaver.Controls.ChatSessionControl.ViewModels
             {
                 return LanguageModelChatContentBlock.CreateHostPreservedContent(
                     attachment.PreservedContentXml ??
-                    SkyweaverPreservedTextContentXml.Build(
+                    PreservedTextContentXml.Build(
                         string.Empty,
                         attachment.DisplayName,
                         attachment.ResourcePath,
