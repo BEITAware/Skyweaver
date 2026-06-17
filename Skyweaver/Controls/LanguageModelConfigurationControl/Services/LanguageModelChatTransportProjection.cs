@@ -8,10 +8,10 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
 {
     internal static class LanguageModelChatTransportProjection
     {
-        private const string LiteralStartToken = "<SkyweaverPreservedContent";
-        private const string LiteralEndToken = "</SkyweaverPreservedContent>";
-        private const string EscapedStartToken = "&lt;SkyweaverPreservedContent";
-        private const string EscapedEndToken = "&lt;/SkyweaverPreservedContent&gt;";
+        private const string LiteralStartToken = "<PreservedContent";
+        private const string LiteralEndToken = "</PreservedContent>";
+        private const string EscapedStartToken = "&lt;PreservedContent";
+        private const string EscapedEndToken = "&lt;/PreservedContent&gt;";
 
         public static async Task<IReadOnlyList<LanguageModelChatMessage>> ProjectMessagesAsync(
             IReadOnlyList<LanguageModelChatMessage> messages,
@@ -181,7 +181,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 var normalizedFragment = isEscaped
                     ? WebUtility.HtmlDecode(rawFragment)
                     : rawFragment;
-                if (SkyweaverPreservedTextContentXml.TryParse(normalizedFragment, out var preservedText))
+                if (PreservedTextContentXml.TryParse(normalizedFragment, out var preservedText))
                 {
                     AppendTextBlock(projectedBlocks, LanguageModelChatContentBlockKind.Text, preservedText.Text);
                     foundResource = true;
@@ -255,15 +255,43 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
 
             var literalIndex = content.IndexOf(LiteralStartToken, startIndex, StringComparison.OrdinalIgnoreCase);
             var escapedIndex = content.IndexOf(EscapedStartToken, startIndex, StringComparison.OrdinalIgnoreCase);
-            if (literalIndex < 0 && escapedIndex < 0)
+            var legacyLiteralIndex = content.IndexOf("<SkyweaverPreservedContent", startIndex, StringComparison.OrdinalIgnoreCase);
+            var legacyEscapedIndex = content.IndexOf("&lt;SkyweaverPreservedContent", startIndex, StringComparison.OrdinalIgnoreCase);
+
+            var firstIndex = -1;
+            string endToken = "";
+
+            if (literalIndex >= 0 && (firstIndex < 0 || literalIndex < firstIndex))
+            {
+                firstIndex = literalIndex;
+                isEscaped = false;
+                endToken = LiteralEndToken;
+            }
+            if (escapedIndex >= 0 && (firstIndex < 0 || escapedIndex < firstIndex))
+            {
+                firstIndex = escapedIndex;
+                isEscaped = true;
+                endToken = EscapedEndToken;
+            }
+            if (legacyLiteralIndex >= 0 && (firstIndex < 0 || legacyLiteralIndex < firstIndex))
+            {
+                firstIndex = legacyLiteralIndex;
+                isEscaped = false;
+                endToken = "</SkyweaverPreservedContent>";
+            }
+            if (legacyEscapedIndex >= 0 && (firstIndex < 0 || legacyEscapedIndex < firstIndex))
+            {
+                firstIndex = legacyEscapedIndex;
+                isEscaped = true;
+                endToken = "&lt;/SkyweaverPreservedContent&gt;";
+            }
+
+            if (firstIndex < 0)
             {
                 return false;
             }
 
-            isEscaped = escapedIndex >= 0 && (literalIndex < 0 || escapedIndex < literalIndex);
-            matchStart = isEscaped ? escapedIndex : literalIndex;
-
-            var endToken = isEscaped ? EscapedEndToken : LiteralEndToken;
+            matchStart = firstIndex;
             var endIndex = content.IndexOf(endToken, matchStart, StringComparison.OrdinalIgnoreCase);
             if (endIndex < 0)
             {
@@ -295,6 +323,10 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                     : rawFragment;
                 var preservedContent = XElement.Parse(normalizedFragment, LoadOptions.PreserveWhitespace);
                 if (!string.Equals(
+                        preservedContent.Name.LocalName,
+                        "PreservedContent",
+                        StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(
                         preservedContent.Name.LocalName,
                         "SkyweaverPreservedContent",
                         StringComparison.OrdinalIgnoreCase))
@@ -426,6 +458,10 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 var preservedContent = XElement.Parse(normalizedFragment, LoadOptions.PreserveWhitespace);
                 if (!string.Equals(
                         preservedContent.Name.LocalName,
+                        "PreservedContent",
+                        StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(
+                        preservedContent.Name.LocalName,
                         "SkyweaverPreservedContent",
                         StringComparison.OrdinalIgnoreCase))
                 {
@@ -511,7 +547,7 @@ namespace Skyweaver.Controls.LanguageModelConfigurationControl.Services
                 element.Add(new XAttribute("MediaType", block.MediaType.Trim()));
             }
 
-            return new XElement("SkyweaverPreservedContent", element).ToString(SaveOptions.DisableFormatting);
+            return new XElement("PreservedContent", element).ToString(SaveOptions.DisableFormatting);
         }
 
         /// <summary>
