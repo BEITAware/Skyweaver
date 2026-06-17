@@ -1,0 +1,2905 @@
+# Issue: Non-compliant Aero Aesthetics Design
+
+According to the Skyweaver UI design guidelines for "Aero aesthetics":
+- Avoid hardcoded hex colors; instead, use theme-defined dynamic resource bindings like `{DynamicResource AeroBackgroundBrush}`.
+- Avoid flat corners (`CornerRadius="0"`); instead, use theme-defined dynamic resource bindings like `{DynamicResource StandardCornerRadius}`.
+
+The following files contain violations of these guidelines:
+
+## `./Skyweaver/MainWindow.xaml`
+- Line 25: Hardcoded hex color -> `Icon="/Skyweaver;component/Resources/Skyweaver.ico" Background="#FF1A1F28">`
+- Line 56: Hardcoded hex color -> `<GradientStop Color="#FF2E4A6C" Offset="0.325"/>`
+- Line 57: Hardcoded hex color -> `<GradientStop Color="#FF1D2E54" Offset="0.237"/>`
+- Line 58: Hardcoded hex color -> `<GradientStop Color="#FE070714" Offset="0.325"/>`
+- Line 59: Hardcoded hex color -> `<GradientStop Color="#FF162F67" Offset="0.562"/>`
+- Line 210: Hardcoded hex color -> `<TextBlock Text="Desk 页面占位 Ribbon 元素" Foreground="#94A3B8" FontSize="11" Margin="8,0" VerticalAlignment="Center"/>`
+- Line 225: Hardcoded hex color -> `<TextBlock Text="Marvelous 页面占位 Ribbon 元素" Foreground="#D8B4FE" FontSize="11" Margin="8,0" VerticalAlignment="Center"/>`
+- Line 273: Hardcoded hex color -> `<Border Background="#1A202C" BorderBrush="#3D4B66" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="4,0" VerticalAlignment="Center">`
+- Line 278: Hardcoded hex color -> `<SolidColorBrush x:Name="DotBrush" Color="#00E676"/>`
+- Line 288: Hardcoded hex color -> `From="#00E676" To="#00B0FF" Duration="0:0:1.5" AutoReverse="True"/>`
+- Line 298: Hardcoded hex color -> `<TextBlock Text="{Binding Message}" Foreground="#E2E8F0" FontSize="11" VerticalAlignment="Center" Margin="0,0,6,0"/>`
+- Line 311: Hardcoded hex color -> `Background="#2D3748" BorderThickness="0">`
+- Line 314: Hardcoded hex color -> `<GradientStop Color="#A0AEC0" Offset="0"/>`
+- Line 315: Hardcoded hex color -> `<GradientStop Color="#E2E8F0" Offset="1"/>`
+- Line 330: Hardcoded hex color -> `Background="#2D3748" BorderThickness="0">`
+- Line 333: Hardcoded hex color -> `<GradientStop Color="#00F2FE" Offset="0"/>`
+- Line 334: Hardcoded hex color -> `<GradientStop Color="#4FACFE" Offset="1"/>`
+- Line 338: Hardcoded hex color -> `<TextBlock Text="{Binding Progress, StringFormat={}{0:0}%}" Foreground="#38BDF8" FontSize="10" FontWeight="Bold" VerticalAlignment="Center"/>`
+- Line 378: Hardcoded hex color -> `Fill="#38BDF8" Width="14" Height="14" Stretch="Uniform" Margin="4,0,8,0" VerticalAlignment="Center"/>`
+- Line 380: Hardcoded hex color -> `Foreground="#E2E8F0" FontSize="11" VerticalAlignment="Center">`
+
+## `./Skyweaver/Resources/ToolTipBackground.xaml`
+- Line 4: Hardcoded hex color -> `<Rectangle x:Name="Rectangle" Width="202.834" Height="91.501" Canvas.Left="0" Canvas.Top="0.00012207" Stretch="Fill" StrokeThickness="1" StrokeLineJoin="Round" Stroke="#FF000000">`
+- Line 8: Hardcoded hex color -> `<GradientStop Color="#4561FFFF" Offset="0"/>`
+- Line 9: Hardcoded hex color -> `<GradientStop Color="#53000000" Offset="0.160796"/>`
+- Line 10: Hardcoded hex color -> `<GradientStop Color="#5A000A11" Offset="0.341501"/>`
+- Line 11: Hardcoded hex color -> `<GradientStop Color="#EC001A2C" Offset="0.562021"/>`
+- Line 12: Hardcoded hex color -> `<GradientStop Color="#3F0086DF" Offset="1"/>`
+
+## `./Skyweaver/Resources/CheckboxBackground.xaml`
+- Line 4: Hardcoded hex color -> `<Rectangle x:Name="Rectangle" Width="24.7915" Height="23.5403" Canvas.Left="0" Canvas.Top="0" Stretch="Fill" StrokeThickness="1" StrokeLineJoin="Round" Stroke="#FF000000">`
+- Line 8: Hardcoded hex color -> `<GradientStop Color="#FF61FFFF" Offset="0"/>`
+- Line 9: Hardcoded hex color -> `<GradientStop Color="#C7000000" Offset="0.173047"/>`
+- Line 10: Hardcoded hex color -> `<GradientStop Color="#00000A11" Offset="0.378254"/>`
+- Line 11: Hardcoded hex color -> `<GradientStop Color="#99001A2C" Offset="0.51608"/>`
+- Line 12: Hardcoded hex color -> `<GradientStop Color="#FF0086DF" Offset="0.825421"/>`
+
+## `./Skyweaver/Resources/ScriptsControls/SharedBrushes.xaml`
+- Line 3: Hardcoded hex color -> `<SolidColorBrush x:Key="Layer_2" Color="#FF1A1F28"/>`
+- Line 4: Hardcoded hex color -> `<SolidColorBrush x:Key="PrimaryForeground" Color="#FFFFFF"/>`
+- Line 5: Hardcoded hex color -> `<SolidColorBrush x:Key="SecondaryForeground" Color="#777777"/>`
+- Line 6: Hardcoded hex color -> `<SolidColorBrush x:Key="BorderBrush" Color="#1A1F28"/>`
+- Line 7: Hardcoded hex color -> `<SolidColorBrush x:Key="Layer_2_M" Color="#FF2A3240"/>`
+- Line 8: Hardcoded hex color -> `<SolidColorBrush x:Key="Layer_1_M" Color="#FF141924"/>`
+- Line 9: Hardcoded hex color -> `<SolidColorBrush x:Key="AccentColor" Color="#FF4466FF"/>`
+
+## `./Skyweaver/Resources/ScriptsControls/Sideline.xaml`
+- Line 9: Hardcoded hex color -> `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 14: Hardcoded hex color -> `<GradientStop Color="#5E00E3FF" Offset="0"/>`
+- Line 15: Hardcoded hex color -> `<GradientStop Color="#2F7FF1FF" Offset="0.341302"/>`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.669219"/>`
+
+## `./Skyweaver/Resources/ScriptsControls/DropdownClickMask.xaml`
+- Line 9: Hardcoded hex color -> `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 14: Hardcoded hex color -> `<GradientStop Color="#FF00FDFF" Offset="0.267994"/>`
+- Line 15: Hardcoded hex color -> `<GradientStop Color="#0000FDFF" Offset="0.49464"/>`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#FF00FDFF" Offset="0.764165"/>`
+
+## `./Skyweaver/Resources/ScriptsControls/ScriptButtonIdleStyles.xaml`
+- Line 6: Hardcoded hex color -> `<GradientStop Color="#29FFFFFF" Offset="0"/>`
+- Line 7: Hardcoded hex color -> `<GradientStop Color="#00000004" Offset="0.38"/>`
+- Line 8: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.417"/>`
+- Line 9: Hardcoded hex color -> `<GradientStop Color="#5EFFFFFF" Offset="0.77"/>`
+- Line 10: Hardcoded hex color -> `<GradientStop Color="#4AFFFFFF" Offset="0.892"/>`
+
+## `./Skyweaver/Resources/ScriptsControls/ScriptButtonHoverStyles.xaml`
+- Line 6: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 7: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0.135"/>`
+- Line 8: Hardcoded hex color -> `<GradientStop Color="#17FFFFFF" Offset="0.488"/>`
+- Line 9: Hardcoded hex color -> `<GradientStop Color="#00000004" Offset="0.518"/>`
+- Line 10: Hardcoded hex color -> `<GradientStop Color="#FF1F8EAD" Offset="0.729"/>`
+
+## `./Skyweaver/Resources/ScriptsControls/SidelineHighlighting.xaml`
+- Line 9: Hardcoded hex color -> `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 14: Hardcoded hex color -> `<GradientStop Color="#7F26E7FF" Offset="0"/>`
+- Line 15: Hardcoded hex color -> `<GradientStop Color="#4092F3FF" Offset="0.51"/>`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+
+## `./Skyweaver/Resources/ScriptsControls/SliderHandleStyles.xaml`
+- Line 9: Hardcoded hex color -> `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 14: Hardcoded hex color -> `<GradientStop Color="#63FFFFFF" Offset="0"/>`
+- Line 15: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.320505"/>`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#7000E3FF" Offset="0.711365"/>`
+- Line 17: Hardcoded hex color -> `<GradientStop Color="#8E00FFF6" Offset="0.890559"/>`
+- Line 18: Hardcoded hex color -> `<GradientStop Color="#B853FFEC" Offset="1"/>`
+
+## `./Skyweaver/Resources/ScriptsControls/ScriptButtonStyles.xaml`
+- Line 10: Hardcoded hex color -> `<SolidColorBrush x:Key="ScriptButtonBorderBrush" Color="#FF000000"/>`
+
+## `./Skyweaver/Resources/ScriptsControls/GlassPipeStyles.xaml`
+- Line 13: Hardcoded hex color -> `<GradientStop Color="#AF00C7FF" Offset="0"/>`
+- Line 14: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.209647"/>`
+- Line 15: Hardcoded hex color -> `<GradientStop Color="#58FFFFFF" Offset="0.54731"/>`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.751391"/>`
+- Line 17: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.862709"/>`
+- Line 18: Hardcoded hex color -> `<GradientStop Color="#FF00ECFF" Offset="1"/>`
+- Line 27: Hardcoded hex color -> `<GradientStop Color="#2600C7FF" Offset="0.48166"/>`
+- Line 28: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.500902"/>`
+- Line 29: Hardcoded hex color -> `<GradientStop Color="#2500E3FF" Offset="0.50932"/>`
+
+## `./Skyweaver/Resources/ScriptsControls/DropdownHoverMask.xaml`
+- Line 9: Hardcoded hex color -> `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 14: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 15: Hardcoded hex color -> `<GradientStop Color="#0535FAFF" Offset="0.258806"/>`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#0079FDFF" Offset="0.488515"/>`
+- Line 17: Hardcoded hex color -> `<GradientStop Color="#7100FDFF" Offset="1"/>`
+
+## `./Skyweaver/Resources/ScriptsControls/ScriptsControlsDictionary.xaml`
+- Line 32: Hardcoded hex color -> `<SolidColorBrush x:Key="NearWhiteForeground" Color="#F0F4FF"/>`
+- Line 136: Hardcoded hex color -> `BorderBrush="#FF000000"`
+- Line 143: Hardcoded hex color -> `<GradientStop Color="#FF435A69" Offset="0"/>`
+- Line 144: Hardcoded hex color -> `<GradientStop Color="#FF374D5A" Offset="0.517625"/>`
+- Line 145: Hardcoded hex color -> `<GradientStop Color="#FE334853" Offset="0.528757"/>`
+- Line 146: Hardcoded hex color -> `<GradientStop Color="#FF324551" Offset="1"/>`
+- Line 164: Hardcoded hex color -> `To="#FF5A7085" Duration="0:0:0.2"/>`
+- Line 167: Hardcoded hex color -> `To="#FF4C6370" Duration="0:0:0.2"/>`
+- Line 170: Hardcoded hex color -> `To="#FE485E69" Duration="0:0:0.2"/>`
+- Line 173: Hardcoded hex color -> `To="#FF475B67" Duration="0:0:0.2"/>`
+- Line 182: Hardcoded hex color -> `To="#FF435A69" Duration="0:0:0.2"/>`
+- Line 185: Hardcoded hex color -> `To="#FF374D5A" Duration="0:0:0.2"/>`
+- Line 188: Hardcoded hex color -> `To="#FE334853" Duration="0:0:0.2"/>`
+- Line 191: Hardcoded hex color -> `To="#FF324551" Duration="0:0:0.2"/>`
+- Line 204: Hardcoded hex color -> `To="#28FFFFFF" Duration="0:0:0.3"/>`
+- Line 207: Hardcoded hex color -> `To="#35CEEEFF" Duration="0:0:0.3"/>`
+- Line 210: Hardcoded hex color -> `To="#652D4957" Duration="0:0:0.3"/>`
+- Line 213: Hardcoded hex color -> `To="#FF6FD4D1" Duration="0:0:0.3"/>`
+- Line 222: Hardcoded hex color -> `To="#FF435A69" Duration="0:0:0.3"/>`
+- Line 225: Hardcoded hex color -> `To="#FF374D5A" Duration="0:0:0.3"/>`
+- Line 228: Hardcoded hex color -> `To="#FE334853" Duration="0:0:0.3"/>`
+- Line 231: Hardcoded hex color -> `To="#FF324551" Duration="0:0:0.3"/>`
+
+## `./Skyweaver/Resources/ScriptsControls/TextBoxStyles.xaml`
+- Line 15: Hardcoded hex color -> `<GradientStop Color="#91007BFF" Offset="0.143"/>`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.503"/>`
+- Line 17: Hardcoded hex color -> `<GradientStop Color="#C30099FF" Offset="0.792"/>`
+- Line 22: Hardcoded hex color -> `<GradientStop Color="#AF00C7FF" Offset="0.414"/>`
+- Line 23: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.495"/>`
+- Line 24: Hardcoded hex color -> `<GradientStop Color="#FF00ECFF" Offset="0.692"/>`
+- Line 45: Hardcoded hex color -> `<GradientStop x:Name="gradientStop1" Color="#91007BFF" Offset="0.143"/>`
+- Line 46: Hardcoded hex color -> `<GradientStop x:Name="gradientStop2" Color="#00FFFFFF" Offset="0.503"/>`
+- Line 47: Hardcoded hex color -> `<GradientStop x:Name="gradientStop3" Color="#C30099FF" Offset="0.792"/>`
+- Line 76: Hardcoded hex color -> `To="#AF00C7FF"`
+- Line 82: Hardcoded hex color -> `To="#00FFFFFF"`
+- Line 88: Hardcoded hex color -> `To="#FF00ECFF"`
+- Line 116: Hardcoded hex color -> `To="#91007BFF"`
+- Line 121: Hardcoded hex color -> `To="#00FFFFFF"`
+- Line 126: Hardcoded hex color -> `To="#C30099FF"`
+
+## `./Skyweaver/Resources/ScriptsControls/TextBoxIdleStyles.xaml`
+- Line 8: Hardcoded hex color -> `<GradientStop Color="#91007BFF" Offset="0.143"/>`
+- Line 9: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.503"/>`
+- Line 10: Hardcoded hex color -> `<GradientStop Color="#C30099FF" Offset="0.792"/>`
+
+## `./Skyweaver/Resources/ScriptsControls/TextBoxActivatedStyles.xaml`
+- Line 8: Hardcoded hex color -> `<GradientStop Color="#AF00C7FF" Offset="0.414"/>`
+- Line 9: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.495"/>`
+- Line 10: Hardcoded hex color -> `<GradientStop Color="#FF00ECFF" Offset="0.692"/>`
+
+## `./Skyweaver/Resources/ScriptsControls/DropdownBase.xaml`
+- Line 9: Hardcoded hex color -> `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 14: Hardcoded hex color -> `<GradientStop Color="#9193C7FF" Offset="0.298622"/>`
+- Line 15: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.502783"/>`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#C3ABDEFF" Offset="0.715161"/>`
+
+## `./Skyweaver/Resources/ScriptsControls/GlassBallStyles.xaml`
+- Line 9: Hardcoded hex color -> `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 14: Hardcoded hex color -> `<GradientStop Color="#63FFFFFF" Offset="0"/>`
+- Line 15: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.320505"/>`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#7000E3FF" Offset="0.711365"/>`
+- Line 17: Hardcoded hex color -> `<GradientStop Color="#8E00FFF6" Offset="0.890559"/>`
+- Line 18: Hardcoded hex color -> `<GradientStop Color="#B853FFEC" Offset="1"/>`
+
+## `./Skyweaver/Resources/ScriptsControls/ScriptButtonPressedStyles.xaml`
+- Line 6: Hardcoded hex color -> `<GradientStop Color="#FF38CBF4" Offset="0.043"/>`
+- Line 7: Hardcoded hex color -> `<GradientStop Color="#00000004" Offset="0.506"/>`
+- Line 8: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.518"/>`
+- Line 9: Hardcoded hex color -> `<GradientStop Color="#5EFFFFFF" Offset="0.737"/>`
+- Line 10: Hardcoded hex color -> `<GradientStop Color="#4AFFFFFF" Offset="0.892"/>`
+
+## `./Skyweaver/Resources/ScriptsControls/SliderStyles.xaml`
+- Line 29: Hardcoded hex color -> `<GradientStop Color="#6060B0F0" Offset="0"/>`
+- Line 30: Hardcoded hex color -> `<GradientStop Color="#0060B0F0" Offset="1"/>`
+- Line 41: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 42: Hardcoded hex color -> `<GradientStop Color="#FFF0F0F0" Offset="0.4"/>`
+- Line 43: Hardcoded hex color -> `<GradientStop Color="#FFE0E0E0" Offset="0.5"/>`
+- Line 44: Hardcoded hex color -> `<GradientStop Color="#FFF5F5F5" Offset="1"/>`
+- Line 49: Hardcoded hex color -> `<GradientStop Color="#FF909090" Offset="0"/>`
+- Line 50: Hardcoded hex color -> `<GradientStop Color="#FF707070" Offset="1"/>`
+- Line 54: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="3" ShadowDepth="1" Opacity="0.4"/>`
+- Line 62: Hardcoded hex color -> `<GradientStop Color="#80FFFFFF" Offset="0"/>`
+- Line 63: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 74: Hardcoded hex color -> `<GradientStop Color="#FFE8F4FF" Offset="0"/>`
+- Line 75: Hardcoded hex color -> `<GradientStop Color="#FFD0E8FF" Offset="0.4"/>`
+- Line 76: Hardcoded hex color -> `<GradientStop Color="#FFC0D8F0" Offset="0.5"/>`
+- Line 77: Hardcoded hex color -> `<GradientStop Color="#FFD8ECFF" Offset="1"/>`
+- Line 84: Hardcoded hex color -> `<GradientStop Color="#FF60A0D0" Offset="0"/>`
+- Line 85: Hardcoded hex color -> `<GradientStop Color="#FF4080B0" Offset="1"/>`
+- Line 95: Hardcoded hex color -> `<GradientStop Color="#FFD0E8FF" Offset="0"/>`
+- Line 96: Hardcoded hex color -> `<GradientStop Color="#FFB0D0F0" Offset="0.4"/>`
+- Line 97: Hardcoded hex color -> `<GradientStop Color="#FFA0C0E0" Offset="0.5"/>`
+- Line 98: Hardcoded hex color -> `<GradientStop Color="#FFC0D8F0" Offset="1"/>`
+- Line 129: Hardcoded hex color -> `<GradientStop Color="#60000000" Offset="0"/>`
+- Line 130: Hardcoded hex color -> `<GradientStop Color="#40000000" Offset="0.5"/>`
+- Line 131: Hardcoded hex color -> `<GradientStop Color="#30000000" Offset="1"/>`
+- Line 136: Hardcoded hex color -> `<GradientStop Color="#40000000" Offset="0"/>`
+- Line 137: Hardcoded hex color -> `<GradientStop Color="#20FFFFFF" Offset="1"/>`
+- Line 151: Hardcoded hex color -> `<GradientStop Color="#FF80D0FF" Offset="0"/>`
+- Line 152: Hardcoded hex color -> `<GradientStop Color="#FF40A0E0" Offset="0.4"/>`
+- Line 153: Hardcoded hex color -> `<GradientStop Color="#FF0080D0" Offset="0.5"/>`
+- Line 154: Hardcoded hex color -> `<GradientStop Color="#FF60B0E0" Offset="1"/>`
+- Line 160: Hardcoded hex color -> `<DropShadowEffect Color="#4080C0FF" BlurRadius="4" ShadowDepth="0" Opacity="0.6"/>`
+
+## `./Skyweaver/Resources/ScriptsControls/PanelStyles.xaml`
+- Line 5: Hardcoded hex color -> `<GradientStop Color="#FF1A1F28" Offset="0"/>`
+- Line 6: Hardcoded hex color -> `<GradientStop Color="#FF1C2432" Offset="0.51"/>`
+- Line 7: Hardcoded hex color -> `<GradientStop Color="#FE1C2533" Offset="0.56"/>`
+- Line 8: Hardcoded hex color -> `<GradientStop Color="#FE30445F" Offset="0.87"/>`
+- Line 9: Hardcoded hex color -> `<GradientStop Color="#FE384F6C" Offset="0.92"/>`
+- Line 10: Hardcoded hex color -> `<GradientStop Color="#FF405671" Offset="0.97"/>`
+
+## `./Skyweaver/Resources/Themes/MainWindowResources.xaml`
+- Line 5: Hardcoded hex color -> `<SolidColorBrush x:Key="WorkAreaBackgroundBrush" Color="#FF1A1F28"/>`
+- Line 6: Hardcoded hex color -> `<SolidColorBrush x:Key="WorkAreaBorderBrush" Color="#FF1A1F28"/>`
+- Line 8: Hardcoded hex color -> `<SolidColorBrush x:Key="StatusActiveBrush" Color="#FF00FF00"/>`
+- Line 10: Hardcoded hex color -> `<SolidColorBrush x:Key="DarkBorderBrush" Color="#FF000000"/>`
+- Line 11: Hardcoded hex color -> `<SolidColorBrush x:Key="TextBrush" Color="#E0E0E0"/>`
+- Line 47: Hardcoded hex color -> `<Setter Property="Foreground" Value="#2C3E50"/>`
+- Line 53: Hardcoded hex color -> `<Setter Property="Foreground" Value="#34495E"/>`
+- Line 59: Hardcoded hex color -> `<Setter Property="Foreground" Value="#7F8C8D"/>`
+- Line 63: Hardcoded hex color -> `<Setter Property="Background" Value="#FAFAFA"/>`
+- Line 64: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#BDC3C7"/>`
+- Line 71: Hardcoded hex color -> `<Setter Property="Background" Value="#3498DB"/>`
+- Line 77: Hardcoded hex color -> `<Setter Property="Background" Value="#2980B9"/>`
+- Line 91: Hardcoded hex color -> `<Pen Thickness="1" LineJoin="Round" Brush="#7F7E8DB3"/>`
+- Line 96: Hardcoded hex color -> `<GradientStop Color="#FF445E74" Offset="0.139847"/>`
+- Line 97: Hardcoded hex color -> `<GradientStop Color="#C12A394C" Offset="0.277778"/>`
+- Line 98: Hardcoded hex color -> `<GradientStop Color="#C324334A" Offset="0.327586"/>`
+- Line 99: Hardcoded hex color -> `<GradientStop Color="#FF334B62" Offset="0.496169"/>`
+- Line 106: Hardcoded hex color -> `<Pen Thickness="1" LineJoin="Round" Brush="#7F7E8DB3"/>`
+- Line 111: Hardcoded hex color -> `<GradientStop Color="#CF49EAFF" Offset="0.210728"/>`
+- Line 112: Hardcoded hex color -> `<GradientStop Color="#0034637B" Offset="0.522988"/>`
+- Line 129: Hardcoded hex color -> `<GradientStop Color="#6BDDFFFD" Offset="0.0811639"/>`
+- Line 130: Hardcoded hex color -> `<GradientStop Color="#3A000000" Offset="0.243492"/>`
+- Line 131: Hardcoded hex color -> `<GradientStop Color="#907FCEFF" Offset="0.500766"/>`
+- Line 132: Hardcoded hex color -> `<GradientStop Color="#FF000000" Offset="0.586524"/>`
+- Line 133: Hardcoded hex color -> `<GradientStop Color="#FF0099FF" Offset="0.828484"/>`
+- Line 144: Hardcoded hex color -> `<GradientStop Color="#7800F3FF" Offset="0.0597243"/>`
+- Line 145: Hardcoded hex color -> `<GradientStop Color="#2B000000" Offset="0.234303"/>`
+- Line 146: Hardcoded hex color -> `<GradientStop Color="#FFA5DBFF" Offset="0.372129"/>`
+- Line 147: Hardcoded hex color -> `<GradientStop Color="#FF0099FF" Offset="0.577335"/>`
+- Line 158: Hardcoded hex color -> `<GradientStop Color="#FC00F3FF" Offset="0"/>`
+- Line 159: Hardcoded hex color -> `<GradientStop Color="#28000000" Offset="0.169985"/>`
+- Line 160: Hardcoded hex color -> `<GradientStop Color="#EBA5DBFF" Offset="0.304747"/>`
+- Line 161: Hardcoded hex color -> `<GradientStop Color="#FF0099FF" Offset="0.577335"/>`
+- Line 226: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#FF000000"/>`
+- Line 299: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#FF000000"/>`
+- Line 365: Hardcoded hex color -> `<GradientStop Color="#FF3A4250" Offset="0"/>`
+- Line 366: Hardcoded hex color -> `<GradientStop Color="#FF2A3240" Offset="0.5"/>`
+- Line 367: Hardcoded hex color -> `<GradientStop Color="#FF1A1F28" Offset="1"/>`
+- Line 388: Hardcoded hex color -> `<GradientStop Color="#FF66FF66" Offset="0"/>`
+- Line 389: Hardcoded hex color -> `<GradientStop Color="#FF44CC44" Offset="1"/>`
+- Line 395: Hardcoded hex color -> `<DropShadowEffect Color="#FF44CC44" Direction="270" ShadowDepth="1" BlurRadius="2" Opacity="0.8"/>`
+
+## `./Skyweaver/Resources/Themes/ThemeBase.xaml`
+- Line 34: Hardcoded hex color -> `<GradientStop Color="#FF18202B" Offset="0"/>`
+- Line 35: Hardcoded hex color -> `<GradientStop Color="#FF0A0E16" Offset="1"/>`
+- Line 42: Hardcoded hex color -> `<SolidColorBrush x:Key="ButtonIdleBrush" Color="#FF2A3240"/>`
+- Line 43: Hardcoded hex color -> `<SolidColorBrush x:Key="ButtonHoverBrush" Color="#FF3A4250"/>`
+- Line 44: Hardcoded hex color -> `<SolidColorBrush x:Key="ButtonActiveBrush" Color="#FF4A5260"/>`
+- Line 45: Hardcoded hex color -> `<SolidColorBrush x:Key="ButtonPressedBrush" Color="#FF1A2230"/>`
+- Line 46: Hardcoded hex color -> `<SolidColorBrush x:Key="AccentBrush" Color="#FF4466FF"/>`
+- Line 57: Hardcoded hex color -> `<GradientStop Color="#FF3E5E85" Offset="0"/>`
+- Line 58: Hardcoded hex color -> `<GradientStop Color="#FF1D2E54" Offset="0.480519"/>`
+- Line 59: Hardcoded hex color -> `<GradientStop Color="#FE000004" Offset="0.487941"/>`
+- Line 60: Hardcoded hex color -> `<GradientStop Color="#FF385EB2" Offset="1"/>`
+- Line 65: Hardcoded hex color -> `<GradientStop Color="#FF1A1F28" Offset="0"/>`
+- Line 66: Hardcoded hex color -> `<GradientStop Color="#FF1C2432" Offset="0.510204"/>`
+- Line 67: Hardcoded hex color -> `<GradientStop Color="#FE1C2533" Offset="0.562152"/>`
+- Line 68: Hardcoded hex color -> `<GradientStop Color="#FE30445F" Offset="0.87013"/>`
+- Line 69: Hardcoded hex color -> `<GradientStop Color="#FE384F6C" Offset="0.918367"/>`
+- Line 70: Hardcoded hex color -> `<GradientStop Color="#FF405671" Offset="0.974026"/>`
+- Line 74: Hardcoded hex color -> `<GradientStop Color="#FF040912" Offset="1"/>`
+- Line 75: Hardcoded hex color -> `<GradientStop Color="#FF1E242E" Offset="0.387"/>`
+- Line 90: Hardcoded hex color -> `<GradientStop Color="#FF6A94C5" Offset="0"/>`
+- Line 91: Hardcoded hex color -> `<GradientStop Color="#FF4679B3" Offset="0.0871985"/>`
+- Line 92: Hardcoded hex color -> `<GradientStop Color="#FF052C63" Offset="0.410019"/>`
+- Line 93: Hardcoded hex color -> `<GradientStop Color="#FE03133E" Offset="0.576994"/>`
+- Line 94: Hardcoded hex color -> `<GradientStop Color="#FF000B2D" Offset="0.706865"/>`
+- Line 99: Hardcoded hex color -> `<GradientStop Color="#3B6A94C5" Offset="0"/>`
+- Line 100: Hardcoded hex color -> `<GradientStop Color="#264679B3" Offset="0.0871985"/>`
+- Line 101: Hardcoded hex color -> `<GradientStop Color="#3C052C63" Offset="0.317254"/>`
+- Line 102: Hardcoded hex color -> `<GradientStop Color="#5203133E" Offset="0.576994"/>`
+- Line 103: Hardcoded hex color -> `<GradientStop Color="#C5000B2D" Offset="0.862709"/>`
+- Line 112: Hardcoded hex color -> `<GradientStop Color="#BA2D72A0" Offset="0"/>`
+- Line 113: Hardcoded hex color -> `<GradientStop Color="#00000004" Offset="0.506494"/>`
+- Line 114: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.517625"/>`
+- Line 115: Hardcoded hex color -> `<GradientStop Color="#3FFFFFFF" Offset="0.821892"/>`
+- Line 116: Hardcoded hex color -> `<GradientStop Color="#4AFFFFFF" Offset="0.892393"/>`
+- Line 128: Hardcoded hex color -> `<DropShadowEffect Color="#20000000" Direction="270" ShadowDepth="1" BlurRadius="3" Opacity="0.5"/>`
+- Line 139: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFFAFAFA"/>`
+- Line 142: Hardcoded hex color -> `<DropShadowEffect Color="#FF002244" Direction="320" ShadowDepth="1" BlurRadius="1" Opacity="0.8"/>`
+- Line 151: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFE8F4FF"/>`
+- Line 156: Hardcoded hex color -> `<DropShadowEffect Color="#FF001122" Direction="320" ShadowDepth="1" BlurRadius="1" Opacity="0.65"/>`
+
+## `./Skyweaver/Resources/Controls/ButtonStyles.xaml`
+- Line 6: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 7: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0.135436"/>`
+- Line 8: Hardcoded hex color -> `<GradientStop Color="#17FFFFFF" Offset="0.487941"/>`
+- Line 9: Hardcoded hex color -> `<GradientStop Color="#00000004" Offset="0.517625"/>`
+- Line 10: Hardcoded hex color -> `<GradientStop Color="#FF1F8EAD" Offset="0.729128"/>`
+- Line 25: Hardcoded hex color -> `<GradientStop Color="#FF61D1F0" Offset="0"/>`
+- Line 26: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="0.662338"/>`
+- Line 40: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 41: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0.135436"/>`
+- Line 42: Hardcoded hex color -> `<GradientStop Color="#17FFFFFF" Offset="0.487941"/>`
+- Line 43: Hardcoded hex color -> `<GradientStop Color="#00000004" Offset="0.517625"/>`
+- Line 44: Hardcoded hex color -> `<GradientStop Color="#FF38CBF4" Offset="0.717996"/>`
+- Line 81: Hardcoded hex color -> `<Setter TargetName="border" Property="BorderBrush" Value="#30FFFFFF"/>`
+- Line 103: Hardcoded hex color -> `<Setter TargetName="border" Property="BorderBrush" Value="#40FFFFFF"/>`
+- Line 137: Hardcoded hex color -> `<Setter TargetName="border" Property="BorderBrush" Value="#FFBDBDBD"/>`
+- Line 176: Hardcoded hex color -> `<Setter TargetName="border" Property="Background" Value="#E0E0E0"/>`
+- Line 179: Hardcoded hex color -> `<Setter TargetName="border" Property="Background" Value="#C0C0C0"/>`
+- Line 208: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FF2E5C8A"/>`
+- Line 212: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0"/>`
+- Line 213: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0.4"/>`
+- Line 214: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0.6"/>`
+- Line 215: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="1"/>`
+- Line 219: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#FF1A1F28"/>`
+- Line 227: Hardcoded hex color -> `Background="#15000000"`
+- Line 228: Flat corners (CornerRadius="0") -> `CornerRadius="0"`
+- Line 235: Flat corners (CornerRadius="0") -> `CornerRadius="0"`
+- Line 239: Hardcoded hex color -> `Background="#30FFFFFF"`
+- Line 240: Flat corners (CornerRadius="0") -> `CornerRadius="0"`
+- Line 253: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0"/>`
+- Line 254: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0.4"/>`
+- Line 255: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0.6"/>`
+- Line 256: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="1"/>`
+- Line 260: Hardcoded hex color -> `<Setter TargetName="mainBorder" Property="BorderBrush" Value="#FF5A9FD4"/>`
+- Line 261: Hardcoded hex color -> `<Setter TargetName="highlightBorder" Property="Background" Value="#40FFFFFF"/>`
+- Line 267: Hardcoded hex color -> `<GradientStop Color="#FF1A1F28" Offset="0"/>`
+- Line 268: Hardcoded hex color -> `<GradientStop Color="#FF1A1F28" Offset="0.4"/>`
+- Line 269: Hardcoded hex color -> `<GradientStop Color="#FF1A1F28" Offset="0.6"/>`
+- Line 270: Hardcoded hex color -> `<GradientStop Color="#FF1A1F28" Offset="1"/>`
+- Line 274: Hardcoded hex color -> `<Setter TargetName="mainBorder" Property="BorderBrush" Value="#FF3B79AC"/>`
+- Line 275: Hardcoded hex color -> `<Setter TargetName="highlightBorder" Property="Background" Value="#20FFFFFF"/>`
+- Line 288: Hardcoded hex color -> `<GradientStop Color="#FFFF6B6B" Offset="0"/>`
+- Line 289: Hardcoded hex color -> `<GradientStop Color="#FFFF5252" Offset="0.4"/>`
+- Line 290: Hardcoded hex color -> `<GradientStop Color="#FFE53E3E" Offset="0.6"/>`
+- Line 291: Hardcoded hex color -> `<GradientStop Color="#FFCC0000" Offset="1"/>`
+- Line 296: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#FFCC0000"/>`
+- Line 302: Hardcoded hex color -> `<GradientStop Color="#FFFF8A80" Offset="0"/>`
+- Line 303: Hardcoded hex color -> `<GradientStop Color="#FFFF6B6B" Offset="0.4"/>`
+- Line 304: Hardcoded hex color -> `<GradientStop Color="#FFFF5252" Offset="0.6"/>`
+- Line 305: Hardcoded hex color -> `<GradientStop Color="#FFE53E3E" Offset="1"/>`
+- Line 314: Hardcoded hex color -> `<GradientStop Color="#FFCC0000" Offset="0"/>`
+- Line 315: Hardcoded hex color -> `<GradientStop Color="#FFE53E3E" Offset="0.4"/>`
+- Line 316: Hardcoded hex color -> `<GradientStop Color="#FFFF5252" Offset="0.6"/>`
+- Line 317: Hardcoded hex color -> `<GradientStop Color="#FFFF6B6B" Offset="1"/>`
+- Line 331: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FF2E5C8A"/>`
+- Line 335: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0"/>`
+- Line 336: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0.3"/>`
+- Line 337: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0.7"/>`
+- Line 338: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="1"/>`
+- Line 342: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#FF84B2D4"/>`
+- Line 350: Hardcoded hex color -> `Fill="#30000000"`
+- Line 360: Hardcoded hex color -> `Fill="#50FFFFFF"`
+- Line 372: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0"/>`
+- Line 373: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0.3"/>`
+- Line 374: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0.7"/>`
+- Line 375: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="1"/>`
+- Line 379: Hardcoded hex color -> `<Setter TargetName="mainEllipse" Property="Stroke" Value="#FF7EB4EA"/>`
+- Line 385: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0"/>`
+- Line 386: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0.3"/>`
+- Line 387: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0.7"/>`
+- Line 388: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="1"/>`
+- Line 392: Hardcoded hex color -> `<Setter TargetName="highlightEllipse" Property="Fill" Value="#30FFFFFF"/>`
+- Line 439: Hardcoded hex color -> `<Setter TargetName="border" Property="BorderBrush" Value="#30FFFFFF"/>`
+- Line 461: Hardcoded hex color -> `<Setter TargetName="border" Property="BorderBrush" Value="#40FFFFFF"/>`
+- Line 495: Hardcoded hex color -> `<Setter TargetName="border" Property="BorderBrush" Value="#FFBDBDBD"/>`
+
+## `./Skyweaver/Resources/Controls/MarkdownTableStyles.xaml`
+- Line 35: Hardcoded hex color -> `<SolidColorBrush x:Key="TwilightBlue_CellForegroundBrush" Color="#FF1B2A3B"/>`
+- Line 154: Hardcoded hex color -> `<Setter Property="AlternatingRowBackground" Value="#FFF2F5F7"/>`
+
+## `./Skyweaver/Resources/Controls/ActivatedButtonStyles.xaml`
+- Line 40: Hardcoded hex color -> `<GradientStop Color="#28FFFFFF" Offset="0.265306"/>`
+- Line 41: Hardcoded hex color -> `<GradientStop Color="#4FCEEEFF" Offset="0.591837"/>`
+- Line 42: Hardcoded hex color -> `<GradientStop Color="#2D2D4957" Offset="0.599258"/>`
+- Line 43: Hardcoded hex color -> `<GradientStop Color="#FF26FFF9" Offset="0.951762"/>`
+- Line 53: Hardcoded hex color -> `<DropShadowEffect Color="#FF26FFF9"`
+- Line 73: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 74: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0.135436"/>`
+- Line 75: Hardcoded hex color -> `<GradientStop Color="#17FFFFFF" Offset="0.487941"/>`
+- Line 76: Hardcoded hex color -> `<GradientStop Color="#00000004" Offset="0.517625"/>`
+- Line 77: Hardcoded hex color -> `<GradientStop Color="#FF1F8EAD" Offset="0.729128"/>`
+- Line 81: Hardcoded hex color -> `<Setter TargetName="border" Property="BorderBrush" Value="#30FFFFFF"/>`
+- Line 104: Hardcoded hex color -> `<Setter TargetName="border" Property="Background" Value="#40FFFFFF"/>`
+- Line 105: Hardcoded hex color -> `<Setter TargetName="border" Property="BorderBrush" Value="#40FFFFFF"/>`
+- Line 140: Hardcoded hex color -> `<Setter TargetName="border" Property="Background" Value="#FFE0E0E0"/>`
+- Line 141: Hardcoded hex color -> `<Setter TargetName="border" Property="BorderBrush" Value="#FFBDBDBD"/>`
+- Line 142: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FF888888"/>`
+
+## `./Skyweaver/Resources/Controls/DropdownClickMask.xaml`
+- Line 9: Hardcoded hex color -> `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 14: Hardcoded hex color -> `<GradientStop Color="#FF00FDFF" Offset="0.267994"/>`
+- Line 15: Hardcoded hex color -> `<GradientStop Color="#0000FDFF" Offset="0.49464"/>`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#FF00FDFF" Offset="0.764165"/>`
+
+## `./Skyweaver/Resources/Controls/ListBoxStyles.xaml`
+- Line 7: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#C8C8C8"/>`
+- Line 42: Hardcoded hex color -> `<Setter Property="Background" TargetName="Bd" Value="#1A1F28"/>`
+- Line 43: Hardcoded hex color -> `<Setter Property="BorderBrush" TargetName="Bd" Value="#1A1F28"/>`
+- Line 44: Hardcoded hex color -> `<Setter Property="Foreground" Value="#222222"/>`
+- Line 47: Hardcoded hex color -> `<Setter Property="Background" TargetName="Bd" Value="#1A1F28"/>`
+- Line 48: Hardcoded hex color -> `<Setter Property="BorderBrush" TargetName="Bd" Value="#1A1F28"/>`
+- Line 80: Hardcoded hex color -> `<Setter Property="Background" Value="#1A1F28"/>`
+- Line 81: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#1A1F28"/>`
+- Line 83: Hardcoded hex color -> `<Setter Property="Foreground" Value="#042271"/>`
+- Line 100: Hardcoded hex color -> `<Setter Property="Background" TargetName="Bd" Value="#FEF3B5"/>`
+- Line 101: Hardcoded hex color -> `<Setter Property="BorderBrush" TargetName="Bd" Value="#C4AF8C"/>`
+- Line 102: Hardcoded hex color -> `<Setter Property="Foreground" Value="#042271"/>`
+- Line 105: Hardcoded hex color -> `<Setter Property="Background" TargetName="Bd" Value="#6A87AB"/>`
+- Line 106: Hardcoded hex color -> `<Setter Property="BorderBrush" TargetName="Bd" Value="#1A1F28"/>`
+- Line 107: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFFFFF"/>`
+- Line 126: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#C8C8C8"/>`
+
+## `./Skyweaver/Resources/Controls/AeroComboBoxStyles.xaml`
+- Line 5: Hardcoded hex color -> `<GradientStop Color="#60A0D0FF" Offset="0"/>`
+- Line 6: Hardcoded hex color -> `<GradientStop Color="#3060A0D0" Offset="0.5"/>`
+- Line 7: Hardcoded hex color -> `<GradientStop Color="#4080C0F0" Offset="1"/>`
+- Line 11: Hardcoded hex color -> `<GradientStop Color="#A0C0E8FF" Offset="0"/>`
+- Line 12: Hardcoded hex color -> `<GradientStop Color="#6080B0E0" Offset="0.5"/>`
+- Line 13: Hardcoded hex color -> `<GradientStop Color="#80A0D0FF" Offset="1"/>`
+- Line 36: Hardcoded hex color -> `<GradientStop Color="#40FFFFFF" Offset="0"/>`
+- Line 37: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 48: Hardcoded hex color -> `<Setter TargetName="Bg" Property="BorderBrush" Value="#5090C0E0"/>`
+- Line 53: Hardcoded hex color -> `<Setter TargetName="Bg" Property="BorderBrush" Value="#80A0D0FF"/>`
+- Line 79: Hardcoded hex color -> `<Border x:Name="IdleBackground" CornerRadius="3" BorderThickness="1" BorderBrush="#FF82869E">`
+- Line 82: Hardcoded hex color -> `<GradientStop Color="#E0183858" Offset="0"/>`
+- Line 83: Hardcoded hex color -> `<GradientStop Color="#D0285878" Offset="0.15"/>`
+- Line 84: Hardcoded hex color -> `<GradientStop Color="#C0306888" Offset="0.5"/>`
+- Line 85: Hardcoded hex color -> `<GradientStop Color="#D0285878" Offset="0.85"/>`
+- Line 86: Hardcoded hex color -> `<GradientStop Color="#E0183858" Offset="1"/>`
+- Line 94: Hardcoded hex color -> `<GradientStop Color="#30FFFFFF" Offset="0"/>`
+- Line 95: Hardcoded hex color -> `<GradientStop Color="#10FFFFFF" Offset="0.5"/>`
+- Line 96: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 104: Hardcoded hex color -> `<GradientStop Color="#4060B0F0" Offset="0"/>`
+- Line 105: Hardcoded hex color -> `<GradientStop Color="#0060B0F0" Offset="1"/>`
+- Line 113: Hardcoded hex color -> `<GradientStop Color="#50FFFFFF" Offset="0"/>`
+- Line 114: Hardcoded hex color -> `<GradientStop Color="#20FFFFFF" Offset="0.5"/>`
+- Line 115: Hardcoded hex color -> `<GradientStop Color="#3080B0D0" Offset="1"/>`
+- Line 120: Hardcoded hex color -> `<Border x:Name="HoverBackground" Opacity="0" CornerRadius="3" BorderThickness="1" BorderBrush="#67BBDDF2">`
+- Line 123: Hardcoded hex color -> `<GradientStop Color="#CD6E869C" Offset="0"/>`
+- Line 124: Hardcoded hex color -> `<GradientStop Color="#CD3A576E" Offset="0.35"/>`
+- Line 125: Hardcoded hex color -> `<GradientStop Color="#CD162D41" Offset="0.5"/>`
+- Line 126: Hardcoded hex color -> `<GradientStop Color="#CB4C87AF" Offset="1"/>`
+- Line 134: Hardcoded hex color -> `<GradientStop Color="#50FFFFFF" Offset="0"/>`
+- Line 135: Hardcoded hex color -> `<GradientStop Color="#20FFFFFF" Offset="0.5"/>`
+- Line 136: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 141: Hardcoded hex color -> `<Border x:Name="PressedBackground" Opacity="0" CornerRadius="3" BorderThickness="1" BorderBrush="#67BBDDF2">`
+- Line 144: Hardcoded hex color -> `<GradientStop Color="#FF87B0CA" Offset="0"/>`
+- Line 145: Hardcoded hex color -> `<GradientStop Color="#FF496A89" Offset="0.45"/>`
+- Line 146: Hardcoded hex color -> `<GradientStop Color="#FF335876" Offset="0.5"/>`
+- Line 147: Hardcoded hex color -> `<GradientStop Color="#FF559EBA" Offset="1"/>`
+- Line 155: Hardcoded hex color -> `<GradientStop Color="#60FFFFFF" Offset="0"/>`
+- Line 156: Hardcoded hex color -> `<GradientStop Color="#20FFFFFF" Offset="0.6"/>`
+- Line 157: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 169: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>`
+- Line 231: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="2" Opacity="0.6"/>`
+- Line 234: Hardcoded hex color -> `<SolidColorBrush Color="#01000000"/>`
+- Line 241: Hardcoded hex color -> `<GradientStop Color="#F0102030" Offset="0"/>`
+- Line 242: Hardcoded hex color -> `<GradientStop Color="#F0183050" Offset="0.3"/>`
+- Line 243: Hardcoded hex color -> `<GradientStop Color="#F0102840" Offset="0.7"/>`
+- Line 244: Hardcoded hex color -> `<GradientStop Color="#F0081828" Offset="1"/>`
+- Line 261: Hardcoded hex color -> `<GradientStop Color="#25FFFFFF" Offset="0"/>`
+- Line 262: Hardcoded hex color -> `<GradientStop Color="#10FFFFFF" Offset="0.5"/>`
+- Line 263: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 271: Hardcoded hex color -> `<GradientStop Color="#3040A0E0" Offset="0"/>`
+- Line 272: Hardcoded hex color -> `<GradientStop Color="#0040A0E0" Offset="1"/>`
+- Line 280: Hardcoded hex color -> `<GradientStop Color="#60FFFFFF" Offset="0"/>`
+- Line 281: Hardcoded hex color -> `<GradientStop Color="#30FFFFFF" Offset="0.3"/>`
+- Line 282: Hardcoded hex color -> `<GradientStop Color="#20FFFFFF" Offset="0.7"/>`
+- Line 283: Hardcoded hex color -> `<GradientStop Color="#4080C0E0" Offset="1"/>`
+
+## `./Skyweaver/Resources/Controls/DiffStyles.xaml`
+- Line 11: Hardcoded hex color -> `<GradientStop Color="#4DC9CACA" Offset="0"/>`
+- Line 12: Hardcoded hex color -> `<GradientStop Color="#0E7C7A44" Offset="0.988506"/>`
+- Line 27: Hardcoded hex color -> `<GradientStop Color="#2AFFFACC" Offset="0"/>`
+- Line 28: Hardcoded hex color -> `<GradientStop Color="#14FFFFFF" Offset="0.247126"/>`
+- Line 29: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.461686"/>`
+- Line 40: Hardcoded hex color -> `<GradientStop Color="#67FFFFFF" Offset="0"/>`
+- Line 41: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 67: Hardcoded hex color -> `<GradientStop Color="#4DC9CACA" Offset="0"/>`
+- Line 68: Hardcoded hex color -> `<GradientStop Color="#0E7C4444" Offset="0.988506"/>`
+- Line 83: Hardcoded hex color -> `<GradientStop Color="#2AFF9F9F" Offset="0"/>`
+- Line 84: Hardcoded hex color -> `<GradientStop Color="#14FFC9C9" Offset="0.247126"/>`
+- Line 85: Hardcoded hex color -> `<GradientStop Color="#00FCD9D9" Offset="0.461686"/>`
+- Line 96: Hardcoded hex color -> `<GradientStop Color="#67FFFFFF" Offset="0"/>`
+- Line 97: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 123: Hardcoded hex color -> `<GradientStop Color="#4DC9CACA" Offset="0"/>`
+- Line 124: Hardcoded hex color -> `<GradientStop Color="#0E0B7622" Offset="0.988506"/>`
+- Line 139: Hardcoded hex color -> `<GradientStop Color="#2A5BFC4C" Offset="0"/>`
+- Line 140: Hardcoded hex color -> `<GradientStop Color="#1498FF8E" Offset="0.247126"/>`
+- Line 141: Hardcoded hex color -> `<GradientStop Color="#00C8FFC3" Offset="0.464467"/>`
+- Line 152: Hardcoded hex color -> `<GradientStop Color="#67FFFFFF" Offset="0"/>`
+- Line 153: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 171: Hardcoded hex color -> `<SolidColorBrush x:Key="SkyweaverDiffAnchorAccentBrush" Color="#FFD8F8F2"/>`
+- Line 172: Hardcoded hex color -> `<SolidColorBrush x:Key="SkyweaverDiffAddedAccentBrush" Color="#FFC8FFD8"/>`
+- Line 173: Hardcoded hex color -> `<SolidColorBrush x:Key="SkyweaverDiffRemovedAccentBrush" Color="#FFFFD1D1"/>`
+- Line 174: Hardcoded hex color -> `<SolidColorBrush x:Key="SkyweaverDiffContentBrush" Color="#FFF4FCFF"/>`
+
+## `./Skyweaver/Resources/Controls/ToolTipStyles.xaml`
+- Line 7: Hardcoded hex color -> `<GradientStop Color="#4561FFFF" Offset="0"/>`
+- Line 8: Hardcoded hex color -> `<GradientStop Color="#53000000" Offset="0.160796"/>`
+- Line 9: Hardcoded hex color -> `<GradientStop Color="#5A000A11" Offset="0.341501"/>`
+- Line 10: Hardcoded hex color -> `<GradientStop Color="#EC001A2C" Offset="0.562021"/>`
+- Line 11: Hardcoded hex color -> `<GradientStop Color="#3F0086DF" Offset="1"/>`
+- Line 19: Hardcoded hex color -> `<SolidColorBrush x:Key="ToolTipBorderBrush" Color="#990099FF"/>`
+- Line 22: Hardcoded hex color -> `<SolidColorBrush x:Key="ToolTipForegroundBrush" Color="#FFFFFFFF"/>`
+- Line 45: Hardcoded hex color -> `<DropShadowEffect ShadowDepth="0.5" Color="#333333" Opacity="0.8" BlurRadius="2" />`
+
+## `./Skyweaver/Resources/Controls/DropdownHoverMask.xaml`
+- Line 9: Hardcoded hex color -> `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 14: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 15: Hardcoded hex color -> `<GradientStop Color="#0535FAFF" Offset="0.258806"/>`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#0079FDFF" Offset="0.488515"/>`
+- Line 17: Hardcoded hex color -> `<GradientStop Color="#7100FDFF" Offset="1"/>`
+
+## `./Skyweaver/Resources/Controls/FilmPreviewTabStyles.xaml`
+- Line 11: Hardcoded hex color -> `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#BA2D38A0" Offset="0"/>`
+- Line 17: Hardcoded hex color -> `<GradientStop Color="#00000004" Offset="0.506494"/>`
+- Line 18: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.517625"/>`
+- Line 19: Hardcoded hex color -> `<GradientStop Color="#3FFFFFFF" Offset="0.821892"/>`
+- Line 20: Hardcoded hex color -> `<GradientStop Color="#4AFFFFFF" Offset="0.892393"/>`
+
+## `./Skyweaver/Resources/Controls/NewNodeGraphDialogStyles.xaml`
+- Line 34: Hardcoded hex color -> `<Setter TargetName="Bd" Property="BorderBrush" Value="#30FFFFFF"/>`
+- Line 40: Hardcoded hex color -> `<Setter TargetName="Bd" Property="BorderBrush" Value="#60FFFFFF"/>`
+
+## `./Skyweaver/Resources/Controls/GroupBoxStyles.xaml`
+- Line 9: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFB8C5D1"/>`
+- Line 21: Hardcoded hex color -> `BorderBrush="#FFD0D0D0"`
+- Line 40: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#FF1A1F28"/>`
+- Line 67: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0"/>`
+- Line 68: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0.5"/>`
+- Line 69: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="1"/>`
+- Line 90: Hardcoded hex color -> `<GradientStop Color="#F8F8F8" Offset="0"/>`
+- Line 91: Hardcoded hex color -> `<GradientStop Color="#F0F0F0" Offset="1"/>`
+- Line 95: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#D0D0D0"/>`
+
+## `./Skyweaver/Resources/Controls/CheckBoxComboBoxStyles.xaml`
+- Line 7: Hardcoded hex color -> `<GradientStop Color="#FF61FFFF" Offset="0"/>`
+- Line 8: Hardcoded hex color -> `<GradientStop Color="#C7000000" Offset="0.173047"/>`
+- Line 9: Hardcoded hex color -> `<GradientStop Color="#00000A11" Offset="0.378254"/>`
+- Line 10: Hardcoded hex color -> `<GradientStop Color="#99001A2C" Offset="0.51608"/>`
+- Line 11: Hardcoded hex color -> `<GradientStop Color="#FF0086DF" Offset="0.825421"/>`
+- Line 19: Hardcoded hex color -> `<SolidColorBrush x:Key="CheckboxComboBoxBorderBrush" Color="#4400CCCC"/>`
+- Line 22: Hardcoded hex color -> `<SolidColorBrush x:Key="CheckboxComboBoxForegroundBrush" Color="#FFFFFFFF"/>`
+- Line 48: Flat corners (CornerRadius="0") -> `CornerRadius="0">`
+- Line 71: Hardcoded hex color -> `<Setter Property="BorderBrush" TargetName="checkBoxBorder" Value="#8800FFFF"/>`
+- Line 112: Hardcoded hex color -> `<Setter Property="Background" Value="#3F0086DF"/>`
+- Line 115: Hardcoded hex color -> `<Setter Property="Background" Value="#7F0086DF"/>`
+- Line 135: Flat corners (CornerRadius="0") -> `CornerRadius="0">`
+- Line 166: Hardcoded hex color -> `<Setter Property="BorderBrush" TargetName="mainBorder" Value="#8800FFFF"/>`
+- Line 170: Hardcoded hex color -> `<Setter Property="BorderBrush" TargetName="mainBorder" Value="#8800FFFF"/>`
+- Line 186: Hardcoded hex color -> `Background="#FF001A2C"`
+- Line 189: Flat corners (CornerRadius="0") -> `CornerRadius="0"`
+
+## `./Skyweaver/Resources/Controls/ScrollBarStyles.xaml`
+- Line 6: Hardcoded hex color -> `<Setter Property="Background" Value="#1A1F28"/>`
+- Line 7: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#0F1419"/>`
+- Line 30: Hardcoded hex color -> `Fill="#8A9BA8"/>`
+- Line 59: Hardcoded hex color -> `Fill="#8A9BA8"/>`
+- Line 69: Hardcoded hex color -> `<Setter Property="Background" Value="#1A1F28"/>`
+- Line 70: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#0F1419"/>`
+- Line 93: Hardcoded hex color -> `Fill="#8A9BA8"/>`
+- Line 122: Hardcoded hex color -> `Fill="#8A9BA8"/>`
+- Line 139: Hardcoded hex color -> `BorderBrush="#1A1F28"`
+- Line 146: Hardcoded hex color -> `<GradientStop Color="#3A4550" Offset="0"/>`
+- Line 147: Hardcoded hex color -> `<GradientStop Color="#2A3540" Offset="0.5"/>`
+- Line 148: Hardcoded hex color -> `<GradientStop Color="#1A2530" Offset="1"/>`
+- Line 157: Hardcoded hex color -> `<GradientStop Color="#4A5560" Offset="0"/>`
+- Line 158: Hardcoded hex color -> `<GradientStop Color="#3A4550" Offset="0.5"/>`
+- Line 159: Hardcoded hex color -> `<GradientStop Color="#2A3540" Offset="1"/>`
+- Line 163: Hardcoded hex color -> `<Setter TargetName="ThumbBorder" Property="BorderBrush" Value="#4A5560"/>`
+- Line 169: Hardcoded hex color -> `<GradientStop Color="#5A6570" Offset="0"/>`
+- Line 170: Hardcoded hex color -> `<GradientStop Color="#4A5560" Offset="0.5"/>`
+- Line 171: Hardcoded hex color -> `<GradientStop Color="#3A4550" Offset="1"/>`
+- Line 175: Hardcoded hex color -> `<Setter TargetName="ThumbBorder" Property="BorderBrush" Value="#5A6570"/>`
+- Line 186: Hardcoded hex color -> `<Setter Property="Background" Value="#1A1F28"/>`
+- Line 187: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#0F1419"/>`
+- Line 197: Flat corners (CornerRadius="0") -> `CornerRadius="0">`
+- Line 203: Hardcoded hex color -> `<Setter TargetName="ButtonBorder" Property="Background" Value="#2A3540"/>`
+- Line 207: Hardcoded hex color -> `<Setter TargetName="ButtonBorder" Property="Background" Value="#3A4550"/>`
+- Line 270: Hardcoded hex color -> `Fill="#1A1F28"`
+- Line 294: Hardcoded hex color -> `<GradientStop Color="#A7FFFFFF" Offset="0"/>`
+- Line 295: Hardcoded hex color -> `<GradientStop Color="#2DFFFFFF" Offset="1"/>`
+- Line 304: Hardcoded hex color -> `<GradientStop Color="#29FFFFFF" Offset="0"/>`
+- Line 305: Hardcoded hex color -> `<GradientStop Color="#00000004" Offset="0.380334"/>`
+- Line 306: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.41744"/>`
+- Line 307: Hardcoded hex color -> `<GradientStop Color="#5EFFFFFF" Offset="0.769944"/>`
+- Line 308: Hardcoded hex color -> `<GradientStop Color="#4AFFFFFF" Offset="0.892393"/>`
+- Line 330: Hardcoded hex color -> `<GradientStop Color="#A7FFFFFF" Offset="0"/>`
+- Line 331: Hardcoded hex color -> `<GradientStop Color="#2DFFFFFF" Offset="1"/>`
+- Line 340: Hardcoded hex color -> `<GradientStop Color="#29FFFFFF" Offset="0"/>`
+- Line 341: Hardcoded hex color -> `<GradientStop Color="#00000004" Offset="0.380334"/>`
+- Line 342: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.41744"/>`
+- Line 343: Hardcoded hex color -> `<GradientStop Color="#5EFFFFFF" Offset="0.769944"/>`
+- Line 344: Hardcoded hex color -> `<GradientStop Color="#4AFFFFFF" Offset="0.892393"/>`
+- Line 366: Hardcoded hex color -> `<GradientStop Color="#A7FFFFFF" Offset="0"/>`
+- Line 367: Hardcoded hex color -> `<GradientStop Color="#2DFFFFFF" Offset="1"/>`
+- Line 376: Hardcoded hex color -> `<GradientStop Color="#29FFFFFF" Offset="0"/>`
+- Line 377: Hardcoded hex color -> `<GradientStop Color="#00000004" Offset="0.380334"/>`
+- Line 378: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.41744"/>`
+- Line 379: Hardcoded hex color -> `<GradientStop Color="#5EFFFFFF" Offset="0.769944"/>`
+- Line 380: Hardcoded hex color -> `<GradientStop Color="#4AFFFFFF" Offset="0.892393"/>`
+- Line 402: Hardcoded hex color -> `<GradientStop Color="#A7FFFFFF" Offset="0"/>`
+- Line 403: Hardcoded hex color -> `<GradientStop Color="#2DFFFFFF" Offset="1"/>`
+- Line 412: Hardcoded hex color -> `<GradientStop Color="#7DFFFFFF" Offset="0"/>`
+- Line 413: Hardcoded hex color -> `<GradientStop Color="#1A000000" Offset="0.467075"/>`
+- Line 414: Hardcoded hex color -> `<GradientStop Color="#1FFFFFFF" Offset="1"/>`
+- Line 433: Hardcoded hex color -> `<GradientStop Color="#A7FFFFFF" Offset="0"/>`
+- Line 434: Hardcoded hex color -> `<GradientStop Color="#2DFFFFFF" Offset="1"/>`
+- Line 443: Hardcoded hex color -> `<GradientStop Color="#7DFFFFFF" Offset="0"/>`
+- Line 444: Hardcoded hex color -> `<GradientStop Color="#1AD3D3D3" Offset="0.467075"/>`
+- Line 445: Hardcoded hex color -> `<GradientStop Color="#1FFFFFFF" Offset="1"/>`
+- Line 464: Hardcoded hex color -> `<GradientStop Color="#A7FFFFFF" Offset="0"/>`
+- Line 465: Hardcoded hex color -> `<GradientStop Color="#2DFFFFFF" Offset="1"/>`
+- Line 474: Hardcoded hex color -> `<GradientStop Color="#29FFFFFF" Offset="0"/>`
+- Line 475: Hardcoded hex color -> `<GradientStop Color="#00000004" Offset="0.380334"/>`
+- Line 476: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.41744"/>`
+- Line 477: Hardcoded hex color -> `<GradientStop Color="#5EFFFFFF" Offset="0.769944"/>`
+- Line 478: Hardcoded hex color -> `<GradientStop Color="#4AFFFFFF" Offset="0.892393"/>`
+- Line 502: Hardcoded hex color -> `<GradientStop Color="#A7FFFFFF" Offset="0"/>`
+- Line 503: Hardcoded hex color -> `<GradientStop Color="#2DFFFFFF" Offset="1"/>`
+- Line 512: Hardcoded hex color -> `<GradientStop Color="#7DFFFFFF" Offset="0"/>`
+- Line 513: Hardcoded hex color -> `<GradientStop Color="#1A000000" Offset="0.467075"/>`
+- Line 514: Hardcoded hex color -> `<GradientStop Color="#1FFFFFFF" Offset="1"/>`
+- Line 536: Hardcoded hex color -> `<GradientStop Color="#A7FFFFFF" Offset="0"/>`
+- Line 537: Hardcoded hex color -> `<GradientStop Color="#2DFFFFFF" Offset="1"/>`
+- Line 546: Hardcoded hex color -> `<GradientStop Color="#7DFFFFFF" Offset="0"/>`
+- Line 547: Hardcoded hex color -> `<GradientStop Color="#1AD3D3D3" Offset="0.467075"/>`
+- Line 548: Hardcoded hex color -> `<GradientStop Color="#1FFFFFFF" Offset="1"/>`
+- Line 587: Flat corners (CornerRadius="0") -> `CornerRadius="0"/>`
+- Line 682: Hardcoded hex color -> `Fill="#8A9BA8"/>`
+- Line 713: Hardcoded hex color -> `Fill="#8A9BA8"/>`
+- Line 750: Hardcoded hex color -> `Fill="#8A9BA8"/>`
+- Line 781: Hardcoded hex color -> `Fill="#8A9BA8"/>`
+
+## `./Skyweaver/Resources/Controls/MenuStateResources.xaml`
+- Line 6: Hardcoded hex color -> `<GradientStop Color="#12FFFFFF" Offset="0"/>`
+- Line 7: Hardcoded hex color -> `<GradientStop Color="#C30099FF" Offset="1"/>`
+- Line 11: Hardcoded hex color -> `<GradientStop Color="#7A00F3FF" Offset="0"/>`
+- Line 12: Hardcoded hex color -> `<GradientStop Color="#C30099FF" Offset="1"/>`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#BA00F3FF" Offset="0"/>`
+- Line 17: Hardcoded hex color -> `<GradientStop Color="#FF0099FF" Offset="1"/>`
+
+## `./Skyweaver/Resources/Controls/ChatStyles.xaml`
+- Line 12: Hardcoded hex color -> `<GradientStop Color="#66304B62" Offset="0"/>`
+- Line 13: Hardcoded hex color -> `<GradientStop Color="#44202F3F" Offset="0.52"/>`
+- Line 14: Hardcoded hex color -> `<GradientStop Color="#38202A36" Offset="1"/>`
+- Line 20: Hardcoded hex color -> `<Pen Thickness="0.32" LineJoin="Round" Brush="#FF000000"/>`
+- Line 31: Hardcoded hex color -> `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 32: Hardcoded hex color -> `<GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>`
+- Line 33: Hardcoded hex color -> `<GradientStop Color="#07FFFFFF" Offset="0.109195"/>`
+- Line 34: Hardcoded hex color -> `<GradientStop Color="#04FFFFFF" Offset="0.298851"/>`
+- Line 35: Hardcoded hex color -> `<GradientStop Color="#3AFFFFFF" Offset="0.327586"/>`
+- Line 36: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0.465517"/>`
+- Line 37: Hardcoded hex color -> `<GradientStop Color="#14FFFFFF" Offset="0.591954"/>`
+- Line 38: Hardcoded hex color -> `<GradientStop Color="#05FFFFFF" Offset="0.758621"/>`
+- Line 39: Hardcoded hex color -> `<GradientStop Color="#44FFFFFF" Offset="1"/>`
+- Line 68: Hardcoded hex color -> `<Border x:Name="IdleBackground" CornerRadius="4" BorderThickness="2" BorderBrush="#67BBDDF2">`
+- Line 71: Hardcoded hex color -> `<GradientStop Color="#FF637495" Offset="0.308"/>`
+- Line 72: Hardcoded hex color -> `<GradientStop Color="#FF384D75" Offset="0.489"/>`
+- Line 73: Hardcoded hex color -> `<GradientStop Color="#FF223761" Offset="0.495"/>`
+- Line 74: Hardcoded hex color -> `<GradientStop Color="#FF284D7E" Offset="0.681"/>`
+- Line 82: Hardcoded hex color -> `<GradientStop Color="#FF4B9DCC" Offset="0.231"/>`
+- Line 83: Hardcoded hex color -> `<GradientStop Color="#013C4F73" Offset="1"/>`
+- Line 88: Hardcoded hex color -> `<Border x:Name="HoverBackground" Opacity="0" CornerRadius="4" BorderThickness="2" BorderBrush="#67BBDDF2">`
+- Line 91: Hardcoded hex color -> `<GradientStop Color="#FF7387AF" Offset="0.308"/>`
+- Line 92: Hardcoded hex color -> `<GradientStop Color="#FF405886" Offset="0.489"/>`
+- Line 93: Hardcoded hex color -> `<GradientStop Color="#FF284276" Offset="0.495"/>`
+- Line 94: Hardcoded hex color -> `<GradientStop Color="#FF295691" Offset="0.681"/>`
+- Line 102: Hardcoded hex color -> `<GradientStop Color="#FF4B9DCC" Offset="0.231"/>`
+- Line 103: Hardcoded hex color -> `<GradientStop Color="#013C4F73" Offset="1"/>`
+- Line 111: Hardcoded hex color -> `<GradientStop Color="#FF4B9DCC" Offset="0.231"/>`
+- Line 112: Hardcoded hex color -> `<GradientStop Color="#013C4F73" Offset="1"/>`
+- Line 117: Hardcoded hex color -> `<Border x:Name="PressedBackground" Opacity="0" CornerRadius="4" BorderThickness="2" BorderBrush="#67BBDDF2">`
+- Line 120: Hardcoded hex color -> `<GradientStop Color="#FF324F80" Offset="0.308"/>`
+- Line 121: Hardcoded hex color -> `<GradientStop Color="#FF142E74" Offset="0.489"/>`
+- Line 122: Hardcoded hex color -> `<GradientStop Color="#FF09246B" Offset="0.501"/>`
+- Line 123: Hardcoded hex color -> `<GradientStop Color="#FF0A348A" Offset="0.681"/>`
+- Line 131: Hardcoded hex color -> `<GradientStop Color="#FF3A5AC6" Offset="0.213"/>`
+- Line 132: Hardcoded hex color -> `<GradientStop Color="#013C4F73" Offset="1"/>`
+- Line 140: Hardcoded hex color -> `<GradientStop Color="#80000000" Offset="0"/>`
+- Line 141: Hardcoded hex color -> `<GradientStop Color="#40000000" Offset="0.15"/>`
+- Line 142: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="0.4"/>`
+- Line 150: Hardcoded hex color -> `<GradientStop Color="#50000000" Offset="0"/>`
+- Line 151: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="0.1"/>`
+- Line 152: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="0.9"/>`
+- Line 153: Hardcoded hex color -> `<GradientStop Color="#50000000" Offset="1"/>`
+- Line 164: Hardcoded hex color -> `<DropShadowEffect Color="#000000"`
+- Line 343: Hardcoded hex color -> `<GradientStop Color="#38FFFFFF" Offset="0"/>`
+- Line 344: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.473183"/>`
+- Line 345: Hardcoded hex color -> `<GradientStop Color="#91FFFFFF" Offset="0.478927"/>`
+- Line 346: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 367: Hardcoded hex color -> `<GradientStop Color="#FF6A92AA" Offset="0"/>`
+- Line 368: Hardcoded hex color -> `<GradientStop Color="#FF2E6986" Offset="1"/>`
+- Line 377: Hardcoded hex color -> `<GradientStop Color="#12FFFFFF" Offset="0"/>`
+- Line 378: Hardcoded hex color -> `<GradientStop Color="#0BEEF5F8" Offset="0.250958"/>`
+- Line 379: Hardcoded hex color -> `<GradientStop Color="#01FFFFFF" Offset="0.992337"/>`
+- Line 395: Hardcoded hex color -> `<GradientStop Color="#FF6A92AA" Offset="0"/>`
+- Line 396: Hardcoded hex color -> `<GradientStop Color="#FF2E6986" Offset="1"/>`
+- Line 405: Hardcoded hex color -> `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 406: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.178161"/>`
+- Line 407: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="0.208812"/>`
+- Line 408: Hardcoded hex color -> `<GradientStop Color="#09070E11" Offset="0.798851"/>`
+- Line 409: Hardcoded hex color -> `<GradientStop Color="#632582AA" Offset="1"/>`
+- Line 430: Hardcoded hex color -> `<GradientStop Color="#FF6A92AA" Offset="0"/>`
+- Line 431: Hardcoded hex color -> `<GradientStop Color="#FF2E6986" Offset="1"/>`
+- Line 440: Hardcoded hex color -> `<GradientStop Color="#12FFFFFF" Offset="0"/>`
+- Line 441: Hardcoded hex color -> `<GradientStop Color="#0BEEF5F8" Offset="0.250958"/>`
+- Line 442: Hardcoded hex color -> `<GradientStop Color="#01FFFFFF" Offset="0.992337"/>`
+- Line 458: Hardcoded hex color -> `<GradientStop Color="#FF6A92AA" Offset="0"/>`
+- Line 459: Hardcoded hex color -> `<GradientStop Color="#FF2E6986" Offset="1"/>`
+- Line 468: Hardcoded hex color -> `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 469: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.295019"/>`
+- Line 470: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="0.300766"/>`
+- Line 471: Hardcoded hex color -> `<GradientStop Color="#09070E11" Offset="0.703065"/>`
+- Line 472: Hardcoded hex color -> `<GradientStop Color="#632582AA" Offset="1"/>`
+- Line 493: Hardcoded hex color -> `<GradientStop Color="#FF6A92AA" Offset="0"/>`
+- Line 494: Hardcoded hex color -> `<GradientStop Color="#FF2E6986" Offset="1"/>`
+- Line 503: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0"/>`
+- Line 504: Hardcoded hex color -> `<GradientStop Color="#0BEEF5F8" Offset="0.890805"/>`
+- Line 505: Hardcoded hex color -> `<GradientStop Color="#0EFFFFFF" Offset="0.992337"/>`
+- Line 521: Hardcoded hex color -> `<GradientStop Color="#FF6A92AA" Offset="0"/>`
+- Line 522: Hardcoded hex color -> `<GradientStop Color="#FF2E6986" Offset="1"/>`
+- Line 531: Hardcoded hex color -> `<GradientStop Color="#5BFFFFFF" Offset="0"/>`
+- Line 532: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.178161"/>`
+- Line 533: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="0.208812"/>`
+- Line 534: Hardcoded hex color -> `<GradientStop Color="#09070E11" Offset="0.798851"/>`
+- Line 535: Hardcoded hex color -> `<GradientStop Color="#952582AA" Offset="1"/>`
+- Line 554: Hardcoded hex color -> `<GradientStop Color="#BF306F83" Offset="0"/>`
+- Line 555: Hardcoded hex color -> `<GradientStop Color="#FF04071C" Offset="0.992337"/>`
+
+## `./Skyweaver/Resources/Controls/TabControlStyles.xaml`
+- Line 11: Hardcoded hex color -> `<Setter Property="Foreground" Value="#99FFFFFF"/>`
+- Line 35: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 36: Hardcoded hex color -> `<GradientStop Color="#35CEEEFF" Offset="0.55102"/>`
+- Line 37: Hardcoded hex color -> `<GradientStop Color="#652D4957" Offset="0.554731"/>`
+- Line 38: Hardcoded hex color -> `<GradientStop Color="#55FFFFFF" Offset="1"/>`
+- Line 57: Hardcoded hex color -> `To="#FFECF5FF" Duration="0:0:0.12" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 60: Hardcoded hex color -> `To="#55CEEEFF" Duration="0:0:0.12" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 63: Hardcoded hex color -> `To="#752D4957" Duration="0:0:0.12" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 66: Hardcoded hex color -> `To="#75FFFFFF" Duration="0:0:0.12" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 75: Hardcoded hex color -> `To="#FFFFFFFF" Duration="0:0:0.15" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 78: Hardcoded hex color -> `To="#35CEEEFF" Duration="0:0:0.15" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 81: Hardcoded hex color -> `To="#652D4957" Duration="0:0:0.15" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 84: Hardcoded hex color -> `To="#55FFFFFF" Duration="0:0:0.15" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 103: Hardcoded hex color -> `To="#28FFFFFF" Duration="0:0:0.18" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 106: Hardcoded hex color -> `To="#35CEEEFF" Duration="0:0:0.18" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 109: Hardcoded hex color -> `To="#652D4957" Duration="0:0:0.18" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 112: Hardcoded hex color -> `To="#FF6FD4D1" Duration="0:0:0.18" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 121: Hardcoded hex color -> `To="#FFFFFFFF" Duration="0:0:0.22" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 124: Hardcoded hex color -> `To="#35CEEEFF" Duration="0:0:0.22" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 127: Hardcoded hex color -> `To="#652D4957" Duration="0:0:0.22" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 130: Hardcoded hex color -> `To="#55FFFFFF" Duration="0:0:0.22" EasingFunction="{StaticResource EaseInOut}"/>`
+- Line 167: Hardcoded hex color -> `<Setter TargetName="border" Property="BorderBrush" Value="#979AA2"/>`
+- Line 168: Hardcoded hex color -> `<Setter Property="Foreground" Value="#000000"/>`
+- Line 175: Hardcoded hex color -> `<GradientStop Color="#FFFFFF" Offset="0"/>`
+- Line 176: Hardcoded hex color -> `<GradientStop Color="#F3F3F3" Offset="0.15"/>`
+- Line 177: Hardcoded hex color -> `<GradientStop Color="#F3F3F3" Offset="0.45"/>`
+- Line 178: Hardcoded hex color -> `<GradientStop Color="#EBEBEB" Offset="0.46"/>`
+- Line 179: Hardcoded hex color -> `<GradientStop Color="#D6D6D5" Offset="1"/>`
+- Line 183: Hardcoded hex color -> `<Setter TargetName="border" Property="BorderBrush" Value="#94979F"/>`
+- Line 184: Hardcoded hex color -> `<Setter Property="Foreground" Value="#333333"/>`
+- Line 191: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0"/>`
+- Line 192: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="1"/>`
+- Line 196: Hardcoded hex color -> `<Setter TargetName="border" Property="BorderBrush" Value="#1A1F28"/>`
+- Line 199: Hardcoded hex color -> `<Setter TargetName="border" Property="Background" Value="#E0E0E0"/>`
+- Line 200: Hardcoded hex color -> `<Setter TargetName="border" Property="BorderBrush" Value="#C0C0C0"/>`
+- Line 201: Hardcoded hex color -> `<Setter Property="Foreground" Value="#888888"/>`
+- Line 213: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#FF000000"/>`
+- Line 256: Hardcoded hex color -> `BorderBrush="#FF000000"`
+- Line 262: Hardcoded hex color -> `<GradientStop Color="#FF435A69" Offset="0"/>`
+- Line 263: Hardcoded hex color -> `<GradientStop Color="#FF374D5A" Offset="0.517625"/>`
+- Line 264: Hardcoded hex color -> `<GradientStop Color="#FE334853" Offset="0.528757"/>`
+- Line 265: Hardcoded hex color -> `<GradientStop Color="#FF324551" Offset="1"/>`
+- Line 326: Hardcoded hex color -> `To="#28FFFFFF" Duration="0:0:0.3"/>`
+- Line 329: Hardcoded hex color -> `To="#35CEEEFF" Duration="0:0:0.3"/>`
+- Line 332: Hardcoded hex color -> `To="#652D4957" Duration="0:0:0.3"/>`
+- Line 335: Hardcoded hex color -> `To="#FF6FD4D1" Duration="0:0:0.3"/>`
+- Line 344: Hardcoded hex color -> `To="#FF435A69" Duration="0:0:0.3"/>`
+- Line 347: Hardcoded hex color -> `To="#FF374D5A" Duration="0:0:0.3"/>`
+- Line 350: Hardcoded hex color -> `To="#FE334853" Duration="0:0:0.3"/>`
+- Line 353: Hardcoded hex color -> `To="#FF324551" Duration="0:0:0.3"/>`
+
+## `./Skyweaver/Resources/Controls/PreferencesPanelStyles.xaml`
+- Line 6: Hardcoded hex color -> `<GradientStop Color="#25102040" Offset="0"/>`
+- Line 7: Hardcoded hex color -> `<GradientStop Color="#354080C0" Offset="0.5"/>`
+- Line 8: Hardcoded hex color -> `<GradientStop Color="#25102040" Offset="1"/>`
+- Line 14: Hardcoded hex color -> `<GradientStop Color="#50FFFFFF" Offset="0"/>`
+- Line 15: Hardcoded hex color -> `<GradientStop Color="#20FFFFFF" Offset="0.5"/>`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#40FFFFFF" Offset="1"/>`
+- Line 22: Hardcoded hex color -> `<GradientStop Color="#FF5A5F6D" Offset="0.36"/>`
+- Line 23: Hardcoded hex color -> `<GradientStop Color="#FF353A51" Offset="0.498"/>`
+- Line 24: Hardcoded hex color -> `<GradientStop Color="#FF141B36" Offset="0.504"/>`
+- Line 25: Hardcoded hex color -> `<GradientStop Color="#FF070918" Offset="0.706"/>`
+- Line 33: Hardcoded hex color -> `<GradientStop Color="#FF79B6EE" Offset="0"/>`
+- Line 34: Hardcoded hex color -> `<GradientStop Color="#004D4D4D" Offset="1"/>`
+- Line 42: Hardcoded hex color -> `<GradientStop Color="#FF43ACFF" Offset="0"/>`
+- Line 43: Hardcoded hex color -> `<GradientStop Color="#004D4D4D" Offset="1"/>`
+- Line 56: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 57: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 63: Hardcoded hex color -> `<GradientStop Color="#FF4A5060" Offset="0"/>`
+- Line 64: Hardcoded hex color -> `<GradientStop Color="#FF2A3040" Offset="0.5"/>`
+- Line 65: Hardcoded hex color -> `<GradientStop Color="#FF1A2030" Offset="0.51"/>`
+- Line 66: Hardcoded hex color -> `<GradientStop Color="#FF0A1020" Offset="1"/>`
+- Line 74: Hardcoded hex color -> `<GradientStop Color="#8040A0FF" Offset="0"/>`
+- Line 75: Hardcoded hex color -> `<GradientStop Color="#0040A0FF" Offset="1"/>`
+- Line 83: Hardcoded hex color -> `<GradientStop Color="#3040A0FF" Offset="0"/>`
+- Line 84: Hardcoded hex color -> `<GradientStop Color="#0040A0FF" Offset="1"/>`
+- Line 90: Hardcoded hex color -> `<GradientStop Color="#60FFFFFF" Offset="0"/>`
+- Line 91: Hardcoded hex color -> `<GradientStop Color="#20FFFFFF" Offset="0.5"/>`
+- Line 92: Hardcoded hex color -> `<GradientStop Color="#40FFFFFF" Offset="1"/>`
+- Line 105: Hardcoded hex color -> `<GradientStop Color="#CCFFFFFF" Offset="0"/>`
+- Line 106: Hardcoded hex color -> `<GradientStop Color="#2EFFFFFF" Offset="0.296"/>`
+- Line 107: Hardcoded hex color -> `<GradientStop Color="#18242729" Offset="0.626"/>`
+- Line 108: Hardcoded hex color -> `<GradientStop Color="#34FFFFFF" Offset="0.963"/>`
+- Line 112: Hardcoded hex color -> `Color="#7F7E8DB3"/>`
+- Line 124: Hardcoded hex color -> `<GradientStop Color="#CCFFFFFF" Offset="0.201"/>`
+- Line 125: Hardcoded hex color -> `<GradientStop Color="#B5CFEFFF" Offset="0.323"/>`
+- Line 126: Hardcoded hex color -> `<GradientStop Color="#967A99A6" Offset="0.455"/>`
+- Line 127: Hardcoded hex color -> `<GradientStop Color="#A501263F" Offset="0.678"/>`
+- Line 128: Hardcoded hex color -> `<GradientStop Color="#BF5FCAFF" Offset="0.911"/>`
+- Line 129: Hardcoded hex color -> `<GradientStop Color="#FF25CFFF" Offset="1"/>`
+- Line 135: Hardcoded hex color -> `<GradientStop Color="#FF707580" Offset="0"/>`
+- Line 136: Hardcoded hex color -> `<GradientStop Color="#20FFFFFF" Offset="0.48"/>`
+- Line 137: Hardcoded hex color -> `<GradientStop Color="#10101520" Offset="0.52"/>`
+- Line 138: Hardcoded hex color -> `<GradientStop Color="#FF606570" Offset="1"/>`
+- Line 144: Hardcoded hex color -> `<GradientStop Color="#FFD0E8FF" Offset="0"/>`
+- Line 145: Hardcoded hex color -> `<GradientStop Color="#FF90B0D0" Offset="0.12"/>`
+- Line 146: Hardcoded hex color -> `<GradientStop Color="#CF305080" Offset="0.45"/>`
+- Line 147: Hardcoded hex color -> `<GradientStop Color="#FF103050" Offset="0.52"/>`
+- Line 148: Hardcoded hex color -> `<GradientStop Color="#FF4090C0" Offset="1"/>`
+- Line 152: Hardcoded hex color -> `Color="#607080A0"/>`
+- Line 170: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 171: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 181: Hardcoded hex color -> `<GradientStop Color="#25FFFFFF" Offset="0"/>`
+- Line 182: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.185299"/>`
+- Line 183: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0.540582"/>`
+- Line 184: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 196: Hardcoded hex color -> `<GradientStop Color="#70FFFFFF" Offset="0"/>`
+- Line 197: Hardcoded hex color -> `<GradientStop Color="#4098C4E6" Offset="0.42"/>`
+- Line 198: Hardcoded hex color -> `<GradientStop Color="#70FFFFFF" Offset="1"/>`
+- Line 222: Hardcoded hex color -> `<GradientStop Color="#82E0FBFF" Offset="0.0766283"/>`
+- Line 223: Hardcoded hex color -> `<GradientStop Color="#00298996" Offset="1"/>`
+- Line 254: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFFFFFFF"/>`
+- Line 361: Hardcoded hex color -> `Background="#15FFFFFF"`
+- Line 375: Hardcoded hex color -> `<GradientStop Color="#00F8F8F8" Offset="0"/>`
+- Line 376: Hardcoded hex color -> `<GradientStop Color="#7CFFFFFF" Offset="0.218391"/>`
+- Line 377: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.245211"/>`
+- Line 378: Hardcoded hex color -> `<GradientStop Color="#59FFFFFF" Offset="0.551724"/>`
+- Line 379: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.570881"/>`
+- Line 380: Hardcoded hex color -> `<GradientStop Color="#67FFFFFF" Offset="0.768199"/>`
+- Line 381: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.798851"/>`
+- Line 382: Hardcoded hex color -> `<GradientStop Color="#33FFFFFF" Offset="0.875479"/>`
+- Line 383: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 390: Hardcoded hex color -> `<GradientStop Color="#FF4BEAFF" Offset="0.0766283"/>`
+- Line 391: Hardcoded hex color -> `<GradientStop Color="#00298996" Offset="1"/>`
+- Line 396: Hardcoded hex color -> `<GradientStop Color="#6B4BEAFF" Offset="0.0766283"/>`
+- Line 397: Hardcoded hex color -> `<GradientStop Color="#00298996" Offset="1"/>`
+- Line 643: Hardcoded hex color -> `<GradientStop Color="#35FFFFFF" Offset="0"/>`
+- Line 644: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 677: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFF2F6FB"/>`
+- Line 685: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFEBF6FF"/>`
+- Line 693: Hardcoded hex color -> `<Setter Property="Foreground" Value="#BEE0EEFF"/>`
+- Line 700: Hardcoded hex color -> `<Setter Property="Foreground" Value="#8FB7CCE4"/>`
+- Line 707: Hardcoded hex color -> `<Setter Property="Foreground" Value="#7FC8DCF5"/>`
+- Line 715: Hardcoded hex color -> `<Setter Property="Foreground" Value="#90FFFFFF"/>`
+
+## `./Skyweaver/Resources/Controls/StatusBarStyles.xaml`
+- Line 9: Hardcoded hex color -> `<GradientStop Color="#FF7C7C7C" Offset="0"/>`
+- Line 10: Hardcoded hex color -> `<GradientStop Color="#FF2B2B2B" Offset="0.54731"/>`
+- Line 11: Hardcoded hex color -> `<GradientStop Color="#FE000004" Offset="0.562152"/>`
+- Line 12: Hardcoded hex color -> `<GradientStop Color="#FF260075" Offset="1"/>`
+- Line 16: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFFFFF"/>`
+- Line 17: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#1A1F28"/>`
+- Line 31: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFFFFF"/>`
+- Line 46: Hardcoded hex color -> `<Rectangle Width="1" Fill="#0F1419" HorizontalAlignment="Center"/>`
+- Line 48: Hardcoded hex color -> `<Rectangle Width="1" Fill="#05080B" HorizontalAlignment="Center" Margin="1,0,0,0" Opacity="0.6"/>`
+
+## `./Skyweaver/Resources/Controls/DropdownBase.xaml`
+- Line 9: Hardcoded hex color -> `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 14: Hardcoded hex color -> `<GradientStop Color="#9193C7FF" Offset="0.298622"/>`
+- Line 15: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.502783"/>`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#C3ABDEFF" Offset="0.715161"/>`
+
+## `./Skyweaver/Resources/Controls/CascadePreferenceImplicitStyles.xaml`
+- Line 13: Hardcoded hex color -> `<Setter Property="SelectionBrush" Value="#804B9DCC"/>`
+- Line 26: Hardcoded hex color -> `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 27: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 32: Hardcoded hex color -> `<GradientStop Color="#FF4588BD" Offset="0"/>`
+- Line 33: Hardcoded hex color -> `<GradientStop Color="#001AD5FF" Offset="0.381"/>`
+- Line 41: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 42: Hardcoded hex color -> `<GradientStop Color="#34C3EFFF" Offset="1"/>`
+- Line 47: Hardcoded hex color -> `<GradientStop Color="#44FFFFFF" Offset="0"/>`
+- Line 48: Hardcoded hex color -> `<GradientStop Color="#0BFFFFFF" Offset="0.345"/>`
+- Line 49: Hardcoded hex color -> `<GradientStop Color="#01FFFFFF" Offset="0.351"/>`
+- Line 50: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 58: Hardcoded hex color -> `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 59: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 64: Hardcoded hex color -> `<GradientStop Color="#384588BD" Offset="0"/>`
+- Line 65: Hardcoded hex color -> `<GradientStop Color="#001AD5FF" Offset="0.691"/>`
+- Line 73: Hardcoded hex color -> `<GradientStop Color="#FF6A9FC0" Offset="0"/>`
+- Line 74: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 79: Hardcoded hex color -> `<GradientStop Color="#FF5A9ED0" Offset="0"/>`
+- Line 80: Hardcoded hex color -> `<GradientStop Color="#001AD5FF" Offset="0.55"/>`
+- Line 88: Hardcoded hex color -> `<GradientStop Color="#FF6A9FC0" Offset="0"/>`
+- Line 89: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 94: Hardcoded hex color -> `<GradientStop Color="#FF5A9ED0" Offset="0"/>`
+- Line 95: Hardcoded hex color -> `<GradientStop Color="#001AD5FF" Offset="0.55"/>`
+- Line 103: Hardcoded hex color -> `<GradientStop Color="#40000000" Offset="0"/>`
+- Line 104: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 112: Hardcoded hex color -> `<GradientStop Color="#25000000" Offset="0"/>`
+- Line 113: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 121: Hardcoded hex color -> `<GradientStop Color="#25000000" Offset="0"/>`
+- Line 122: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 135: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.3"/>`
+- Line 217: Hardcoded hex color -> `<Border x:Name="IdleBackground" CornerRadius="4" BorderThickness="2" BorderBrush="#67BBDDF2">`
+- Line 220: Hardcoded hex color -> `<GradientStop Color="#FF637495" Offset="0.308"/>`
+- Line 221: Hardcoded hex color -> `<GradientStop Color="#FF384D75" Offset="0.489"/>`
+- Line 222: Hardcoded hex color -> `<GradientStop Color="#FF223761" Offset="0.495"/>`
+- Line 223: Hardcoded hex color -> `<GradientStop Color="#FF284D7E" Offset="0.681"/>`
+- Line 231: Hardcoded hex color -> `<GradientStop Color="#FF4B9DCC" Offset="0.231"/>`
+- Line 232: Hardcoded hex color -> `<GradientStop Color="#013C4F73" Offset="1"/>`
+- Line 237: Hardcoded hex color -> `<Border x:Name="HoverBackground" Opacity="0" CornerRadius="4" BorderThickness="2" BorderBrush="#67BBDDF2">`
+- Line 240: Hardcoded hex color -> `<GradientStop Color="#FF7387AF" Offset="0.308"/>`
+- Line 241: Hardcoded hex color -> `<GradientStop Color="#FF405886" Offset="0.489"/>`
+- Line 242: Hardcoded hex color -> `<GradientStop Color="#FF284276" Offset="0.495"/>`
+- Line 243: Hardcoded hex color -> `<GradientStop Color="#FF295691" Offset="0.681"/>`
+- Line 251: Hardcoded hex color -> `<GradientStop Color="#FF4B9DCC" Offset="0.231"/>`
+- Line 252: Hardcoded hex color -> `<GradientStop Color="#013C4F73" Offset="1"/>`
+- Line 260: Hardcoded hex color -> `<GradientStop Color="#FF4B9DCC" Offset="0.231"/>`
+- Line 261: Hardcoded hex color -> `<GradientStop Color="#013C4F73" Offset="1"/>`
+- Line 266: Hardcoded hex color -> `<Border x:Name="PressedBackground" Opacity="0" CornerRadius="4" BorderThickness="2" BorderBrush="#67BBDDF2">`
+- Line 269: Hardcoded hex color -> `<GradientStop Color="#FF324F80" Offset="0.308"/>`
+- Line 270: Hardcoded hex color -> `<GradientStop Color="#FF142E74" Offset="0.489"/>`
+- Line 271: Hardcoded hex color -> `<GradientStop Color="#FF09246B" Offset="0.501"/>`
+- Line 272: Hardcoded hex color -> `<GradientStop Color="#FF0A348A" Offset="0.681"/>`
+- Line 280: Hardcoded hex color -> `<GradientStop Color="#FF3A5AC6" Offset="0.213"/>`
+- Line 281: Hardcoded hex color -> `<GradientStop Color="#013C4F73" Offset="1"/>`
+- Line 289: Hardcoded hex color -> `<GradientStop Color="#80000000" Offset="0"/>`
+- Line 290: Hardcoded hex color -> `<GradientStop Color="#40000000" Offset="0.15"/>`
+- Line 291: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="0.4"/>`
+- Line 299: Hardcoded hex color -> `<GradientStop Color="#50000000" Offset="0"/>`
+- Line 300: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="0.1"/>`
+- Line 301: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="0.9"/>`
+- Line 302: Hardcoded hex color -> `<GradientStop Color="#50000000" Offset="1"/>`
+- Line 313: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>`
+- Line 414: Hardcoded hex color -> `<GradientStop Color="#CCD9E7F4" Offset="0"/>`
+- Line 415: Hardcoded hex color -> `<GradientStop Color="#CC7CBEEA" Offset="1"/>`
+- Line 420: Hardcoded hex color -> `<GradientStop Color="#CC9CB3C8" Offset="0.473"/>`
+- Line 421: Hardcoded hex color -> `<GradientStop Color="#CC3A576E" Offset="0.593"/>`
+- Line 422: Hardcoded hex color -> `<GradientStop Color="#CC162D41" Offset="0.623"/>`
+- Line 423: Hardcoded hex color -> `<GradientStop Color="#CC4C87AF" Offset="0.798"/>`
+- Line 431: Hardcoded hex color -> `<GradientStop Color="#FFE9F7FF" Offset="0"/>`
+- Line 432: Hardcoded hex color -> `<GradientStop Color="#FF8CCEFA" Offset="1"/>`
+- Line 437: Hardcoded hex color -> `<GradientStop Color="#FFACC3D8" Offset="0.473"/>`
+- Line 438: Hardcoded hex color -> `<GradientStop Color="#FF4A677E" Offset="0.593"/>`
+- Line 439: Hardcoded hex color -> `<GradientStop Color="#FF263D51" Offset="0.623"/>`
+- Line 440: Hardcoded hex color -> `<GradientStop Color="#FF5C97BF" Offset="0.798"/>`
+- Line 455: Hardcoded hex color -> `<GradientStop Color="#FF8AE0FF" Offset="0.093"/>`
+- Line 456: Hardcoded hex color -> `<GradientStop Color="#FF35A6E6" Offset="0.645"/>`
+- Line 457: Hardcoded hex color -> `<GradientStop Color="#FF4DA6E4" Offset="0.712"/>`
+- Line 458: Hardcoded hex color -> `<GradientStop Color="#FFAED3F4" Offset="0.942"/>`
+- Line 462: Hardcoded hex color -> `<DropShadowEffect Color="#22657C" BlurRadius="2" ShadowDepth="0" Opacity="0.8" Direction="315"/>`
+- Line 469: Hardcoded hex color -> `<GradientStop Color="#FF8AE0FF" Offset="0.093"/>`
+- Line 470: Hardcoded hex color -> `<GradientStop Color="#FF35A6E6" Offset="0.645"/>`
+- Line 471: Hardcoded hex color -> `<GradientStop Color="#FF4DA6E4" Offset="0.712"/>`
+- Line 472: Hardcoded hex color -> `<GradientStop Color="#FFAED3F4" Offset="0.942"/>`
+- Line 476: Hardcoded hex color -> `<DropShadowEffect Color="#22657C" BlurRadius="2" ShadowDepth="0" Opacity="0.8" Direction="315"/>`
+- Line 487: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>`
+
+## `./Skyweaver/Resources/Controls/CustomContextMenuStyles.xaml`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#6ADDFFFD" Offset="0.00153139"/>`
+- Line 17: Hardcoded hex color -> `<GradientStop Color="#76000000" Offset="0.148545"/>`
+- Line 18: Hardcoded hex color -> `<GradientStop Color="#E07FCEFF" Offset="0.32925"/>`
+- Line 19: Hardcoded hex color -> `<GradientStop Color="#FF000000" Offset="0.344564"/>`
+- Line 20: Hardcoded hex color -> `<GradientStop Color="#FF0099FF" Offset="0.828484"/>`
+- Line 31: Hardcoded hex color -> `<GradientStop Color="#7800F3FF" Offset="0"/>`
+- Line 32: Hardcoded hex color -> `<GradientStop Color="#6A000000" Offset="0.148545"/>`
+- Line 33: Hardcoded hex color -> `<GradientStop Color="#FFA5DBFF" Offset="0.316998"/>`
+- Line 34: Hardcoded hex color -> `<GradientStop Color="#FF0099FF" Offset="0.577335"/>`
+- Line 45: Hardcoded hex color -> `<GradientStop Color="#FF00F3FF" Offset="0"/>`
+- Line 46: Hardcoded hex color -> `<GradientStop Color="#59000000" Offset="0.169985"/>`
+- Line 47: Hardcoded hex color -> `<GradientStop Color="#EBA5DBFF" Offset="0.307808"/>`
+- Line 48: Hardcoded hex color -> `<GradientStop Color="#FF0099FF" Offset="0.577335"/>`
+- Line 63: Flat corners (CornerRadius="0") -> `CornerRadius="0">`
+- Line 89: Hardcoded hex color -> `<DropShadowEffect ShadowDepth="0.5" Color="#333333" Opacity="1" BlurRadius="3" />`
+- Line 101: Hardcoded hex color -> `<DropShadowEffect ShadowDepth="0.5" Color="#333333" Opacity="0.8" BlurRadius="3" />`
+- Line 109: Hardcoded hex color -> `Fill="#AAFFFFFF"`
+- Line 142: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFFFFF"/>`
+- Line 151: Flat corners (CornerRadius="0") -> `CornerRadius="0">`
+- Line 177: Hardcoded hex color -> `<DropShadowEffect ShadowDepth="0.5" Color="#333333" Opacity="1" BlurRadius="3" />`
+- Line 189: Hardcoded hex color -> `<DropShadowEffect ShadowDepth="0.5" Color="#333333" Opacity="0.8" BlurRadius="3" />`
+- Line 284: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFFFFF"/>`
+
+## `./Skyweaver/Resources/Controls/TreeViewStyles.xaml`
+- Line 89: Hardcoded hex color -> `<GradientStop Color="#FF1A1F28" Offset="0"/>`
+- Line 90: Hardcoded hex color -> `<GradientStop Color="#FF1A1F28" Offset="1"/>`
+
+## `./Skyweaver/Resources/Controls/SplitterStyles.xaml`
+- Line 12: Hardcoded hex color -> `<GradientStop Color="#2A3540" Offset="0"/>`
+- Line 13: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0.3"/>`
+- Line 14: Hardcoded hex color -> `<GradientStop Color="#0F1419" Offset="0.5"/>`
+- Line 15: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0.7"/>`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#2A3540" Offset="1"/>`
+- Line 28: Hardcoded hex color -> `<Line x:Name="Line1" X1="0" Y1="2" X2="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}, Path=ActualWidth}" Y2="2" Stroke="#3A4550" StrokeThickness="1"/>`
+- Line 30: Hardcoded hex color -> `<Line x:Name="Line2" X1="0" Y1="3" X2="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}, Path=ActualWidth}" Y2="3" Stroke="#0A0F14" StrokeThickness="1"/>`
+- Line 38: Hardcoded hex color -> `<GradientStop Color="#FEF3B5" Offset="0"/>`
+- Line 39: Hardcoded hex color -> `<GradientStop Color="#FFD02E" Offset="1"/>`
+- Line 58: Hardcoded hex color -> `<GradientStop Color="#2A3540" Offset="0"/>`
+- Line 59: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0.3"/>`
+- Line 60: Hardcoded hex color -> `<GradientStop Color="#0F1419" Offset="0.5"/>`
+- Line 61: Hardcoded hex color -> `<GradientStop Color="#1A1F28" Offset="0.7"/>`
+- Line 62: Hardcoded hex color -> `<GradientStop Color="#2A3540" Offset="1"/>`
+- Line 74: Hardcoded hex color -> `<Line x:Name="Line1" X1="2" Y1="0" X2="2" Y2="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}, Path=ActualHeight}" Stroke="#3A4550" StrokeThickness="1"/>`
+- Line 76: Hardcoded hex color -> `<Line x:Name="Line2" X1="3" Y1="0" X2="3" Y2="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}, Path=ActualHeight}" Stroke="#0A0F14" StrokeThickness="1"/>`
+- Line 84: Hardcoded hex color -> `<GradientStop Color="#FEF3B5" Offset="0"/>`
+- Line 85: Hardcoded hex color -> `<GradientStop Color="#FFD02E" Offset="1"/>`
+
+## `./Skyweaver/Resources/Controls/SliderStyles.xaml`
+- Line 48: Hardcoded hex color -> `<GradientStop Color="#6060B0F0" Offset="0"/>`
+- Line 49: Hardcoded hex color -> `<GradientStop Color="#0060B0F0" Offset="1"/>`
+- Line 60: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 61: Hardcoded hex color -> `<GradientStop Color="#FFF0F0F0" Offset="0.4"/>`
+- Line 62: Hardcoded hex color -> `<GradientStop Color="#FFE0E0E0" Offset="0.5"/>`
+- Line 63: Hardcoded hex color -> `<GradientStop Color="#FFF5F5F5" Offset="1"/>`
+- Line 68: Hardcoded hex color -> `<GradientStop Color="#FF909090" Offset="0"/>`
+- Line 69: Hardcoded hex color -> `<GradientStop Color="#FF707070" Offset="1"/>`
+- Line 73: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="3" ShadowDepth="1" Opacity="0.4"/>`
+- Line 81: Hardcoded hex color -> `<GradientStop Color="#80FFFFFF" Offset="0"/>`
+- Line 82: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 93: Hardcoded hex color -> `<GradientStop Color="#FFE8F4FF" Offset="0"/>`
+- Line 94: Hardcoded hex color -> `<GradientStop Color="#FFD0E8FF" Offset="0.4"/>`
+- Line 95: Hardcoded hex color -> `<GradientStop Color="#FFC0D8F0" Offset="0.5"/>`
+- Line 96: Hardcoded hex color -> `<GradientStop Color="#FFD8ECFF" Offset="1"/>`
+- Line 103: Hardcoded hex color -> `<GradientStop Color="#FF60A0D0" Offset="0"/>`
+- Line 104: Hardcoded hex color -> `<GradientStop Color="#FF4080B0" Offset="1"/>`
+- Line 114: Hardcoded hex color -> `<GradientStop Color="#FFD0E8FF" Offset="0"/>`
+- Line 115: Hardcoded hex color -> `<GradientStop Color="#FFB0D0F0" Offset="0.4"/>`
+- Line 116: Hardcoded hex color -> `<GradientStop Color="#FFA0C0E0" Offset="0.5"/>`
+- Line 117: Hardcoded hex color -> `<GradientStop Color="#FFC0D8F0" Offset="1"/>`
+- Line 150: Hardcoded hex color -> `<GradientStop Color="#60000000" Offset="0"/>`
+- Line 151: Hardcoded hex color -> `<GradientStop Color="#40000000" Offset="0.5"/>`
+- Line 152: Hardcoded hex color -> `<GradientStop Color="#30000000" Offset="1"/>`
+- Line 157: Hardcoded hex color -> `<GradientStop Color="#40000000" Offset="0"/>`
+- Line 158: Hardcoded hex color -> `<GradientStop Color="#20FFFFFF" Offset="1"/>`
+- Line 173: Hardcoded hex color -> `<GradientStop Color="#FF80D0FF" Offset="0"/>`
+- Line 174: Hardcoded hex color -> `<GradientStop Color="#FF40A0E0" Offset="0.4"/>`
+- Line 175: Hardcoded hex color -> `<GradientStop Color="#FF0080D0" Offset="0.5"/>`
+- Line 176: Hardcoded hex color -> `<GradientStop Color="#FF60B0E0" Offset="1"/>`
+- Line 182: Hardcoded hex color -> `<DropShadowEffect Color="#4080C0FF" BlurRadius="4" ShadowDepth="0" Opacity="0.6"/>`
+
+## `./Skyweaver/PageControls/Desk/Views/DeskPageView.xaml`
+- Line 8: Hardcoded hex color -> `<Grid Background="#FF1E293B">`
+- Line 9: Hardcoded hex color -> `<Border Margin="24" CornerRadius="12" BorderThickness="1" BorderBrush="#33FFFFFF">`
+- Line 12: Hardcoded hex color -> `<GradientStop Color="#1E293B" Offset="0"/>`
+- Line 13: Hardcoded hex color -> `<GradientStop Color="#0F172A" Offset="1"/>`
+- Line 18: Hardcoded hex color -> `<Border Width="80" Height="80" CornerRadius="40" Background="#10FFFFFF" BorderThickness="1.5" BorderBrush="#20FFFFFF" Margin="0,0,0,24" HorizontalAlignment="Center">`
+- Line 20: Hardcoded hex color -> `<Ellipse Width="40" Height="40" Fill="#FF00D2FF" Opacity="0.8"/>`
+- Line 21: Hardcoded hex color -> `<Ellipse Width="20" Height="20" Fill="#FF00F0FF" Margin="10"/>`
+- Line 24: Hardcoded hex color -> `<TextBlock Text="Desk Workspace" FontSize="28" FontWeight="SemiBold" Foreground="#FFFFFFFF" HorizontalAlignment="Center"/>`
+- Line 25: Hardcoded hex color -> `<TextBlock Text="This space is reserved for the Desk Page control interface." Margin="0,8,0,0" FontSize="14" Foreground="#94A3B8" HorizontalAlignment="Center"/>`
+- Line 26: Hardcoded hex color -> `<TextBlock Text="(Placeholder - No Functionality)" Margin="0,16,0,0" FontSize="12" Foreground="#64748B" HorizontalAlignment="Center" FontStyle="Italic"/>`
+
+## `./Skyweaver/PageControls/Tiles/Views/TilesPageView.xaml`
+- Line 22: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 23: Hardcoded hex color -> `<GradientStop Color="#FF90D0FF" Offset="1"/>`
+- Line 27: Hardcoded hex color -> `<GradientStop Color="#55FFFFFF" Offset="0"/>`
+- Line 28: Hardcoded hex color -> `<GradientStop Color="#25FFFFFF" Offset="1"/>`
+- Line 32: Hardcoded hex color -> `<GradientStop Color="#25171718" Offset="0"/>`
+- Line 33: Hardcoded hex color -> `<GradientStop Color="#15FFFFFF" Offset="1"/>`
+- Line 38: Hardcoded hex color -> `<GradientStop Color="#00171718" Offset="0"/>`
+- Line 39: Hardcoded hex color -> `<GradientStop Color="#00BBBBBB" Offset="0.88"/>`
+- Line 40: Hardcoded hex color -> `<GradientStop Color="#20FFFFFF" Offset="1"/>`
+- Line 51: Hardcoded hex color -> `<GradientStop Color="#866B99D0" Offset="0"/>`
+- Line 52: Hardcoded hex color -> `<GradientStop Color="#981C4675" Offset="1"/>`
+- Line 56: Hardcoded hex color -> `<GradientStop Color="#04171718" Offset="0"/>`
+- Line 57: Hardcoded hex color -> `<GradientStop Color="#05FFFFFF" Offset="1"/>`
+- Line 62: Hardcoded hex color -> `<GradientStop Color="#04171718" Offset="0.00899281"/>`
+- Line 63: Hardcoded hex color -> `<GradientStop Color="#00BBBBBB" Offset="0.888489"/>`
+- Line 64: Hardcoded hex color -> `<GradientStop Color="#08FFFFFF" Offset="1"/>`
+- Line 76: Hardcoded hex color -> `<GradientStop Color="#04171718" Offset="0"/>`
+- Line 77: Hardcoded hex color -> `<GradientStop Color="#00BBBBBB" Offset="0.901079"/>`
+- Line 78: Hardcoded hex color -> `<GradientStop Color="#22FFFFFF" Offset="1"/>`
+- Line 89: Hardcoded hex color -> `<GradientStop Color="#A0FFFFFF" Offset="0"/>`
+- Line 90: Hardcoded hex color -> `<GradientStop Color="#40FFFFFF" Offset="0.5"/>`
+- Line 91: Hardcoded hex color -> `<GradientStop Color="#A0A0C0FF" Offset="1"/>`
+- Line 95: Hardcoded hex color -> `<GradientStop Color="#18FFFFFF" Offset="0"/>`
+- Line 96: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 101: Hardcoded hex color -> `<GradientStop Color="#FF1E518E" Offset="0"/>`
+- Line 102: Hardcoded hex color -> `<GradientStop Color="#FF061F3C" Offset="1"/>`
+- Line 108: Hardcoded hex color -> `<GradientStop Color="#04171718" Offset="0"/>`
+- Line 109: Hardcoded hex color -> `<GradientStop Color="#05FFFFFF" Offset="1"/>`
+- Line 115: Hardcoded hex color -> `<GradientStop Color="#490D0D1C" Offset="0"/>`
+- Line 116: Hardcoded hex color -> `<GradientStop Color="#145754AE" Offset="0.944245"/>`
+- Line 117: Hardcoded hex color -> `<GradientStop Color="#237F7BFF" Offset="1"/>`
+- Line 128: Hardcoded hex color -> `<GradientStop Color="#1000B0FF" Offset="0"/>`
+- Line 129: Hardcoded hex color -> `<GradientStop Color="#080050A0" Offset="1"/>`
+- Line 133: Hardcoded hex color -> `<GradientStop Color="#FFE5A93B" Offset="0"/>`
+- Line 134: Hardcoded hex color -> `<GradientStop Color="#FFFFDF73" Offset="0.5"/>`
+- Line 135: Hardcoded hex color -> `<GradientStop Color="#FFB8860B" Offset="1"/>`
+- Line 139: Hardcoded hex color -> `<GradientStop Color="#2500F5D4" Offset="0"/>`
+- Line 140: Hardcoded hex color -> `<GradientStop Color="#1501B5A0" Offset="1"/>`
+- Line 144: Hardcoded hex color -> `<GradientStop Color="#36D6FE" Offset="0"/>`
+- Line 145: Hardcoded hex color -> `<GradientStop Color="#0C6AB5" Offset="0.45"/>`
+- Line 146: Hardcoded hex color -> `<GradientStop Color="#01162B" Offset="0.9"/>`
+- Line 150: Hardcoded hex color -> `<GradientStop Color="#5CE2FF" Offset="0"/>`
+- Line 151: Hardcoded hex color -> `<GradientStop Color="#0D7CD4" Offset="0.45"/>`
+- Line 152: Hardcoded hex color -> `<GradientStop Color="#01162B" Offset="0.9"/>`
+- Line 156: Hardcoded hex color -> `<GradientStop Color="#20B0D6" Offset="0"/>`
+- Line 157: Hardcoded hex color -> `<GradientStop Color="#084C83" Offset="0.5"/>`
+- Line 158: Hardcoded hex color -> `<GradientStop Color="#000C18" Offset="0.9"/>`
+- Line 162: Hardcoded hex color -> `<GradientStop Color="#965AD2FF" Offset="0"/>`
+- Line 163: Hardcoded hex color -> `<GradientStop Color="#335AD2FF" Offset="0.45"/>`
+- Line 164: Hardcoded hex color -> `<GradientStop Color="#005AD2FF" Offset="0.7"/>`
+- Line 168: Hardcoded hex color -> `<GradientStop Color="#73FFFFFF" Offset="0"/>`
+- Line 169: Hardcoded hex color -> `<GradientStop Color="#38FFFFFF" Offset="0.4"/>`
+- Line 170: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 174: Hardcoded hex color -> `<GradientStop Color="#FFFFFF" Offset="0"/>`
+- Line 175: Hardcoded hex color -> `<GradientStop Color="#D6ECFF" Offset="1"/>`
+- Line 199: Hardcoded hex color -> `<GradientStop x:Name="Stop1" Color="#7A8CB0E0" Offset="0"/>`
+- Line 200: Hardcoded hex color -> `<GradientStop x:Name="Stop2" Color="#4A5A80B0" Offset="1"/>`
+- Line 210: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="Stop1" Storyboard.TargetProperty="Color" To="#B0C2EAEE" Duration="0:0:0.2"/>`
+- Line 211: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="Stop2" Storyboard.TargetProperty="Color" To="#8090A0D0" Duration="0:0:0.2"/>`
+- Line 218: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="Stop1" Storyboard.TargetProperty="Color" To="#7A8CB0E0" Duration="0:0:0.2"/>`
+- Line 219: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="Stop2" Storyboard.TargetProperty="Color" To="#4A5A80B0" Duration="0:0:0.2"/>`
+- Line 229: Hardcoded hex color -> `<DropShadowEffect Color="#FF00D8FF" BlurRadius="15" Opacity="0.85" ShadowDepth="0"/>`
+- Line 312: Hardcoded hex color -> `Foreground="#CCFFFFFF"`
+- Line 391: Hardcoded hex color -> `<Separator Background="#33FFFFFF"/>`
+- Line 423: Hardcoded hex color -> `<Border x:Name="BrightLayer" CornerRadius="4" BorderThickness="1" BorderBrush="#FFFFFFFF" Opacity="0" IsHitTestVisible="False" Background="{StaticResource TileBrightRadialBackgroundBrush}"/>`
+- Line 442: Hardcoded hex color -> `<Border x:Name="RunningBackground" CornerRadius="4" Opacity="0" BorderThickness="1" BorderBrush="#3500B0FF" IsHitTestVisible="False" Background="{StaticResource TileRunningBackgroundBrush}"/>`
+- Line 462: Hardcoded hex color -> `<Setter Property="Background" Value="#38FFF5E6"/>`
+- Line 465: Hardcoded hex color -> `<Setter Property="Background" Value="#2CE2F4E7"/>`
+- Line 468: Hardcoded hex color -> `<Setter Property="Background" Value="#2CF2E6FF"/>`
+- Line 481: Hardcoded hex color -> `<Setter Property="Background" Value="#38FFF5E6"/>`
+- Line 484: Hardcoded hex color -> `<Setter Property="Background" Value="#2CE2F4E7"/>`
+- Line 487: Hardcoded hex color -> `<Setter Property="Background" Value="#2CF2E6FF"/>`
+- Line 501: Hardcoded hex color -> `<Setter Property="Fill" Value="#38FFF5E6"/>`
+- Line 504: Hardcoded hex color -> `<Setter Property="Fill" Value="#2CE2F4E7"/>`
+- Line 507: Hardcoded hex color -> `<Setter Property="Fill" Value="#2CF2E6FF"/>`
+- Line 524: Hardcoded hex color -> `Foreground="#EFFFFFFF"`
+- Line 551: Hardcoded hex color -> `<Setter Property="Fill" Value="#D0FFE4B5"/>`
+- Line 554: Hardcoded hex color -> `<Setter Property="Fill" Value="#D0C0F0C0"/>`
+- Line 557: Hardcoded hex color -> `<Setter Property="Fill" Value="#D0E0D0F0"/>`
+- Line 577: Hardcoded hex color -> `<GradientStop Color="#A0FF5252" Offset="0"/>`
+- Line 578: Hardcoded hex color -> `<GradientStop Color="#C0D32F2F" Offset="1"/>`
+- Line 581: Hardcoded hex color -> `<GradientStop Color="#60FFFFFF" Offset="0"/>`
+- Line 582: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 585: Hardcoded hex color -> `<GradientStop Color="#80FFFFFF" Offset="0"/>`
+- Line 586: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 597: Hardcoded hex color -> `<Ellipse Stroke="#000812" StrokeThickness="1"/>`
+- Line 611: Hardcoded hex color -> `<Border CornerRadius="8" Background="#CC101D30" BorderBrush="#8036D6FE" BorderThickness="1.5" Padding="12,8" MaxWidth="300">`
+- Line 613: Hardcoded hex color -> `<DropShadowEffect Color="#FF36D6FE" BlurRadius="12" ShadowDepth="0" Opacity="0.5"/>`
+- Line 616: Hardcoded hex color -> `<TextBlock Text="最新代理回复 (3日内)" Foreground="#FF36D6FE" FontSize="12" FontWeight="Bold" Margin="0,0,0,6"/>`
+- Line 627: Hardcoded hex color -> `<TextBlock Text="{Binding Creator}" Foreground="#FFFFDF73" FontSize="11" FontWeight="SemiBold"/>`
+- Line 628: Hardcoded hex color -> `<TextBlock Grid.Column="2" Text="{Binding DisplayDateTime}" Foreground="#80FFFFFF" FontSize="9" HorizontalAlignment="Right" Margin="10,0,0,0"/>`
+- Line 631: Hardcoded hex color -> `<Border BorderBrush="#20FFFFFF" BorderThickness="0,0,0,1" Margin="0,4,0,2"/>`
+- Line 661: Hardcoded hex color -> `Fill="#E8F4FF"`
+- Line 686: Hardcoded hex color -> `Foreground="#EFEFEF"`
+- Line 698: Hardcoded hex color -> `Foreground="#EFEFEF"`
+- Line 716: Hardcoded hex color -> `<DropShadowEffect x:Name="AeroGlow" Color="#36D6FE" BlurRadius="6" Opacity="0" ShadowDepth="0"/>`
+- Line 732: Hardcoded hex color -> `<Ellipse Width="42" Height="42" StrokeThickness="1" Stroke="#000812"/>`
+- Line 751: Hardcoded hex color -> `<TextBlock Grid.Row="0" Text="{Binding Name}" Foreground="#FFFFFFFF" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis">`
+- Line 757: Hardcoded hex color -> `<TextBlock Text="{Binding StatusText}" Foreground="#CCFFFFFF" FontSize="11" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" TextAlignment="Left" Height="42">`
+- Line 763: Hardcoded hex color -> `<TextBlock Grid.Row="2" Text="运行中..." Foreground="#8000B0FF" FontSize="9" FontWeight="SemiBold">`
+- Line 779: Hardcoded hex color -> `<TextBlock Grid.Row="0" Text="{Binding Name}" Foreground="#FFFFFFFF" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis">`
+- Line 792: Hardcoded hex color -> `<TextBlock Grid.Row="0" Text="{Binding StatusText, StringFormat='状态: {0}'}" Foreground="#CCFFFFFF" FontSize="12" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" TextAlignment="Left">`
+- Line 799: Hardcoded hex color -> `<Border Background="{DynamicResource ButtonIdleBrush}" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="0,0,4,4" SnapsToDevicePixels="True">`
+- Line 813: Hardcoded hex color -> `<TextBlock FontSize="10" Foreground="#E0FFFFFF" Text="{Binding FlowName, StringFormat='会话流: {0}'}">`
+- Line 819: Hardcoded hex color -> `<Border Background="{DynamicResource ButtonIdleBrush}" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="0,0,4,4" SnapsToDevicePixels="True">`
+- Line 833: Hardcoded hex color -> `<TextBlock FontSize="10" Foreground="#E0FFFFFF" Text="{Binding CurrentNodeTitle, StringFormat='节点: {0}'}">`
+- Line 839: Hardcoded hex color -> `<Border Background="{DynamicResource ButtonIdleBrush}" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="0,0,4,4" SnapsToDevicePixels="True">`
+- Line 853: Hardcoded hex color -> `<TextBlock FontSize="10" Foreground="#E0FFFFFF" Text="{Binding CurrentAgentId, StringFormat='代理: {0}'}">`
+- Line 859: Hardcoded hex color -> `<Border Background="{DynamicResource ButtonIdleBrush}" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="0,0,4,4" SnapsToDevicePixels="True">`
+- Line 873: Hardcoded hex color -> `<TextBlock FontSize="10" Foreground="#E0FFFFFF" Text="{Binding ModelId, StringFormat='模型: {0}'}">`
+- Line 883: Hardcoded hex color -> `<TextBlock Grid.Row="2" Text="运行中..." Foreground="#8000B0FF" FontSize="9" FontWeight="SemiBold">`
+- Line 900: Hardcoded hex color -> `<TextBlock Text="{Binding Name}" Foreground="#FFFFFFFF" FontSize="16" FontWeight="Bold" TextTrimming="CharacterEllipsis">`
+- Line 909: Hardcoded hex color -> `<Border Background="{DynamicResource ButtonIdleBrush}" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="0,0,4,4" SnapsToDevicePixels="True">`
+- Line 923: Hardcoded hex color -> `<TextBlock FontSize="10" Foreground="#E0FFFFFF" Text="{Binding FlowName, StringFormat='会话流: {0}'}">`
+- Line 929: Hardcoded hex color -> `<Border Background="{DynamicResource ButtonIdleBrush}" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="0,0,4,4" SnapsToDevicePixels="True">`
+- Line 943: Hardcoded hex color -> `<TextBlock FontSize="10" Foreground="#E0FFFFFF" Text="{Binding CurrentNodeTitle, StringFormat='节点: {0}'}">`
+- Line 949: Hardcoded hex color -> `<Border Background="{DynamicResource ButtonIdleBrush}" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="0,0,4,4" SnapsToDevicePixels="True">`
+- Line 963: Hardcoded hex color -> `<TextBlock FontSize="10" Foreground="#E0FFFFFF" Text="{Binding CurrentAgentId, StringFormat='代理: {0}'}">`
+- Line 969: Hardcoded hex color -> `<Border Background="{DynamicResource ButtonIdleBrush}" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="0,0,4,4" SnapsToDevicePixels="True">`
+- Line 983: Hardcoded hex color -> `<TextBlock FontSize="10" Foreground="#E0FFFFFF" Text="{Binding ModelId, StringFormat='模型: {0}'}">`
+- Line 994: Hardcoded hex color -> `<TextBlock Text="{Binding LatestOutput}" Foreground="#DDFFFFFF" FontSize="10" FontFamily="Consolas, Courier New, Segoe UI" TextWrapping="Wrap" Margin="6">`
+- Line 1002: Hardcoded hex color -> `<TextBlock Grid.Row="3" Text="{Binding StatusText, StringFormat='状态: {0}'}" Foreground="#88FFFFFF" FontSize="10" Margin="0,4,0,0" TextTrimming="CharacterEllipsis">`
+- Line 1019: Hardcoded hex color -> `<TextBlock Text="{Binding LatestOutput}" Foreground="#DDFFFFFF" FontSize="10" FontFamily="Consolas, Courier New, Segoe UI" TextWrapping="Wrap" Margin="4">`
+- Line 1028: Hardcoded hex color -> `<TextBlock Grid.Row="1" Text="{Binding Name}" Foreground="#EFEFEF" FontSize="14" FontWeight="SemiBold" FontFamily="Segoe UI, Microsoft YaHei" TextTrimming="CharacterEllipsis" HorizontalAlignment="Left" VerticalAlignment="Bottom">`
+- Line 1193: Hardcoded hex color -> `<DropShadowEffect Color="#FF00B0FF" BlurRadius="10" Opacity="0.7" ShadowDepth="2"/>`
+- Line 1313: Hardcoded hex color -> `BorderBrush="#D8FFFFFF"`
+- Line 1315: Hardcoded hex color -> `Background="#20FFFFFF"`
+- Line 1334: Hardcoded hex color -> `Foreground="#FF00B0FF"`
+- Line 1337: Hardcoded hex color -> `<DropShadowEffect Color="#FF00B0FF" BlurRadius="20" Opacity="0.4" ShadowDepth="0"/>`
+- Line 1343: Hardcoded hex color -> `Foreground="#80A0C0D0"`
+
+## `./Skyweaver/PageControls/Marvelous/Views/MarvelousPageView.xaml`
+- Line 8: Hardcoded hex color -> `<Grid Background="#FF2E1065">`
+- Line 9: Hardcoded hex color -> `<Border Margin="24" CornerRadius="12" BorderThickness="1" BorderBrush="#33FFFFFF">`
+- Line 12: Hardcoded hex color -> `<GradientStop Color="#2E1065" Offset="0"/>`
+- Line 13: Hardcoded hex color -> `<GradientStop Color="#0F052D" Offset="1"/>`
+- Line 18: Hardcoded hex color -> `<Border Width="80" Height="80" CornerRadius="40" Background="#10FFFFFF" BorderThickness="1.5" BorderBrush="#20FFFFFF" Margin="0,0,0,24" HorizontalAlignment="Center">`
+- Line 20: Hardcoded hex color -> `<Ellipse Width="40" Height="40" Fill="#FFD946EF" Opacity="0.8"/>`
+- Line 21: Hardcoded hex color -> `<Ellipse Width="20" Height="20" Fill="#FFA855F7" Margin="10"/>`
+- Line 24: Hardcoded hex color -> `<TextBlock Text="Marvelous Workspace" FontSize="28" FontWeight="SemiBold" Foreground="#FFFFFFFF" HorizontalAlignment="Center"/>`
+- Line 25: Hardcoded hex color -> `<TextBlock Text="This space is reserved for the Marvelous Page control interface." Margin="0,8,0,0" FontSize="14" Foreground="#D8B4FE" HorizontalAlignment="Center"/>`
+- Line 26: Hardcoded hex color -> `<TextBlock Text="(Placeholder - No Functionality)" Margin="0,16,0,0" FontSize="12" Foreground="#A78BFA" HorizontalAlignment="Center" FontStyle="Italic"/>`
+
+## `./Skyweaver/Tools/WorkspaceNoteTemplateToolConfigurationView.xaml`
+- Line 13: Hardcoded hex color -> `<Setter Property="Background" Value="#11000000"/>`
+- Line 14: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#33FFFFFF"/>`
+- Line 28: Hardcoded hex color -> `BorderBrush="#40FFFFFF"`
+- Line 32: Hardcoded hex color -> `<GradientStop Color="#1A6FA9FF" Offset="0"/>`
+- Line 33: Hardcoded hex color -> `<GradientStop Color="#0BFFFFFF" Offset="0.45"/>`
+- Line 34: Hardcoded hex color -> `<GradientStop Color="#1528E5B0" Offset="1"/>`
+- Line 65: Hardcoded hex color -> `Foreground="#FFD3F6FF"`
+- Line 76: Hardcoded hex color -> `Foreground="#99FFFFFF"`
+- Line 90: Hardcoded hex color -> `Foreground="#FFD3F6FF"`
+- Line 111: Hardcoded hex color -> `Background="#12000000"`
+- Line 112: Hardcoded hex color -> `BorderBrush="#33FFFFFF"`
+- Line 123: Hardcoded hex color -> `Foreground="#99FFFFFF"`
+
+## `./Skyweaver/Tools/VectorineCreateSvgToolInvocationView.xaml`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#4DC9CACA" Offset="0"/>`
+- Line 17: Hardcoded hex color -> `<GradientStop Color="#0E445E7C" Offset="0.988506"/>`
+- Line 32: Hardcoded hex color -> `<GradientStop Color="#2AFFFFFF" Offset="0"/>`
+- Line 33: Hardcoded hex color -> `<GradientStop Color="#14FFFFFF" Offset="0.247126"/>`
+- Line 34: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.461686"/>`
+- Line 48: Hardcoded hex color -> `<GradientStop Color="#67FFFFFF" Offset="0"/>`
+- Line 49: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 74: Hardcoded hex color -> `<Pen Thickness="0.32" LineJoin="Round" Brush="#FF000000"/>`
+- Line 79: Hardcoded hex color -> `<GradientStop Color="#FF2B2B2B" Offset="0"/>`
+- Line 80: Hardcoded hex color -> `<GradientStop Color="#FF000000" Offset="1"/>`
+- Line 97: Hardcoded hex color -> `<Pen Thickness="0.32" LineJoin="Round" Brush="#FF000000"/>`
+- Line 102: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 103: Hardcoded hex color -> `<GradientStop Color="#FFC3C3C3" Offset="0.51"/>`
+- Line 104: Hardcoded hex color -> `<GradientStop Color="#FF878787" Offset="1"/>`
+- Line 116: Hardcoded hex color -> `BorderBrush="#5598E8FF"`
+- Line 124: Hardcoded hex color -> `Foreground="#FFF0FBFF"`
+- Line 132: Hardcoded hex color -> `Foreground="#FFB9E7FF"`
+- Line 140: Hardcoded hex color -> `Background="#22FFFFFF"`
+- Line 141: Hardcoded hex color -> `BorderBrush="#3347C8FF"`
+- Line 152: Hardcoded hex color -> `Foreground="#FFF0FBFF"`
+- Line 164: Hardcoded hex color -> `BorderBrush="#447FDFFF"`
+
+## `./Skyweaver/Tools/ShowLiveXamlToolInvocationView.xaml`
+- Line 8: Hardcoded hex color -> `<Border Background="#1B152434"`
+- Line 9: Hardcoded hex color -> `BorderBrush="#5598E8FF"`
+- Line 16: Hardcoded hex color -> `Foreground="#FFF0FBFF"`
+- Line 22: Hardcoded hex color -> `Foreground="#FFB9E7FF"`
+- Line 29: Hardcoded hex color -> `Foreground="#FFD7F7FF"`
+- Line 36: Hardcoded hex color -> `Foreground="#CCFFFFFF"`
+- Line 42: Hardcoded hex color -> `Background="#22FFFFFF"`
+- Line 43: Hardcoded hex color -> `BorderBrush="#3347C8FF"`
+- Line 51: Hardcoded hex color -> `Foreground="#FFFFE4D9"`
+- Line 60: Hardcoded hex color -> `Background="#12F7FBFF"`
+- Line 61: Hardcoded hex color -> `BorderBrush="#447FDFFF"`
+- Line 73: Hardcoded hex color -> `Foreground="#CCFFFFFF"`
+
+## `./Skyweaver/Tools/VectorineCreateXamlToolInvocationView.xaml`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#4DC9CACA" Offset="0"/>`
+- Line 17: Hardcoded hex color -> `<GradientStop Color="#0E445E7C" Offset="0.988506"/>`
+- Line 32: Hardcoded hex color -> `<GradientStop Color="#2AFFFFFF" Offset="0"/>`
+- Line 33: Hardcoded hex color -> `<GradientStop Color="#14FFFFFF" Offset="0.247126"/>`
+- Line 34: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.461686"/>`
+- Line 48: Hardcoded hex color -> `<GradientStop Color="#67FFFFFF" Offset="0"/>`
+- Line 49: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 74: Hardcoded hex color -> `<Pen Thickness="0.32" LineJoin="Round" Brush="#FF000000"/>`
+- Line 79: Hardcoded hex color -> `<GradientStop Color="#FF2B2B2B" Offset="0"/>`
+- Line 80: Hardcoded hex color -> `<GradientStop Color="#FF000000" Offset="1"/>`
+- Line 97: Hardcoded hex color -> `<Pen Thickness="0.32" LineJoin="Round" Brush="#FF000000"/>`
+- Line 102: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 103: Hardcoded hex color -> `<GradientStop Color="#FFC3C3C3" Offset="0.51"/>`
+- Line 104: Hardcoded hex color -> `<GradientStop Color="#FF878787" Offset="1"/>`
+- Line 116: Hardcoded hex color -> `BorderBrush="#5598E8FF"`
+- Line 124: Hardcoded hex color -> `Foreground="#FFF0FBFF"`
+- Line 132: Hardcoded hex color -> `Foreground="#FFB9E7FF"`
+- Line 140: Hardcoded hex color -> `Background="#22FFFFFF"`
+- Line 141: Hardcoded hex color -> `BorderBrush="#3347C8FF"`
+- Line 152: Hardcoded hex color -> `Foreground="#FFF0FBFF"`
+- Line 164: Hardcoded hex color -> `BorderBrush="#447FDFFF"`
+
+## `./Skyweaver/Windows/ShellChatWindow.xaml`
+- Line 52: Hardcoded hex color -> `<GradientStop Color="#38080D1A" Offset="0"/>`
+- Line 53: Hardcoded hex color -> `<GradientStop Color="#22101530" Offset="0.5"/>`
+- Line 54: Hardcoded hex color -> `<GradientStop Color="#3204060F" Offset="1"/>`
+- Line 72: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0"/>`
+- Line 73: Hardcoded hex color -> `<GradientStop Color="#0DFFFFFF" Offset="0.1"/>`
+- Line 74: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.3"/>`
+- Line 75: Hardcoded hex color -> `<GradientStop Color="#1CFFFFFF" Offset="0.33"/>`
+- Line 76: Hardcoded hex color -> `<GradientStop Color="#08FFFFFF" Offset="0.6"/>`
+- Line 77: Hardcoded hex color -> `<GradientStop Color="#20FFFFFF" Offset="1"/>`
+- Line 100: Hardcoded hex color -> `<DropShadowEffect Color="#FF00A8FF" BlurRadius="20" ShadowDepth="0" Opacity="0.3"/>`
+- Line 112: Hardcoded hex color -> `<GradientStop Color="#80FFFFFF" Offset="0"/>`
+- Line 113: Hardcoded hex color -> `<GradientStop Color="#25FFFFFF" Offset="0.2"/>`
+- Line 114: Hardcoded hex color -> `<GradientStop Color="#15FFFFFF" Offset="0.8"/>`
+- Line 115: Hardcoded hex color -> `<GradientStop Color="#4580D0FF" Offset="1"/>`
+- Line 123: Hardcoded hex color -> `<Ellipse Width="350" Height="280" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-120,-80,0" Fill="#222B5BC2">`
+- Line 130: Hardcoded hex color -> `<Ellipse Width="320" Height="250" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="-80,0,0,-100" Fill="#187638B5">`
+- Line 145: Hardcoded hex color -> `<Ellipse Width="1" Height="1" Fill="#20FFFFFF" Canvas.Left="0" Canvas.Top="0"/>`
+- Line 146: Hardcoded hex color -> `<Ellipse Width="1" Height="1" Fill="#20FFFFFF" Canvas.Left="2.5" Canvas.Top="2.5"/>`
+- Line 164: Hardcoded hex color -> `Background="#20101530"`
+- Line 166: Hardcoded hex color -> `BorderBrush="#60FFFFFF" BorderThickness="1.5"`
+- Line 172: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="4" Opacity="0.6"/>`
+- Line 174: Hardcoded hex color -> `<Border CornerRadius="26" Margin="3" ClipToBounds="True" Background="#60000000">`
+
+## `./Skyweaver/Windows/CreateChatSessionDialog.xaml`
+- Line 11: Hardcoded hex color -> `<SolidColorBrush Color="#FF111326"/>`
+- Line 28: Hardcoded hex color -> `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 29: Hardcoded hex color -> `<GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>`
+- Line 30: Hardcoded hex color -> `<GradientStop Color="#07FFFFFF" Offset="0.109195"/>`
+- Line 31: Hardcoded hex color -> `<GradientStop Color="#04FFFFFF" Offset="0.298851"/>`
+- Line 32: Hardcoded hex color -> `<GradientStop Color="#3AFFFFFF" Offset="0.327586"/>`
+- Line 33: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0.465517"/>`
+- Line 34: Hardcoded hex color -> `<GradientStop Color="#14FFFFFF" Offset="0.591954"/>`
+- Line 35: Hardcoded hex color -> `<GradientStop Color="#05FFFFFF" Offset="0.758621"/>`
+- Line 36: Hardcoded hex color -> `<GradientStop Color="#44FFFFFF" Offset="1"/>`
+- Line 52: Hardcoded hex color -> `<Pen LineJoin="Round" Brush="#6793F2FF"/>`
+- Line 57: Hardcoded hex color -> `<GradientStop Color="#FF8E89CA" Offset="0"/>`
+- Line 58: Hardcoded hex color -> `<GradientStop Color="#3444477C" Offset="0.988506"/>`
+- Line 71: Hardcoded hex color -> `<Pen LineJoin="Round" Brush="#6793F2FF"/>`
+- Line 76: Hardcoded hex color -> `<GradientStop Color="#95FFFFFF" Offset="0"/>`
+- Line 77: Hardcoded hex color -> `<GradientStop Color="#2DFFFFFF" Offset="0.247126"/>`
+- Line 78: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.421456"/>`
+- Line 94: Hardcoded hex color -> `<Pen LineJoin="Round" Brush="#FFFFFFFF"/>`
+- Line 105: Hardcoded hex color -> `<GradientStop Color="#55FFFFFF" Offset="0"/>`
+- Line 106: Hardcoded hex color -> `<GradientStop Color="#053D3D3D" Offset="0.35249"/>`
+- Line 107: Hardcoded hex color -> `<GradientStop Color="#04666666" Offset="0.670498"/>`
+- Line 108: Hardcoded hex color -> `<GradientStop Color="#51FFFFFF" Offset="0.988506"/>`
+- Line 124: Hardcoded hex color -> `<Pen LineJoin="Round" Brush="#6793F2FF"/>`
+- Line 135: Hardcoded hex color -> `<GradientStop Color="#55D0F3FF" Offset="0"/>`
+- Line 136: Hardcoded hex color -> `<GradientStop Color="#053D3D3D" Offset="0.515326"/>`
+- Line 137: Hardcoded hex color -> `<GradientStop Color="#04666666" Offset="0.563218"/>`
+- Line 138: Hardcoded hex color -> `<GradientStop Color="#51B4FFFD" Offset="0.988506"/>`
+- Line 177: Hardcoded hex color -> `<GradientStop Color="#70976BDB" Offset="0"/>`
+- Line 178: Hardcoded hex color -> `<GradientStop Color="#506443AE" Offset="0.52"/>`
+- Line 179: Hardcoded hex color -> `<GradientStop Color="#608A64D5" Offset="1"/>`
+- Line 183: Hardcoded hex color -> `<GradientStop Color="#C7C9AAFF" Offset="0"/>`
+- Line 184: Hardcoded hex color -> `<GradientStop Color="#A67C5DCA" Offset="0.48"/>`
+- Line 185: Hardcoded hex color -> `<GradientStop Color="#B79F85F2" Offset="1"/>`
+- Line 213: Hardcoded hex color -> `<GradientStop Color="#4FFFFFFF" Offset="0"/>`
+- Line 214: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 225: Hardcoded hex color -> `<Setter TargetName="Bg" Property="BorderBrush" Value="#88CCB7FF"/>`
+- Line 231: Hardcoded hex color -> `<Setter TargetName="Bg" Property="BorderBrush" Value="#A7E0D3FF"/>`
+- Line 261: Hardcoded hex color -> `BorderBrush="#FF9B8CCF">`
+- Line 264: Hardcoded hex color -> `<GradientStop Color="#E026173E" Offset="0"/>`
+- Line 265: Hardcoded hex color -> `<GradientStop Color="#D03D2464" Offset="0.18"/>`
+- Line 266: Hardcoded hex color -> `<GradientStop Color="#C0553490" Offset="0.5"/>`
+- Line 267: Hardcoded hex color -> `<GradientStop Color="#D03D2464" Offset="0.82"/>`
+- Line 268: Hardcoded hex color -> `<GradientStop Color="#E026173E" Offset="1"/>`
+- Line 284: Hardcoded hex color -> `<GradientStop Color="#46FFFFFF" Offset="0"/>`
+- Line 285: Hardcoded hex color -> `<GradientStop Color="#14FFFFFF" Offset="0.55"/>`
+- Line 286: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 297: Hardcoded hex color -> `<GradientStop Color="#50C87CFF" Offset="0"/>`
+- Line 298: Hardcoded hex color -> `<GradientStop Color="#00C87CFF" Offset="1"/>`
+- Line 308: Hardcoded hex color -> `<GradientStop Color="#70FFFFFF" Offset="0"/>`
+- Line 309: Hardcoded hex color -> `<GradientStop Color="#28FFFFFF" Offset="0.45"/>`
+- Line 310: Hardcoded hex color -> `<GradientStop Color="#40A88BE8" Offset="1"/>`
+- Line 319: Hardcoded hex color -> `BorderBrush="#88D8BFFF">`
+- Line 322: Hardcoded hex color -> `<GradientStop Color="#D2714CB8" Offset="0"/>`
+- Line 323: Hardcoded hex color -> `<GradientStop Color="#CD4E2D89" Offset="0.38"/>`
+- Line 324: Hardcoded hex color -> `<GradientStop Color="#CD30195B" Offset="0.55"/>`
+- Line 325: Hardcoded hex color -> `<GradientStop Color="#CB8558D0" Offset="1"/>`
+- Line 338: Hardcoded hex color -> `<GradientStop Color="#56FFFFFF" Offset="0"/>`
+- Line 339: Hardcoded hex color -> `<GradientStop Color="#20FFFFFF" Offset="0.5"/>`
+- Line 340: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 349: Hardcoded hex color -> `BorderBrush="#9AE5D3FF">`
+- Line 352: Hardcoded hex color -> `<GradientStop Color="#FFB18AF5" Offset="0"/>`
+- Line 353: Hardcoded hex color -> `<GradientStop Color="#FF6A45B6" Offset="0.44"/>`
+- Line 354: Hardcoded hex color -> `<GradientStop Color="#FF47267D" Offset="0.56"/>`
+- Line 355: Hardcoded hex color -> `<GradientStop Color="#FF8C66E3" Offset="1"/>`
+- Line 374: Hardcoded hex color -> `<GradientStop Color="#66FFFFFF" Offset="0"/>`
+- Line 375: Hardcoded hex color -> `<GradientStop Color="#24FFFFFF" Offset="0.6"/>`
+- Line 376: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 388: Hardcoded hex color -> `<DropShadowEffect Color="#22000000" BlurRadius="2" ShadowDepth="1" Opacity="0.7"/>`
+- Line 452: Hardcoded hex color -> `<DropShadowEffect Color="#2A000000" BlurRadius="16" ShadowDepth="3" Opacity="0.75"/>`
+- Line 455: Hardcoded hex color -> `<SolidColorBrush Color="#01000000"/>`
+- Line 464: Hardcoded hex color -> `<GradientStop Color="#F226163E" Offset="0"/>`
+- Line 465: Hardcoded hex color -> `<GradientStop Color="#F2351F63" Offset="0.28"/>`
+- Line 466: Hardcoded hex color -> `<GradientStop Color="#F022143C" Offset="0.72"/>`
+- Line 467: Hardcoded hex color -> `<GradientStop Color="#F0140C26" Offset="1"/>`
+- Line 492: Hardcoded hex color -> `<GradientStop Color="#2EFFFFFF" Offset="0"/>`
+- Line 493: Hardcoded hex color -> `<GradientStop Color="#12FFFFFF" Offset="0.48"/>`
+- Line 494: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 505: Hardcoded hex color -> `<GradientStop Color="#3EB676FF" Offset="0"/>`
+- Line 506: Hardcoded hex color -> `<GradientStop Color="#00B676FF" Offset="1"/>`
+- Line 516: Hardcoded hex color -> `<GradientStop Color="#7AFFFFFF" Offset="0"/>`
+- Line 517: Hardcoded hex color -> `<GradientStop Color="#38FFFFFF" Offset="0.34"/>`
+- Line 518: Hardcoded hex color -> `<GradientStop Color="#28FFFFFF" Offset="0.72"/>`
+- Line 519: Hardcoded hex color -> `<GradientStop Color="#50B597F2" Offset="1"/>`
+- Line 545: Hardcoded hex color -> `<GradientStop Color="#FF191D3A" Offset="0"/>`
+- Line 546: Hardcoded hex color -> `<GradientStop Color="#FF231B40" Offset="0.5"/>`
+- Line 547: Hardcoded hex color -> `<GradientStop Color="#FF0B0B19" Offset="1"/>`
+- Line 552: Hardcoded hex color -> `<Ellipse Width="600" Height="400" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-200,-150,0,0" Fill="#304153C2">`
+- Line 557: Hardcoded hex color -> `<Ellipse Width="700" Height="500" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-250,-200" Fill="#207638B5">`
+- Line 568: Hardcoded hex color -> `<Ellipse Width="1.5" Height="1.5" Fill="#15FFFFFF" Canvas.Left="0" Canvas.Top="0"/>`
+- Line 569: Hardcoded hex color -> `<Ellipse Width="1.5" Height="1.5" Fill="#15FFFFFF" Canvas.Left="3" Canvas.Top="3"/>`
+- Line 576: Hardcoded hex color -> `<Path Data="M 200,-100 Q 500,100 850,50 L 850,100 Q 400,200 100,550 L 0,550 Q 300,100 200,-100 Z" Fill="#15FFFFFF">`
+- Line 581: Hardcoded hex color -> `<Path Data="M 300,-100 Q 550,50 850,0 L 850,20 Q 500,100 250,550 L 200,550 Q 450,50 300,-100 Z" Fill="#25FFFFFF">`
+- Line 586: Hardcoded hex color -> `<Path Data="M -100,200 Q 150,150 850,-50 L 850,-10 Q 100,200 -100,250 Z" Fill="#10FFFFFF">`
+- Line 619: Hardcoded hex color -> `Foreground="#E0FFFFFF"`
+- Line 632: Hardcoded hex color -> `Foreground="#E0FFFFFF"`
+- Line 679: Hardcoded hex color -> `Foreground="#A0FFFFFF"`
+- Line 702: Hardcoded hex color -> `<Border Width="28" Height="28" CornerRadius="6" Background="#18000000" Margin="0,0,10,0">`
+- Line 716: Hardcoded hex color -> `Foreground="#B0FFFFFF"`
+- Line 721: Hardcoded hex color -> `Foreground="#90FFFFFF"`
+- Line 742: Hardcoded hex color -> `<Border BorderThickness="0" CornerRadius="6" Background="#1A000000"/>`
+- Line 749: Hardcoded hex color -> `Background="#12000000"`
+- Line 754: Hardcoded hex color -> `Foreground="#B0FFFFFF"`
+- Line 763: Hardcoded hex color -> `Foreground="#E0FFFFFF"`
+- Line 768: Hardcoded hex color -> `Foreground="#A0FFFFFF"`
+- Line 773: Hardcoded hex color -> `Foreground="#D8FFFFFF"`
+- Line 790: Hardcoded hex color -> `<TextBlock Text="{DynamicResource Common.Agent}" Foreground="#A0FFFFFF" FontSize="10"/>`
+- Line 797: Hardcoded hex color -> `<TextBlock Text="{DynamicResource Common.Model}" Foreground="#A0FFFFFF" FontSize="10"/>`
+- Line 804: Hardcoded hex color -> `<TextBlock Text="{DynamicResource Common.Node}" Foreground="#A0FFFFFF" FontSize="10"/>`
+- Line 811: Hardcoded hex color -> `<TextBlock Text="{DynamicResource Common.Connection}" Foreground="#A0FFFFFF" FontSize="10"/>`
+- Line 820: Hardcoded hex color -> `Background="#12000000"`
+- Line 829: Hardcoded hex color -> `Foreground="#A0FFFFFF"`
+- Line 834: Hardcoded hex color -> `Foreground="#A0FFFFFF"`
+- Line 845: Hardcoded hex color -> `Background="#10000000"`
+- Line 855: Hardcoded hex color -> `<Border Width="44" Height="44" CornerRadius="8" Background="#16000000" Margin="0,0,12,0">`
+- Line 869: Hardcoded hex color -> `Foreground="#A0FFFFFF"`
+- Line 873: Hardcoded hex color -> `Foreground="#B0FFFFFF"`
+- Line 878: Hardcoded hex color -> `<Border Background="#18000000" CornerRadius="4" Padding="6,2" Margin="0,0,6,4">`
+- Line 879: Hardcoded hex color -> `<TextBlock Text="{Binding ModeText}" Foreground="#E0FFFFFF" FontSize="10"/>`
+- Line 881: Hardcoded hex color -> `<Border Background="#18000000" CornerRadius="4" Padding="6,2" Margin="0,0,6,4">`
+- Line 882: Hardcoded hex color -> `<TextBlock Text="{Binding SelectionModeText}" Foreground="#E0FFFFFF" FontSize="10"/>`
+- Line 886: Hardcoded hex color -> `Foreground="#E0FFFFFF"`
+- Line 891: Hardcoded hex color -> `Foreground="#90FFFFFF"`
+- Line 917: Hardcoded hex color -> `Background="#12000000"`
+- Line 926: Hardcoded hex color -> `Foreground="#A0FFFFFF"`
+- Line 931: Hardcoded hex color -> `Foreground="#A0FFFFFF"`
+- Line 950: Hardcoded hex color -> `Background="#10000000">`
+- Line 958: Hardcoded hex color -> `Foreground="#B0FFFFFF"`
+- Line 963: Hardcoded hex color -> `<Border Background="#18000000" CornerRadius="4" Padding="6,2" Margin="0,0,6,4">`
+- Line 964: Hardcoded hex color -> `<TextBlock Text="{Binding InterfaceTypeText}" Foreground="#E0FFFFFF" FontSize="10"/>`
+- Line 966: Hardcoded hex color -> `<Border Background="#18000000" CornerRadius="4" Padding="6,2" Margin="0,0,6,4">`
+- Line 967: Hardcoded hex color -> `<TextBlock Text="{Binding SourceTypeText}" Foreground="#E0FFFFFF" FontSize="10"/>`
+- Line 971: Hardcoded hex color -> `Foreground="#90FFFFFF"`
+- Line 984: Hardcoded hex color -> `Background="#12000000"`
+- Line 992: Hardcoded hex color -> `Foreground="#A0FFFFFF"`
+
+## `./Skyweaver/Windows/ToolConfirmationDialog.xaml`
+- Line 12: Hardcoded hex color -> `<SolidColorBrush Color="#FF111326"/>`
+- Line 17: Hardcoded hex color -> `<GradientStop Color="#FF191D3A" Offset="0"/>`
+- Line 18: Hardcoded hex color -> `<GradientStop Color="#FF231B40" Offset="0.52"/>`
+- Line 19: Hardcoded hex color -> `<GradientStop Color="#FF0B0B19" Offset="1"/>`
+- Line 23: Hardcoded hex color -> `<GradientStop Color="#AAFFFFFF" Offset="0"/>`
+- Line 24: Hardcoded hex color -> `<GradientStop Color="#45FFFFFF" Offset="0.36"/>`
+- Line 25: Hardcoded hex color -> `<GradientStop Color="#669B8CCF" Offset="1"/>`
+- Line 29: Hardcoded hex color -> `<GradientStop Color="#E722173A" Offset="0"/>`
+- Line 30: Hardcoded hex color -> `<GradientStop Color="#D61E1532" Offset="0.44"/>`
+- Line 31: Hardcoded hex color -> `<GradientStop Color="#CC0F1123" Offset="1"/>`
+- Line 35: Hardcoded hex color -> `<GradientStop Color="#4E314B77" Offset="0"/>`
+- Line 36: Hardcoded hex color -> `<GradientStop Color="#35223349" Offset="0.5"/>`
+- Line 37: Hardcoded hex color -> `<GradientStop Color="#28111A2B" Offset="1"/>`
+- Line 49: Hardcoded hex color -> `Fill="#304153C2">`
+- Line 60: Hardcoded hex color -> `Fill="#1E7638B5">`
+- Line 71: Hardcoded hex color -> `<Ellipse Width="1.4" Height="1.4" Fill="#15FFFFFF" Canvas.Left="0" Canvas.Top="0"/>`
+- Line 72: Hardcoded hex color -> `<Ellipse Width="1.4" Height="1.4" Fill="#15FFFFFF" Canvas.Left="3" Canvas.Top="3"/>`
+- Line 93: Hardcoded hex color -> `<GradientStop Color="#43FFFFFF" Offset="0"/>`
+- Line 94: Hardcoded hex color -> `<GradientStop Color="#18FFFFFF" Offset="0.58"/>`
+- Line 95: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 108: Hardcoded hex color -> `<GradientStop Color="#3AA585FF" Offset="0"/>`
+- Line 109: Hardcoded hex color -> `<GradientStop Color="#00A585FF" Offset="1"/>`
+- Line 133: Hardcoded hex color -> `Foreground="#F2F7FFFF"`
+- Line 139: Hardcoded hex color -> `Foreground="#D4DDF8FF"`
+- Line 146: Hardcoded hex color -> `BorderBrush="#6E86AEE2"`
+- Line 155: Hardcoded hex color -> `<GradientStop Color="#34FFFFFF" Offset="0"/>`
+- Line 156: Hardcoded hex color -> `<GradientStop Color="#10FFFFFF" Offset="0.35"/>`
+- Line 157: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 174: Hardcoded hex color -> `Background="#2C101A2D"`
+- Line 175: Hardcoded hex color -> `BorderBrush="#5E7DA7DA"`
+- Line 182: Hardcoded hex color -> `Foreground="#FFF3F8FF"/>`
+- Line 187: Hardcoded hex color -> `Foreground="#FFF7FBFF"`
+
+## `./Skyweaver/Windows/AssistantBallWindow.xaml`
+- Line 35: Hardcoded hex color -> `<GradientStop Color="#15FFFFFF" Offset="0"/>`
+- Line 36: Hardcoded hex color -> `<GradientStop Color="#0AFFFFFF" Offset="0.1"/>`
+- Line 37: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.3"/>`
+- Line 38: Hardcoded hex color -> `<GradientStop Color="#15FFFFFF" Offset="0.33"/>`
+- Line 39: Hardcoded hex color -> `<GradientStop Color="#05FFFFFF" Offset="0.6"/>`
+- Line 40: Hardcoded hex color -> `<GradientStop Color="#18FFFFFF" Offset="1"/>`
+- Line 55: Hardcoded hex color -> `<DropShadowEffect Color="#FF00A8FF" BlurRadius="18" ShadowDepth="0" Opacity="0.25"/>`
+- Line 77: Hardcoded hex color -> `<SolidColorBrush Color="#6793F2FF" />`
+- Line 82: Hardcoded hex color -> `<GradientStop Color="#C5C9CACA" Offset="0"/>`
+- Line 83: Hardcoded hex color -> `<GradientStop Color="#34445E7C" Offset="0.988506"/>`
+- Line 98: Hardcoded hex color -> `<SolidColorBrush Color="#6793F2FF"/>`
+- Line 109: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 110: Hardcoded hex color -> `<GradientStop Color="#2CFFFFFF" Offset="0.254789"/>`
+- Line 111: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.513412"/>`
+- Line 112: Hardcoded hex color -> `<GradientStop Color="#39FFFFFF" Offset="0.701149"/>`
+- Line 113: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.720307"/>`
+- Line 114: Hardcoded hex color -> `<GradientStop Color="#33FFFFFF" Offset="0.856322"/>`
+- Line 115: Hardcoded hex color -> `<GradientStop Color="#03FFFFFF" Offset="0.89272"/>`
+- Line 116: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.988506"/>`
+- Line 127: Hardcoded hex color -> `<GradientStop Color="#66FFFFFF" Offset="0"/>`
+- Line 128: Hardcoded hex color -> `<GradientStop Color="#24FFFFFF" Offset="0.247126"/>`
+- Line 129: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.421456"/>`
+- Line 147: Hardcoded hex color -> `Background="#182A0000">`
+- Line 151: Hardcoded hex color -> `<GradientStop Color="#7FEAF2FE" Offset="0"/>`
+- Line 152: Hardcoded hex color -> `<GradientStop Color="#00B7D7EE" Offset="0.528331"/>`
+- Line 153: Hardcoded hex color -> `<GradientStop Color="#6F91C7E6" Offset="0.816092"/>`
+- Line 154: Hardcoded hex color -> `<GradientStop Color="#7F8CC5E6" Offset="1"/>`
+- Line 164: Hardcoded hex color -> `Background="#FFFF0000"`
+- Line 169: Hardcoded hex color -> `<DropShadowEffect Color="#FFFF0000" BlurRadius="10" ShadowDepth="0" Opacity="0.95"/>`
+- Line 181: Hardcoded hex color -> `Background="#A5000208"`
+- Line 182: Hardcoded hex color -> `BorderBrush="#A5343434"`
+- Line 199: Hardcoded hex color -> `<SolidColorBrush Color="#DFFF7F00"/>`
+- Line 203: Hardcoded hex color -> `<GradientStop Color="#0FFFFF7F" Offset="0" />`
+- Line 204: Hardcoded hex color -> `<GradientStop Color="#05FF7F00" Offset="0.8" />`
+- Line 205: Hardcoded hex color -> `<GradientStop Color="#00FF7F00" Offset="1" />`
+- Line 213: Hardcoded hex color -> `Foreground="#A08C9DBF"`
+- Line 220: Hardcoded hex color -> `Foreground="#E5FFFFFF"`
+- Line 225: Hardcoded hex color -> `<DropShadowEffect x:Name="StateTextGlow" Color="#FF00A8FF" BlurRadius="8" ShadowDepth="0" Opacity="0.3"/>`
+- Line 231: Hardcoded hex color -> `Foreground="#A5FF7F00"`
+- Line 257: Hardcoded hex color -> `<GradientStop Color="#7FEAF2FE" Offset="0"/>`
+- Line 258: Hardcoded hex color -> `<GradientStop Color="#00B7D7EE" Offset="0.528331"/>`
+- Line 259: Hardcoded hex color -> `<GradientStop Color="#6F91C7E6" Offset="0.816092"/>`
+- Line 260: Hardcoded hex color -> `<GradientStop Color="#7F8CC5E6" Offset="1"/>`
+- Line 267: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 268: Hardcoded hex color -> `<GradientStop Color="#FFD1D6E2" Offset="0.101533"/>`
+- Line 269: Hardcoded hex color -> `<GradientStop Color="#FF344B6A" Offset="0.444444"/>`
+- Line 270: Hardcoded hex color -> `<GradientStop Color="#FF0D1C42" Offset="0.544061"/>`
+- Line 271: Hardcoded hex color -> `<GradientStop Color="#FF2B688C" Offset="1"/>`
+- Line 287: Hardcoded hex color -> `<GradientStop x:Name="BlueGlowStop" Color="#FF41B8FF" Offset="0"/>`
+- Line 288: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 299: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="0.43295"/>`
+- Line 300: Hardcoded hex color -> `<GradientStop Color="#00DFDFDF" Offset="1"/>`
+- Line 310: Hardcoded hex color -> `Stroke="#FFFF7F00" StrokeThickness="3.5"`
+- Line 322: Hardcoded hex color -> `Fill="#A000A8FF">`
+- Line 324: Hardcoded hex color -> `<DropShadowEffect x:Name="MicGlow" Color="#FF00A8FF" BlurRadius="12" ShadowDepth="0" Opacity="0.9"/>`
+- Line 365: Hardcoded hex color -> `<Ellipse x:Name="BtnCircle" Fill="#30FFFFFF"/>`
+- Line 370: Hardcoded hex color -> `<Setter TargetName="BtnCircle" Property="Fill" Value="#D0FF4444"/>`
+
+## `./Skyweaver/Windows/UniversalNewDialog.xaml`
+- Line 34: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="0"/>`
+- Line 35: Hardcoded hex color -> `<GradientStop Color="#10000000" Offset="0.44"/>`
+- Line 36: Hardcoded hex color -> `<GradientStop Color="#68000000" Offset="0.82"/>`
+- Line 37: Hardcoded hex color -> `<GradientStop Color="#D8000000" Offset="1"/>`
+- Line 41: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 42: Hardcoded hex color -> `<GradientStop Color="#AAFFFFFF" Offset="0.22"/>`
+- Line 43: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 51: Hardcoded hex color -> `<GradientStop Color="#3AFFFFFF" Offset="0"/>`
+- Line 52: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.72"/>`
+- Line 56: Hardcoded hex color -> `<GradientStop Color="#D9242B38" Offset="0"/>`
+- Line 57: Hardcoded hex color -> `<GradientStop Color="#C8182232" Offset="0.58"/>`
+- Line 58: Hardcoded hex color -> `<GradientStop Color="#C20E121E" Offset="1"/>`
+- Line 62: Hardcoded hex color -> `<GradientStop Color="#96FFFFFF" Offset="0"/>`
+- Line 63: Hardcoded hex color -> `<GradientStop Color="#426DD0F1" Offset="0.55"/>`
+- Line 64: Hardcoded hex color -> `<GradientStop Color="#60657E9F" Offset="1"/>`
+- Line 75: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.62"/>`
+- Line 80: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFFFDC7A"/>`
+- Line 84: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFF5FEFF"/>`
+- Line 90: Hardcoded hex color -> `<Setter Property="Foreground" Value="#BBC8D3DA"/>`
+- Line 99: Hardcoded hex color -> `<Setter Property="Foreground" Value="#E1F5FAFF"/>`
+- Line 128: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="14" ShadowDepth="8" Direction="315" Opacity="0.48"/>`
+- Line 162: Hardcoded hex color -> `<Ellipse Stroke="#E8FFFFFF"`
+- Line 168: Hardcoded hex color -> `<Ellipse Stroke="#45000000"`
+- Line 183: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="3" ShadowDepth="1" Opacity="0.7"/>`
+- Line 190: Hardcoded hex color -> `Foreground="#EAF2F7FF"`
+- Line 194: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.62"/>`
+- Line 204: Hardcoded hex color -> `Background="#70150912"`
+- Line 205: Hardcoded hex color -> `BorderBrush="#A0FFD178"`
+- Line 212: Hardcoded hex color -> `Foreground="#FFFFE5A2"`
+- Line 260: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="8" ShadowDepth="4" Direction="315" Opacity="0.42"/>`
+- Line 279: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="3" ShadowDepth="1" Opacity="0.48"/>`
+- Line 298: Hardcoded hex color -> `<Ellipse Stroke="#D8FFFFFF"`
+- Line 399: Hardcoded hex color -> `Foreground="#C9D5DCE2"`
+
+## `./Skyweaver/Windows/LateralFileSystemFolderDialog.xaml`
+- Line 37: Hardcoded hex color -> `Foreground="#FFD6E8FF"`
+
+## `./Skyweaver/Windows/ResourceManagerWindow.xaml`
+- Line 14: Hardcoded hex color -> `<GradientStop Color="#6BDDFFFD" Offset="0.0811639"/>`
+- Line 15: Hardcoded hex color -> `<GradientStop Color="#3A000000" Offset="0.243492"/>`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#907FCEFF" Offset="0.500766"/>`
+- Line 17: Hardcoded hex color -> `<GradientStop Color="#FF000000" Offset="0.586524"/>`
+- Line 18: Hardcoded hex color -> `<GradientStop Color="#FF0099FF" Offset="0.828484"/>`
+- Line 29: Hardcoded hex color -> `<GradientStop Color="#7800F3FF" Offset="0.0597243"/>`
+- Line 30: Hardcoded hex color -> `<GradientStop Color="#2B000000" Offset="0.234303"/>`
+- Line 31: Hardcoded hex color -> `<GradientStop Color="#FFA5DBFF" Offset="0.372129"/>`
+- Line 32: Hardcoded hex color -> `<GradientStop Color="#FF0099FF" Offset="0.577335"/>`
+
+## `./Skyweaver/Windows/StickyNoteRepliesWindow.xaml`
+- Line 20: Hardcoded hex color -> `<Pen Thickness="2" LineJoin="Round" Brush="#FF2A7288"/>`
+- Line 25: Hardcoded hex color -> `<GradientStop Color="#FF306F83" Offset="0"/>`
+- Line 26: Hardcoded hex color -> `<GradientStop Color="#FF091023" Offset="0.992337"/>`
+- Line 38: Hardcoded hex color -> `<Setter Property="Background" Value="#35000000"/>`
+- Line 39: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#25FFFFFF"/>`
+- Line 74: Hardcoded hex color -> `<Border BorderBrush="#20FFFFFF" BorderThickness="0,0,0,1" Padding="0,4,0,8" Margin="0,0,0,4">`
+- Line 85: Hardcoded hex color -> `<TextBlock Text="{Binding Creator}" Foreground="#FFA3D8FF" FontWeight="Bold" FontSize="12"/>`
+- Line 86: Hardcoded hex color -> `<TextBlock Grid.Column="2" Text="{Binding DisplayDateTime}" Foreground="#80FFFFFF" FontSize="10" VerticalAlignment="Center"/>`
+
+## `./Skyweaver/Windows/CreateScheduledTaskDialog.xaml`
+- Line 18: Hardcoded hex color -> `<Pen Thickness="2" LineJoin="Round" Brush="#FF2A7288"/>`
+- Line 23: Hardcoded hex color -> `<GradientStop Color="#FF306F83" Offset="0"/>`
+- Line 24: Hardcoded hex color -> `<GradientStop Color="#FF091023" Offset="0.992337"/>`
+- Line 37: Hardcoded hex color -> `<Setter Property="Background" Value="#35000000"/>`
+- Line 38: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#25FFFFFF"/>`
+- Line 52: Hardcoded hex color -> `<GradientStop Color="#50000000" Offset="0"/>`
+- Line 53: Hardcoded hex color -> `<GradientStop Color="#20000000" Offset="0.5"/>`
+- Line 54: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 63: Hardcoded hex color -> `<GradientStop Color="#30000000" Offset="0"/>`
+- Line 64: Hardcoded hex color -> `<GradientStop Color="#15000000" Offset="0.5"/>`
+- Line 65: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 74: Hardcoded hex color -> `<GradientStop Color="#30000000" Offset="0"/>`
+- Line 75: Hardcoded hex color -> `<GradientStop Color="#15000000" Offset="0.5"/>`
+- Line 76: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 85: Hardcoded hex color -> `<GradientStop Color="#25000000" Offset="0"/>`
+- Line 86: Hardcoded hex color -> `<GradientStop Color="#08000000" Offset="0.5"/>`
+- Line 87: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 117: Hardcoded hex color -> `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 118: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 123: Hardcoded hex color -> `<GradientStop Color="#374588BD" Offset="0"/>`
+- Line 124: Hardcoded hex color -> `<GradientStop Color="#081AD5FF" Offset="0.69"/>`
+- Line 125: Hardcoded hex color -> `<GradientStop Color="#1FFFFFFF" Offset="1"/>`
+- Line 134: Hardcoded hex color -> `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 135: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 140: Hardcoded hex color -> `<GradientStop Color="#A34588BD" Offset="0"/>`
+- Line 141: Hardcoded hex color -> `<GradientStop Color="#111AD5FF" Offset="0.69"/>`
+- Line 142: Hardcoded hex color -> `<GradientStop Color="#31FFFFFF" Offset="1"/>`
+- Line 210: Hardcoded hex color -> `<GradientStop Color="#25FFFFFF" Offset="0"/>`
+- Line 211: Hardcoded hex color -> `<GradientStop Color="#08FFFFFF" Offset="0.3"/>`
+- Line 212: Hardcoded hex color -> `<GradientStop Color="#02FFFFFF" Offset="0.7"/>`
+- Line 213: Hardcoded hex color -> `<GradientStop Color="#18FFFFFF" Offset="1"/>`
+- Line 222: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#40FFFFFF"/>`
+- Line 225: Hardcoded hex color -> `<Setter Property="Background" Value="#1A000000"/>`
+- Line 231: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFA3D8FF"/>`
+- Line 263: Hardcoded hex color -> `<GradientStop Color="#CCD9E7F4" Offset="0"/>`
+- Line 264: Hardcoded hex color -> `<GradientStop Color="#CC7CBEEA" Offset="1"/>`
+- Line 269: Hardcoded hex color -> `<GradientStop Color="#CC9CB3C8" Offset="0.473"/>`
+- Line 270: Hardcoded hex color -> `<GradientStop Color="#CC3A576E" Offset="0.593"/>`
+- Line 271: Hardcoded hex color -> `<GradientStop Color="#CC162D41" Offset="0.623"/>`
+- Line 272: Hardcoded hex color -> `<GradientStop Color="#CC4C87AF" Offset="0.798"/>`
+- Line 280: Hardcoded hex color -> `<GradientStop Color="#FFE9F7FF" Offset="0"/>`
+- Line 281: Hardcoded hex color -> `<GradientStop Color="#FF8CCEFA" Offset="1"/>`
+- Line 286: Hardcoded hex color -> `<GradientStop Color="#FFACC3D8" Offset="0.473"/>`
+- Line 287: Hardcoded hex color -> `<GradientStop Color="#FF4A677E" Offset="0.593"/>`
+- Line 288: Hardcoded hex color -> `<GradientStop Color="#FF263D51" Offset="0.623"/>`
+- Line 289: Hardcoded hex color -> `<GradientStop Color="#FF5C97BF" Offset="0.798"/>`
+- Line 304: Hardcoded hex color -> `<GradientStop Color="#FF8AE0FF" Offset="0.093"/>`
+- Line 305: Hardcoded hex color -> `<GradientStop Color="#FF35A6E6" Offset="0.645"/>`
+- Line 306: Hardcoded hex color -> `<GradientStop Color="#FF4DA6E4" Offset="0.712"/>`
+- Line 307: Hardcoded hex color -> `<GradientStop Color="#FFAED3F4" Offset="0.942"/>`
+- Line 311: Hardcoded hex color -> `<DropShadowEffect Color="#22657C" BlurRadius="2" ShadowDepth="0" Opacity="0.8" Direction="315"/>`
+- Line 318: Hardcoded hex color -> `<GradientStop Color="#FF8AE0FF" Offset="0.093"/>`
+- Line 319: Hardcoded hex color -> `<GradientStop Color="#FF35A6E6" Offset="0.645"/>`
+- Line 320: Hardcoded hex color -> `<GradientStop Color="#FF4DA6E4" Offset="0.712"/>`
+- Line 321: Hardcoded hex color -> `<GradientStop Color="#FFAED3F4" Offset="0.942"/>`
+- Line 325: Hardcoded hex color -> `<DropShadowEffect Color="#22657C" BlurRadius="2" ShadowDepth="0" Opacity="0.8" Direction="315"/>`
+- Line 336: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>`
+- Line 417: Hardcoded hex color -> `<TextBlock Text="{DynamicResource ScheduledTaskDialog.Header.Description}" FontSize="11" Foreground="#A0FFFFFF" Margin="0,4,0,0"/>`
+- Line 440: Hardcoded hex color -> `<TextBox x:Name="TaskNameTextBox" Height="28" VerticalContentAlignment="Center" Background="#30000000" BorderBrush="#50FFFFFF" Foreground="White" CaretBrush="White"/>`
+- Line 446: Hardcoded hex color -> `<ComboBox x:Name="SessionFlowComboBox" Height="28" Background="#30000000" Foreground="Black" BorderBrush="#50FFFFFF" DisplayMemberPath="Name" SelectedValuePath="FilePath"/>`
+- Line 458: Hardcoded hex color -> `<TextBox x:Name="PromptTextBox" Height="90" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Background="#30000000" BorderBrush="#50FFFFFF" Foreground="White" CaretBrush="White" Padding="6"/>`
+- Line 500: Hardcoded hex color -> `<TextBlock Text="{DynamicResource ScheduledTaskDialog.TriggerType.Label}" Foreground="#E0FFFFFF" FontSize="11" Margin="0,0,0,4"/>`
+- Line 511: Hardcoded hex color -> `<Border Grid.Column="2" BorderThickness="1,0,0,0" BorderBrush="#30FFFFFF" Padding="12,0,0,0">`
+- Line 603: Hardcoded hex color -> `<TextBlock Text="{DynamicResource ScheduledTaskDialog.Label.NoExtraParams}" Foreground="#70FFFFFF" FontSize="11" VerticalAlignment="Center" FontStyle="Italic"/>`
+- Line 626: Hardcoded hex color -> `<TextBlock Text="{DynamicResource ScheduledTaskDialog.PreAction.Label}" Foreground="#E0FFFFFF" FontSize="11" Margin="0,0,0,4"/>`
+- Line 635: Hardcoded hex color -> `<TextBlock Text="{DynamicResource ScheduledTaskDialog.PowershellScript.Label}" Foreground="#E0FFFFFF" FontSize="11" Margin="0,0,0,4"/>`
+- Line 636: Hardcoded hex color -> `<TextBox x:Name="PreActionScriptTextBox" Height="26" VerticalContentAlignment="Center" Background="#30000000" BorderBrush="#50FFFFFF" Foreground="White" CaretBrush="White"/>`
+- Line 648: Hardcoded hex color -> `<TextBlock Text="{DynamicResource ScheduledTaskDialog.PostAction.Label}" Foreground="#E0FFFFFF" FontSize="11" Margin="0,0,0,4"/>`
+- Line 657: Hardcoded hex color -> `<TextBlock Text="{DynamicResource ScheduledTaskDialog.PowershellScript.Label}" Foreground="#E0FFFFFF" FontSize="11" Margin="0,0,0,4"/>`
+- Line 658: Hardcoded hex color -> `<TextBox x:Name="PostActionScriptTextBox" Height="26" VerticalContentAlignment="Center" Background="#30000000" BorderBrush="#50FFFFFF" Foreground="White" CaretBrush="White"/>`
+
+## `./Skyweaver/Windows/SkyweaverGroundingEngineWindow.xaml`
+- Line 20: Hardcoded hex color -> `<GradientStop Color="#FF306F83" Offset="0"/>`
+- Line 21: Hardcoded hex color -> `<GradientStop Color="#FF091023" Offset="0.992"/>`
+- Line 28: Hardcoded hex color -> `<GradientStop Color="#FF6A92AA" Offset="0"/>`
+- Line 29: Hardcoded hex color -> `<GradientStop Color="#FF2E6986" Offset="1"/>`
+- Line 36: Hardcoded hex color -> `<GradientStop Color="#5BFFFFFF" Offset="0"/>`
+- Line 37: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.178"/>`
+- Line 38: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="0.208"/>`
+- Line 39: Hardcoded hex color -> `<GradientStop Color="#09070E11" Offset="0.798"/>`
+- Line 40: Hardcoded hex color -> `<GradientStop Color="#952582AA" Offset="1"/>`
+- Line 47: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 48: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 55: Hardcoded hex color -> `<GradientStop Color="#3037FF62" Offset="0"/>`
+- Line 56: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.298"/>`
+- Line 57: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0.54"/>`
+- Line 58: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 65: Hardcoded hex color -> `<GradientStop Color="#40FFE600" Offset="0"/>`
+- Line 66: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.306"/>`
+- Line 67: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0.54"/>`
+- Line 68: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 75: Hardcoded hex color -> `<GradientStop Color="#4BFF4747" Offset="0"/>`
+- Line 76: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.385"/>`
+- Line 77: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0.534"/>`
+- Line 78: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 85: Hardcoded hex color -> `<GradientStop Color="#A7FFFFFF" Offset="0"/>`
+- Line 86: Hardcoded hex color -> `<GradientStop Color="#2DFFFFFF" Offset="1"/>`
+- Line 93: Hardcoded hex color -> `<GradientStop Color="#7DFFFFFF" Offset="0"/>`
+- Line 94: Hardcoded hex color -> `<GradientStop Color="#1A000000" Offset="0.467"/>`
+- Line 95: Hardcoded hex color -> `<GradientStop Color="#1FFFFFFF" Offset="1"/>`
+- Line 108: Hardcoded hex color -> `<GradientStop Color="#12FFFFFF" Offset="0"/>`
+- Line 109: Hardcoded hex color -> `<GradientStop Color="#06FFFFFF" Offset="0.2"/>`
+- Line 110: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.5"/>`
+- Line 111: Hardcoded hex color -> `<GradientStop Color="#10FFFFFF" Offset="0.55"/>`
+- Line 112: Hardcoded hex color -> `<GradientStop Color="#02FFFFFF" Offset="0.8"/>`
+- Line 113: Hardcoded hex color -> `<GradientStop Color="#18FFFFFF" Offset="1"/>`
+- Line 124: Hardcoded hex color -> `<DropShadowEffect x:Key="BubbleDropShadow" Color="#FF2E6986" BlurRadius="12" ShadowDepth="0" Opacity="0.3"/>`
+- Line 136: Hardcoded hex color -> `<DropShadowEffect Color="#FF37FF62" BlurRadius="20" ShadowDepth="0" Opacity="0.3"/>`
+- Line 144: Hardcoded hex color -> `<DropShadowEffect Color="#FFFFE600" BlurRadius="20" ShadowDepth="0" Opacity="0.3"/>`
+- Line 152: Hardcoded hex color -> `<DropShadowEffect Color="#FFFF4747" BlurRadius="20" ShadowDepth="0" Opacity="0.35"/>`
+- Line 162: Hardcoded hex color -> `Background="#2080D0FF"`
+- Line 163: Hardcoded hex color -> `BorderBrush="#60FFFFFF"`
+- Line 171: Hardcoded hex color -> `<Setter TargetName="BtnBorder" Property="Background" Value="#5080D0FF"/>`
+- Line 172: Hardcoded hex color -> `<Setter TargetName="BtnBorder" Property="BorderBrush" Value="#FFFFFFFF"/>`
+- Line 175: Hardcoded hex color -> `<DropShadowEffect Color="#FF80D0FF" BlurRadius="10" ShadowDepth="0" Opacity="0.8"/>`
+- Line 180: Hardcoded hex color -> `<Setter TargetName="BtnBorder" Property="Background" Value="#8080D0FF"/>`
+- Line 181: Hardcoded hex color -> `<Setter TargetName="BtnBorder" Property="BorderBrush" Value="#80FFFFFF"/>`
+- Line 191: Hardcoded hex color -> `BorderBrush="#FF2A7288"`
+- Line 196: Hardcoded hex color -> `<Ellipse Width="650" Height="500" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-180,-120,0" Fill="#202B5BC2" IsHitTestVisible="False">`
+- Line 203: Hardcoded hex color -> `<Ellipse Width="600" Height="450" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="-120,0,0,-150" Fill="#157638B5" IsHitTestVisible="False">`
+- Line 215: Hardcoded hex color -> `<Ellipse Width="1.5" Height="1.5" Fill="#FFFFFFFF" Canvas.Left="0" Canvas.Top="0"/>`
+- Line 216: Hardcoded hex color -> `<Ellipse Width="1.5" Height="1.5" Fill="#FFFFFFFF" Canvas.Left="5" Canvas.Top="5"/>`
+- Line 245: Hardcoded hex color -> `<Run FontFamily="微软雅黑" FontSize="38" Text="Skyweaver " Foreground="#FFFFFFFF" FontWeight="Bold"/>`
+- Line 246: Hardcoded hex color -> `<Run FontFamily="微软雅黑 Light" FontSize="38" Text="Grounding Engine" Foreground="#FFA7D0E0"/>`
+- Line 260: Hardcoded hex color -> `<Border x:Name="Border" Width="28" Height="28" Background="#15FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="14">`
+- Line 261: Hardcoded hex color -> `<Path Data="M 6,14 L 22,14" Stroke="#FFFFFFFF" StrokeThickness="2" SnapsToDevicePixels="True"/>`
+- Line 265: Hardcoded hex color -> `<Setter TargetName="Border" Property="Background" Value="#40FFFFFF"/>`
+- Line 266: Hardcoded hex color -> `<Setter TargetName="Border" Property="BorderBrush" Value="#80FFFFFF"/>`
+- Line 278: Hardcoded hex color -> `<Border x:Name="Border" Width="28" Height="28" Background="#15FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="14">`
+- Line 279: Hardcoded hex color -> `<Path Data="M 8,8 L 20,20 M 20,8 L 8,20" Stroke="#FFFFFFFF" StrokeThickness="2" SnapsToDevicePixels="True"/>`
+- Line 283: Hardcoded hex color -> `<Setter TargetName="Border" Property="Background" Value="#FFD83B3B"/>`
+- Line 284: Hardcoded hex color -> `<Setter TargetName="Border" Property="BorderBrush" Value="#FFFF8080"/>`
+- Line 287: Hardcoded hex color -> `<DropShadowEffect Color="#FFD83B3B" BlurRadius="10" ShadowDepth="0" Opacity="0.8"/>`
+- Line 342: Hardcoded hex color -> `<Ellipse Width="24" Height="24" Fill="#3080D0FF" Stroke="#9080D0FF" StrokeThickness="1" DockPanel.Dock="Left" Margin="0,0,8,0">`
+- Line 344: Hardcoded hex color -> `<DropShadowEffect Color="#FF80D0FF" BlurRadius="5" ShadowDepth="0" Opacity="0.5"/>`
+- Line 347: Hardcoded hex color -> `<TextBlock Text="AI 智能体助手" Foreground="#FFA0E5FF" FontFamily="微软雅黑" FontWeight="Bold" VerticalAlignment="Center" FontSize="14"/>`
+- Line 348: Hardcoded hex color -> `<TextBlock Text="{Binding Timestamp}" Foreground="#60FFFFFF" FontFamily="Consolas" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="12"/>`
+- Line 353: Hardcoded hex color -> `Foreground="#FFFFFFFF"`
+- Line 364: Hardcoded hex color -> `<Line X1="0" Y1="0" X2="30" Y2="0" Stroke="#8080D0FF" StrokeThickness="1.5" StrokeDashArray="3,3">`
+- Line 366: Hardcoded hex color -> `<DropShadowEffect Color="#FF80D0FF" BlurRadius="5" ShadowDepth="0" Opacity="0.5"/>`
+- Line 369: Hardcoded hex color -> `<Polygon Points="26,-4 32,0 26,4" Fill="#FFA0E5FF" HorizontalAlignment="Right"/>`
+- Line 394: Hardcoded hex color -> `<TextBlock Text="已证实" Foreground="#FF47FF7D" FontWeight="Bold" FontSize="13" FontFamily="微软雅黑"/>`
+- Line 404: Hardcoded hex color -> `<TextBlock Text="未证实" Foreground="#FFFFE600" FontWeight="Bold" FontSize="13" FontFamily="微软雅黑"/>`
+- Line 414: Hardcoded hex color -> `<TextBlock Text="冲突" Foreground="#FFFF4747" FontWeight="Bold" FontSize="13" FontFamily="微软雅黑"/>`
+- Line 423: Hardcoded hex color -> `<TextBlock Text="{Binding Source, StringFormat='来源: {0}'}" Foreground="#80FFFFFF" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Right"/>`
+- Line 429: Hardcoded hex color -> `Foreground="#FFFFFFFF"`
+- Line 443: Hardcoded hex color -> `<TextBlock Text="校验可信度" Foreground="#60FFFFFF" FontSize="11" FontFamily="微软雅黑"/>`
+- Line 444: Hardcoded hex color -> `<TextBlock Text="{Binding Confidence, StringFormat={}{0:P0}}" Foreground="#FFFFFFFF" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right" DockPanel.Dock="Right"/>`
+- Line 447: Hardcoded hex color -> `<ProgressBar Grid.Row="1" Height="3" Minimum="0" Maximum="1" Value="{Binding Confidence}" Background="#15FFFFFF" BorderThickness="0">`
+- Line 452: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FF47FF7D"/>`
+- Line 455: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFFFE600"/>`
+- Line 458: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFFF4747"/>`
+- Line 494: Hardcoded hex color -> `BorderBrush="#30FFFFFF"`
+- Line 495: Hardcoded hex color -> `Background="#15000000"`
+- Line 500: Hardcoded hex color -> `<TextBlock Text="关于 GROUNDING 进度" Foreground="#FFA0E5FF" FontWeight="Bold" FontSize="13" Margin="0,0,0,8" FontFamily="微软雅黑"/>`
+- Line 502: Hardcoded hex color -> `Foreground="#A0FFFFFF" FontSize="12" TextWrapping="Wrap" LineHeight="18" FontFamily="微软雅黑"/>`
+- Line 509: Hardcoded hex color -> `BorderBrush="#4080D0FF"`
+- Line 510: Hardcoded hex color -> `Background="#180F1D32"`
+- Line 520: Hardcoded hex color -> `<TextBlock Grid.Row="0" Text="PENDING TASKS / Grounding 进度" Foreground="#FFA0E5FF" FontWeight="Bold" FontSize="13" Margin="0,0,0,15" FontFamily="微软雅黑"/>`
+- Line 539: Hardcoded hex color -> `Background="#12FFFFFF"`
+- Line 540: Hardcoded hex color -> `BorderBrush="#25FFFFFF"`
+- Line 551: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="ItemBorder" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#25FFFFFF" Duration="0:0:0.15"/>`
+- Line 552: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="ItemBorder" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#55FFFFFF" Duration="0:0:0.15"/>`
+- Line 560: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="ItemBorder" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#35FFFFFF" Duration="0:0:0.15"/>`
+- Line 561: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="ItemBorder" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#9000C3FF" Duration="0:0:0.15"/>`
+- Line 585: Hardcoded hex color -> `<TextBlock Text="{Binding EtaText}" Foreground="#80FFFFFF" FontSize="11" HorizontalAlignment="Right" DockPanel.Dock="Right" FontFamily="Consolas"/>`
+- Line 589: Hardcoded hex color -> `<TextBlock Grid.Row="1" Text="{Binding StatusText}" Foreground="#FFA0E5FF" FontSize="11.5" Margin="0,0,0,8" FontFamily="微软雅黑"/>`
+- Line 597: Hardcoded hex color -> `<ProgressBar Height="4" Minimum="0" Maximum="1" Value="{Binding Progress}" Foreground="#FF00C3FF" Background="#15FFFFFF" BorderThickness="0" VerticalAlignment="Center"/>`
+- Line 619: Hardcoded hex color -> `<DropShadowEffect Color="#80FFFFFF" BlurRadius="8" ShadowDepth="0" Opacity="0.5"/>`
+- Line 622: Hardcoded hex color -> `<Border Width="8" Height="24" CornerRadius="4" Background="#FF00C3FF" Margin="0,15,0,0" VerticalAlignment="Top">`
+- Line 624: Hardcoded hex color -> `<DropShadowEffect Color="#FF00C3FF" BlurRadius="12" ShadowDepth="0" Opacity="0.9"/>`
+
+## `./Skyweaver/Panels/NodeSettings/Views/NodeSettingsPanelView.xaml`
+- Line 30: Hardcoded hex color -> `BorderBrush="#446FD4D1"`
+- Line 32: Hardcoded hex color -> `Background="#12000000"/>`
+- Line 35: Hardcoded hex color -> `Foreground="#FF96FCFF"`
+- Line 41: Hardcoded hex color -> `Foreground="#CCFFFFFF"`
+
+## `./Skyweaver/Panels/DocumentWorkspace/Views/DocumentWorkspacePanelView.xaml`
+- Line 19: Hardcoded hex color -> `BorderBrush="#FF000000"`
+- Line 25: Hardcoded hex color -> `<GradientStop Color="#FF435A69" Offset="0"/>`
+- Line 26: Hardcoded hex color -> `<GradientStop Color="#FF374D5A" Offset="0.517625"/>`
+- Line 27: Hardcoded hex color -> `<GradientStop Color="#FE334853" Offset="0.528757"/>`
+- Line 28: Hardcoded hex color -> `<GradientStop Color="#FF324551" Offset="1"/>`
+- Line 90: Hardcoded hex color -> `To="#FF5A7085" Duration="0:0:0.2"/>`
+- Line 93: Hardcoded hex color -> `To="#FF4C6370" Duration="0:0:0.2"/>`
+- Line 96: Hardcoded hex color -> `To="#FE485E69" Duration="0:0:0.2"/>`
+- Line 99: Hardcoded hex color -> `To="#FF475B67" Duration="0:0:0.2"/>`
+- Line 108: Hardcoded hex color -> `To="#FF435A69" Duration="0:0:0.2"/>`
+- Line 111: Hardcoded hex color -> `To="#FF374D5A" Duration="0:0:0.2"/>`
+- Line 114: Hardcoded hex color -> `To="#FE334853" Duration="0:0:0.2"/>`
+- Line 117: Hardcoded hex color -> `To="#FF324551" Duration="0:0:0.2"/>`
+- Line 129: Hardcoded hex color -> `To="#28FFFFFF" Duration="0:0:0.3"/>`
+- Line 132: Hardcoded hex color -> `To="#35CEEEFF" Duration="0:0:0.3"/>`
+- Line 135: Hardcoded hex color -> `To="#652D4957" Duration="0:0:0.3"/>`
+- Line 138: Hardcoded hex color -> `To="#FF6FD4D1" Duration="0:0:0.3"/>`
+- Line 147: Hardcoded hex color -> `To="#FF435A69" Duration="0:0:0.3"/>`
+- Line 150: Hardcoded hex color -> `To="#FF374D5A" Duration="0:0:0.3"/>`
+- Line 153: Hardcoded hex color -> `To="#FE334853" Duration="0:0:0.3"/>`
+- Line 156: Hardcoded hex color -> `To="#FF324551" Duration="0:0:0.3"/>`
+- Line 190: Hardcoded hex color -> `Background="#22000000">`
+- Line 209: Hardcoded hex color -> `<GradientStop Color="#B0000000" Offset="0"/>`
+- Line 210: Hardcoded hex color -> `<GradientStop Color="#90000000" Offset="1"/>`
+- Line 215: Hardcoded hex color -> `<TextBlock Text="{Binding Subtitle}" FontSize="13" Foreground="#FFDDEFFF" HorizontalAlignment="Center" Margin="0,8,0,0"/>`
+
+## `./Skyweaver/Panels/LiveTasks/Views/LiveTasksPanelView.xaml`
+- Line 14: Hardcoded hex color -> `<Setter Property="Background" Value="#35000000"/>`
+- Line 36: Hardcoded hex color -> `<GradientStop Color="#50000000" Offset="0"/>`
+- Line 37: Hardcoded hex color -> `<GradientStop Color="#20000000" Offset="0.5"/>`
+- Line 38: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 49: Hardcoded hex color -> `<GradientStop Color="#30000000" Offset="0"/>`
+- Line 50: Hardcoded hex color -> `<GradientStop Color="#15000000" Offset="0.5"/>`
+- Line 51: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 62: Hardcoded hex color -> `<GradientStop Color="#30000000" Offset="0"/>`
+- Line 63: Hardcoded hex color -> `<GradientStop Color="#15000000" Offset="0.5"/>`
+- Line 64: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 75: Hardcoded hex color -> `<GradientStop Color="#25000000" Offset="0"/>`
+- Line 76: Hardcoded hex color -> `<GradientStop Color="#08000000" Offset="0.5"/>`
+- Line 77: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 107: Hardcoded hex color -> `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 108: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 113: Hardcoded hex color -> `<GradientStop Color="#374588BD" Offset="0"/>`
+- Line 114: Hardcoded hex color -> `<GradientStop Color="#081AD5FF" Offset="0.69"/>`
+- Line 115: Hardcoded hex color -> `<GradientStop Color="#1FFFFFFF" Offset="1"/>`
+- Line 123: Hardcoded hex color -> `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 124: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 129: Hardcoded hex color -> `<GradientStop Color="#A34588BD" Offset="0"/>`
+- Line 130: Hardcoded hex color -> `<GradientStop Color="#111AD5FF" Offset="0.69"/>`
+- Line 131: Hardcoded hex color -> `<GradientStop Color="#31FFFFFF" Offset="1"/>`
+- Line 203: Hardcoded hex color -> `<GradientStop Color="#FF2A3240" Offset="0"/>`
+- Line 204: Hardcoded hex color -> `<GradientStop Color="#FF1A1F28" Offset="1"/>`
+- Line 302: Hardcoded hex color -> `<GradientStop Color="#FF1A1F28" Offset="0"/>`
+- Line 303: Hardcoded hex color -> `<GradientStop Color="#FF141924" Offset="1"/>`
+- Line 339: Hardcoded hex color -> `<GradientStop Color="#FF141924" Offset="0"/>`
+- Line 340: Hardcoded hex color -> `<GradientStop Color="#FF0F1419" Offset="1"/>`
+- Line 346: Hardcoded hex color -> `Foreground="#80FFFFFF"`
+- Line 378: Hardcoded hex color -> `Foreground="#B0FFFFFF"`
+- Line 382: Hardcoded hex color -> `Foreground="#A0FFFFFF"`
+- Line 387: Hardcoded hex color -> `Foreground="#80FFFFFF"`
+- Line 392: Hardcoded hex color -> `Foreground="#70FFFFFF"`
+- Line 404: Hardcoded hex color -> `Foreground="#FFA2D6FF"/>`
+- Line 410: Hardcoded hex color -> `Foreground="#FFA2D6FF"/>`
+- Line 416: Hardcoded hex color -> `Foreground="#FFA2D6FF"/>`
+- Line 422: Hardcoded hex color -> `Foreground="#FFA2D6FF"/>`
+- Line 429: Hardcoded hex color -> `Foreground="#FFA2D6FF"/>`
+- Line 436: Hardcoded hex color -> `Foreground="#FFA2D6FF"/>`
+- Line 443: Hardcoded hex color -> `Foreground="#FFA2D6FF"/>`
+
+## `./Skyweaver/Panels/MultiFunctionArea/Views/MultiFunctionAreaPanelView.xaml`
+- Line 23: Hardcoded hex color -> `BorderBrush="#FF000000"`
+- Line 29: Hardcoded hex color -> `<GradientStop Color="#FF435A69" Offset="0"/>`
+- Line 30: Hardcoded hex color -> `<GradientStop Color="#FF374D5A" Offset="0.517625"/>`
+- Line 31: Hardcoded hex color -> `<GradientStop Color="#FE334853" Offset="0.528757"/>`
+- Line 32: Hardcoded hex color -> `<GradientStop Color="#FF324551" Offset="1"/>`
+- Line 92: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[0].(GradientStop.Color)" To="#FF5A7085" Duration="0:0:0.2"/>`
+- Line 93: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[1].(GradientStop.Color)" To="#FF4C6370" Duration="0:0:0.2"/>`
+- Line 94: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[2].(GradientStop.Color)" To="#FE485E69" Duration="0:0:0.2"/>`
+- Line 95: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[3].(GradientStop.Color)" To="#FF475B67" Duration="0:0:0.2"/>`
+- Line 102: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[0].(GradientStop.Color)" To="#FF435A69" Duration="0:0:0.2"/>`
+- Line 103: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[1].(GradientStop.Color)" To="#FF374D5A" Duration="0:0:0.2"/>`
+- Line 104: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[2].(GradientStop.Color)" To="#FE334853" Duration="0:0:0.2"/>`
+- Line 105: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[3].(GradientStop.Color)" To="#FF324551" Duration="0:0:0.2"/>`
+- Line 115: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[0].(GradientStop.Color)" To="#28FFFFFF" Duration="0:0:0.3"/>`
+- Line 116: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[1].(GradientStop.Color)" To="#35CEEEFF" Duration="0:0:0.3"/>`
+- Line 117: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[2].(GradientStop.Color)" To="#652D4957" Duration="0:0:0.3"/>`
+- Line 118: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[3].(GradientStop.Color)" To="#FF6FD4D1" Duration="0:0:0.3"/>`
+- Line 125: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[0].(GradientStop.Color)" To="#FF435A69" Duration="0:0:0.3"/>`
+- Line 126: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[1].(GradientStop.Color)" To="#FF374D5A" Duration="0:0:0.3"/>`
+- Line 127: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[2].(GradientStop.Color)" To="#FE334853" Duration="0:0:0.3"/>`
+- Line 128: Hardcoded hex color -> `<ColorAnimation Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.Background).(LinearGradientBrush.GradientStops)[3].(GradientStop.Color)" To="#FF324551" Duration="0:0:0.3"/>`
+- Line 158: Hardcoded hex color -> `Background="#22000000">`
+- Line 170: Hardcoded hex color -> `Foreground="#CCFFFFFF"`
+- Line 253: Hardcoded hex color -> `Background="#22000000">`
+- Line 272: Hardcoded hex color -> `<GradientStop Color="#B0000000" Offset="0"/>`
+- Line 273: Hardcoded hex color -> `<GradientStop Color="#90000000" Offset="1"/>`
+- Line 278: Hardcoded hex color -> `<TextBlock Text="{Binding Subtitle}" FontSize="13" Foreground="#FFDDEFFF" HorizontalAlignment="Center" Margin="0,8,0,0"/>`
+
+## `./Skyweaver/Panels/MultiFunctionArea/Views/PlaceholderPanelView.xaml`
+- Line 12: Hardcoded hex color -> `<GradientStop Color="#FF19222D" Offset="0"/>`
+- Line 13: Hardcoded hex color -> `<GradientStop Color="#FF10161E" Offset="1"/>`
+- Line 19: Hardcoded hex color -> `Background="#16000000"`
+- Line 20: Hardcoded hex color -> `BorderBrush="#335596FC"`
+- Line 27: Hardcoded hex color -> `Foreground="#FF96FCFF"/>`
+- Line 31: Hardcoded hex color -> `Foreground="#E6FFFFFF"`
+- Line 36: Hardcoded hex color -> `Foreground="#AAFFFFFF"`
+
+## `./Skyweaver/Panels/Filmstrip/Views/FilmstripPanelView.xaml`
+- Line 30: Hardcoded hex color -> `BorderBrush="#446FD4D1"`
+- Line 32: Hardcoded hex color -> `Background="#12000000"/>`
+- Line 35: Hardcoded hex color -> `Foreground="#FF96FCFF"`
+- Line 41: Hardcoded hex color -> `Foreground="#CCFFFFFF"`
+
+## `./Skyweaver/Panels/ChatSession/Views/ChatSessionPanelView.xaml`
+- Line 13: Hardcoded hex color -> `<GradientStop Color="#FF19222D" Offset="0"/>`
+- Line 14: Hardcoded hex color -> `<GradientStop Color="#FF10161E" Offset="1"/>`
+- Line 20: Hardcoded hex color -> `Background="#16000000"`
+- Line 21: Hardcoded hex color -> `BorderBrush="#335596FC"`
+- Line 28: Hardcoded hex color -> `Foreground="#FF96FCFF"/>`
+- Line 32: Hardcoded hex color -> `Foreground="#E6FFFFFF"`
+- Line 37: Hardcoded hex color -> `Foreground="#AAFFFFFF"`
+
+## `./Skyweaver/Panels/SessionList/Views/SessionListPanelView.xaml`
+- Line 36: Hardcoded hex color -> `<GradientStop Color="#FF2A3240" Offset="0"/>`
+- Line 37: Hardcoded hex color -> `<GradientStop Color="#FF1A1F28" Offset="1"/>`
+- Line 134: Hardcoded hex color -> `<GradientStop Color="#FF1A1F28" Offset="0"/>`
+- Line 135: Hardcoded hex color -> `<GradientStop Color="#FF141924" Offset="1"/>`
+- Line 171: Hardcoded hex color -> `<GradientStop Color="#FF141924" Offset="0"/>`
+- Line 172: Hardcoded hex color -> `<GradientStop Color="#FF0F1419" Offset="1"/>`
+- Line 201: Hardcoded hex color -> `<GradientStop Color="#FF3A4250" Offset="0"/>`
+- Line 202: Hardcoded hex color -> `<GradientStop Color="#FF2A3240" Offset="0.5"/>`
+- Line 203: Hardcoded hex color -> `<GradientStop Color="#FF1A1F28" Offset="1"/>`
+
+## `./Skyweaver/Controls/ShellChatSessionControl/Views/ShellChatSessionControl.xaml`
+- Line 28: Hardcoded hex color -> `<GradientStop Color="#2CFFFFFF" Offset="0"/>`
+- Line 29: Hardcoded hex color -> `<GradientStop Color="#10FFFFFF" Offset="0.12"/>`
+- Line 30: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.34"/>`
+- Line 31: Hardcoded hex color -> `<GradientStop Color="#24FFFFFF" Offset="0.42"/>`
+- Line 32: Hardcoded hex color -> `<GradientStop Color="#06FFFFFF" Offset="0.7"/>`
+- Line 33: Hardcoded hex color -> `<GradientStop Color="#36FFFFFF" Offset="1"/>`
+- Line 43: Hardcoded hex color -> `<GradientStop Color="#552B5B75" Offset="0"/>`
+- Line 44: Hardcoded hex color -> `<GradientStop Color="#15122F42" Offset="0.35"/>`
+- Line 45: Hardcoded hex color -> `<GradientStop Color="#4515324A" Offset="1"/>`
+- Line 49: Hardcoded hex color -> `<GradientStop Color="#55395A6E" Offset="0"/>`
+- Line 50: Hardcoded hex color -> `<GradientStop Color="#150E2838" Offset="0.35"/>`
+- Line 51: Hardcoded hex color -> `<GradientStop Color="#45122530" Offset="1"/>`
+- Line 55: Hardcoded hex color -> `<GradientStop Color="#30FFFFFF" Offset="0"/>`
+- Line 56: Hardcoded hex color -> `<GradientStop Color="#10FFFFFF" Offset="0.48"/>`
+- Line 57: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 61: Hardcoded hex color -> `<GradientStop Color="#001878A8" Offset="0"/>`
+- Line 62: Hardcoded hex color -> `<GradientStop Color="#0A1E6585" Offset="0.42"/>`
+- Line 63: Hardcoded hex color -> `<GradientStop Color="#25248596" Offset="1"/>`
+- Line 68: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#4080C0D8"/>`
+- Line 73: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="6" ShadowDepth="1.5" Opacity="0.25"/>`
+- Line 80: Hardcoded hex color -> `Foreground="#FFE7FBFF"`
+- Line 87: Hardcoded hex color -> `<Border Background="#20162B34"`
+- Line 88: Hardcoded hex color -> `BorderBrush="#55A8F0FF"`
+- Line 94: Hardcoded hex color -> `Foreground="#FFBDEBFF"`
+- Line 100: Hardcoded hex color -> `Foreground="#DDEDFBFF"`
+- Line 113: Hardcoded hex color -> `BorderBrush="#448AEFFF"`
+- Line 123: Hardcoded hex color -> `Background="#22000000"`
+- Line 124: Hardcoded hex color -> `BorderBrush="#448AEFFF"`
+- Line 133: Hardcoded hex color -> `Foreground="#FFF5FAFF"`
+- Line 143: Hardcoded hex color -> `<Border Background="#20162B34"`
+- Line 144: Hardcoded hex color -> `BorderBrush="#55A8F0FF"`
+- Line 150: Hardcoded hex color -> `Foreground="#FFBDEBFF"`
+- Line 156: Hardcoded hex color -> `Foreground="#FFEAFDFF"`
+- Line 165: Hardcoded hex color -> `<Border Background="#18191F32"`
+- Line 166: Hardcoded hex color -> `BorderBrush="#55B0A7FF"`
+- Line 171: Hardcoded hex color -> `Foreground="#DDEDFBFF"`
+- Line 181: Hardcoded hex color -> `BorderBrush="#5596FCFF"`
+- Line 195: Hardcoded hex color -> `Background="#1414232C"`
+- Line 196: Hardcoded hex color -> `BorderBrush="#4476D7EE"`
+- Line 200: Hardcoded hex color -> `Foreground="#FFD5F5FF"`
+- Line 206: Hardcoded hex color -> `Foreground="#DDEDFBFF"`
+- Line 228: Hardcoded hex color -> `Foreground="#FFBDEBFF"`
+- Line 234: Hardcoded hex color -> `Foreground="#80FFFFFF"`
+- Line 350: Hardcoded hex color -> `Background="#33111824"`
+- Line 351: Hardcoded hex color -> `BorderBrush="#5596FCFF"`
+- Line 381: Hardcoded hex color -> `Foreground="#80FFFFFF"`
+- Line 398: Hardcoded hex color -> `Background="#80C42E2E"`
+- Line 399: Hardcoded hex color -> `BorderBrush="#60FFFFFF"`
+- Line 410: Hardcoded hex color -> `<GradientStop Color="#70FFFFFF" Offset="0"/>`
+- Line 411: Hardcoded hex color -> `<GradientStop Color="#10FFFFFF" Offset="1"/>`
+- Line 421: Hardcoded hex color -> `<GradientStop Color="#B0FF9999" Offset="0"/>`
+- Line 422: Hardcoded hex color -> `<GradientStop Color="#00FF4444" Offset="1"/>`
+- Line 435: Hardcoded hex color -> `<DropShadowEffect Color="#80000000" BlurRadius="2" ShadowDepth="1"/>`
+- Line 455: Hardcoded hex color -> `<Setter TargetName="bg" Property="Background" Value="#FF9E1B1B"/>`
+- Line 466: Hardcoded hex color -> `Background="#E0050810"`
+- Line 467: Hardcoded hex color -> `BorderBrush="#20FFFFFF"`
+- Line 494: Hardcoded hex color -> `Foreground="#70FFFFFF"`
+- Line 513: Hardcoded hex color -> `<Border Grid.Column="1" Background="#20FFFFFF" Margin="0,16"/>`
+- Line 597: Hardcoded hex color -> `Foreground="#55FFFFFF"`
+
+## `./Skyweaver/Controls/ScheduledTasksControl/Views/ScheduledTasksControl.xaml`
+- Line 17: Hardcoded hex color -> `<Pen Thickness="2" LineJoin="Round" Brush="#FF2A7288"/>`
+- Line 22: Hardcoded hex color -> `<GradientStop Color="#FF306F83" Offset="0"/>`
+- Line 23: Hardcoded hex color -> `<GradientStop Color="#FF091023" Offset="0.992337"/>`
+- Line 40: Hardcoded hex color -> `<Pen Thickness="1" LineJoin="Round" Brush="#FF000000"/>`
+- Line 45: Hardcoded hex color -> `<GradientStop Color="#29FFFFFF" Offset="0"/>`
+- Line 46: Hardcoded hex color -> `<GradientStop Color="#00000004" Offset="0.380334"/>`
+- Line 47: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.41744"/>`
+- Line 48: Hardcoded hex color -> `<GradientStop Color="#5EFFFFFF" Offset="0.769944"/>`
+- Line 49: Hardcoded hex color -> `<GradientStop Color="#4AFFFFFF" Offset="0.892393"/>`
+- Line 66: Hardcoded hex color -> `<Pen Thickness="1" LineJoin="Round" Brush="#FFA0ABB9"/>`
+- Line 71: Hardcoded hex color -> `<GradientStop Color="#99C5CCDD" Offset="0.323124"/>`
+- Line 72: Hardcoded hex color -> `<GradientStop Color="#99A0AECA" Offset="0.356815"/>`
+- Line 73: Hardcoded hex color -> `<GradientStop Color="#7528536E" Offset="0.482389"/>`
+- Line 74: Hardcoded hex color -> `<GradientStop Color="#A401263F" Offset="0.494637"/>`
+- Line 75: Hardcoded hex color -> `<GradientStop Color="#A6286D89" Offset="0.620214"/>`
+- Line 89: Hardcoded hex color -> `<Setter Property="Background" Value="#35000000"/>`
+- Line 90: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#25FFFFFF"/>`
+- Line 104: Hardcoded hex color -> `<GradientStop Color="#50000000" Offset="0"/>`
+- Line 105: Hardcoded hex color -> `<GradientStop Color="#20000000" Offset="0.5"/>`
+- Line 106: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 115: Hardcoded hex color -> `<GradientStop Color="#30000000" Offset="0"/>`
+- Line 116: Hardcoded hex color -> `<GradientStop Color="#15000000" Offset="0.5"/>`
+- Line 117: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 126: Hardcoded hex color -> `<GradientStop Color="#30000000" Offset="0"/>`
+- Line 127: Hardcoded hex color -> `<GradientStop Color="#15000000" Offset="0.5"/>`
+- Line 128: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 137: Hardcoded hex color -> `<GradientStop Color="#25000000" Offset="0"/>`
+- Line 138: Hardcoded hex color -> `<GradientStop Color="#08000000" Offset="0.5"/>`
+- Line 139: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 169: Hardcoded hex color -> `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 170: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 175: Hardcoded hex color -> `<GradientStop Color="#374588BD" Offset="0"/>`
+- Line 176: Hardcoded hex color -> `<GradientStop Color="#081AD5FF" Offset="0.69"/>`
+- Line 177: Hardcoded hex color -> `<GradientStop Color="#1FFFFFFF" Offset="1"/>`
+- Line 186: Hardcoded hex color -> `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 187: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 192: Hardcoded hex color -> `<GradientStop Color="#A34588BD" Offset="0"/>`
+- Line 193: Hardcoded hex color -> `<GradientStop Color="#111AD5FF" Offset="0.69"/>`
+- Line 194: Hardcoded hex color -> `<GradientStop Color="#31FFFFFF" Offset="1"/>`
+- Line 256: Hardcoded hex color -> `<GradientStop Color="#50FFFFFF" Offset="0"/>`
+- Line 257: Hardcoded hex color -> `<GradientStop Color="#15FFFFFF" Offset="0.5"/>`
+- Line 258: Hardcoded hex color -> `<GradientStop Color="#30FFFFFF" Offset="1"/>`
+- Line 262: Hardcoded hex color -> `<Setter Property="Background" Value="#15000000"/>`
+- Line 263: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#25FFFFFF"/>`
+- Line 270: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFA2D6FF"/>`
+- Line 299: Hardcoded hex color -> `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 300: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 305: Hardcoded hex color -> `<GradientStop Color="#374588BD" Offset="0"/>`
+- Line 306: Hardcoded hex color -> `<GradientStop Color="#081AD5FF" Offset="0.69"/>`
+- Line 307: Hardcoded hex color -> `<GradientStop Color="#1FFFFFFF" Offset="1"/>`
+- Line 316: Hardcoded hex color -> `<GradientStop Color="#FF5984AD" Offset="0"/>`
+- Line 317: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="1"/>`
+- Line 322: Hardcoded hex color -> `<GradientStop Color="#A34588BD" Offset="0"/>`
+- Line 323: Hardcoded hex color -> `<GradientStop Color="#111AD5FF" Offset="0.69"/>`
+- Line 324: Hardcoded hex color -> `<GradientStop Color="#31FFFFFF" Offset="1"/>`
+- Line 411: Hardcoded hex color -> `<Border Grid.Row="0" BorderThickness="0,0,0,1" BorderBrush="#20FFFFFF" Padding="0,0,0,12" Margin="0,0,0,12">`
+- Line 449: Hardcoded hex color -> `<Separator Background="#20FFFFFF"/>`
+- Line 492: Hardcoded hex color -> `<TextBlock Grid.Column="0" Text="日" Foreground="#80FFFFFF" FontSize="11" HorizontalAlignment="Center"/>`
+- Line 493: Hardcoded hex color -> `<TextBlock Grid.Column="1" Text="一" Foreground="#80FFFFFF" FontSize="11" HorizontalAlignment="Center"/>`
+- Line 494: Hardcoded hex color -> `<TextBlock Grid.Column="2" Text="二" Foreground="#80FFFFFF" FontSize="11" HorizontalAlignment="Center"/>`
+- Line 495: Hardcoded hex color -> `<TextBlock Grid.Column="3" Text="三" Foreground="#80FFFFFF" FontSize="11" HorizontalAlignment="Center"/>`
+- Line 496: Hardcoded hex color -> `<TextBlock Grid.Column="4" Text="四" Foreground="#80FFFFFF" FontSize="11" HorizontalAlignment="Center"/>`
+- Line 497: Hardcoded hex color -> `<TextBlock Grid.Column="5" Text="五" Foreground="#80FFFFFF" FontSize="11" HorizontalAlignment="Center"/>`
+- Line 498: Hardcoded hex color -> `<TextBlock Grid.Column="6" Text="六" Foreground="#80FFFFFF" FontSize="11" HorizontalAlignment="Center"/>`
+- Line 534: Hardcoded hex color -> `<TextBlock Text="点击日历日期可以切换查看不同日期的激活任务详情。" FontSize="10" Foreground="#80FFFFFF"/>`
+- Line 540: Hardcoded hex color -> `<TextBlock Text="该日期没有被激活的计划任务。" Foreground="#60FFFFFF" FontSize="12" FontStyle="Italic" HorizontalAlignment="Center" VerticalAlignment="Center"`
+- Line 567: Hardcoded hex color -> `<TextBlock Text="{Binding SessionFlowName, StringFormat='关联会话流：{0}'}" Foreground="#B0FFFFFF" FontSize="11"/>`
+- Line 568: Hardcoded hex color -> `<TextBlock Text="{Binding Prompt, StringFormat='任务提示词：{0}'}" Foreground="#80FFFFFF" FontSize="11" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"/>`
+- Line 575: Hardcoded hex color -> `<TextBlock VerticalAlignment="Center" FontSize="11" Text="{Binding TriggersDisplayText, StringFormat='触发：{0}'}" Foreground="#FFA2D6FF"/>`
+- Line 579: Hardcoded hex color -> `<TextBlock VerticalAlignment="Center" FontSize="11" Text="{Binding PreAction.DisplayText, StringFormat='前置：{0}'}" Foreground="#FFA2D6FF"/>`
+- Line 583: Hardcoded hex color -> `<TextBlock VerticalAlignment="Center" FontSize="11" Text="{Binding PostAction.DisplayText, StringFormat='后置：{0}'}" Foreground="#FFA2D6FF"/>`
+
+## `./Skyweaver/Controls/EmbeddingModelConfigurationControl/Views/EmbeddingModelConfigurationControl.xaml`
+- Line 370: Hardcoded hex color -> `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 371: Hardcoded hex color -> `<GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>`
+- Line 372: Hardcoded hex color -> `<GradientStop Color="#07FFFFFF" Offset="0.109195"/>`
+- Line 373: Hardcoded hex color -> `<GradientStop Color="#04FFFFFF" Offset="0.298851"/>`
+- Line 374: Hardcoded hex color -> `<GradientStop Color="#3AFFFFFF" Offset="0.327586"/>`
+- Line 375: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0.465517"/>`
+- Line 376: Hardcoded hex color -> `<GradientStop Color="#14FFFFFF" Offset="0.591954"/>`
+- Line 377: Hardcoded hex color -> `<GradientStop Color="#05FFFFFF" Offset="0.758621"/>`
+- Line 378: Hardcoded hex color -> `<GradientStop Color="#44FFFFFF" Offset="1"/>`
+- Line 382: Hardcoded hex color -> `<SolidColorBrush Color="#40000000"/>`
+
+## `./Skyweaver/Controls/AgentConfigurationControl/Views/AgentConfigurationControl.xaml`
+- Line 165: Hardcoded hex color -> `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 166: Hardcoded hex color -> `<GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>`
+- Line 167: Hardcoded hex color -> `<GradientStop Color="#07FFFFFF" Offset="0.109195"/>`
+- Line 168: Hardcoded hex color -> `<GradientStop Color="#04FFFFFF" Offset="0.298851"/>`
+- Line 169: Hardcoded hex color -> `<GradientStop Color="#3AFFFFFF" Offset="0.327586"/>`
+- Line 170: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0.465517"/>`
+- Line 171: Hardcoded hex color -> `<GradientStop Color="#14FFFFFF" Offset="0.591954"/>`
+- Line 172: Hardcoded hex color -> `<GradientStop Color="#05FFFFFF" Offset="0.758621"/>`
+- Line 173: Hardcoded hex color -> `<GradientStop Color="#44FFFFFF" Offset="1"/>`
+- Line 177: Hardcoded hex color -> `<SolidColorBrush Color="#40000000"/>`
+- Line 204: Hardcoded hex color -> `Foreground="#D9FFFFFF"`
+- Line 368: Hardcoded hex color -> `Foreground="#FFD3F6FF"`
+- Line 386: Hardcoded hex color -> `Foreground="#D9FFFFFF"`
+- Line 527: Hardcoded hex color -> `Background="#33000000"`
+- Line 528: Hardcoded hex color -> `BorderBrush="#44FFFFFF"`
+- Line 537: Hardcoded hex color -> `Foreground="#D9FFFFFF"`
+- Line 542: Hardcoded hex color -> `Foreground="#FFD3F6FF"`
+- Line 687: Hardcoded hex color -> `Foreground="#D9FFFFFF"`
+- Line 727: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFD3F6FF"/>`
+- Line 730: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFFFB3B3"/>`
+- Line 753: Hardcoded hex color -> `Foreground="#D9FFFFFF"`
+- Line 760: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFD3F6FF"/>`
+- Line 763: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFFFB3B3"/>`
+
+## `./Skyweaver/Controls/AgentWizardControl/Views/AgentWizardControl.xaml`
+- Line 14: Hardcoded hex color -> `<GradientStop Color="#FF19222D" Offset="0"/>`
+- Line 15: Hardcoded hex color -> `<GradientStop Color="#FF10161E" Offset="1"/>`
+- Line 21: Hardcoded hex color -> `Background="#16000000"`
+- Line 22: Hardcoded hex color -> `BorderBrush="#335596FC"`
+- Line 29: Hardcoded hex color -> `Foreground="#FF96FCFF"/>`
+- Line 33: Hardcoded hex color -> `Foreground="#E6FFFFFF"`
+- Line 38: Hardcoded hex color -> `Foreground="#AAFFFFFF"`
+- Line 47: Hardcoded hex color -> `Foreground="#D9FFFFFF"`
+- Line 52: Hardcoded hex color -> `Foreground="#A6FFFFFF"`
+
+## `./Skyweaver/Controls/ChatSessionControl/Views/AerialCityToolInvocationCardView.xaml`
+- Line 16: Hardcoded hex color -> `<GradientStop Color="#D6C9CACA" Offset="0"/>`
+- Line 17: Hardcoded hex color -> `<GradientStop Color="#9B9EB4C2" Offset="0.44"/>`
+- Line 18: Hardcoded hex color -> `<GradientStop Color="#5A445E7C" Offset="1"/>`
+- Line 34: Hardcoded hex color -> `<GradientStop Color="#66FFFFFF" Offset="0"/>`
+- Line 35: Hardcoded hex color -> `<GradientStop Color="#24FFFFFF" Offset="0.26"/>`
+- Line 36: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.44"/>`
+- Line 44: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 45: Hardcoded hex color -> `<GradientStop Color="#2CFFFFFF" Offset="0.25"/>`
+- Line 46: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.52"/>`
+- Line 47: Hardcoded hex color -> `<GradientStop Color="#39FFFFFF" Offset="0.70"/>`
+- Line 48: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.72"/>`
+- Line 49: Hardcoded hex color -> `<GradientStop Color="#33FFFFFF" Offset="0.86"/>`
+- Line 50: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.99"/>`
+- Line 63: Hardcoded hex color -> `<GradientStop Color="#75007BFF" Offset="0"/>`
+- Line 64: Hardcoded hex color -> `<GradientStop Color="#1A93F2FF" Offset="0.48"/>`
+- Line 65: Hardcoded hex color -> `<GradientStop Color="#0093F2FF" Offset="1"/>`
+- Line 68: Hardcoded hex color -> `<SolidColorBrush x:Key="AerialCityToolBrightTextBrush" Color="#F4FBFF"/>`
+- Line 69: Hardcoded hex color -> `<SolidColorBrush x:Key="AerialCityToolSoftTextBrush" Color="#D9E5EB"/>`
+- Line 70: Hardcoded hex color -> `<SolidColorBrush x:Key="AerialCityToolMutedTextBrush" Color="#B8C5CD"/>`
+- Line 71: Hardcoded hex color -> `<SolidColorBrush x:Key="AerialCityToolPlaceholderTextBrush" Color="#CBD4DA"/>`
+- Line 72: Hardcoded hex color -> `<SolidColorBrush x:Key="AerialCityToolCoolGrayTextBrush" Color="#AAB8C2"/>`
+- Line 74: Hardcoded hex color -> `Color="#203746"`
+- Line 101: Hardcoded hex color -> `<Setter Property="Background" Value="#18FFFFFF"/>`
+- Line 102: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#6793F2FF"/>`
+- Line 108: Hardcoded hex color -> `BorderBrush="#6793F2FF"`
+- Line 427: Hardcoded hex color -> `Foreground="#B493F2FF"`
+- Line 428: Hardcoded hex color -> `Background="#24000000"`
+- Line 429: Hardcoded hex color -> `BorderBrush="#4493F2FF"`
+
+## `./Skyweaver/Controls/ChatSessionControl/Views/ToolInvocationCardView.xaml`
+- Line 12: Hardcoded hex color -> `<GradientStop Color="#72354954" Offset="0"/>`
+- Line 13: Hardcoded hex color -> `<GradientStop Color="#60324451" Offset="0.38"/>`
+- Line 14: Hardcoded hex color -> `<GradientStop Color="#4A20303C" Offset="1"/>`
+- Line 18: Hardcoded hex color -> `<GradientStop Color="#54FFFFFF" Offset="0"/>`
+- Line 19: Hardcoded hex color -> `<GradientStop Color="#18FFFFFF" Offset="0.45"/>`
+- Line 20: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 24: Hardcoded hex color -> `<GradientStop Color="#0019D2FF" Offset="0"/>`
+- Line 25: Hardcoded hex color -> `<GradientStop Color="#1223C8E7" Offset="0.42"/>`
+- Line 26: Hardcoded hex color -> `<GradientStop Color="#3838C4D8" Offset="1"/>`
+- Line 32: Hardcoded hex color -> `<GradientStop Color="#91007BFF" Offset="0.143"/>`
+- Line 33: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.503"/>`
+- Line 34: Hardcoded hex color -> `<GradientStop Color="#C30099FF" Offset="0.792"/>`
+- Line 41: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#660D1320"/>`
+- Line 52: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#55A9FFF7"/>`
+- Line 59: Hardcoded hex color -> `BorderBrush="#365F7E8E"`
+- Line 88: Hardcoded hex color -> `BorderBrush="#0036D9D1"`
+- Line 102: Hardcoded hex color -> `Foreground="#FFF5FAFF"`
+- Line 108: Hardcoded hex color -> `Foreground="#FFD6E8FF"`
+- Line 113: Hardcoded hex color -> `Foreground="#FFE2FFF8">`
+- Line 157: Hardcoded hex color -> `Foreground="#FFE7F3FF"`
+- Line 165: Hardcoded hex color -> `Foreground="#FFF7FBFF"`
+- Line 182: Hardcoded hex color -> `Foreground="#CCEAF7FF"`
+- Line 212: Hardcoded hex color -> `Foreground="#FFF5FAFF"/>`
+- Line 246: Hardcoded hex color -> `Foreground="#FFE7F3FF"`
+- Line 254: Hardcoded hex color -> `Foreground="#FFF7FBFF"`
+- Line 271: Hardcoded hex color -> `Foreground="#CCEAF7FF"`
+- Line 301: Hardcoded hex color -> `Foreground="#FFF5FAFF"/>`
+- Line 311: Hardcoded hex color -> `Background="#1A08131A"`
+- Line 312: Hardcoded hex color -> `BorderBrush="#4438C4D8"`
+- Line 337: Hardcoded hex color -> `Foreground="#FFD6E8FF">`
+- Line 353: Hardcoded hex color -> `Foreground="#FFEAFDFF"`
+- Line 362: Hardcoded hex color -> `Foreground="#FFE2FFF8"`
+- Line 405: Hardcoded hex color -> `Foreground="#FFF7FBFF"`
+- Line 417: Hardcoded hex color -> `Background="#1A08131A"`
+- Line 418: Hardcoded hex color -> `BorderBrush="#4438C4D8"`
+- Line 436: Hardcoded hex color -> `Foreground="#FFD6E8FF"/>`
+- Line 455: Hardcoded hex color -> `Foreground="#FFEAFDFF"`
+
+## `./Skyweaver/Controls/ChatSessionControl/Views/PlanItemCheckInvocationCardView.xaml`
+- Line 17: Hardcoded hex color -> `BorderBrush="#6793F2FF"`
+- Line 56: Hardcoded hex color -> `<Border Background="#22FFFFFF" BorderBrush="#33FFFFFF" BorderThickness="1" CornerRadius="9"/>`
+- Line 59: Hardcoded hex color -> `Stroke="#FF7BF1A8"`
+- Line 72: Hardcoded hex color -> `Foreground="#FFAAD7FF"`
+- Line 78: Hardcoded hex color -> `Foreground="#FFF6FEFF"`
+
+## `./Skyweaver/Controls/ChatSessionControl/Views/ChatSessionControl.xaml`
+- Line 47: Hardcoded hex color -> `<Pen Thickness="0.32" LineJoin="Round" Brush="#FF000000"/>`
+- Line 69: Hardcoded hex color -> `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 71: Hardcoded hex color -> `<GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>`
+- Line 73: Hardcoded hex color -> `<GradientStop Color="#07FFFFFF" Offset="0.109195"/>`
+- Line 75: Hardcoded hex color -> `<GradientStop Color="#04FFFFFF" Offset="0.298851"/>`
+- Line 77: Hardcoded hex color -> `<GradientStop Color="#3AFFFFFF" Offset="0.327586"/>`
+- Line 79: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0.465517"/>`
+- Line 81: Hardcoded hex color -> `<GradientStop Color="#14FFFFFF" Offset="0.591954"/>`
+- Line 83: Hardcoded hex color -> `<GradientStop Color="#05FFFFFF" Offset="0.758621"/>`
+- Line 85: Hardcoded hex color -> `<GradientStop Color="#44FFFFFF" Offset="1"/>`
+- Line 115: Hardcoded hex color -> `<GradientStop Color="#26FFFFFF" Offset="0"/>`
+- Line 117: Hardcoded hex color -> `<GradientStop Color="#00000004" Offset="0.38"/>`
+- Line 119: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.417"/>`
+- Line 121: Hardcoded hex color -> `<GradientStop Color="#56D4FFF9" Offset="0.77"/>`
+- Line 123: Hardcoded hex color -> `<GradientStop Color="#4A8CF1E4" Offset="0.892"/>`
+- Line 135: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 137: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0.135436"/>`
+- Line 139: Hardcoded hex color -> `<GradientStop Color="#14FFFFFF" Offset="0.487941"/>`
+- Line 141: Hardcoded hex color -> `<GradientStop Color="#00000004" Offset="0.517625"/>`
+- Line 143: Hardcoded hex color -> `<GradientStop Color="#FF2AAE9A" Offset="0.729128"/>`
+- Line 175: Hardcoded hex color -> `<GradientStop Color="#FF76F1E4" Offset="0"/>`
+- Line 177: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="0.662338"/>`
+- Line 203: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 205: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0.135436"/>`
+- Line 207: Hardcoded hex color -> `<GradientStop Color="#14FFFFFF" Offset="0.487941"/>`
+- Line 209: Hardcoded hex color -> `<GradientStop Color="#00000004" Offset="0.517625"/>`
+- Line 211: Hardcoded hex color -> `<GradientStop Color="#FF29E1C8" Offset="0.717996"/>`
+- Line 237: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFF4FFFD"/>`
+- Line 241: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#FF000000"/>`
+- Line 305: Hardcoded hex color -> `<Setter Property="BorderBrush" TargetName="border" Value="#552FFFF2"/>`
+- Line 317: Hardcoded hex color -> `<Setter Property="BorderBrush" TargetName="border" Value="#6634FFF0"/>`
+- Line 383: Hardcoded hex color -> `<Setter Property="Foreground" Value="#99FFFFFF"/>`
+- Line 413: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFF5FEFF"/>`
+- Line 431: Hardcoded hex color -> `<Setter Property="Foreground" Value="#B9E8FAFF"/>`
+- Line 451: Hardcoded hex color -> `<Setter Property="Background" Value="#55283A4D"/>`
+- Line 453: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#8896FCFF"/>`
+- Line 471: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFF4FEFF"/>`
+- Line 705: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#332EC5C0"/>`
+- Line 719: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#44F3C96B"/>`
+- Line 729: Hardcoded hex color -> `<Setter Property="Foreground" Value="#CCFFFFFF"/>`
+- Line 743: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFF3E4AE"/>`
+- Line 771: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="2" Opacity="0.6"/>`
+- Line 777: Hardcoded hex color -> `<SolidColorBrush Color="#01000000"/>`
+- Line 791: Hardcoded hex color -> `<GradientStop Color="#F0102030" Offset="0"/>`
+- Line 793: Hardcoded hex color -> `<GradientStop Color="#F0183050" Offset="0.3"/>`
+- Line 795: Hardcoded hex color -> `<GradientStop Color="#F0102840" Offset="0.7"/>`
+- Line 797: Hardcoded hex color -> `<GradientStop Color="#F0081828" Offset="1"/>`
+- Line 813: Hardcoded hex color -> `<GradientStop Color="#25FFFFFF" Offset="0"/>`
+- Line 815: Hardcoded hex color -> `<GradientStop Color="#10FFFFFF" Offset="0.5"/>`
+- Line 817: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 833: Hardcoded hex color -> `<GradientStop Color="#3040A0E0" Offset="0"/>`
+- Line 835: Hardcoded hex color -> `<GradientStop Color="#0040A0E0" Offset="1"/>`
+- Line 851: Hardcoded hex color -> `<GradientStop Color="#60FFFFFF" Offset="0"/>`
+- Line 853: Hardcoded hex color -> `<GradientStop Color="#30FFFFFF" Offset="0.3"/>`
+- Line 855: Hardcoded hex color -> `<GradientStop Color="#20FFFFFF" Offset="0.7"/>`
+- Line 857: Hardcoded hex color -> `<GradientStop Color="#4080C0E0" Offset="1"/>`
+- Line 925: Hardcoded hex color -> `<GradientStop Color="#B36693B0" Offset="0"/>`
+- Line 927: Hardcoded hex color -> `<GradientStop Color="#A63A6F8C" Offset="0.34"/>`
+- Line 929: Hardcoded hex color -> `<GradientStop Color="#C1234966" Offset="1"/>`
+- Line 937: Hardcoded hex color -> `<GradientStop Color="#B06A94AF" Offset="0"/>`
+- Line 939: Hardcoded hex color -> `<GradientStop Color="#A040718F" Offset="0.34"/>`
+- Line 941: Hardcoded hex color -> `<GradientStop Color="#BC203E58" Offset="1"/>`
+- Line 949: Hardcoded hex color -> `<GradientStop Color="#66FFFFFF" Offset="0"/>`
+- Line 951: Hardcoded hex color -> `<GradientStop Color="#22FFFFFF" Offset="0.48"/>`
+- Line 953: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 961: Hardcoded hex color -> `<GradientStop Color="#0028B4FF" Offset="0"/>`
+- Line 963: Hardcoded hex color -> `<GradientStop Color="#143BBBE8" Offset="0.42"/>`
+- Line 965: Hardcoded hex color -> `<GradientStop Color="#4D43D8F3" Offset="1"/>`
+- Line 975: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#6687CAE3"/>`
+- Line 1013: Hardcoded hex color -> `<GradientStop x:Name="gradientStop1" Color="#91007BFF" Offset="0.143"/>`
+- Line 1015: Hardcoded hex color -> `<GradientStop x:Name="gradientStop2" Color="#00FFFFFF" Offset="0.503"/>`
+- Line 1017: Hardcoded hex color -> `<GradientStop x:Name="gradientStop3" Color="#C30099FF" Offset="0.792"/>`
+- Line 1059: Hardcoded hex color -> `To="#AF00C7FF"`
+- Line 1069: Hardcoded hex color -> `To="#00FFFFFF"`
+- Line 1079: Hardcoded hex color -> `To="#FF00ECFF"`
+- Line 1131: Hardcoded hex color -> `To="#91007BFF"`
+- Line 1141: Hardcoded hex color -> `To="#00FFFFFF"`
+- Line 1151: Hardcoded hex color -> `To="#C30099FF"`
+- Line 1217: Hardcoded hex color -> `<Setter Property="Background" Value="#99000000"/>`
+- Line 1219: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#66FFFFFF"/>`
+- Line 1291: Hardcoded hex color -> `Foreground="#FFBDEBFF"`
+- Line 1321: Hardcoded hex color -> `<Border Background="#24000000"`
+- Line 1323: Hardcoded hex color -> `BorderBrush="#4496FCFF"`
+- Line 1337: Hardcoded hex color -> `Foreground="#FFBDEBFF"`
+- Line 1347: Hardcoded hex color -> `Background="#22000000"`
+- Line 1349: Hardcoded hex color -> `BorderBrush="#3388D7E8"`
+- Line 1359: Hardcoded hex color -> `<TextBlock Text="{Binding Language}" Foreground="#FF9CDCFE" FontSize="11"/>`
+- Line 1367: Hardcoded hex color -> `Foreground="#FF9CDCFE"`
+- Line 1385: Hardcoded hex color -> `<Border Background="#241C7488"`
+- Line 1387: Hardcoded hex color -> `BorderBrush="#5584E7F4"`
+- Line 1399: Hardcoded hex color -> `Foreground="#FFBDEBFF"`
+- Line 1411: Hardcoded hex color -> `Foreground="#FFE7FBFF"`
+- Line 1427: Hardcoded hex color -> `<Border Background="#15000000"`
+- Line 1429: Hardcoded hex color -> `BorderBrush="#5596FCFF"`
+- Line 1441: Hardcoded hex color -> `Foreground="#FFBDEBFF"`
+- Line 1453: Hardcoded hex color -> `Foreground="#CCFFFFFF"`
+- Line 1503: Hardcoded hex color -> `Foreground="#FFFFF2CF"`
+- Line 1537: Hardcoded hex color -> `Foreground="#CCFFFFFF"`
+- Line 1553: Hardcoded hex color -> `<Border Background="#20162B34"`
+- Line 1555: Hardcoded hex color -> `BorderBrush="#55A8F0FF"`
+- Line 1569: Hardcoded hex color -> `Foreground="#FFBDEBFF"`
+- Line 1579: Hardcoded hex color -> `Background="#22000000"`
+- Line 1581: Hardcoded hex color -> `BorderBrush="#3388D7E8"`
+- Line 1589: Hardcoded hex color -> `<TextBlock Text="{Binding BadgeText}" Foreground="#FF9CDCFE" FontSize="11"/>`
+- Line 1623: Hardcoded hex color -> `Foreground="#FFEAFDFF"`
+- Line 1679: Hardcoded hex color -> `<Border Background="#18191F32"`
+- Line 1681: Hardcoded hex color -> `BorderBrush="#55B0A7FF"`
+- Line 1695: Hardcoded hex color -> `Foreground="#FFBDEBFF"`
+- Line 1705: Hardcoded hex color -> `Background="#22000000"`
+- Line 1707: Hardcoded hex color -> `BorderBrush="#33B0A7FF"`
+- Line 1715: Hardcoded hex color -> `<TextBlock Text="{Binding BadgeText}" Foreground="#FFB0A7FF" FontSize="11"/>`
+- Line 1735: Hardcoded hex color -> `Foreground="#B8FFFFFF"`
+- Line 1779: Hardcoded hex color -> `BorderBrush="#5596FCFF"`
+- Line 1819: Hardcoded hex color -> `<GradientStop Color="#C5C9CACA" Offset="0"/>`
+- Line 1821: Hardcoded hex color -> `<GradientStop Color="#34445E7C" Offset="0.988506"/>`
+- Line 1851: Hardcoded hex color -> `<GradientStop Color="#66FFFFFF" Offset="0"/>`
+- Line 1853: Hardcoded hex color -> `<GradientStop Color="#24FFFFFF" Offset="0.247126"/>`
+- Line 1855: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.421456"/>`
+- Line 1883: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 1885: Hardcoded hex color -> `<GradientStop Color="#2CFFFFFF" Offset="0.254789"/>`
+- Line 1887: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.513412"/>`
+- Line 1889: Hardcoded hex color -> `<GradientStop Color="#39FFFFFF" Offset="0.701149"/>`
+- Line 1891: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.720307"/>`
+- Line 1893: Hardcoded hex color -> `<GradientStop Color="#33FFFFFF" Offset="0.856322"/>`
+- Line 1895: Hardcoded hex color -> `<GradientStop Color="#03FFFFFF" Offset="0.89272"/>`
+- Line 1897: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.988506"/>`
+- Line 1915: Hardcoded hex color -> `BorderBrush="#6793F2FF"`
+- Line 1989: Hardcoded hex color -> `Background="#EEFAFDFF"`
+- Line 1991: Hardcoded hex color -> `BorderBrush="#AA182433"`
+- Line 2001: Hardcoded hex color -> `Fill="#FFC8E7F0"`
+- Line 2013: Hardcoded hex color -> `Foreground="#FF152635"`
+- Line 2035: Hardcoded hex color -> `Foreground="#FFF6FEFF"`
+- Line 2073: Hardcoded hex color -> `Foreground="#FFF6FEFF"`
+- Line 2091: Hardcoded hex color -> `Foreground="#DCEAF9FF"`
+- Line 2127: Hardcoded hex color -> `Foreground="#FFF8FEFF"`
+- Line 2139: Hardcoded hex color -> `Foreground="#B8FFFFFF"`
+- Line 2207: Hardcoded hex color -> `Foreground="#B8FFFFFF"`
+- Line 2251: Hardcoded hex color -> `Background="#1414232C"`
+- Line 2253: Hardcoded hex color -> `BorderBrush="#4476D7EE"`
+- Line 2285: Hardcoded hex color -> `Foreground="#FFD5F5FF"`
+- Line 2297: Hardcoded hex color -> `Foreground="#99FFFFFF"`
+- Line 2309: Hardcoded hex color -> `Foreground="#DDEDFBFF"`
+- Line 2321: Hardcoded hex color -> `<Border Background="#1414232C"`
+- Line 2323: Hardcoded hex color -> `BorderBrush="#4476D7EE"`
+- Line 2357: Hardcoded hex color -> `Foreground="#FFD5F5FF"`
+- Line 2369: Hardcoded hex color -> `Foreground="#99FFFFFF"`
+- Line 2377: Hardcoded hex color -> `Foreground="#DDEDFBFF"`
+- Line 2427: Hardcoded hex color -> `Foreground="#FFBDEBFF"`
+- Line 2439: Hardcoded hex color -> `Foreground="#99FFFFFF"`
+- Line 2665: Hardcoded hex color -> `Background="#33111824"`
+- Line 2667: Hardcoded hex color -> `BorderBrush="#5596FCFF"`
+- Line 2693: Hardcoded hex color -> `<GradientStop Color="#40FFFFFF" Offset="0"/>`
+- Line 2695: Hardcoded hex color -> `<GradientStop Color="#10FFFFFF" Offset="0.45"/>`
+- Line 2697: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.45"/>`
+- Line 2699: Hardcoded hex color -> `<GradientStop Color="#05FFFFFF" Offset="1"/>`
+- Line 2709: Hardcoded hex color -> `<GradientStop Color="#CB4C87AF" Offset="0.295559"/>`
+- Line 2711: Hardcoded hex color -> `<GradientStop Color="#CD162D41" Offset="0.607963"/>`
+- Line 2713: Hardcoded hex color -> `<GradientStop Color="#CD3A576E" Offset="0.638591"/>`
+- Line 2715: Hardcoded hex color -> `<GradientStop Color="#CD6E869C" Offset="0.911179"/>`
+- Line 2727: Hardcoded hex color -> `<SolidColorBrush x:Key="ToolButtonHoverBorderBrush" Color="#67BBDDF2"/>`
+- Line 2735: Hardcoded hex color -> `<GradientStop Color="#CC2C577F" Offset="0.295559"/>`
+- Line 2737: Hardcoded hex color -> `<GradientStop Color="#CC061D31" Offset="0.607963"/>`
+- Line 2739: Hardcoded hex color -> `<GradientStop Color="#CC1A374E" Offset="0.638591"/>`
+- Line 2741: Hardcoded hex color -> `<GradientStop Color="#CC4E667C" Offset="0.911179"/>`
+- Line 2753: Hardcoded hex color -> `<SolidColorBrush x:Key="ToolButtonPressedBorderBrush" Color="#99001020"/>`
+- Line 2885: Hardcoded hex color -> `Foreground="#FF96FCFF"`
+- Line 2939: Hardcoded hex color -> `<TextBlock Text="{DynamicResource ChatSessionControl.ContextWindowUsage}" Foreground="#FF96FCFF" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6"/>`
+- Line 2955: Hardcoded hex color -> `Foreground="#44F3C96B"`
+- Line 2993: Hardcoded hex color -> `<Border Background="#18000000"`
+- Line 2995: Hardcoded hex color -> `BorderBrush="#3396FCFF"`
+- Line 3079: Hardcoded hex color -> `Foreground="#AAFFFFFF"`
+- Line 3099: Hardcoded hex color -> `BorderBrush="#3396FCFF"`
+- Line 3139: Hardcoded hex color -> `Foreground="#99FFFFFF"`
+- Line 3171: Hardcoded hex color -> `BorderBrush="#5596FCFF"`
+- Line 3205: Hardcoded hex color -> `Foreground="#FF96FCFF"/>`
+- Line 3217: Hardcoded hex color -> `Foreground="#E6FFFFFF"/>`
+- Line 3255: Hardcoded hex color -> `<Border Grid.Row="2" Background="{StaticResource MediaBarGlassBrush}" BorderBrush="#80FFFFFF" BorderThickness="1" Margin="0,0,0,8" CornerRadius="3" Padding="8,2">`
+- Line 3289: Hardcoded hex color -> `<Rectangle Width="1" Height="24" Fill="#33FFFFFF" Margin="5,0"/>`
+- Line 3325: Hardcoded hex color -> `<Rectangle Width="1" Height="24" Fill="#33FFFFFF" Margin="5,0"/>`
+- Line 3379: Hardcoded hex color -> `Background="#14000000"`
+- Line 3383: Hardcoded hex color -> `BorderBrush="#5596FCFF"`
+
+## `./Skyweaver/Controls/ChatSessionControl/Views/WebSearchToolInvocationCardView.xaml`
+- Line 20: Hardcoded hex color -> `<GradientStop Color="#D6C5C9CA" Offset="0"/>`
+- Line 21: Hardcoded hex color -> `<GradientStop Color="#8A9CAEBE" Offset="0.45"/>`
+- Line 22: Hardcoded hex color -> `<GradientStop Color="#5434445E" Offset="1"/>`
+- Line 39: Hardcoded hex color -> `<GradientStop Color="#7DFFFFFF" Offset="0"/>`
+- Line 40: Hardcoded hex color -> `<GradientStop Color="#29FFFFFF" Offset="0.247"/>`
+- Line 41: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.421"/>`
+- Line 50: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 51: Hardcoded hex color -> `<GradientStop Color="#3EFFFFFF" Offset="0.255"/>`
+- Line 52: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.513"/>`
+- Line 53: Hardcoded hex color -> `<GradientStop Color="#67FFFFFF" Offset="0.701"/>`
+- Line 54: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.72"/>`
+- Line 55: Hardcoded hex color -> `<GradientStop Color="#62FFFFFF" Offset="0.856"/>`
+- Line 56: Hardcoded hex color -> `<GradientStop Color="#03FFFFFF" Offset="0.893"/>`
+- Line 57: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.989"/>`
+- Line 71: Hardcoded hex color -> `<GradientStop Color="#75007BFF" Offset="0"/>`
+- Line 72: Hardcoded hex color -> `<GradientStop Color="#1A93F2FF" Offset="0.48"/>`
+- Line 73: Hardcoded hex color -> `<GradientStop Color="#0093F2FF" Offset="1"/>`
+- Line 76: Hardcoded hex color -> `<SolidColorBrush x:Key="WebSearchToolBrightTextBrush" Color="#F4FBFF"/>`
+- Line 77: Hardcoded hex color -> `<SolidColorBrush x:Key="WebSearchToolSoftTextBrush" Color="#D9E5EB"/>`
+- Line 78: Hardcoded hex color -> `<SolidColorBrush x:Key="WebSearchToolMutedTextBrush" Color="#B8C5CD"/>`
+- Line 79: Hardcoded hex color -> `<SolidColorBrush x:Key="WebSearchToolPlaceholderTextBrush" Color="#CBD4DA"/>`
+- Line 80: Hardcoded hex color -> `<SolidColorBrush x:Key="WebSearchToolCoolGrayTextBrush" Color="#AAB8C2"/>`
+- Line 82: Hardcoded hex color -> `Color="#1A2D3C"`
+- Line 109: Hardcoded hex color -> `<Setter Property="Background" Value="#18FFFFFF"/>`
+- Line 110: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#6793F2FF"/>`
+- Line 116: Hardcoded hex color -> `BorderBrush="#6793F2FF"`
+- Line 439: Hardcoded hex color -> `Foreground="#B493F2FF"`
+- Line 440: Hardcoded hex color -> `Background="#24000000"`
+- Line 441: Hardcoded hex color -> `BorderBrush="#4493F2FF"`
+
+## `./Skyweaver/Controls/ChatSessionControl/Views/WebBrowseToolInvocationCardView.xaml`
+- Line 20: Hardcoded hex color -> `<GradientStop Color="#D6C5C9CA" Offset="0"/>`
+- Line 21: Hardcoded hex color -> `<GradientStop Color="#8A9CAEBE" Offset="0.45"/>`
+- Line 22: Hardcoded hex color -> `<GradientStop Color="#5434445E" Offset="1"/>`
+- Line 39: Hardcoded hex color -> `<GradientStop Color="#7DFFFFFF" Offset="0"/>`
+- Line 40: Hardcoded hex color -> `<GradientStop Color="#29FFFFFF" Offset="0.247"/>`
+- Line 41: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.421"/>`
+- Line 50: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 51: Hardcoded hex color -> `<GradientStop Color="#3EFFFFFF" Offset="0.255"/>`
+- Line 52: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.513"/>`
+- Line 53: Hardcoded hex color -> `<GradientStop Color="#67FFFFFF" Offset="0.701"/>`
+- Line 54: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.72"/>`
+- Line 55: Hardcoded hex color -> `<GradientStop Color="#62FFFFFF" Offset="0.856"/>`
+- Line 56: Hardcoded hex color -> `<GradientStop Color="#03FFFFFF" Offset="0.893"/>`
+- Line 57: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.989"/>`
+- Line 71: Hardcoded hex color -> `<GradientStop Color="#75007BFF" Offset="0"/>`
+- Line 72: Hardcoded hex color -> `<GradientStop Color="#1A93F2FF" Offset="0.48"/>`
+- Line 73: Hardcoded hex color -> `<GradientStop Color="#0093F2FF" Offset="1"/>`
+- Line 76: Hardcoded hex color -> `<SolidColorBrush x:Key="WebBrowseToolBrightTextBrush" Color="#F4FBFF"/>`
+- Line 77: Hardcoded hex color -> `<SolidColorBrush x:Key="WebBrowseToolSoftTextBrush" Color="#D9E5EB"/>`
+- Line 78: Hardcoded hex color -> `<SolidColorBrush x:Key="WebBrowseToolMutedTextBrush" Color="#B8C5CD"/>`
+- Line 79: Hardcoded hex color -> `<SolidColorBrush x:Key="WebBrowseToolPlaceholderTextBrush" Color="#CBD4DA"/>`
+- Line 80: Hardcoded hex color -> `<SolidColorBrush x:Key="WebBrowseToolCoolGrayTextBrush" Color="#AAB8C2"/>`
+- Line 82: Hardcoded hex color -> `Color="#1A2D3C"`
+- Line 109: Hardcoded hex color -> `<Setter Property="Background" Value="#18FFFFFF"/>`
+- Line 110: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#6793F2FF"/>`
+- Line 116: Hardcoded hex color -> `BorderBrush="#6793F2FF"`
+- Line 439: Hardcoded hex color -> `Foreground="#B493F2FF"`
+- Line 440: Hardcoded hex color -> `Background="#24000000"`
+- Line 441: Hardcoded hex color -> `BorderBrush="#4493F2FF"`
+
+## `./Skyweaver/Controls/NodeEditorControl/Views/NodeEditorControl.xaml`
+- Line 15: Hardcoded hex color -> `Background="#1F3449">`
+- Line 38: Hardcoded hex color -> `<SolidColorBrush Color="#1F3449"/>`
+- Line 46: Hardcoded hex color -> `<SolidColorBrush Color="#010303"/>`
+
+## `./Skyweaver/Controls/FileManagerControl/Views/FileManagerControl.xaml`
+- Line 14: Hardcoded hex color -> `<GradientStop Color="#FF19222D" Offset="0"/>`
+- Line 15: Hardcoded hex color -> `<GradientStop Color="#FF10161E" Offset="1"/>`
+- Line 21: Hardcoded hex color -> `Background="#16000000"`
+- Line 22: Hardcoded hex color -> `BorderBrush="#335596FC"`
+- Line 29: Hardcoded hex color -> `Foreground="#FF96FCFF"/>`
+- Line 33: Hardcoded hex color -> `Foreground="#E6FFFFFF"`
+- Line 38: Hardcoded hex color -> `Foreground="#AAFFFFFF"`
+- Line 47: Hardcoded hex color -> `Foreground="#D9FFFFFF"`
+- Line 52: Hardcoded hex color -> `Foreground="#A6FFFFFF"`
+
+## `./Skyweaver/Controls/PersonaSettingsControl/Views/PersonaSettingsControl.xaml`
+- Line 43: Hardcoded hex color -> `<Setter TargetName="ArrowPath" Property="Stroke" Value="#D0F0FF"/>`
+- Line 46: Hardcoded hex color -> `<DropShadowEffect Color="#A0E0FF" BlurRadius="10" ShadowDepth="0" Opacity="0.8"/>`
+- Line 51: Hardcoded hex color -> `<Setter TargetName="ArrowPath" Property="Stroke" Value="#A0E0FF"/>`
+- Line 54: Hardcoded hex color -> `<DropShadowEffect Color="#50A0FF" BlurRadius="6" ShadowDepth="0" Opacity="0.9"/>`
+- Line 105: Hardcoded hex color -> `<Setter TargetName="ArrowPath" Property="Stroke" Value="#D0F0FF"/>`
+- Line 108: Hardcoded hex color -> `<DropShadowEffect Color="#A0E0FF" BlurRadius="10" ShadowDepth="0" Opacity="0.8"/>`
+- Line 139: Hardcoded hex color -> `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 146: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.4"/>`
+- Line 152: Hardcoded hex color -> `<Setter Property="Foreground" Value="#B8EAF8FF"/>`
+- Line 160: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.35"/>`
+- Line 173: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="8" ShadowDepth="2" Opacity="0.6"/>`
+- Line 179: Hardcoded hex color -> `<Setter Property="Foreground" Value="#D0F0FF"/>`
+- Line 189: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="4" ShadowDepth="1.5" Opacity="0.5"/>`
+- Line 223: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="0"/>`
+- Line 224: Hardcoded hex color -> `<GradientStop Color="#90000000" Offset="1"/>`
+- Line 233: Hardcoded hex color -> `<GradientStop x:Name="GlowColorStop" Color="#FF808080" Offset="0"/>`
+- Line 234: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 243: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 244: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 253: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 254: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="0.32"/>`
+- Line 255: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.35"/>`
+- Line 256: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.58"/>`
+- Line 257: Hardcoded hex color -> `<GradientStop Color="#50FFFFFF" Offset="0.78"/>`
+- Line 258: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.9"/>`
+- Line 267: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0"/>`
+- Line 268: Hardcoded hex color -> `<GradientStop Color="#AFFFFFFF" Offset="0.45"/>`
+- Line 269: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.5"/>`
+- Line 270: Hardcoded hex color -> `<GradientStop Color="#20000000" Offset="0.505"/>`
+- Line 271: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="0.75"/>`
+- Line 280: Hardcoded hex color -> `<GradientStop Color="#40FFFFFF" Offset="0"/>`
+- Line 281: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.25"/>`
+- Line 282: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="0.75"/>`
+- Line 283: Hardcoded hex color -> `<GradientStop Color="#50000000" Offset="1"/>`
+- Line 325: Hardcoded hex color -> `<Ellipse Fill="#50000000">`
+- Line 339: Hardcoded hex color -> `<GradientStop Color="#B0FFFFFF" Offset="0"/>`
+- Line 340: Hardcoded hex color -> `<GradientStop Color="#15FFFFFF" Offset="0.5"/>`
+- Line 341: Hardcoded hex color -> `<GradientStop Color="#60FFFFFF" Offset="1"/>`
+- Line 350: Hardcoded hex color -> `<GradientStop Color="#25000000" Offset="0"/>`
+- Line 351: Hardcoded hex color -> `<GradientStop Color="#85000000" Offset="1"/>`
+- Line 360: Hardcoded hex color -> `<GradientStop Color="#E5FFFFFF" Offset="0"/>`
+- Line 361: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="0.85"/>`
+- Line 370: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 371: Hardcoded hex color -> `<GradientStop Color="#00FFFFFF" Offset="1"/>`
+- Line 433: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="25" ShadowDepth="6" Opacity="0.4"/>`
+- Line 441: Hardcoded hex color -> `<DropShadowEffect Color="#000000" BlurRadius="4" ShadowDepth="1" Opacity="0.5"/>`
+- Line 549: Hardcoded hex color -> `Foreground="#D0F0FF"`
+
+## `./Skyweaver/Controls/LanguageModelConfigurationControl/Views/LanguageModelConfigurationControl.xaml`
+- Line 463: Hardcoded hex color -> `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 464: Hardcoded hex color -> `<GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>`
+- Line 465: Hardcoded hex color -> `<GradientStop Color="#07FFFFFF" Offset="0.109195"/>`
+- Line 466: Hardcoded hex color -> `<GradientStop Color="#04FFFFFF" Offset="0.298851"/>`
+- Line 467: Hardcoded hex color -> `<GradientStop Color="#3AFFFFFF" Offset="0.327586"/>`
+- Line 468: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0.465517"/>`
+- Line 469: Hardcoded hex color -> `<GradientStop Color="#14FFFFFF" Offset="0.591954"/>`
+- Line 470: Hardcoded hex color -> `<GradientStop Color="#05FFFFFF" Offset="0.758621"/>`
+- Line 471: Hardcoded hex color -> `<GradientStop Color="#44FFFFFF" Offset="1"/>`
+- Line 475: Hardcoded hex color -> `<SolidColorBrush Color="#40000000"/>`
+- Line 592: Hardcoded hex color -> `Background="#22000000"`
+- Line 593: Hardcoded hex color -> `BorderBrush="#4496FCFF"`
+
+## `./Skyweaver/Controls/TextEditorControl/Views/TextEditorControl.xaml`
+- Line 18: Hardcoded hex color -> `<GradientStop Color="#FF263A50" Offset="0"/>`
+- Line 19: Hardcoded hex color -> `<GradientStop Color="#FF172537" Offset="0.46"/>`
+- Line 20: Hardcoded hex color -> `<GradientStop Color="#FF0B1524" Offset="0.51"/>`
+- Line 21: Hardcoded hex color -> `<GradientStop Color="#FF1F3854" Offset="1"/>`
+- Line 27: Hardcoded hex color -> `<GradientStop Color="#FF122033" Offset="0"/>`
+- Line 28: Hardcoded hex color -> `<GradientStop Color="#FF09101B" Offset="1"/>`
+- Line 34: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 35: Hardcoded hex color -> `<GradientStop Color="#FFF8FCFF" Offset="0.54"/>`
+- Line 36: Hardcoded hex color -> `<GradientStop Color="#FFEAF4FA" Offset="1"/>`
+- Line 42: Hardcoded hex color -> `<GradientStop Color="#E7355876" Offset="0"/>`
+- Line 43: Hardcoded hex color -> `<GradientStop Color="#D2182B42" Offset="0.52"/>`
+- Line 44: Hardcoded hex color -> `<GradientStop Color="#E50B1524" Offset="1"/>`
+- Line 48: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFF6FBFF"/>`
+- Line 55: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFDFF3FF"/>`
+- Line 75: Hardcoded hex color -> `<Setter Property="CaretBrush" Value="#FF1F2D36"/>`
+- Line 112: Hardcoded hex color -> `Foreground="#E9F8FFFF"`
+- Line 119: Hardcoded hex color -> `Foreground="#BDE7F8FF"`
+- Line 130: Hardcoded hex color -> `BorderBrush="#8DB6D9EE"`
+- Line 190: Hardcoded hex color -> `Background="#55D5F3FF"/>`
+- Line 209: Hardcoded hex color -> `Background="#55D5F3FF"`
+- Line 254: Hardcoded hex color -> `BorderBrush="#4A9BC9E9"`
+- Line 321: Hardcoded hex color -> `Foreground="#FFE8F8FF"`
+- Line 326: Hardcoded hex color -> `Background="#707DA9C2"/>`
+- Line 357: Hardcoded hex color -> `Foreground="#FFE8F8FF"`
+- Line 381: Hardcoded hex color -> `Background="#45000000"`
+- Line 382: Hardcoded hex color -> `BorderBrush="#406F98B7"`
+- Line 392: Hardcoded hex color -> `Background="#DDF4FAFF"`
+- Line 393: Hardcoded hex color -> `BorderBrush="#FFC5D8E7"`
+- Line 398: Hardcoded hex color -> `Foreground="#FF17344A"`
+- Line 404: Hardcoded hex color -> `Foreground="#FF4A6578"`
+- Line 419: Hardcoded hex color -> `Background="#EEF0F5F8"`
+- Line 420: Hardcoded hex color -> `BorderBrush="#FFC5D8E7"`
+- Line 430: Hardcoded hex color -> `Background="#EEF0F5F8"`
+- Line 431: Hardcoded hex color -> `Foreground="#FF7790A0"`
+- Line 451: Hardcoded hex color -> `Foreground="#FF1F2D36"`
+- Line 457: Hardcoded hex color -> `SelectionBrush="#804B9DCC"`
+- Line 466: Hardcoded hex color -> `Background="#45000000"`
+- Line 467: Hardcoded hex color -> `BorderBrush="#406F98B7"`
+- Line 477: Hardcoded hex color -> `Background="#DDF4FAFF"`
+- Line 478: Hardcoded hex color -> `BorderBrush="#FFC5D8E7"`
+- Line 483: Hardcoded hex color -> `Foreground="#FF17344A"`
+- Line 489: Hardcoded hex color -> `Foreground="#FF4A6578"`
+- Line 505: Hardcoded hex color -> `Foreground="#FF1F2D36"`
+- Line 511: Hardcoded hex color -> `SelectionBrush="#804B9DCC"/>`
+- Line 552: Hardcoded hex color -> `Foreground="#A8E6F7FF"`
+- Line 570: Hardcoded hex color -> `BorderBrush="#4589BEE0"`
+- Line 653: Hardcoded hex color -> `Background="#30102030"`
+- Line 654: Hardcoded hex color -> `BorderBrush="#305D91B4"`
+- Line 669: Hardcoded hex color -> `Foreground="#D9F4FCFF"`
+- Line 679: Hardcoded hex color -> `BorderBrush="#4A9BC9E9"`
+- Line 691: Hardcoded hex color -> `Foreground="#E9F8FFFF"`
+- Line 700: Hardcoded hex color -> `Foreground="#C8E8F6FF"`
+- Line 704: Hardcoded hex color -> `Foreground="#C8E8F6FF"`
+
+## `./Skyweaver/Controls/LateralFileSystemTreeControl/Views/LateralFileSystemTreeControl.xaml`
+- Line 22: Hardcoded hex color -> `<Pen LineJoin="Round" Brush="#6793F2FF"/>`
+- Line 33: Hardcoded hex color -> `<GradientStop Color="#55FFFFFF" Offset="0"/>`
+- Line 34: Hardcoded hex color -> `<GradientStop Color="#053D3D3D" Offset="0.35249"/>`
+- Line 35: Hardcoded hex color -> `<GradientStop Color="#04666666" Offset="0.670498"/>`
+- Line 36: Hardcoded hex color -> `<GradientStop Color="#51FFFFFF" Offset="0.988506"/>`
+- Line 52: Hardcoded hex color -> `<Pen LineJoin="Round" Brush="#6793F2FF"/>`
+- Line 63: Hardcoded hex color -> `<GradientStop Color="#55FFFFFF" Offset="0"/>`
+- Line 64: Hardcoded hex color -> `<GradientStop Color="#053D3D3D" Offset="0.35249"/>`
+- Line 65: Hardcoded hex color -> `<GradientStop Color="#04666666" Offset="0.670498"/>`
+- Line 66: Hardcoded hex color -> `<GradientStop Color="#51FFFFFF" Offset="0.988506"/>`
+- Line 82: Hardcoded hex color -> `<Pen LineJoin="Round" Brush="#FFFFFFFF"/>`
+- Line 93: Hardcoded hex color -> `<GradientStop Color="#55FFFFFF" Offset="0"/>`
+- Line 94: Hardcoded hex color -> `<GradientStop Color="#053D3D3D" Offset="0.35249"/>`
+- Line 95: Hardcoded hex color -> `<GradientStop Color="#04666666" Offset="0.670498"/>`
+- Line 96: Hardcoded hex color -> `<GradientStop Color="#51FFFFFF" Offset="0.988506"/>`
+- Line 112: Hardcoded hex color -> `<Pen Thickness="0.32" LineJoin="Round" Brush="#FF000000"/>`
+- Line 123: Hardcoded hex color -> `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 124: Hardcoded hex color -> `<GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>`
+- Line 125: Hardcoded hex color -> `<GradientStop Color="#07FFFFFF" Offset="0.109195"/>`
+- Line 126: Hardcoded hex color -> `<GradientStop Color="#04FFFFFF" Offset="0.298851"/>`
+- Line 127: Hardcoded hex color -> `<GradientStop Color="#3AFFFFFF" Offset="0.327586"/>`
+- Line 128: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0.465517"/>`
+- Line 129: Hardcoded hex color -> `<GradientStop Color="#14FFFFFF" Offset="0.591954"/>`
+- Line 130: Hardcoded hex color -> `<GradientStop Color="#05FFFFFF" Offset="0.758621"/>`
+- Line 131: Hardcoded hex color -> `<GradientStop Color="#44FFFFFF" Offset="1"/>`
+- Line 207: Hardcoded hex color -> `Background="#10000000">`
+- Line 224: Hardcoded hex color -> `Stroke="#A000F3FF"`
+- Line 227: Hardcoded hex color -> `<DropShadowEffect Color="#FF0099FF"`
+- Line 294: Hardcoded hex color -> `<DropShadowEffect Color="#FF00F3FF"`
+- Line 322: Hardcoded hex color -> `Foreground="#E0FFFFFF"/>`
+- Line 328: Hardcoded hex color -> `Foreground="#B0FFFFFF"`
+- Line 404: Hardcoded hex color -> `BorderBrush="#30FFFFFF"`
+- Line 406: Hardcoded hex color -> `Background="#16000000">`
+- Line 416: Hardcoded hex color -> `Foreground="#E0FFFFFF"/>`
+- Line 420: Hardcoded hex color -> `Foreground="#A8FFFFFF"`
+- Line 496: Hardcoded hex color -> `BorderBrush="#33FFFFFF"`
+- Line 498: Hardcoded hex color -> `Background="#16000000">`
+- Line 503: Hardcoded hex color -> `Foreground="#F0FFFFFF"/>`
+- Line 507: Hardcoded hex color -> `Foreground="#C8FFFFFF"`
+- Line 517: Hardcoded hex color -> `Foreground="#70FFFFFF"`
+- Line 548: Hardcoded hex color -> `BorderBrush="#33FFFFFF"`
+- Line 550: Hardcoded hex color -> `Background="#18000000">`
+- Line 554: Hardcoded hex color -> `Foreground="#D8FFFFFF"/>`
+- Line 563: Hardcoded hex color -> `Foreground="#B8FFFFFF"`
+- Line 571: Hardcoded hex color -> `BorderBrush="#33FFFFFF"`
+- Line 573: Hardcoded hex color -> `Background="#18000000">`
+- Line 583: Hardcoded hex color -> `Foreground="#D8FFFFFF"/>`
+- Line 587: Hardcoded hex color -> `Foreground="#D8FFFFFF"/>`
+- Line 591: Hardcoded hex color -> `Foreground="#D8FFFFFF"/>`
+- Line 595: Hardcoded hex color -> `Foreground="#A8FFFFFF"`
+- Line 600: Hardcoded hex color -> `Foreground="#A8FFFFFF"`
+- Line 609: Hardcoded hex color -> `Foreground="#A8FFFFFF"`
+- Line 637: Hardcoded hex color -> `Foreground="#A8FFFFFF"`
+- Line 671: Hardcoded hex color -> `Foreground="#A8FFFFFF"`
+
+## `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/SkyweaverPreferencesControl.xaml`
+- Line 25: Hardcoded hex color -> `<Rectangle Fill="#16001024"`
+- Line 99: Hardcoded hex color -> `<Border Background="#15000000"`
+- Line 100: Hardcoded hex color -> `BorderBrush="#30FFFFFF"`
+- Line 104: Hardcoded hex color -> `Foreground="#50FFFFFF"`
+
+## `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/DirectoryLocationsPreferencesPageView.xaml`
+- Line 18: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 32: Hardcoded hex color -> `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 39: Hardcoded hex color -> `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 176: Hardcoded hex color -> `Background="#30FFFFFF"/>`
+- Line 232: Hardcoded hex color -> `Background="#30FFFFFF"/>`
+
+## `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/ChatSessionPreferencesPageView.xaml`
+- Line 18: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 32: Hardcoded hex color -> `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 39: Hardcoded hex color -> `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 85: Hardcoded hex color -> `Background="#30FFFFFF"/>`
+- Line 130: Hardcoded hex color -> `Background="#30FFFFFF"/>`
+
+## `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/LateralFileSystemPreferencesPageView.xaml`
+- Line 18: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 32: Hardcoded hex color -> `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 39: Hardcoded hex color -> `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 97: Hardcoded hex color -> `Background="#30FFFFFF"/>`
+- Line 153: Hardcoded hex color -> `Background="#30FFFFFF"/>`
+
+## `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/ShellIntegrationPreferencesPageView.xaml`
+- Line 18: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 32: Hardcoded hex color -> `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 39: Hardcoded hex color -> `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 95: Hardcoded hex color -> `Foreground="#FFF4FAFF"`
+- Line 99: Hardcoded hex color -> `Foreground="#90DBEEFF"`
+- Line 121: Hardcoded hex color -> `Background="#30FFFFFF"/>`
+- Line 177: Hardcoded hex color -> `Background="#30FFFFFF"/>`
+
+## `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/MemoryPreferencesPageView.xaml`
+- Line 18: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 32: Hardcoded hex color -> `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 39: Hardcoded hex color -> `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 134: Hardcoded hex color -> `Background="#30FFFFFF"/>`
+- Line 180: Hardcoded hex color -> `Background="#30FFFFFF"/>`
+
+## `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/ImagePreferencesPageView.xaml`
+- Line 18: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 32: Hardcoded hex color -> `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 39: Hardcoded hex color -> `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 60: Hardcoded hex color -> `Background="#30FFFFFF"/>`
+- Line 96: Hardcoded hex color -> `Background="#30FFFFFF"/>`
+
+## `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/OpenSourceLicensesPreferencesPageView.xaml`
+- Line 18: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: Hardcoded hex color -> `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 32: Hardcoded hex color -> `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 70: Hardcoded hex color -> `Background="#1823384D"`
+- Line 71: Hardcoded hex color -> `BorderBrush="#45BBDDF2"`
+- Line 89: Hardcoded hex color -> `Background="#263F6E88"`
+- Line 90: Hardcoded hex color -> `BorderBrush="#557FD8FF"`
+
+## `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/SemanticSearchPreferencesPageView.xaml`
+- Line 18: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 32: Hardcoded hex color -> `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 39: Hardcoded hex color -> `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 134: Hardcoded hex color -> `Background="#30FFFFFF"/>`
+
+## `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/ContextArrangementPreferencesPageView.xaml`
+- Line 18: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 32: Hardcoded hex color -> `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 39: Hardcoded hex color -> `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 92: Hardcoded hex color -> `Background="#30FFFFFF"/>`
+- Line 137: Hardcoded hex color -> `Background="#30FFFFFF"/>`
+
+## `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/LocalizationPreferencesPageView.xaml`
+- Line 18: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 32: Hardcoded hex color -> `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 39: Hardcoded hex color -> `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 86: Hardcoded hex color -> `Background="#30FFFFFF"/>`
+- Line 131: Hardcoded hex color -> `Background="#30FFFFFF"/>`
+
+## `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/ContextCompressionPreferencesPageView.xaml`
+- Line 18: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 25: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 32: Hardcoded hex color -> `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 39: Hardcoded hex color -> `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 177: Hardcoded hex color -> `Background="#30FFFFFF"/>`
+- Line 222: Hardcoded hex color -> `Background="#30FFFFFF"/>`
+
+## `./Skyweaver/Controls/SkyweaverPreferencesControl/Views/Pages/SearchPreferencesPageView.xaml`
+- Line 20: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FF61D1F0"/>`
+- Line 27: Hardcoded hex color -> `<Setter Property="Foreground" Value="#FFF4FAFF"/>`
+- Line 34: Hardcoded hex color -> `<Setter Property="Foreground" Value="#B9DBEEFF"/>`
+- Line 41: Hardcoded hex color -> `<Setter Property="Foreground" Value="#EAF8FFFF"/>`
+- Line 82: Hardcoded hex color -> `<Border Height="1" Background="#20FFFFFF" Margin="0,0,0,12"/>`
+- Line 151: Hardcoded hex color -> `<Border Height="1" Background="#20FFFFFF" Margin="0,0,0,12"/>`
+- Line 228: Hardcoded hex color -> `<Border Height="1" Background="#20FFFFFF" Margin="0,0,0,12"/>`
+- Line 306: Hardcoded hex color -> `Background="#30FFFFFF"/>`
+
+## `./Skyweaver/Controls/WorkflowEditorControl/Views/WorkflowEditorControl.xaml`
+- Line 21: Hardcoded hex color -> `<GradientStop Color="#FF101A25" Offset="0"/>`
+- Line 22: Hardcoded hex color -> `<GradientStop Color="#FF0B1119" Offset="0.52"/>`
+- Line 23: Hardcoded hex color -> `<GradientStop Color="#FF081017" Offset="1"/>`
+- Line 34: Hardcoded hex color -> `<Pen Brush="#162B4760" Thickness="1"/>`
+- Line 54: Hardcoded hex color -> `<Pen Brush="#2F4A6C88" Thickness="1"/>`
+- Line 71: Hardcoded hex color -> `<GradientStop Color="#2E80B8E3" Offset="0"/>`
+- Line 72: Hardcoded hex color -> `<GradientStop Color="#10294764" Offset="0.4"/>`
+- Line 73: Hardcoded hex color -> `<GradientStop Color="#00000000" Offset="1"/>`
+- Line 79: Hardcoded hex color -> `<GradientStop Color="#F3162738" Offset="0"/>`
+- Line 80: Hardcoded hex color -> `<GradientStop Color="#ED0D1825" Offset="0.56"/>`
+- Line 81: Hardcoded hex color -> `<GradientStop Color="#F3071018" Offset="1"/>`
+- Line 87: Hardcoded hex color -> `<GradientStop Color="#F0738CA4" Offset="0"/>`
+- Line 88: Hardcoded hex color -> `<GradientStop Color="#D52E4E6E" Offset="0.62"/>`
+- Line 89: Hardcoded hex color -> `<GradientStop Color="#DD162A40" Offset="1"/>`
+- Line 95: Hardcoded hex color -> `<GradientStop Color="#FF132030" Offset="0"/>`
+- Line 96: Hardcoded hex color -> `<GradientStop Color="#FF0C141E" Offset="1"/>`
+- Line 102: Hardcoded hex color -> `<GradientStop Color="#F21A2B3E" Offset="0"/>`
+- Line 103: Hardcoded hex color -> `<GradientStop Color="#F10D1722" Offset="1"/>`
+- Line 109: Hardcoded hex color -> `<GradientStop Color="#E36A8AA9" Offset="0"/>`
+- Line 110: Hardcoded hex color -> `<GradientStop Color="#C52F4F6E" Offset="0.66"/>`
+- Line 111: Hardcoded hex color -> `<GradientStop Color="#C41B3044" Offset="1"/>`
+- Line 114: Hardcoded hex color -> `<SolidColorBrush x:Key="WorkflowNodeTextBrush" Color="#FFF5FBFF"/>`
+- Line 115: Hardcoded hex color -> `<SolidColorBrush x:Key="WorkflowNodeMutedTextBrush" Color="#D8E8F4FF"/>`
+- Line 116: Hardcoded hex color -> `<SolidColorBrush x:Key="WorkflowNodeFooterTextBrush" Color="#CCE5F5FF"/>`
+- Line 117: Hardcoded hex color -> `<SolidColorBrush x:Key="WorkflowNodeDividerBrush" Color="#35516A82"/>`
+- Line 118: Hardcoded hex color -> `<SolidColorBrush x:Key="WorkflowPortGuideBrush" Color="#45698299"/>`
+- Line 124: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#839EB9CD"/>`
+- Line 132: Hardcoded hex color -> `Color="#CC000000"/>`
+- Line 137: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#86A8C4D9"/>`
+- Line 140: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#8AB7CDE0"/>`
+- Line 143: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#8CB6CDB0"/>`
+- Line 146: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#8CB0C8D9"/>`
+- Line 149: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#90B8C9B3"/>`
+- Line 152: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#FFE6F6FF"/>`
+- Line 158: Hardcoded hex color -> `Color="#B04E82A8"/>`
+- Line 168: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#00FFFFFF"/>`
+- Line 173: Hardcoded hex color -> `<Setter Property="Background" Value="#0E6AA9D3"/>`
+- Line 174: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#BFE7FBFF"/>`
+- Line 182: Hardcoded hex color -> `<Setter Property="Background" Value="#FF8FB6D3"/>`
+- Line 185: Hardcoded hex color -> `<Setter Property="Background" Value="#FFA8CAE1"/>`
+- Line 188: Hardcoded hex color -> `<Setter Property="Background" Value="#FF9CC5E2"/>`
+- Line 191: Hardcoded hex color -> `<Setter Property="Background" Value="#FFB0CDA3"/>`
+- Line 194: Hardcoded hex color -> `<Setter Property="Background" Value="#FFA5CBE4"/>`
+- Line 197: Hardcoded hex color -> `<Setter Property="Background" Value="#FFB7D1A8"/>`
+- Line 200: Hardcoded hex color -> `<Setter Property="Background" Value="#FFF4FCFF"/>`
+- Line 208: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#8BB8D4EA"/>`
+- Line 209: Hardcoded hex color -> `<Setter Property="Background" Value="#26364C62"/>`
+- Line 212: Hardcoded hex color -> `<Setter Property="Background" Value="#28435A72"/>`
+- Line 213: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#A2CDE8FF"/>`
+- Line 216: Hardcoded hex color -> `<Setter Property="Background" Value="#253A5268"/>`
+- Line 217: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#92C2E2F9"/>`
+- Line 220: Hardcoded hex color -> `<Setter Property="Background" Value="#27424937"/>`
+- Line 221: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#9AC7D7A0"/>`
+- Line 224: Hardcoded hex color -> `<Setter Property="Background" Value="#283F566B"/>`
+- Line 225: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#98C5E0F3"/>`
+- Line 228: Hardcoded hex color -> `<Setter Property="Background" Value="#29444B38"/>`
+- Line 229: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#A4C8DCA7"/>`
+- Line 235: Hardcoded hex color -> `<Setter Property="Background" Value="#1F08131D"/>`
+- Line 236: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#324E677D"/>`
+- Line 244: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#FFDDF4FF"/>`
+- Line 249: Hardcoded hex color -> `<GradientStop Color="#FFF7FCFF" Offset="0"/>`
+- Line 250: Hardcoded hex color -> `<GradientStop Color="#FF8CC4E8" Offset="0.45"/>`
+- Line 251: Hardcoded hex color -> `<GradientStop Color="#FF35648C" Offset="1"/>`
+- Line 257: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#FFF1DFBF"/>`
+- Line 261: Hardcoded hex color -> `<GradientStop Color="#FFFFFBF2" Offset="0"/>`
+- Line 262: Hardcoded hex color -> `<GradientStop Color="#FFF2C67F" Offset="0.45"/>`
+- Line 263: Hardcoded hex color -> `<GradientStop Color="#FFB06F28" Offset="1"/>`
+- Line 269: Hardcoded hex color -> `<Setter Property="BorderBrush" Value="#FFE2F8EC"/>`
+- Line 273: Hardcoded hex color -> `<GradientStop Color="#FFF8FFFC" Offset="0"/>`
+- Line 274: Hardcoded hex color -> `<GradientStop Color="#FFB9E1CF" Offset="0.45"/>`
+- Line 275: Hardcoded hex color -> `<GradientStop Color="#FF4E886D" Offset="1"/>`
+- Line 287: Hardcoded hex color -> `<Setter Property="Fill" Value="#FFFFFFFF"/>`
+- Line 288: Hardcoded hex color -> `<Setter Property="Stroke" Value="#CC6BA9D3"/>`
+- Line 301: Hardcoded hex color -> `<Setter Property="Fill" Value="#FFFFFFFF"/>`
+- Line 302: Hardcoded hex color -> `<Setter Property="Stroke" Value="#CCB77F37"/>`
+- Line 315: Hardcoded hex color -> `<Setter Property="Fill" Value="#EAF7FFFC"/>`
+- Line 316: Hardcoded hex color -> `<Setter Property="Stroke" Value="#CC5F8E76"/>`
+- Line 327: Hardcoded hex color -> `<Setter Property="Stroke" Value="#66000000"/>`
+- Line 336: Hardcoded hex color -> `<Setter Property="Stroke" Value="#FF8FB8D5"/>`
+- Line 344: Hardcoded hex color -> `<Setter Property="Stroke" Value="#FFD5AE6C"/>`
+- Line 350: Hardcoded hex color -> `<Setter Property="Stroke" Value="#DFF8FDFF"/>`
+- Line 358: Hardcoded hex color -> `<Setter Property="Stroke" Value="#FFF7E3BF"/>`
+- Line 366: Hardcoded hex color -> `<Setter Property="Fill" Value="#FF8FB8D5"/>`
+- Line 367: Hardcoded hex color -> `<Setter Property="Stroke" Value="#FFF5FCFF"/>`
+- Line 371: Hardcoded hex color -> `<Setter Property="Fill" Value="#FFD5AE6C"/>`
+- Line 372: Hardcoded hex color -> `<Setter Property="Stroke" Value="#FFFFF7EA"/>`
+- Line 467: Hardcoded hex color -> `BorderBrush="#33000000"`
+- Line 482: Hardcoded hex color -> `BorderBrush="#2AFFFFFF"`
+- Line 484: Flat corners (CornerRadius="0") -> `CornerRadius="0"`
+- Line 485: Hardcoded hex color -> `Background="#16000000">`
+- Line 493: Hardcoded hex color -> `Foreground="#D7EDFF"`
+- Line 497: Hardcoded hex color -> `Foreground="#A7D8F0"`
+- Line 501: Hardcoded hex color -> `Foreground="#DDF6FFFF"`
+- Line 506: Hardcoded hex color -> `Foreground="#A9D9F1"`
+- Line 523: Hardcoded hex color -> `Foreground="#CCF2FFFF"`
+- Line 526: Hardcoded hex color -> `Foreground="#DDF6FFFF"`
+- Line 532: Hardcoded hex color -> `Foreground="#A9D9F1"`
+- Line 551: Hardcoded hex color -> `Foreground="#FFF2FCFF"/>`
+- Line 576: Hardcoded hex color -> `Foreground="#FFF7F7DE"/>`
+- Line 585: Hardcoded hex color -> `Foreground="#FFF7F7DE"/>`
+- Line 594: Hardcoded hex color -> `Foreground="#FFF7F7DE"/>`
+- Line 603: Hardcoded hex color -> `Foreground="#FFF7F7DE"/>`
+- Line 613: Hardcoded hex color -> `Foreground="#FFE9FDFF"/>`
+- Line 622: Hardcoded hex color -> `Foreground="#FFE9FDEB"/>`
+- Line 707: Hardcoded hex color -> `Background="#18000000"`
+- Line 708: Hardcoded hex color -> `BorderBrush="#33000000"`
+- Line 720: Hardcoded hex color -> `Foreground="#88FFFFFF"/>`
+- Line 722: Hardcoded hex color -> `Foreground="#D7F3FF"/>`
+- Line 727: Hardcoded hex color -> `Foreground="#FFE9FFD0"/>`
+- Line 733: Hardcoded hex color -> `BorderBrush="#5B89AAC1"`
+- Line 735: Hardcoded hex color -> `Background="#18000000">`
+- Line 834: Hardcoded hex color -> `BorderBrush="#2E4A6178"`
+- Line 841: Hardcoded hex color -> `Background="#A0FFFFFF"/>`
+- Line 984: Hardcoded hex color -> `BorderBrush="#2E4A6178"`
+- Line 1005: Hardcoded hex color -> `BorderBrush="#739AB8CD"`
+- Line 1011: Hardcoded hex color -> `Background="#55FFFFFF"`
+- Line 1022: Hardcoded hex color -> `BorderBrush="#324A6378"`
+- Line 1042: Hardcoded hex color -> `Foreground="#D8EFFBFF"/>`
+- Line 1053: Hardcoded hex color -> `Foreground="#D8EFFBFF"/>`
+- Line 1065: Hardcoded hex color -> `Stroke="#FFF2FCFF"`
+- Line 1071: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 1072: Hardcoded hex color -> `<GradientStop Color="#FF7EE3FF" Offset="0.36"/>`
+- Line 1073: Hardcoded hex color -> `<GradientStop Color="#FF22BFE9" Offset="1"/>`
+- Line 1089: Hardcoded hex color -> `Stroke="#FFFFF3D8"`
+- Line 1096: Hardcoded hex color -> `<GradientStop Color="#FFFFFFFF" Offset="0"/>`
+- Line 1097: Hardcoded hex color -> `<GradientStop Color="#FFF3D28D" Offset="0.34"/>`
+- Line 1098: Hardcoded hex color -> `<GradientStop Color="#FFBE8731" Offset="1"/>`
+- Line 1112: Hardcoded hex color -> `Foreground="#B3E5F6FF"`
+- Line 1130: Hardcoded hex color -> `BorderBrush="#5B89AAC1"`
+- Line 1147: Hardcoded hex color -> `Foreground="#D7EDFF"`
+- Line 1200: Hardcoded hex color -> `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 1201: Hardcoded hex color -> `<GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>`
+- Line 1202: Hardcoded hex color -> `<GradientStop Color="#07FFFFFF" Offset="0.109195"/>`
+- Line 1203: Hardcoded hex color -> `<GradientStop Color="#04FFFFFF" Offset="0.298851"/>`
+- Line 1204: Hardcoded hex color -> `<GradientStop Color="#3AFFFFFF" Offset="0.327586"/>`
+- Line 1205: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0.465517"/>`
+- Line 1206: Hardcoded hex color -> `<GradientStop Color="#14FFFFFF" Offset="0.591954"/>`
+- Line 1207: Hardcoded hex color -> `<GradientStop Color="#05FFFFFF" Offset="0.758621"/>`
+- Line 1208: Hardcoded hex color -> `<GradientStop Color="#44FFFFFF" Offset="1"/>`
+- Line 1212: Hardcoded hex color -> `<SolidColorBrush Color="#40000000"/>`
+- Line 1233: Hardcoded hex color -> `Background="#12000000"`
+- Line 1234: Hardcoded hex color -> `BorderBrush="#40FFFFFF"`
+- Line 1254: Hardcoded hex color -> `Background="#33000000"`
+- Line 1255: Hardcoded hex color -> `BorderBrush="#55FFFFFF"`
+- Line 1260: Hardcoded hex color -> `Foreground="#FFF3FCFF"`
+- Line 1266: Hardcoded hex color -> `Foreground="#D9FFFFFF"`
+- Line 1270: Hardcoded hex color -> `Foreground="#B5DDEFFF"`
+- Line 1304: Hardcoded hex color -> `<TextBlock Foreground="#D9FFFFFF"`
+- Line 1308: Hardcoded hex color -> `Foreground="#D9FFFFFF"`
+- Line 1312: Hardcoded hex color -> `Foreground="#FFD3F6FF"`
+- Line 1316: Hardcoded hex color -> `Foreground="#FFD3F6FF"`
+
+## `./Skyweaver/Controls/ToolConfigurationControl/Views/ToolConfigurationControl.xaml`
+- Line 84: Hardcoded hex color -> `Background="#15000000"`
+- Line 85: Hardcoded hex color -> `BorderBrush="#40FFFFFF"`
+- Line 170: Hardcoded hex color -> `Foreground="#FFD3F6FF"`
+- Line 215: Hardcoded hex color -> `Foreground="#99FFFFFF"`
+- Line 251: Hardcoded hex color -> `Foreground="#FFD3F6FF"/>`
+- Line 277: Hardcoded hex color -> `Foreground="#FFD3F6FF"`
+- Line 287: Hardcoded hex color -> `Foreground="#99FFFFFF"`
+- Line 314: Hardcoded hex color -> `Foreground="#99FFFFFF"`
+- Line 382: Hardcoded hex color -> `<GradientStop Color="#3BFFFFFF" Offset="0"/>`
+- Line 383: Hardcoded hex color -> `<GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>`
+- Line 384: Hardcoded hex color -> `<GradientStop Color="#07FFFFFF" Offset="0.109195"/>`
+- Line 385: Hardcoded hex color -> `<GradientStop Color="#04FFFFFF" Offset="0.298851"/>`
+- Line 386: Hardcoded hex color -> `<GradientStop Color="#3AFFFFFF" Offset="0.327586"/>`
+- Line 387: Hardcoded hex color -> `<GradientStop Color="#1AFFFFFF" Offset="0.465517"/>`
+- Line 388: Hardcoded hex color -> `<GradientStop Color="#14FFFFFF" Offset="0.591954"/>`
+- Line 389: Hardcoded hex color -> `<GradientStop Color="#05FFFFFF" Offset="0.758621"/>`
+- Line 390: Hardcoded hex color -> `<GradientStop Color="#44FFFFFF" Offset="1"/>`
+- Line 394: Hardcoded hex color -> `<SolidColorBrush Color="#40000000"/>`
+- Line 414: Hardcoded hex color -> `Background="#12000000"`
+- Line 415: Hardcoded hex color -> `BorderBrush="#40FFFFFF"`
+- Line 433: Hardcoded hex color -> `Foreground="#D9FFFFFF"`
+- Line 521: Hardcoded hex color -> `Foreground="#FFD3F6FF"`
