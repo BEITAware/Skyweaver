@@ -62,6 +62,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Views
             _draggingOffset = new Point(currentPosition.X - node.X, currentPosition.Y - node.Y);
 
             element.CaptureMouse();
+            PlayMousePressAnimation(element, true);
             e.Handled = true;
         }
 
@@ -79,6 +80,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Views
                 if (sender is UIElement releasedElement)
                 {
                     releasedElement.ReleaseMouseCapture();
+                    PlayMousePressAnimation(releasedElement as FrameworkElement, false);
                 }
 
                 return;
@@ -103,6 +105,7 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Views
             if (sender is UIElement element)
             {
                 element.ReleaseMouseCapture();
+                PlayMousePressAnimation(element as FrameworkElement, false);
             }
 
             e.Handled = true;
@@ -154,6 +157,79 @@ namespace Skyweaver.Controls.WorkflowEditorControl.Views
 
             ViewModel.OpenSelectedNodeGraphCommand.Execute(null);
             e.Handled = true;
+        }
+
+        private void PlayMousePressAnimation(FrameworkElement? element, bool isPressed)
+        {
+            if (element == null) return;
+
+            if (element.RenderTransformOrigin != new Point(0.5, 0.5))
+            {
+                element.RenderTransformOrigin = new Point(0.5, 0.5);
+            }
+
+            ScaleTransform? scaleTransform = element.RenderTransform as ScaleTransform;
+            if (scaleTransform == null && element.RenderTransform is TransformGroup group)
+            {
+                foreach (var child in group.Children)
+                {
+                    if (child is ScaleTransform st)
+                    {
+                        scaleTransform = st;
+                        break;
+                    }
+                }
+            }
+
+            if (scaleTransform == null)
+            {
+                scaleTransform = new ScaleTransform(1.0, 1.0);
+                if (element.RenderTransform is TransformGroup tg)
+                {
+                    tg.Children.Add(scaleTransform);
+                }
+                else
+                {
+                    element.RenderTransform = scaleTransform;
+                }
+            }
+
+            var storyboard = new System.Windows.Media.Animation.Storyboard();
+            double toValue = isPressed ? 0.95 : 1.0;
+
+            var scaleXAnimation = new System.Windows.Media.Animation.DoubleAnimation
+            {
+                To = toValue,
+                Duration = TimeSpan.FromMilliseconds(isPressed ? 100 : 200)
+            };
+
+            if (!isPressed)
+            {
+                scaleXAnimation.EasingFunction = new System.Windows.Media.Animation.ElasticEase
+                {
+                    EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut,
+                    Oscillations = 1,
+                    Springiness = 2
+                };
+            }
+            else
+            {
+                scaleXAnimation.EasingFunction = new System.Windows.Media.Animation.QuadraticEase
+                {
+                    EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
+                };
+            }
+
+            System.Windows.Media.Animation.Storyboard.SetTarget(scaleXAnimation, element);
+            System.Windows.Media.Animation.Storyboard.SetTargetProperty(scaleXAnimation, new PropertyPath("RenderTransform.ScaleX"));
+            storyboard.Children.Add(scaleXAnimation);
+
+            var scaleYAnimation = scaleXAnimation.Clone();
+            System.Windows.Media.Animation.Storyboard.SetTarget(scaleYAnimation, element);
+            System.Windows.Media.Animation.Storyboard.SetTargetProperty(scaleYAnimation, new PropertyPath("RenderTransform.ScaleY"));
+            storyboard.Children.Add(scaleYAnimation);
+
+            storyboard.Begin();
         }
 
         private static SessionFlowNodeModel? FindNodeDataContext(DependencyObject? current)

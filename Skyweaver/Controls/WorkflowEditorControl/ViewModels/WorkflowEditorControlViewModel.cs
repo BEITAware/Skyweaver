@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -1197,48 +1197,20 @@ namespace Skyweaver.Controls.WorkflowEditorControl.ViewModels
 
         private static string CreateConnectionPathData(Point sourcePoint, Point targetPoint)
         {
-            const double lead = 28;
-            const double forwardThreshold = 96;
-            const double detourOffset = 72;
+            var deltaX = Math.Abs(targetPoint.X - sourcePoint.X);
+            var controlOffset = Math.Max(80, deltaX * 0.4);
 
-            var points = new List<Point>(8);
-            AppendConnectionPoint(points, sourcePoint);
-            AppendConnectionPoint(points, new Point(sourcePoint.X + lead, sourcePoint.Y));
+            var cx1 = sourcePoint.X + controlOffset;
+            var cy1 = sourcePoint.Y;
+            var cx2 = targetPoint.X - controlOffset;
+            var cy2 = targetPoint.Y;
 
-            if (targetPoint.X - sourcePoint.X >= forwardThreshold)
-            {
-                var midX = sourcePoint.X + Math.Max((targetPoint.X - sourcePoint.X) * 0.5, lead);
-                AppendConnectionPoint(points, new Point(midX, sourcePoint.Y));
-                AppendConnectionPoint(points, new Point(midX, targetPoint.Y));
-            }
-            else
-            {
-                var detourX = Math.Max(sourcePoint.X, targetPoint.X) + detourOffset;
-                var midY = sourcePoint.Y + ((targetPoint.Y - sourcePoint.Y) * 0.5);
-                AppendConnectionPoint(points, new Point(detourX, sourcePoint.Y));
-                AppendConnectionPoint(points, new Point(detourX, midY));
-                AppendConnectionPoint(points, new Point(targetPoint.X - lead, midY));
-            }
-
-            AppendConnectionPoint(points, new Point(targetPoint.X - lead, targetPoint.Y));
-            AppendConnectionPoint(points, targetPoint);
-
-            if (points.Count == 0)
-            {
-                return string.Empty;
-            }
-
-            var builder = new StringBuilder();
-            builder.Append("M ");
-            AppendPointText(builder, points[0]);
-
-            for (var index = 1; index < points.Count; index++)
-            {
-                builder.Append(" L ");
-                AppendPointText(builder, points[index]);
-            }
-
-            return builder.ToString();
+            return string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                "M {0:0.0},{1:0.0} C {2:0.0},{3:0.0} {4:0.0},{5:0.0} {6:0.0},{7:0.0}",
+                sourcePoint.X, sourcePoint.Y,
+                cx1, cy1,
+                cx2, cy2,
+                targetPoint.X, targetPoint.Y);
         }
 
         private static void AppendConnectionPoint(ICollection<Point> points, Point point)

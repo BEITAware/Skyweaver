@@ -273,11 +273,10 @@
                     </Grid.RenderTransform>
 
                     <ScrollViewer x:Name="TileScrollViewer"
-                                  HorizontalScrollBarVisibility="Auto"
-                                  VerticalScrollBarVisibility="Disabled"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Hidden"
                                   Focusable="False"
-                                  CanContentScroll="True"
-                                  PreviewMouseWheel="TileScrollViewer_PreviewMouseWheel"
+                                  CanContentScroll="False"
                                   Margin="10,0,10,0">
                         <ScrollViewer.Resources>
                             <Style TargetType="ScrollBar">
@@ -287,17 +286,15 @@
                         </ScrollViewer.Resources>
 
                         <ItemsControl x:Name="TileGroupsItemsControl"
-                                      ItemsSource="{Binding TileGroups}"
-                                      VirtualizingPanel.IsVirtualizing="True"
-                                      VirtualizingPanel.VirtualizationMode="Recycling">
+                                      ItemsSource="{Binding TileGroups}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <VirtualizingStackPanel Orientation="Horizontal" VerticalAlignment="Center"/>
+                                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid Margin="20,0,20,0">
+                                    <Grid Margin="20,0,20,30">
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="*"/>

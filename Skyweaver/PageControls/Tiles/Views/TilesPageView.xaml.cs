@@ -53,7 +53,7 @@ namespace Skyweaver.PageControls.Tiles.Views
         private TileItemViewModel? _pendingDragTile;
         private ContentPresenter? _pendingDragPresenter;
         private Point _dragStartMouseInView;
-        private double _dragStartHorizontalOffset;
+        private double _dragStartVerticalOffset;
 
         private TileItemViewModel? _draggedTile;
         private ContentPresenter? _draggedPresenter;
@@ -309,9 +309,13 @@ namespace Skyweaver.PageControls.Tiles.Views
 
             if (e.Delta < 0 && _currentPageIndex == 0)
             {
-                SwitchToPage(1);
-                _lastSwitchTime = DateTime.Now;
-                e.Handled = true;
+                // 仅当 ScrollViewer 滚动到底部或无法滚动时才切换到下一页 (Live Session)
+                if (TileScrollViewer.VerticalOffset >= TileScrollViewer.ScrollableHeight - 1 || TileScrollViewer.ScrollableHeight <= 0)
+                {
+                    SwitchToPage(1);
+                    _lastSwitchTime = DateTime.Now;
+                    e.Handled = true;
+                }
             }
             else if (e.Delta > 0 && _currentPageIndex == 1)
             {
@@ -329,7 +333,7 @@ namespace Skyweaver.PageControls.Tiles.Views
             }
 
             double direction = e.Delta < 0 ? 1 : -1;
-            scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset + direction * TileCellSize);
+            scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset + direction * TileCellSize);
             e.Handled = true;
         }
 
@@ -373,7 +377,7 @@ namespace Skyweaver.PageControls.Tiles.Views
             _pendingDragTile = tile;
             _pendingDragPresenter = presenter;
             _dragStartMouseInView = e.GetPosition(this);
-            _dragStartHorizontalOffset = TileScrollViewer.HorizontalOffset;
+            _dragStartVerticalOffset = TileScrollViewer.VerticalOffset;
         }
 
         private void OnPageViewPreviewMouseMove(object sender, MouseEventArgs e)
@@ -456,8 +460,8 @@ namespace Skyweaver.PageControls.Tiles.Views
             var transform = EnsurePresenterTransform(_draggedPresenter);
             transform.BeginAnimation(TranslateTransform.XProperty, null);
             transform.BeginAnimation(TranslateTransform.YProperty, null);
-            transform.X = currentMouse.X - _dragStartMouseInView.X + TileScrollViewer.HorizontalOffset - _dragStartHorizontalOffset;
-            transform.Y = currentMouse.Y - _dragStartMouseInView.Y;
+            transform.X = currentMouse.X - _dragStartMouseInView.X;
+            transform.Y = currentMouse.Y - _dragStartMouseInView.Y + TileScrollViewer.VerticalOffset - _dragStartVerticalOffset;
 
             AutoScrollWhileDragging(e);
             UpdateDragAvoidance();
@@ -931,13 +935,13 @@ namespace Skyweaver.PageControls.Tiles.Views
         private void AutoScrollWhileDragging(MouseEventArgs e)
         {
             Point mouseInViewer = e.GetPosition(TileScrollViewer);
-            if (mouseInViewer.X < DragAutoScrollEdge)
+            if (mouseInViewer.Y < DragAutoScrollEdge)
             {
-                TileScrollViewer.ScrollToHorizontalOffset(Math.Max(0, TileScrollViewer.HorizontalOffset - DragAutoScrollStep));
+                TileScrollViewer.ScrollToVerticalOffset(Math.Max(0, TileScrollViewer.VerticalOffset - DragAutoScrollStep));
             }
-            else if (mouseInViewer.X > TileScrollViewer.ActualWidth - DragAutoScrollEdge)
+            else if (mouseInViewer.Y > TileScrollViewer.ActualHeight - DragAutoScrollEdge)
             {
-                TileScrollViewer.ScrollToHorizontalOffset(Math.Min(TileScrollViewer.ScrollableWidth, TileScrollViewer.HorizontalOffset + DragAutoScrollStep));
+                TileScrollViewer.ScrollToVerticalOffset(Math.Min(TileScrollViewer.ScrollableHeight, TileScrollViewer.VerticalOffset + DragAutoScrollStep));
             }
         }
 

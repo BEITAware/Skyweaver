@@ -15,63 +15,40 @@
              TextOptions.TextFormattingMode="Display">
     <UserControl.Resources>
         <ResourceDictionary>
-            <LinearGradientBrush x:Key="WorkflowSurfaceBaseBrush"
-                                 StartPoint="0,0"
-                                 EndPoint="0,1">
-                <GradientStop Color="#FF101A25" Offset="0"/>
-                <GradientStop Color="#FF0B1119" Offset="0.52"/>
-                <GradientStop Color="#FF081017" Offset="1"/>
-            </LinearGradientBrush>
+            <SolidColorBrush x:Key="WorkflowSurfaceBaseBrush" Color="#1F3449"/>
 
             <DrawingBrush x:Key="WorkflowSurfaceMinorGridBrush"
                           TileMode="Tile"
-                          Viewport="0,0,24,24"
+                          Viewport="0,0,1,4"
                           ViewportUnits="Absolute"
                           Stretch="None">
                 <DrawingBrush.Drawing>
-                    <GeometryDrawing>
-                        <GeometryDrawing.Pen>
-                            <Pen Brush="#162B4760" Thickness="1"/>
-                        </GeometryDrawing.Pen>
-                        <GeometryDrawing.Geometry>
-                            <GeometryGroup>
-                                <LineGeometry StartPoint="0,0" EndPoint="24,0"/>
-                                <LineGeometry StartPoint="0,0" EndPoint="0,24"/>
-                            </GeometryGroup>
-                        </GeometryDrawing.Geometry>
-                    </GeometryDrawing>
+                    <DrawingGroup>
+                        <!-- 基础色条纹 -->
+                        <GeometryDrawing>
+                            <GeometryDrawing.Geometry>
+                                <RectangleGeometry Rect="0,0,1,1"/>
+                            </GeometryDrawing.Geometry>
+                            <GeometryDrawing.Brush>
+                                <SolidColorBrush Color="#1F3449"/>
+                            </GeometryDrawing.Brush>
+                        </GeometryDrawing>
+                        <!-- 深色条纹 -->
+                        <GeometryDrawing>
+                            <GeometryDrawing.Geometry>
+                                <RectangleGeometry Rect="0,1,1,1"/>
+                            </GeometryDrawing.Geometry>
+                            <GeometryDrawing.Brush>
+                                <SolidColorBrush Color="#010303"/>
+                            </GeometryDrawing.Brush>
+                        </GeometryDrawing>
+                    </DrawingGroup>
                 </DrawingBrush.Drawing>
             </DrawingBrush>
 
-            <DrawingBrush x:Key="WorkflowSurfaceMajorGridBrush"
-                          TileMode="Tile"
-                          Viewport="0,0,96,96"
-                          ViewportUnits="Absolute"
-                          Stretch="None">
-                <DrawingBrush.Drawing>
-                    <GeometryDrawing>
-                        <GeometryDrawing.Pen>
-                            <Pen Brush="#2F4A6C88" Thickness="1"/>
-                        </GeometryDrawing.Pen>
-                        <GeometryDrawing.Geometry>
-                            <GeometryGroup>
-                                <LineGeometry StartPoint="0,0" EndPoint="96,0"/>
-                                <LineGeometry StartPoint="0,0" EndPoint="0,96"/>
-                            </GeometryGroup>
-                        </GeometryDrawing.Geometry>
-                    </GeometryDrawing>
-                </DrawingBrush.Drawing>
-            </DrawingBrush>
+            <SolidColorBrush x:Key="WorkflowSurfaceMajorGridBrush" Color="Transparent"/>
 
-            <RadialGradientBrush x:Key="WorkflowSurfaceGlowBrush"
-                                 Center="0.18,0"
-                                 GradientOrigin="0.18,0"
-                                 RadiusX="1.2"
-                                 RadiusY="0.9">
-                <GradientStop Color="#2E80B8E3" Offset="0"/>
-                <GradientStop Color="#10294764" Offset="0.4"/>
-                <GradientStop Color="#00000000" Offset="1"/>
-            </RadialGradientBrush>
+            <SolidColorBrush x:Key="WorkflowSurfaceGlowBrush" Color="Transparent"/>
 
             <LinearGradientBrush x:Key="WorkflowNodeBodyBrush"
                                  StartPoint="0,0"
@@ -119,262 +96,248 @@
 
             <Style x:Key="WorkflowNodeCardStyle" TargetType="Border">
                 <Setter Property="Width" Value="{Binding Width}"/>
-                <Setter Property="MinHeight" Value="118"/>
-                <Setter Property="Background" Value="{StaticResource WorkflowNodeBodyBrush}"/>
-                <Setter Property="BorderBrush" Value="#839EB9CD"/>
-                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="MinHeight" Value="85"/>
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="BorderThickness" Value="1.8"/>
+                <Setter Property="Opacity" Value="0.95"/>
                 <Setter Property="SnapsToDevicePixels" Value="True"/>
+                <Setter Property="BorderBrush">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#C0FFFFFF" Offset="0"/>
+                            <GradientStop Color="#80FFFFFF" Offset="0.5"/>
+                            <GradientStop Color="#40000000" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
                 <Setter Property="Effect">
                     <Setter.Value>
-                        <DropShadowEffect BlurRadius="10"
-                                          ShadowDepth="2"
-                                          Opacity="0.28"
-                                          Color="#CC000000"/>
+                        <DropShadowEffect Color="#60000000"
+                                          Direction="315"
+                                          ShadowDepth="6"
+                                          BlurRadius="12"
+                                          Opacity="0.8"/>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#4A90E2" Offset="0"/>
+                            <GradientStop Color="#4A90E2" Offset="0.4"/>
+                            <GradientStop Color="#F8FCFF" Offset="0.6"/>
+                            <GradientStop Color="#FFFFFF" Offset="1"/>
+                        </LinearGradientBrush>
                     </Setter.Value>
                 </Setter>
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding IsInputOutputNode}" Value="True">
-                        <Setter Property="BorderBrush" Value="#86A8C4D9"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding IsAgentNode}" Value="True">
-                        <Setter Property="BorderBrush" Value="#8AB7CDE0"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding IsLogicNode}" Value="True">
-                        <Setter Property="BorderBrush" Value="#8CB6CDB0"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding IsLogicExecutionNode}" Value="True">
-                        <Setter Property="BorderBrush" Value="#8CB0C8D9"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding IsNextLogicExecutionNode}" Value="True">
-                        <Setter Property="BorderBrush" Value="#90B8C9B3"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                        <Setter Property="BorderBrush" Value="#FFE6F6FF"/>
-                        <Setter Property="Effect">
+                        <Setter Property="Background">
                             <Setter.Value>
-                                <DropShadowEffect BlurRadius="14"
-                                                  ShadowDepth="0"
-                                                  Opacity="0.46"
-                                                  Color="#B04E82A8"/>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#4A90E2" Offset="0"/>
+                                    <GradientStop Color="#4A90E2" Offset="0.4"/>
+                                    <GradientStop Color="#F8FCFF" Offset="0.6"/>
+                                    <GradientStop Color="#FFFFFF" Offset="1"/>
+                                </LinearGradientBrush>
                             </Setter.Value>
                         </Setter>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding IsAgentNode}" Value="True">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#00ACC1" Offset="0"/>
+                                    <GradientStop Color="#00ACC1" Offset="0.4"/>
+                                    <GradientStop Color="#F8FCFF" Offset="0.6"/>
+                                    <GradientStop Color="#FFFFFF" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Setter.Value>
+                        </Setter>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding IsLogicNode}" Value="True">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#4CAF50" Offset="0"/>
+                                    <GradientStop Color="#4CAF50" Offset="0.4"/>
+                                    <GradientStop Color="#F8FCFF" Offset="0.6"/>
+                                    <GradientStop Color="#FFFFFF" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Setter.Value>
+                        </Setter>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding IsLogicExecutionNode}" Value="True">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#8E24AA" Offset="0"/>
+                                    <GradientStop Color="#8E24AA" Offset="0.4"/>
+                                    <GradientStop Color="#F8FCFF" Offset="0.6"/>
+                                    <GradientStop Color="#FFFFFF" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Setter.Value>
+                        </Setter>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding IsNextLogicExecutionNode}" Value="True">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#E65100" Offset="0"/>
+                                    <GradientStop Color="#E65100" Offset="0.4"/>
+                                    <GradientStop Color="#F8FCFF" Offset="0.6"/>
+                                    <GradientStop Color="#FFFFFF" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Setter.Value>
+                        </Setter>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                        <Setter Property="Opacity" Value="1.0"/>
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
 
             <Style x:Key="WorkflowNodeSelectionFrameStyle" TargetType="Border">
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="BorderBrush" Value="#00FFFFFF"/>
                 <Setter Property="Visibility" Value="Collapsed"/>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                        <Setter Property="Visibility" Value="Visible"/>
-                        <Setter Property="Background" Value="#0E6AA9D3"/>
-                        <Setter Property="BorderBrush" Value="#BFE7FBFF"/>
-                    </DataTrigger>
-                </Style.Triggers>
             </Style>
 
             <Style x:Key="WorkflowNodeAccentBandStyle" TargetType="Border">
-                <Setter Property="Height" Value="4"/>
-                <Setter Property="VerticalAlignment" Value="Top"/>
-                <Setter Property="Background" Value="#FF8FB6D3"/>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsInputOutputNode}" Value="True">
-                        <Setter Property="Background" Value="#FFA8CAE1"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding IsAgentNode}" Value="True">
-                        <Setter Property="Background" Value="#FF9CC5E2"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding IsLogicNode}" Value="True">
-                        <Setter Property="Background" Value="#FFB0CDA3"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding IsLogicExecutionNode}" Value="True">
-                        <Setter Property="Background" Value="#FFA5CBE4"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding IsNextLogicExecutionNode}" Value="True">
-                        <Setter Property="Background" Value="#FFB7D1A8"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                        <Setter Property="Background" Value="#FFF4FCFF"/>
-                    </DataTrigger>
-                </Style.Triggers>
+                <Setter Property="Visibility" Value="Collapsed"/>
             </Style>
 
             <Style x:Key="WorkflowNodeKindBadgeStyle" TargetType="Border">
-                <Setter Property="Padding" Value="8,2"/>
+                <Setter Property="Padding" Value="6,2"/>
                 <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="BorderBrush" Value="#8BB8D4EA"/>
-                <Setter Property="Background" Value="#26364C62"/>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsInputOutputNode}" Value="True">
-                        <Setter Property="Background" Value="#28435A72"/>
-                        <Setter Property="BorderBrush" Value="#A2CDE8FF"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding IsAgentNode}" Value="True">
-                        <Setter Property="Background" Value="#253A5268"/>
-                        <Setter Property="BorderBrush" Value="#92C2E2F9"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding IsLogicNode}" Value="True">
-                        <Setter Property="Background" Value="#27424937"/>
-                        <Setter Property="BorderBrush" Value="#9AC7D7A0"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding IsLogicExecutionNode}" Value="True">
-                        <Setter Property="Background" Value="#283F566B"/>
-                        <Setter Property="BorderBrush" Value="#98C5E0F3"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding IsNextLogicExecutionNode}" Value="True">
-                        <Setter Property="Background" Value="#29444B38"/>
-                        <Setter Property="BorderBrush" Value="#A4C8DCA7"/>
-                    </DataTrigger>
-                </Style.Triggers>
+                <Setter Property="BorderBrush" Value="#40FFFFFF"/>
+                <Setter Property="Background" Value="#20000000"/>
+                <Setter Property="CornerRadius" Value="8"/>
             </Style>
 
             <Style x:Key="WorkflowNodePortsPanelStyle" TargetType="Border">
-                <Setter Property="Background" Value="#1F08131D"/>
-                <Setter Property="BorderBrush" Value="#324E677D"/>
-                <Setter Property="BorderThickness" Value="0,1,0,1"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderBrush" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
             </Style>
 
-            <Style x:Key="WorkflowPortAnchorStyle" TargetType="Border">
-                <Setter Property="Width" Value="16"/>
-                <Setter Property="Height" Value="16"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="BorderBrush" Value="#FFDDF4FF"/>
-                <Setter Property="SnapsToDevicePixels" Value="True"/>
-                <Setter Property="Background">
+            <Style x:Key="WorkflowPortAnchorStyle" TargetType="Ellipse">
+                <Setter Property="Width" Value="14"/>
+                <Setter Property="Height" Value="14"/>
+                <Setter Property="Margin" Value="2,6,2,6"/>
+                <Setter Property="Fill">
                     <Setter.Value>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="#FFF7FCFF" Offset="0"/>
-                            <GradientStop Color="#FF8CC4E8" Offset="0.45"/>
-                            <GradientStop Color="#FF35648C" Offset="1"/>
+                        <RadialGradientBrush>
+                            <GradientStop Color="#FFFFFF" Offset="0"/>
+                            <GradientStop Color="#F0F8FF" Offset="0.3"/>
+                            <GradientStop Color="#E0E8F0" Offset="0.7"/>
+                            <GradientStop Color="#C0D0E0" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Stroke">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#8090A0" Offset="0"/>
+                            <GradientStop Color="#606070" Offset="1"/>
                         </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="StrokeThickness" Value="1.2"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="IsHitTestVisible" Value="True"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="#40000000"
+                                        Direction="315"
+                                        ShadowDepth="2"
+                                        BlurRadius="4"
+                                        Opacity="0.7"/>
                     </Setter.Value>
                 </Setter>
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding IsXmlFieldPort}" Value="True">
-                        <Setter Property="BorderBrush" Value="#FFF1DFBF"/>
-                        <Setter Property="Background">
+                        <Setter Property="Fill">
                             <Setter.Value>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                    <GradientStop Color="#FFFFFBF2" Offset="0"/>
-                                    <GradientStop Color="#FFF2C67F" Offset="0.45"/>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="#FFFFFF" Offset="0"/>
+                                    <GradientStop Color="#FFF2C67F" Offset="0.5"/>
                                     <GradientStop Color="#FFB06F28" Offset="1"/>
-                                </LinearGradientBrush>
+                                </RadialGradientBrush>
                             </Setter.Value>
                         </Setter>
                     </DataTrigger>
                     <DataTrigger Binding="{Binding IsFlexiblePort}" Value="True">
-                        <Setter Property="BorderBrush" Value="#FFE2F8EC"/>
-                        <Setter Property="Background">
+                        <Setter Property="Fill">
                             <Setter.Value>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                    <GradientStop Color="#FFF8FFFC" Offset="0"/>
-                                    <GradientStop Color="#FFB9E1CF" Offset="0.45"/>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="#FFFFFF" Offset="0"/>
+                                    <GradientStop Color="#FFB9E1CF" Offset="0.5"/>
                                     <GradientStop Color="#FF4E886D" Offset="1"/>
-                                </LinearGradientBrush>
+                                </RadialGradientBrush>
                             </Setter.Value>
                         </Setter>
                     </DataTrigger>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Effect">
+                            <Setter.Value>
+                                <DropShadowEffect Color="#80000000"
+                                                Direction="315"
+                                                ShadowDepth="3"
+                                                BlurRadius="6"
+                                                Opacity="0.9"/>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="StrokeThickness" Value="1.8"/>
+                        <Setter Property="Width" Value="16"/>
+                        <Setter Property="Height" Value="16"/>
+                    </Trigger>
                 </Style.Triggers>
             </Style>
 
-            <Style x:Key="WorkflowNaturalPortGlyphStyle" TargetType="Ellipse">
-                <Setter Property="Visibility" Value="Collapsed"/>
-                <Setter Property="Width" Value="6"/>
-                <Setter Property="Height" Value="6"/>
-                <Setter Property="Fill" Value="#FFFFFFFF"/>
-                <Setter Property="Stroke" Value="#CC6BA9D3"/>
-                <Setter Property="StrokeThickness" Value="1"/>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsNaturalLanguagePort}" Value="True">
-                        <Setter Property="Visibility" Value="Visible"/>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-
-            <Style x:Key="WorkflowXmlPortGlyphStyle" TargetType="Rectangle">
-                <Setter Property="Visibility" Value="Collapsed"/>
-                <Setter Property="Width" Value="7"/>
-                <Setter Property="Height" Value="7"/>
-                <Setter Property="Fill" Value="#FFFFFFFF"/>
-                <Setter Property="Stroke" Value="#CCB77F37"/>
-                <Setter Property="StrokeThickness" Value="1"/>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsXmlFieldPort}" Value="True">
-                        <Setter Property="Visibility" Value="Visible"/>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-
-            <Style x:Key="WorkflowSmartPortGlyphStyle" TargetType="Rectangle">
-                <Setter Property="Visibility" Value="Collapsed"/>
-                <Setter Property="Width" Value="7"/>
-                <Setter Property="Height" Value="7"/>
-                <Setter Property="Fill" Value="#EAF7FFFC"/>
-                <Setter Property="Stroke" Value="#CC5F8E76"/>
-                <Setter Property="StrokeThickness" Value="1"/>
-                <Setter Property="StrokeDashArray" Value="1.5 1"/>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsFlexiblePort}" Value="True">
-                        <Setter Property="Visibility" Value="Visible"/>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
+            <!-- Removed unused port glyph styles to match Tunnel-Next 1:1 -->
 
             <Style x:Key="WorkflowConnectionShadowPathStyle" TargetType="Path">
-                <Setter Property="Stroke" Value="#66000000"/>
-                <Setter Property="StrokeThickness" Value="5.4"/>
-                <Setter Property="StrokeStartLineCap" Value="Square"/>
-                <Setter Property="StrokeEndLineCap" Value="Square"/>
-                <Setter Property="StrokeLineJoin" Value="Miter"/>
-                <Setter Property="Opacity" Value="0.75"/>
+                <Setter Property="Visibility" Value="Collapsed"/>
             </Style>
 
             <Style x:Key="WorkflowConnectionBasePathStyle" TargetType="Path">
-                <Setter Property="Stroke" Value="#FF8FB8D5"/>
-                <Setter Property="StrokeThickness" Value="3.2"/>
-                <Setter Property="StrokeStartLineCap" Value="Square"/>
-                <Setter Property="StrokeEndLineCap" Value="Square"/>
-                <Setter Property="StrokeLineJoin" Value="Miter"/>
-                <Setter Property="SnapsToDevicePixels" Value="True"/>
+                <Setter Property="StrokeThickness" Value="4"/>
+                <Setter Property="StrokeStartLineCap" Value="Round"/>
+                <Setter Property="StrokeEndLineCap" Value="Round"/>
+                <Setter Property="Opacity" Value="0.9"/>
+                <Setter Property="Stroke">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#FF4A90E2" Offset="0"/>
+                            <GradientStop Color="#C84A90E2" Offset="0.5"/>
+                            <GradientStop Color="#FF4A90E2" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="#64000000" Direction="315" ShadowDepth="2" BlurRadius="4" Opacity="0.6"/>
+                    </Setter.Value>
+                </Setter>
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding IsXmlConnection}" Value="True">
-                        <Setter Property="Stroke" Value="#FFD5AE6C"/>
+                        <Setter Property="Stroke">
+                            <Setter.Value>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#FFFFA500" Offset="0"/>
+                                    <GradientStop Color="#C8FFA500" Offset="0.5"/>
+                                    <GradientStop Color="#FFFFA500" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Setter.Value>
+                        </Setter>
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
 
             <Style x:Key="WorkflowConnectionHighlightPathStyle" TargetType="Path">
-                <Setter Property="Stroke" Value="#DFF8FDFF"/>
-                <Setter Property="StrokeThickness" Value="1.1"/>
-                <Setter Property="StrokeStartLineCap" Value="Square"/>
-                <Setter Property="StrokeEndLineCap" Value="Square"/>
-                <Setter Property="StrokeLineJoin" Value="Miter"/>
-                <Setter Property="Opacity" Value="0.88"/>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsXmlConnection}" Value="True">
-                        <Setter Property="Stroke" Value="#FFF7E3BF"/>
-                    </DataTrigger>
-                </Style.Triggers>
+                <Setter Property="Visibility" Value="Collapsed"/>
             </Style>
 
             <Style x:Key="WorkflowConnectionMarkerStyle" TargetType="Rectangle">
-                <Setter Property="Width" Value="8"/>
-                <Setter Property="Height" Value="8"/>
-                <Setter Property="Fill" Value="#FF8FB8D5"/>
-                <Setter Property="Stroke" Value="#FFF5FCFF"/>
-                <Setter Property="StrokeThickness" Value="1"/>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsXmlConnection}" Value="True">
-                        <Setter Property="Fill" Value="#FFD5AE6C"/>
-                        <Setter Property="Stroke" Value="#FFFFF7EA"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding PathData}" Value="">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                    </DataTrigger>
-                </Style.Triggers>
+                <Setter Property="Visibility" Value="Collapsed"/>
             </Style>
 
             <Style x:Key="WorkflowConnectionSourceMarkerStyle"
@@ -813,185 +776,204 @@
                         </ItemsControl.ItemContainerStyle>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type models:SessionFlowNodeModel}">
-                                <Border Style="{StaticResource WorkflowNodeCardStyle}"
-                                        MouseLeftButtonDown="NodeCard_MouseLeftButtonDown"
-                                        MouseLeftButtonUp="NodeCard_MouseLeftButtonUp"
-                                        MouseMove="NodeCard_MouseMove">
-                                    <Grid ClipToBounds="False">
-                                        <Border Margin="1"
-                                                Panel.ZIndex="1"
-                                                Style="{StaticResource WorkflowNodeSelectionFrameStyle}"
-                                                IsHitTestVisible="False"/>
-                                        <Grid>
+                                <Grid ClipToBounds="False">
+                                    <Grid.RenderTransform>
+                                        <ScaleTransform ScaleX="1.0" ScaleY="1.0"/>
+                                    </Grid.RenderTransform>
+                                    <Grid.Style>
+                                        <Style TargetType="Grid">
+                                            <Style.Triggers>
+                                                <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                                             From="0.3" To="1.0" Duration="0:0:0.45">
+                                                                <DoubleAnimation.EasingFunction>
+                                                                    <BackEase Amplitude="0.75" EasingMode="EaseOut"/>
+                                                                </DoubleAnimation.EasingFunction>
+                                                            </DoubleAnimation>
+                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                                             From="0.3" To="1.0" Duration="0:0:0.45">
+                                                                <DoubleAnimation.EasingFunction>
+                                                                    <BackEase Amplitude="0.75" EasingMode="EaseOut"/>
+                                                                </DoubleAnimation.EasingFunction>
+                                                            </DoubleAnimation>
+                                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                             From="0.0" To="1.0" Duration="0:0:0.3"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </EventTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Grid.Style>
+
+                                    <!-- 选中与高亮外框发光效果 -->
+                                    <Border Margin="-3"
+                                            CornerRadius="14"
+                                            BorderThickness="2.2"
+                                            Background="Transparent"
+                                            IsHitTestVisible="False"
+                                            Panel.ZIndex="5">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="BorderBrush" Value="Transparent"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsHighlighted}" Value="True">
+                                                        <Setter Property="BorderBrush" Value="#C000E5FF"/>
+                                                        <Setter Property="Effect">
+                                                            <Setter.Value>
+                                                                <DropShadowEffect Color="#00E5FF" BlurRadius="14" ShadowDepth="0" Opacity="0.95"/>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                        <Setter Property="BorderBrush" Value="#FFFFFFFF"/>
+                                                        <Setter Property="Effect">
+                                                            <Setter.Value>
+                                                                <DropShadowEffect Color="#FF00FF88" BlurRadius="18" ShadowDepth="0" Opacity="0.95"/>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                    </Border>
+
+                                    <Border Style="{StaticResource WorkflowNodeCardStyle}"
+                                            MouseLeftButtonDown="NodeCard_MouseLeftButtonDown"
+                                            MouseLeftButtonUp="NodeCard_MouseLeftButtonUp"
+                                            MouseMove="NodeCard_MouseMove">
+                                        <Grid ClipToBounds="True">
                                             <Grid.RowDefinitions>
-                                                <RowDefinition Height="44"/>
+                                                <RowDefinition Height="38"/>
                                                 <RowDefinition Height="Auto"/>
                                                 <RowDefinition Height="Auto"/>
                                             </Grid.RowDefinitions>
 
-                                            <Border Grid.Row="0"
-                                                    Background="{StaticResource WorkflowNodeHeaderBrush}"
-                                                    BorderBrush="#2E4A6178"
-                                                    BorderThickness="0,0,0,1">
-                                                <Grid>
-                                                    <Border Style="{StaticResource WorkflowNodeAccentBandStyle}"/>
-                                                    <Border Height="1"
-                                                            Margin="0,4,0,0"
-                                                            VerticalAlignment="Top"
-                                                            Background="#A0FFFFFF"/>
-
-                                                    <DockPanel Margin="12,8,12,8">
-                                                        <Border DockPanel.Dock="Right"
-                                                                Margin="10,0,0,0"
-                                                                VerticalAlignment="Center"
-                                                                Style="{StaticResource WorkflowNodeKindBadgeStyle}">
-                                                            <TextBlock Text="{Binding NodeKindDisplayText}"
-                                                                       Foreground="{StaticResource WorkflowNodeMutedTextBrush}"
-                                                                       FontFamily="{DynamicResource AeroFontFamily}"
-                                                                       FontSize="{DynamicResource AeroSmallFontSize}"
-                                                                       FontWeight="SemiBold"/>
-                                                        </Border>
-
-                                                        <TextBlock Text="{Binding Title}"
-                                                                   Foreground="{StaticResource WorkflowNodeTextBrush}"
-                                                                   FontFamily="{DynamicResource AeroFontFamily}"
-                                                                   FontSize="13"
-                                                                   FontWeight="SemiBold"
-                                                                   TextTrimming="CharacterEllipsis"
-                                                                   VerticalAlignment="Center"/>
-                                                    </DockPanel>
-                                                </Grid>
+                                            <!-- 图层 1：全局高光磨砂玻璃层 - 完美移植 Tunnel Aero 质感 -->
+                                            <Border Grid.RowSpan="3"
+                                                    CornerRadius="10"
+                                                    BorderThickness="0"
+                                                    Opacity="0.75"
+                                                    IsHitTestVisible="False"
+                                                    Panel.ZIndex="1">
+                                                <Border.Background>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,0.5">
+                                                        <GradientStop Color="#C0FFFFFF" Offset="0"/>
+                                                        <GradientStop Color="#90FFFFFF" Offset="0.25"/>
+                                                        <GradientStop Color="#60FFFFFF" Offset="0.5"/>
+                                                        <GradientStop Color="#30FFFFFF" Offset="0.75"/>
+                                                        <GradientStop Color="Transparent" Offset="1"/>
+                                                    </LinearGradientBrush>
+                                                </Border.Background>
+                                                <Border.Effect>
+                                                    <BlurEffect Radius="1.5" KernelType="Gaussian"/>
+                                                </Border.Effect>
                                             </Border>
 
-                                            <Border Grid.Row="1"
-                                                    Style="{StaticResource WorkflowNodePortsPanelStyle}">
-                                                <Grid>
+                                            <!-- 图层 2：标题栏精致高斯模糊磨砂层 -->
+                                            <Border Grid.Row="0"
+                                                    CornerRadius="10,10,0,0"
+                                                    IsHitTestVisible="False"
+                                                    Panel.ZIndex="2">
+                                                <Border.Background>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                        <GradientStop Color="#80FFFFFF" Offset="0"/>
+                                                        <GradientStop Color="#50FFFFFF" Offset="0.5"/>
+                                                        <GradientStop Color="#20FFFFFF" Offset="1"/>
+                                                    </LinearGradientBrush>
+                                                </Border.Background>
+                                                <Border.Effect>
+                                                    <BlurEffect Radius="0.5" KernelType="Gaussian"/>
+                                                </Border.Effect>
+                                            </Border>
+
+                                            <!-- 图层 3：业务逻辑内容容器 (放置于最顶层，ZIndex=3) -->
+                                            <Grid Grid.RowSpan="3" Panel.ZIndex="3">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="38"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+
+                                                <!-- Header -->
+                                                <Border Grid.Row="0"
+                                                        CornerRadius="10,10,0,0"
+                                                        Padding="8,5"
+                                                        Margin="0">
+                                                    <TextBlock Text="{Binding Title}"
+                                                               Foreground="White"
+                                                               FontWeight="SemiBold"
+                                                               FontSize="12"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center">
+                                                        <TextBlock.Effect>
+                                                            <DropShadowEffect Color="#80000000"
+                                                                              Direction="270"
+                                                                              ShadowDepth="1.5"
+                                                                              BlurRadius="3"
+                                                                              Opacity="0.9"/>
+                                                        </TextBlock.Effect>
+                                                    </TextBlock>
+                                                </Border>
+
+                                                <!-- Ports -->
+                                                <Grid Grid.Row="1" Margin="14,4">
                                                     <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
                                                         <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="12"/>
-                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
 
-                                                    <Rectangle Grid.Column="1"
-                                                               Width="1"
-                                                               Margin="0,8"
-                                                               HorizontalAlignment="Center"
-                                                               Fill="{StaticResource WorkflowNodeDividerBrush}"/>
-
+                                                    <!-- Inputs -->
                                                     <ItemsControl Grid.Column="0"
-                                                                  ItemsSource="{Binding InputPorts}">
+                                                                  ItemsSource="{Binding InputPorts}"
+                                                                  VerticalAlignment="Center"
+                                                                  Margin="0,2">
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate DataType="{x:Type models:SessionFlowPortModel}">
-                                                                <DockPanel Height="24"
-                                                                           LastChildFill="True">
-                                                                    <Border DockPanel.Dock="Left"
-                                                                            Margin="-8,0,0,0"
-                                                                            VerticalAlignment="Center"
-                                                                            Cursor="Hand"
-                                                                            ToolTip="{Binding PortTypeDisplayText}"
-                                                                            Style="{StaticResource WorkflowPortAnchorStyle}"
-                                                                            MouseLeftButtonDown="PortAnchor_MouseLeftButtonDown">
-                                                                        <Grid>
-                                                                            <Ellipse HorizontalAlignment="Center"
-                                                                                     VerticalAlignment="Center"
-                                                                                     Style="{StaticResource WorkflowNaturalPortGlyphStyle}"/>
-                                                                            <Rectangle HorizontalAlignment="Center"
-                                                                                       VerticalAlignment="Center"
-                                                                                       RenderTransformOrigin="0.5,0.5"
-                                                                                       Style="{StaticResource WorkflowXmlPortGlyphStyle}">
-                                                                                <Rectangle.RenderTransform>
-                                                                                    <RotateTransform Angle="45"/>
-                                                                                </Rectangle.RenderTransform>
-                                                                            </Rectangle>
-                                                                            <Rectangle HorizontalAlignment="Center"
-                                                                                       VerticalAlignment="Center"
-                                                                                       Style="{StaticResource WorkflowSmartPortGlyphStyle}"/>
-                                                                        </Grid>
-                                                                    </Border>
-
-                                                                    <Rectangle DockPanel.Dock="Left"
-                                                                               Width="10"
-                                                                               Height="1"
-                                                                               VerticalAlignment="Center"
-                                                                               Fill="{StaticResource WorkflowPortGuideBrush}"/>
-
-                                                                    <TextBlock Margin="6,0,0,0"
-                                                                               VerticalAlignment="Center"
-                                                                               Text="{Binding Name}"
-                                                                               TextTrimming="CharacterEllipsis"
-                                                                               Foreground="{StaticResource WorkflowNodeTextBrush}"
-                                                                               FontFamily="{DynamicResource AeroFontFamily}"
-                                                                               FontSize="11"/>
-                                                                </DockPanel>
+                                                                <Ellipse Style="{StaticResource WorkflowPortAnchorStyle}"
+                                                                         ToolTip="{Binding Name}"
+                                                                         MouseLeftButtonDown="PortAnchor_MouseLeftButtonDown"/>
                                                             </DataTemplate>
                                                         </ItemsControl.ItemTemplate>
                                                     </ItemsControl>
 
+                                                    <Grid Grid.Column="1" Margin="4,0">
+                                                        <!-- Central content placeholder -->
+                                                    </Grid>
+
+                                                    <!-- Outputs -->
                                                     <ItemsControl Grid.Column="2"
-                                                                  ItemsSource="{Binding OutputPorts}">
+                                                                  ItemsSource="{Binding OutputPorts}"
+                                                                  VerticalAlignment="Center"
+                                                                  Margin="0,2">
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate DataType="{x:Type models:SessionFlowPortModel}">
-                                                                <DockPanel Height="24"
-                                                                           LastChildFill="True">
-                                                                    <Border DockPanel.Dock="Right"
-                                                                            Margin="0,0,-8,0"
-                                                                            VerticalAlignment="Center"
-                                                                            Cursor="Hand"
-                                                                            ToolTip="{Binding PortTypeDisplayText}"
-                                                                            Style="{StaticResource WorkflowPortAnchorStyle}"
-                                                                            MouseLeftButtonDown="PortAnchor_MouseLeftButtonDown">
-                                                                        <Grid>
-                                                                            <Ellipse HorizontalAlignment="Center"
-                                                                                     VerticalAlignment="Center"
-                                                                                     Style="{StaticResource WorkflowNaturalPortGlyphStyle}"/>
-                                                                            <Rectangle HorizontalAlignment="Center"
-                                                                                       VerticalAlignment="Center"
-                                                                                       RenderTransformOrigin="0.5,0.5"
-                                                                                       Style="{StaticResource WorkflowXmlPortGlyphStyle}">
-                                                                                <Rectangle.RenderTransform>
-                                                                                    <RotateTransform Angle="45"/>
-                                                                                </Rectangle.RenderTransform>
-                                                                            </Rectangle>
-                                                                            <Rectangle HorizontalAlignment="Center"
-                                                                                       VerticalAlignment="Center"
-                                                                                       Style="{StaticResource WorkflowSmartPortGlyphStyle}"/>
-                                                                        </Grid>
-                                                                    </Border>
-
-                                                                    <Rectangle DockPanel.Dock="Right"
-                                                                               Width="10"
-                                                                               Height="1"
-                                                                               VerticalAlignment="Center"
-                                                                               Fill="{StaticResource WorkflowPortGuideBrush}"/>
-
-                                                                    <TextBlock Margin="0,0,6,0"
-                                                                               VerticalAlignment="Center"
-                                                                               Text="{Binding Name}"
-                                                                               TextAlignment="Right"
-                                                                               TextTrimming="CharacterEllipsis"
-                                                                               Foreground="{StaticResource WorkflowNodeTextBrush}"
-                                                                               FontFamily="{DynamicResource AeroFontFamily}"
-                                                                               FontSize="11"/>
-                                                                </DockPanel>
+                                                                <Ellipse Style="{StaticResource WorkflowPortAnchorStyle}"
+                                                                         ToolTip="{Binding Name}"
+                                                                         MouseLeftButtonDown="PortAnchor_MouseLeftButtonDown"/>
                                                             </DataTemplate>
                                                         </ItemsControl.ItemTemplate>
                                                     </ItemsControl>
                                                 </Grid>
-                                            </Border>
 
-                                            <Border Grid.Row="2"
-                                                    Background="{StaticResource WorkflowNodeFooterBrush}"
-                                                    BorderBrush="#2E4A6178"
-                                                    BorderThickness="0,1,0,0"
-                                                    Padding="10,5">
-                                                <TextBlock Text="{Binding PortSummaryText}"
-                                                           Foreground="{StaticResource WorkflowNodeFooterTextBrush}"
-                                                           FontFamily="{DynamicResource AeroFontFamily}"
-                                                           FontSize="{DynamicResource AeroSmallFontSize}"/>
-                                            </Border>
+                                                <!-- Footer -->
+                                                <Border Grid.Row="2"
+                                                        Background="Transparent"
+                                                        BorderBrush="#10000000"
+                                                        BorderThickness="0,1,0,0"
+                                                        Padding="10,5">
+                                                    <TextBlock Text="{Binding PortSummaryText}"
+                                                               Foreground="#FF4E5F70"
+                                                               FontFamily="{DynamicResource AeroFontFamily}"
+                                                               FontSize="{DynamicResource AeroSmallFontSize}"
+                                                               FontWeight="SemiBold"/>
+                                                </Border>
+                                            </Grid>
                                         </Grid>
-                                    </Grid>
-                                </Border>
+                                    </Border>
+                                </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
