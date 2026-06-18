@@ -1,0 +1,699 @@
+<UserControl x:Class="Ferrita.Controls.LateralFileSystemTreeControl.Views.LateralFileSystemTreeControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:Ferrita.Controls.LateralFileSystemTreeControl.ViewModels"
+             xmlns:views="clr-namespace:Ferrita.Controls.LateralFileSystemTreeControl.Views"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewModels:LateralFileSystemTreeControlViewModel, IsDesignTimeCreatable=False}"
+             d:DesignHeight="720"
+             d:DesignWidth="1080">
+    <UserControl.Resources>
+        <Style TargetType="ScrollBar" BasedOn="{StaticResource AeroScrollBarV2Style}"/>
+        <Style TargetType="ScrollViewer" BasedOn="{StaticResource AeroScrollViewerV2Style}"/>
+
+        <DrawingBrush x:Key="LateralFSNodeIdleBrush" Stretch="Uniform">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <DrawingGroup.Children>
+                        <GeometryDrawing Geometry="F1 M 8.5,0.500244L 498.47,0.500244C 502.888,0.500244 506.47,4.08203 506.47,8.50024L 506.47,208.679C 506.47,213.098 502.888,216.679 498.47,216.679L 8.5,216.679C 4.08179,216.679 0.5,213.098 0.5,208.679L 0.5,8.50024C 0.5,4.08203 4.08179,0.500244 8.5,0.500244 Z ">
+                            <GeometryDrawing.Pen>
+                                <Pen LineJoin="Round" Brush="#6793F2FF"/>
+                            </GeometryDrawing.Pen>
+                            <GeometryDrawing.Brush>
+                                <LinearGradientBrush StartPoint="0.269646,-0.150282" EndPoint="1.6494,-0.150282">
+                                    <LinearGradientBrush.RelativeTransform>
+                                        <TransformGroup>
+                                            <SkewTransform CenterX="0.269646" CenterY="-0.150282" AngleX="5.23492" AngleY="0"/>
+                                            <RotateTransform CenterX="0.269646" CenterY="-0.150282" Angle="70.494"/>
+                                        </TransformGroup>
+                                    </LinearGradientBrush.RelativeTransform>
+                                    <LinearGradientBrush.GradientStops>
+                                        <GradientStop Color="#55FFFFFF" Offset="0"/>
+                                        <GradientStop Color="#053D3D3D" Offset="0.35249"/>
+                                        <GradientStop Color="#04666666" Offset="0.670498"/>
+                                        <GradientStop Color="#51FFFFFF" Offset="0.988506"/>
+                                    </LinearGradientBrush.GradientStops>
+                                </LinearGradientBrush>
+                            </GeometryDrawing.Brush>
+                        </GeometryDrawing>
+                    </DrawingGroup.Children>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+
+        <DrawingBrush x:Key="LateralFSNodeHoverBrush" Stretch="Uniform">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <DrawingGroup.Children>
+                        <GeometryDrawing Geometry="F1 M 8.5,0.5L 498.47,0.5C 502.888,0.5 506.47,4.08203 506.47,8.5L 506.47,208.68C 506.47,213.098 502.888,216.68 498.47,216.68L 8.5,216.68C 4.08167,216.68 0.5,213.098 0.5,208.68L 0.5,8.5C 0.5,4.08203 4.08167,0.5 8.5,0.5 Z ">
+                            <GeometryDrawing.Pen>
+                                <Pen LineJoin="Round" Brush="#6793F2FF"/>
+                            </GeometryDrawing.Pen>
+                            <GeometryDrawing.Brush>
+                                <LinearGradientBrush StartPoint="0.308197,-0.0414513" EndPoint="1.45703,-0.0414513">
+                                    <LinearGradientBrush.RelativeTransform>
+                                        <TransformGroup>
+                                            <SkewTransform CenterX="0.308197" CenterY="-0.0414513" AngleX="5.23476" AngleY="0"/>
+                                            <RotateTransform CenterX="0.308197" CenterY="-0.0414513" Angle="70.4939"/>
+                                        </TransformGroup>
+                                    </LinearGradientBrush.RelativeTransform>
+                                    <LinearGradientBrush.GradientStops>
+                                        <GradientStop Color="#55FFFFFF" Offset="0"/>
+                                        <GradientStop Color="#053D3D3D" Offset="0.35249"/>
+                                        <GradientStop Color="#04666666" Offset="0.670498"/>
+                                        <GradientStop Color="#51FFFFFF" Offset="0.988506"/>
+                                    </LinearGradientBrush.GradientStops>
+                                </LinearGradientBrush>
+                            </GeometryDrawing.Brush>
+                        </GeometryDrawing>
+                    </DrawingGroup.Children>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+
+        <DrawingBrush x:Key="LateralFSNodeActivatedBrush" Stretch="Uniform">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <DrawingGroup.Children>
+                        <GeometryDrawing Geometry="F1 M 8.5,0.500244L 498.47,0.500244C 502.888,0.500244 506.47,4.08179 506.47,8.50024L 506.47,208.679C 506.47,213.098 502.888,216.679 498.47,216.679L 8.5,216.679C 4.08179,216.679 0.5,213.098 0.5,208.679L 0.5,8.50024C 0.5,4.08179 4.08179,0.500244 8.5,0.500244 Z ">
+                            <GeometryDrawing.Pen>
+                                <Pen LineJoin="Round" Brush="#FFFFFFFF"/>
+                            </GeometryDrawing.Pen>
+                            <GeometryDrawing.Brush>
+                                <LinearGradientBrush StartPoint="0.269646,-0.150282" EndPoint="1.6494,-0.150282">
+                                    <LinearGradientBrush.RelativeTransform>
+                                        <TransformGroup>
+                                            <SkewTransform CenterX="0.269646" CenterY="-0.150282" AngleX="5.23489" AngleY="0"/>
+                                            <RotateTransform CenterX="0.269646" CenterY="-0.150282" Angle="70.494"/>
+                                        </TransformGroup>
+                                    </LinearGradientBrush.RelativeTransform>
+                                    <LinearGradientBrush.GradientStops>
+                                        <GradientStop Color="#55FFFFFF" Offset="0"/>
+                                        <GradientStop Color="#053D3D3D" Offset="0.35249"/>
+                                        <GradientStop Color="#04666666" Offset="0.670498"/>
+                                        <GradientStop Color="#51FFFFFF" Offset="0.988506"/>
+                                    </LinearGradientBrush.GradientStops>
+                                </LinearGradientBrush>
+                            </GeometryDrawing.Brush>
+                        </GeometryDrawing>
+                    </DrawingGroup.Children>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+
+        <DrawingBrush x:Key="SoftGlassSliceBrush" Stretch="Fill">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <DrawingGroup.Children>
+                        <GeometryDrawing Geometry="F1 M 0.160156,0.159668L 1386.16,0.159668L 1386.16,223.646L 0.160156,223.646L 0.160156,0.159668 Z ">
+                            <GeometryDrawing.Pen>
+                                <Pen Thickness="0.32" LineJoin="Round" Brush="#FF000000"/>
+                            </GeometryDrawing.Pen>
+                            <GeometryDrawing.Brush>
+                                <LinearGradientBrush StartPoint="0.10059,1.65236" EndPoint="2.53982,1.65236">
+                                    <LinearGradientBrush.RelativeTransform>
+                                        <TransformGroup>
+                                            <SkewTransform CenterX="0.10059" CenterY="1.65236" AngleX="-59.7491" AngleY="0"/>
+                                            <RotateTransform CenterX="0.10059" CenterY="1.65236" Angle="-70.8836"/>
+                                        </TransformGroup>
+                                    </LinearGradientBrush.RelativeTransform>
+                                    <LinearGradientBrush.GradientStops>
+                                        <GradientStop Color="#3BFFFFFF" Offset="0"/>
+                                        <GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>
+                                        <GradientStop Color="#07FFFFFF" Offset="0.109195"/>
+                                        <GradientStop Color="#04FFFFFF" Offset="0.298851"/>
+                                        <GradientStop Color="#3AFFFFFF" Offset="0.327586"/>
+                                        <GradientStop Color="#1AFFFFFF" Offset="0.465517"/>
+                                        <GradientStop Color="#14FFFFFF" Offset="0.591954"/>
+                                        <GradientStop Color="#05FFFFFF" Offset="0.758621"/>
+                                        <GradientStop Color="#44FFFFFF" Offset="1"/>
+                                    </LinearGradientBrush.GradientStops>
+                                </LinearGradientBrush>
+                            </GeometryDrawing.Brush>
+                        </GeometryDrawing>
+                    </DrawingGroup.Children>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+    </UserControl.Resources>
+
+    <Grid>
+        <Rectangle Stretch="Fill" IsHitTestVisible="False">
+            <Rectangle.Fill>
+                <SolidColorBrush Color="White"/>
+            </Rectangle.Fill>
+            <Rectangle.Effect>
+                <views:LateralFSRibbonBackgroundEffect x:Name="BgEffect" AspectRatio="1.6"/>
+            </Rectangle.Effect>
+            <Rectangle.Triggers>
+                <EventTrigger RoutedEvent="Loaded">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetName="BgEffect"
+                                             Storyboard.TargetProperty="Time"
+                                             From="0"
+                                             To="1000"
+                                             Duration="0:16:40"
+                                             RepeatBehavior="Forever"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Rectangle.Triggers>
+        </Rectangle>
+
+        <Grid Margin="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0"
+                    Style="{StaticResource AeroParameterPanelHeaderStyle}"
+                    Margin="0,0,0,12"
+                    CornerRadius="3">
+                <StackPanel>
+                    <TextBlock Text="{Binding Title}"
+                               Style="{StaticResource AeroParameterPanelHeaderTextStyle}"
+                               FontSize="16"/>
+                    <TextBlock Margin="0,4,0,0"
+                               Text="{Binding Description}"
+                               Style="{StaticResource AeroParameterPanelDescriptionTextStyle}"/>
+                    <TextBlock Margin="0,4,0,0"
+                               Text="{Binding StatusMessage}"
+                               Style="{StaticResource AeroParameterPanelDescriptionTextStyle}"/>
+                </StackPanel>
+            </Border>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="360"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0"
+                            Style="{StaticResource AeroWorkAreaStyle}"
+                            Background="Transparent">
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                      VerticalScrollBarVisibility="Auto"
+                                      Background="#10000000">
+                            <Grid Width="4000"
+                                  Height="4000"
+                                  Background="Transparent"
+                                  MouseLeftButtonDown="OnCanvasMouseLeftButtonDown">
+                                <ItemsControl ItemsSource="{Binding Links}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <Canvas/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Line X1="{Binding SourceX}"
+                                                  Y1="{Binding SourceY}"
+                                                  X2="{Binding TargetX}"
+                                                  Y2="{Binding TargetY}"
+                                                  Stroke="#A000F3FF"
+                                                  StrokeThickness="2">
+                                                <Line.Effect>
+                                                    <DropShadowEffect Color="#FF0099FF"
+                                                                      ShadowDepth="0"
+                                                                      BlurRadius="6"
+                                                                      Opacity="0.8"/>
+                                                </Line.Effect>
+                                            </Line>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <ItemsControl ItemsSource="{Binding Nodes}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <Canvas/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemContainerStyle>
+                                        <Style TargetType="ContentPresenter">
+                                            <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                                            <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                                        </Style>
+                                    </ItemsControl.ItemContainerStyle>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Thumb DragDelta="Node_DragDelta"
+                                                   DragCompleted="Node_DragCompleted"
+                                                   PreviewMouseLeftButtonDown="Node_PreviewMouseLeftButtonDown">
+                                                <Thumb.Template>
+                                                    <ControlTemplate TargetType="Thumb">
+                                                        <Grid Width="210"
+                                                              Height="98"
+                                                              Cursor="Hand"
+                                                              Background="Transparent"
+                                                              RenderTransformOrigin="0.5,0.5">
+                                                            <Grid.RenderTransform>
+                                                                <ScaleTransform x:Name="NodeScale"
+                                                                                ScaleX="1"
+                                                                                ScaleY="1"/>
+                                                            </Grid.RenderTransform>
+
+                                                            <Border x:Name="IdleBg"
+                                                                    Background="{StaticResource LateralFSNodeIdleBrush}">
+                                                                <Border.Effect>
+                                                                    <DropShadowEffect Color="Black"
+                                                                                      Direction="270"
+                                                                                      ShadowDepth="2"
+                                                                                      BlurRadius="3"
+                                                                                      Opacity="0.4"/>
+                                                                </Border.Effect>
+                                                            </Border>
+
+                                                            <Border x:Name="HoverBg"
+                                                                    Background="{StaticResource LateralFSNodeHoverBrush}"
+                                                                    Opacity="0">
+                                                                <Border.Effect>
+                                                                    <DropShadowEffect Color="Black"
+                                                                                      Direction="270"
+                                                                                      ShadowDepth="2"
+                                                                                      BlurRadius="5"
+                                                                                      Opacity="0.7"/>
+                                                                </Border.Effect>
+                                                            </Border>
+
+                                                            <Border x:Name="ActivatedBg"
+                                                                    Background="{StaticResource LateralFSNodeActivatedBrush}"
+                                                                    Visibility="Collapsed">
+                                                                <Border.Effect>
+                                                                    <DropShadowEffect Color="#FF00F3FF"
+                                                                                      Direction="270"
+                                                                                      ShadowDepth="0"
+                                                                                      BlurRadius="6"
+                                                                                      Opacity="0.9"/>
+                                                                </Border.Effect>
+                                                            </Border>
+
+                                                            <Grid Margin="12,10"
+                                                                  IsHitTestVisible="False">
+                                                                <Grid.RowDefinitions>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                    <RowDefinition Height="*"/>
+                                                                </Grid.RowDefinitions>
+
+                                                                <TextBlock Grid.Row="0"
+                                                                           Text="{Binding Name}"
+                                                                           Style="{StaticResource AeroTextBlockStyle}"
+                                                                           FontWeight="Bold"
+                                                                           FontSize="13"
+                                                                           Foreground="White"
+                                                                           TextTrimming="CharacterEllipsis"/>
+                                                                <TextBlock Grid.Row="1"
+                                                                           Margin="0,4,0,0"
+                                                                           Text="{Binding Kind}"
+                                                                           Style="{StaticResource AeroTextBlockStyle}"
+                                                                           FontSize="10"
+                                                                           Foreground="#E0FFFFFF"/>
+                                                                <TextBlock Grid.Row="2"
+                                                                           Margin="0,6,0,0"
+                                                                           Text="{Binding VirtualRootPath}"
+                                                                           Style="{StaticResource AeroTextBlockStyle}"
+                                                                           FontSize="9"
+                                                                           Foreground="#B0FFFFFF"
+                                                                           TextTrimming="CharacterEllipsis"/>
+                                                            </Grid>
+                                                        </Grid>
+                                                        <ControlTemplate.Triggers>
+                                                            <EventTrigger RoutedEvent="MouseEnter">
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <DoubleAnimation Storyboard.TargetName="HoverBg"
+                                                                                         Storyboard.TargetProperty="Opacity"
+                                                                                         To="1"
+                                                                                         Duration="0:0:0.15"/>
+                                                                        <DoubleAnimation Storyboard.TargetName="NodeScale"
+                                                                                         Storyboard.TargetProperty="ScaleX"
+                                                                                         To="1.05"
+                                                                                         Duration="0:0:0.15">
+                                                                            <DoubleAnimation.EasingFunction>
+                                                                                <QuadraticEase EasingMode="EaseOut"/>
+                                                                            </DoubleAnimation.EasingFunction>
+                                                                        </DoubleAnimation>
+                                                                        <DoubleAnimation Storyboard.TargetName="NodeScale"
+                                                                                         Storyboard.TargetProperty="ScaleY"
+                                                                                         To="1.05"
+                                                                                         Duration="0:0:0.15">
+                                                                            <DoubleAnimation.EasingFunction>
+                                                                                <QuadraticEase EasingMode="EaseOut"/>
+                                                                            </DoubleAnimation.EasingFunction>
+                                                                        </DoubleAnimation>
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </EventTrigger>
+                                                            <EventTrigger RoutedEvent="MouseLeave">
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <DoubleAnimation Storyboard.TargetName="HoverBg"
+                                                                                         Storyboard.TargetProperty="Opacity"
+                                                                                         To="0"
+                                                                                         Duration="0:0:0.25"/>
+                                                                        <DoubleAnimation Storyboard.TargetName="NodeScale"
+                                                                                         Storyboard.TargetProperty="ScaleX"
+                                                                                         To="1"
+                                                                                         Duration="0:0:0.25">
+                                                                            <DoubleAnimation.EasingFunction>
+                                                                                <QuadraticEase EasingMode="EaseOut"/>
+                                                                            </DoubleAnimation.EasingFunction>
+                                                                        </DoubleAnimation>
+                                                                        <DoubleAnimation Storyboard.TargetName="NodeScale"
+                                                                                         Storyboard.TargetProperty="ScaleY"
+                                                                                         To="1"
+                                                                                         Duration="0:0:0.25">
+                                                                            <DoubleAnimation.EasingFunction>
+                                                                                <QuadraticEase EasingMode="EaseOut"/>
+                                                                            </DoubleAnimation.EasingFunction>
+                                                                        </DoubleAnimation>
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </EventTrigger>
+                                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                <Setter TargetName="IdleBg" Property="Visibility" Value="Collapsed"/>
+                                                                <Setter TargetName="HoverBg" Property="Visibility" Value="Collapsed"/>
+                                                                <Setter TargetName="ActivatedBg" Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Thumb.Template>
+                                            </Thumb>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+                        </ScrollViewer>
+                    </Border>
+
+                    <Border Grid.Row="1"
+                            Margin="0,8,0,0"
+                            CornerRadius="4"
+                            BorderBrush="#30FFFFFF"
+                            BorderThickness="1"
+                            Background="#16000000">
+                        <Grid Margin="16,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel>
+                                <TextBlock Text="{DynamicResource LateralFileSystemTree.WorkingRoot}"
+                                           Style="{StaticResource AeroTextBlockStyle}"
+                                           Foreground="#E0FFFFFF"/>
+                                <TextBlock Margin="0,4,0,0"
+                                           Text="{Binding CurrentWorkingRootDirectoryDisplay}"
+                                           Style="{StaticResource AeroTextBlockStyle}"
+                                           Foreground="#A8FFFFFF"
+                                           TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+
+                            <Button Grid.Column="1"
+                                    MinWidth="116"
+                                    Height="32"
+                                    Style="{StaticResource AeroButtonStyle}"
+                                    Command="{Binding RefreshTreeCommand}"
+                                    Content="{DynamicResource LateralFileSystemTree.RefreshTree}"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <DockPanel Grid.Column="2">
+                    <Border DockPanel.Dock="Top"
+                            Style="{StaticResource AeroParameterPanelHeaderStyle}"
+                            Height="32"
+                            Padding="10,0"
+                            Margin="0,0,0,8"
+                            CornerRadius="2">
+                        <TextBlock Text="{DynamicResource LateralFileSystemTree.FolderDetails}"
+                                   Style="{StaticResource AeroParameterPanelHeaderTextStyle}"
+                                   FontSize="13"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+
+                    <Border DockPanel.Dock="Bottom"
+                            Margin="0,10,0,0"
+                            Background="{StaticResource SoftGlassSliceBrush}"
+                            CornerRadius="3">
+                        <StackPanel Margin="12">
+                            <Button Width="220"
+                                    Height="34"
+                                    HorizontalAlignment="Center"
+                                    Style="{StaticResource AeroButtonStyle}"
+                                    Command="{Binding CreateProjectionFolderCommand}"
+                                    Content="{DynamicResource LateralFileSystemTree.CreateProjectionFolder}"/>
+                            <Button Width="220"
+                                    Height="34"
+                                    Margin="0,8,0,0"
+                                    HorizontalAlignment="Center"
+                                    Style="{StaticResource AeroButtonStyle}"
+                                    Command="{Binding CreateInheritanceFolderCommand}"
+                                    Content="{DynamicResource LateralFileSystemTree.CreateInheritanceFolder}"/>
+                            <Button Width="220"
+                                    Height="34"
+                                    Margin="0,8,0,0"
+                                    HorizontalAlignment="Center"
+                                    Style="{StaticResource AeroButtonStyle}"
+                                    Command="{Binding MergeFolderCommand}"
+                                    Content="{DynamicResource LateralFileSystemTree.MergeFolder}"/>
+                            <Button Width="220"
+                                    Height="34"
+                                    Margin="0,8,0,0"
+                                    HorizontalAlignment="Center"
+                                    Style="{StaticResource AeroButtonStyle}"
+                                    Command="{Binding DeleteFolderCommand}"
+                                    Content="{DynamicResource LateralFileSystemTree.DeleteFolder}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource AeroWorkAreaStyle}"
+                            Background="Transparent">
+                        <Grid>
+                            <Border Background="{DynamicResource RibbonContentBackgroundBrush}" Opacity="0.2"/>
+                            <Grid Margin="12">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <Border Grid.Row="0"
+                                        Padding="10"
+                                        CornerRadius="6"
+                                        BorderBrush="#33FFFFFF"
+                                        BorderThickness="1"
+                                        Background="#16000000">
+                                    <StackPanel>
+                                        <TextBlock Text="{DynamicResource LateralFileSystemTree.ConnectionStatus}"
+                                                   Style="{StaticResource AeroTextBlockStyle}"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#F0FFFFFF"/>
+                                        <TextBlock Margin="0,6,0,0"
+                                                   Text="{Binding BackendAvailabilityText}"
+                                                   Style="{StaticResource AeroTextBlockStyle}"
+                                                   Foreground="#C8FFFFFF"
+                                                   TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <TextBlock Grid.Row="1"
+                                           Margin="0,16,0,0"
+                                           Text="{Binding SelectionPlaceholderText}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Foreground="#70FFFFFF"
+                                           TextAlignment="Center"
+                                           TextWrapping="Wrap">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource AeroTextBlockStyle}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding HasSelectedNode}" Value="False">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <ScrollViewer Grid.Row="1"
+                                              Grid.RowSpan="2"
+                                              Margin="0,16,0,0"
+                                              VerticalScrollBarVisibility="Auto"
+                                              Visibility="{Binding HasSelectedNode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <StackPanel>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="12"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Border Grid.Column="0"
+                                                    Padding="12"
+                                                    CornerRadius="6"
+                                                    BorderBrush="#33FFFFFF"
+                                                    BorderThickness="1"
+                                                    Background="#18000000">
+                                                <StackPanel>
+                                                    <TextBlock Text="{DynamicResource LateralFileSystemTree.HydratedSize}"
+                                                               Style="{StaticResource AeroTextBlockStyle}"
+                                                               Foreground="#D8FFFFFF"/>
+                                                    <TextBlock Margin="0,8,0,0"
+                                                               Text="{Binding SelectedNodeHydratedSizeText}"
+                                                               FontSize="24"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="White"/>
+                                                    <TextBlock Margin="0,8,0,0"
+                                                               Text="{Binding SelectedNodeFileSummaryText}"
+                                                               Style="{StaticResource AeroTextBlockStyle}"
+                                                               Foreground="#B8FFFFFF"
+                                                               TextWrapping="Wrap"/>
+                                                </StackPanel>
+                                            </Border>
+
+                                            <Border Grid.Column="2"
+                                                    Padding="12"
+                                                    CornerRadius="6"
+                                                    BorderBrush="#33FFFFFF"
+                                                    BorderThickness="1"
+                                                    Background="#18000000">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding SelectedNode.Name}"
+                                                               Style="{StaticResource AeroTextBlockStyle}"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="White"
+                                                               FontSize="14"/>
+                                                    <TextBlock Margin="0,8,0,0"
+                                                               Text="{Binding SelectedNodeKindText}"
+                                                               Style="{StaticResource AeroTextBlockStyle}"
+                                                               Foreground="#D8FFFFFF"/>
+                                                    <TextBlock Margin="0,4,0,0"
+                                                               Text="{Binding SelectedNodeOwnerText}"
+                                                               Style="{StaticResource AeroTextBlockStyle}"
+                                                               Foreground="#D8FFFFFF"/>
+                                                    <TextBlock Margin="0,4,0,0"
+                                                               Text="{Binding SelectedNodeParentText}"
+                                                               Style="{StaticResource AeroTextBlockStyle}"
+                                                               Foreground="#D8FFFFFF"/>
+                                                    <TextBlock Margin="0,8,0,0"
+                                                               Text="{Binding SelectedNodeVirtualRootText}"
+                                                               Style="{StaticResource AeroTextBlockStyle}"
+                                                               Foreground="#A8FFFFFF"
+                                                               TextWrapping="Wrap"/>
+                                                    <TextBlock Margin="0,4,0,0"
+                                                               Text="{Binding SelectedNodeProjectionSourceText}"
+                                                               Style="{StaticResource AeroTextBlockStyle}"
+                                                               Foreground="#A8FFFFFF"
+                                                               TextWrapping="Wrap"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </Grid>
+
+                                        <TextBlock Margin="0,12,0,0"
+                                                   Text="{Binding SelectedNodeStorageNote}"
+                                                   Style="{StaticResource AeroTextBlockStyle}"
+                                                   Foreground="#A8FFFFFF"
+                                                   TextWrapping="Wrap"/>
+
+                                        <DockPanel Margin="0,16,0,0">
+                                            <TextBlock DockPanel.Dock="Left"
+                                                       Text="{DynamicResource LateralFileSystemTree.FileResourceTree}"
+                                                       Style="{StaticResource AeroTextBlockStyle}"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="White"
+                                                       VerticalAlignment="Center"/>
+                                            <StackPanel DockPanel.Dock="Right">
+                                                <Button MinWidth="126"
+                                                        Height="30"
+                                                        Style="{StaticResource AeroButtonStyle}"
+                                                        Command="{Binding RefreshSelectedNodeFilesCommand}"
+                                                        ToolTip="{DynamicResource LateralFileSystemTree.RefreshFileView.ToolTip}"
+                                                        Content="{DynamicResource LateralFileSystemTree.RefreshFileView}"/>
+                                                <Button MinWidth="126"
+                                                        Height="30"
+                                                        Margin="0,8,0,0"
+                                                        Style="{StaticResource AeroButtonStyle}"
+                                                        Content="{DynamicResource LateralFileSystemTree.ReleaseLock}"/>
+                                            </StackPanel>
+                                        </DockPanel>
+
+                                        <TextBlock Margin="0,12,0,0"
+                                                   Text="{DynamicResource LateralFileSystemTree.LoadingFileTree}"
+                                                   Style="{StaticResource AeroTextBlockStyle}"
+                                                   Foreground="#A8FFFFFF"
+                                                   Visibility="{Binding IsLoadingSelectedNodeInspector, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                                        <TreeView Margin="0,12,0,0"
+                                                  ItemsSource="{Binding SelectedNodeFileTreeRoots}"
+                                                  Background="Transparent"
+                                                  BorderThickness="0"
+                                                  ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                            <TreeView.Resources>
+                                                <HierarchicalDataTemplate DataType="{x:Type viewModels:LateralFileSystemFileTreeNodeViewModel}"
+                                                                          ItemsSource="{Binding Children}">
+                                                    <StackPanel Orientation="Horizontal" Margin="0,2">
+                                                        <Image Width="16"
+                                                               Height="16"
+                                                               Margin="0,0,6,0"
+                                                               RenderOptions.BitmapScalingMode="HighQuality">
+                                                            <Image.Style>
+                                                                <Style TargetType="Image">
+                                                                    <Setter Property="Source" Value="pack://application:,,,/Resources/image.png"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsDirectory}" Value="True">
+                                                                            <Setter Property="Source" Value="pack://application:,,,/Resources/WorkFolder.png"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Image.Style>
+                                                        </Image>
+
+                                                        <StackPanel>
+                                                            <TextBlock Text="{Binding Name}"
+                                                                       Foreground="{DynamicResource PrimaryForeground}"
+                                                                       FontFamily="Segoe UI, Microsoft YaHei UI, Arial"
+                                                                       VerticalAlignment="Center"/>
+                                                            <TextBlock Text="{Binding DetailText}"
+                                                                       Foreground="#A8FFFFFF"
+                                                                       FontFamily="Segoe UI, Microsoft YaHei UI, Arial"
+                                                                       FontSize="11"
+                                                                       TextWrapping="Wrap"/>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </HierarchicalDataTemplate>
+
+                                                <Style TargetType="TreeViewItem">
+                                                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+                                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource PrimaryForeground}"/>
+                                                    <Setter Property="Margin" Value="1,1"/>
+                                                    <Setter Property="Padding" Value="4,2"/>
+                                                    <Setter Property="Background" Value="Transparent"/>
+                                                    <Setter Property="BorderThickness" Value="0"/>
+                                                </Style>
+                                            </TreeView.Resources>
+                                        </TreeView>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </DockPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

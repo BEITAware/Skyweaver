@@ -1,0 +1,49 @@
+<UserControl x:Class="Ferrita.PageControls.Session.Views.SessionPageView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:sessionList="clr-namespace:Ferrita.Panels.SessionList.Views"
+             xmlns:liveTasks="clr-namespace:Ferrita.Panels.LiveTasks.Views"
+             xmlns:documentWorkspace="clr-namespace:Ferrita.Panels.DocumentWorkspace.Views"
+             xmlns:multiFunctionArea="clr-namespace:Ferrita.Panels.MultiFunctionArea.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1200">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="ColSessionList" Width="1*" MinWidth="200"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition x:Name="ColChatArea" Width="3*" MinWidth="0"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition x:Name="ColFullView" Width="2.5*" MinWidth="0"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*" MinHeight="150"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="1*" MinHeight="150"/>
+            </Grid.RowDefinitions>
+
+            <sessionList:SessionListPanelView Grid.Row="0"
+                                               DataContext="{Binding SessionListPanel}"/>
+            <GridSplitter Grid.Row="1" Style="{DynamicResource AeroHorizontalSplitterStyle}"/>
+            <liveTasks:LiveTasksPanelView Grid.Row="2"
+                                           DataContext="{Binding LiveTasksPanel}"/>
+        </Grid>
+
+        <GridSplitter Grid.Column="1" Style="{DynamicResource AeroVerticalSplitterStyle}"
+                      DragStarted="GridSplitter_DragStarted" DragCompleted="GridSplitter_DragCompleted"/>
+
+        <Grid Grid.Column="2">
+            <documentWorkspace:DocumentWorkspacePanelView DataContext="{Binding DocumentWorkspacePanel}"/>
+        </Grid>
+
+        <GridSplitter x:Name="ChatFullViewSplitter" Grid.Column="3" Style="{DynamicResource AeroVerticalSplitterStyle}"
+                      DragStarted="GridSplitter_DragStarted" DragDelta="ChatFullViewSplitter_DragDelta" DragCompleted="GridSplitter_DragCompleted"/>
+
+        <Grid Grid.Column="4">
+            <multiFunctionArea:MultiFunctionAreaPanelView DataContext="{Binding MultiFunctionAreaPanel}"/>
+        </Grid>
+    </Grid>
+</UserControl>

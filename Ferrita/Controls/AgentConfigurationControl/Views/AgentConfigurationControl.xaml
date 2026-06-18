@@ -1,0 +1,779 @@
+<UserControl x:Class="Ferrita.Controls.AgentConfigurationControl.Views.AgentConfigurationControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="clr-namespace:Ferrita.Controls.AgentConfigurationControl.Models"
+             xmlns:viewModels="clr-namespace:Ferrita.Controls.AgentConfigurationControl.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewModels:AgentConfigurationControlViewModel, IsDesignTimeCreatable=True}"
+             d:DesignHeight="920"
+             d:DesignWidth="1220">
+    <UserControl.Resources>
+        <Style x:Key="ConfigurationListViewStyle"
+               TargetType="ListView"
+               BasedOn="{StaticResource AeroListViewStyle}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+        </Style>
+
+        <Style x:Key="ConfigurationListViewItemStyle"
+               TargetType="ListViewItem"
+               BasedOn="{StaticResource AeroListViewItemStyle}">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Grid>
+                            <Border x:Name="HoverOverlay"
+                                    Background="{StaticResource MenuItemHoverBrush}"
+                                    Opacity="0"
+                                    IsHitTestVisible="False"/>
+                            <Border x:Name="SelectedOverlay"
+                                    Background="{StaticResource MenuItemClickedBrush}"
+                                    Opacity="0"
+                                    IsHitTestVisible="False"/>
+                            <ContentPresenter/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" TargetName="HoverOverlay" Value="0.2"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Opacity" TargetName="SelectedOverlay" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="GlassCardBorderStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource ChatSessionHeaderBorderStyle}">
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Padding" Value="12,10"/>
+        </Style>
+
+        <Style x:Key="CapsuleBorderStyle"
+               TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource ButtonIdleBrush}"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="MinWidth" Value="58"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Margin" Value="0,0,6,6"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+        </Style>
+
+        <HierarchicalDataTemplate DataType="{x:Type models:XmlElementNodeDefinition}"
+                                  ItemsSource="{Binding Children}">
+            <TextBox MinWidth="140"
+                     Padding="4,2"
+                     Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+        </HierarchicalDataTemplate>
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource DocumentTabBackgroundBrush}">
+        <Grid Margin="18">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0"
+                        Margin="0,0,0,16">
+                <TextBlock Text="{Binding Title}"
+                           Style="{StaticResource AeroTextBlockStyle}"
+                           FontSize="16"
+                           FontWeight="SemiBold"/>
+                <TextBlock Margin="0,6,0,0"
+                           Text="{Binding Description}"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+
+            <Grid Grid.Row="1"
+                  Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="340"/>
+                    <ColumnDefinition Width="14"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <DockPanel Grid.Column="0">
+                    <StackPanel DockPanel.Dock="Top"
+                                Margin="0,0,0,10">
+                        <TextBlock Text="{DynamicResource AgentConfiguration.ListTitle}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"/>
+                        <WrapPanel Margin="0,10,0,0">
+                            <Border Style="{StaticResource CapsuleBorderStyle}">
+                                <TextBlock VerticalAlignment="Center"
+                                           FontSize="11"
+                                           Text="{Binding AgentSummaryText}"/>
+                            </Border>
+                        </WrapPanel>
+                    </StackPanel>
+
+                    <Grid DockPanel.Dock="Top"
+                          Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0"
+                                Command="{Binding AddAgentCommand}"
+                                Content="{DynamicResource Common.Add}"/>
+                        <Button Grid.Column="2"
+                                Command="{Binding DuplicateAgentCommand}"
+                                Content="{DynamicResource Common.Duplicate}"/>
+                        <Button Grid.Column="4"
+                                Command="{Binding RemoveAgentCommand}"
+                                Content="{DynamicResource Common.Delete}"/>
+                    </Grid>
+
+                    <Border CornerRadius="2"
+                            BorderThickness="1"
+                            Padding="4"
+                            SnapsToDevicePixels="True">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0.10059,1.65236"
+                                                 EndPoint="2.53982,1.65236"
+                                                 Opacity="0.5">
+                                <LinearGradientBrush.RelativeTransform>
+                                    <TransformGroup>
+                                        <SkewTransform CenterX="0.10059"
+                                                       CenterY="1.65236"
+                                                       AngleX="-59.7491"
+                                                       AngleY="0"/>
+                                        <RotateTransform CenterX="0.10059"
+                                                         CenterY="1.65236"
+                                                         Angle="-70.8836"/>
+                                    </TransformGroup>
+                                </LinearGradientBrush.RelativeTransform>
+                                <GradientStop Color="#3BFFFFFF" Offset="0"/>
+                                <GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>
+                                <GradientStop Color="#07FFFFFF" Offset="0.109195"/>
+                                <GradientStop Color="#04FFFFFF" Offset="0.298851"/>
+                                <GradientStop Color="#3AFFFFFF" Offset="0.327586"/>
+                                <GradientStop Color="#1AFFFFFF" Offset="0.465517"/>
+                                <GradientStop Color="#14FFFFFF" Offset="0.591954"/>
+                                <GradientStop Color="#05FFFFFF" Offset="0.758621"/>
+                                <GradientStop Color="#44FFFFFF" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Border.BorderBrush>
+                            <SolidColorBrush Color="#40000000"/>
+                        </Border.BorderBrush>
+
+                        <ListView ItemsSource="{Binding Agents}"
+                                  SelectedItem="{Binding SelectedAgent}"
+                                  Style="{StaticResource ConfigurationListViewStyle}"
+                                  ItemContainerStyle="{StaticResource ConfigurationListViewItemStyle}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate DataType="{x:Type models:AgentDefinition}">
+                                    <Border Style="{StaticResource GlassCardBorderStyle}" ClipToBounds="True">
+                                        <Grid>
+                                            <Image Source="{Binding AvatarPreviewPath}"
+                                                   Stretch="Uniform"
+                                                   Width="90"
+                                                   Height="90"
+                                                   HorizontalAlignment="Right"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,-20,-20"
+                                                   Opacity="0.2"
+                                                   IsHitTestVisible="False"/>
+
+                                             <StackPanel Margin="0,0,60,0">
+                                                 <TextBlock Text="{Binding DisplayNameOrFallback}"
+                                                            FontSize="14"
+                                                            FontWeight="SemiBold"
+                                                            TextWrapping="Wrap"/>
+                                                 <TextBlock Margin="0,4,0,0"
+                                                            Foreground="#D9FFFFFF"
+                                                            Text="{Binding AgentIdOrFallback}"
+                                                            TextWrapping="Wrap"/>
+                                                  <WrapPanel Margin="0,8,0,0">
+                                                      <Border Style="{StaticResource CapsuleBorderStyle}">
+                                                          <TextBlock VerticalAlignment="Center"
+                                                                     FontSize="11"
+                                                                     Text="{Binding StructuredModeText}"/>
+                                                      </Border>
+                                                      <Border Style="{StaticResource CapsuleBorderStyle}">
+                                                          <TextBlock VerticalAlignment="Center"
+                                                                     FontSize="11"
+                                                                     Text="{Binding RuntimeRoleText}"/>
+                                                      </Border>
+                                                  </WrapPanel>
+                                             </StackPanel>
+                                         </Grid>
+                                     </Border>
+                                 </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Border>
+                </DockPanel>
+
+                <Border Grid.Column="2"
+                        Style="{StaticResource GlassCardBorderStyle}">
+                    <Grid>
+                        <TextBlock HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Text="{DynamicResource AgentConfiguration.EmptySelection}"
+                                   Visibility="Collapsed">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedAgent}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel Visibility="{Binding HasSelectedAgent, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="96"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Width="82"
+                                            Height="82"
+                                            Background="{DynamicResource ChatAvatarBackgroundGlassBrush}"
+                                            CornerRadius="12">
+                                        <Image Width="56"
+                                               Height="56"
+                                               Source="{Binding SelectedAgent.AvatarPreviewPath}"
+                                               Stretch="Uniform"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <TextBox Grid.Column="1"
+                                             Margin="0,0,10,0"
+                                             VerticalContentAlignment="Center"
+                                             Text="{Binding SelectedAgent.AvatarPath, UpdateSourceTrigger=LostFocus}"/>
+                                    <Button Grid.Column="2"
+                                            Width="90"
+                                            Command="{Binding BrowseAvatarCommand}"
+                                            Content="{DynamicResource Common.Browse}"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel>
+                                        <TextBlock Text="{DynamicResource Common.DisplayName}"
+                                                   FontWeight="SemiBold"/>
+                                        <TextBox Margin="0,6,0,0"
+                                                 Text="{Binding SelectedAgent.DisplayName, UpdateSourceTrigger=LostFocus}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="{DynamicResource AgentConfiguration.AgentId}"
+                                                   FontWeight="SemiBold"/>
+                                        <TextBox Margin="0,6,0,0"
+                                                 Text="{Binding SelectedAgent.AgentId, UpdateSourceTrigger=LostFocus}"/>
+                                    </StackPanel>
+                                 </Grid>
+
+                                <StackPanel Margin="0,0,0,12">
+                                    <TextBlock Text="{DynamicResource AgentConfiguration.RuntimeRole}"
+                                               FontWeight="SemiBold"/>
+                                    <ComboBox Margin="0,6,0,0"
+                                              ItemsSource="{Binding RuntimeRoleOptions}"
+                                              DisplayMemberPath="DisplayName"
+                                              SelectedValuePath="Role"
+                                              SelectedValue="{Binding SelectedAgent.RuntimeRole, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <StackPanel Margin="0,10,0,0"
+                                                Visibility="{Binding IsSubAgentIntroductionVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Text="{DynamicResource AgentConfiguration.SubAgentIntroduction}"
+                                                   FontWeight="SemiBold"/>
+                                        <TextBox Margin="0,6,0,0"
+                                                 MinHeight="90"
+                                                 AcceptsReturn="True"
+                                                 TextWrapping="Wrap"
+                                                 VerticalScrollBarVisibility="Auto"
+                                                 Text="{Binding SelectedAgent.SubAgentIntroduction, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                 <StackPanel Margin="0,0,0,12">
+                                     <DockPanel>
+                                        <TextBlock Text="{DynamicResource AgentConfiguration.LanguageModel}"
+                                                   FontWeight="SemiBold"/>
+                                        <Button DockPanel.Dock="Right"
+                                                Width="120"
+                                                Command="{Binding ReloadLanguageModelCatalogCommand}"
+                                                                Content="{DynamicResource AgentConfiguration.RefreshModelCatalog}"/>
+                                    </DockPanel>
+
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="240"/>
+                                            <ColumnDefinition Width="12"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel>
+                                                    <TextBlock Text="{DynamicResource AgentConfiguration.SelectionMode}"
+                                                       FontWeight="SemiBold"/>
+                                            <ComboBox Margin="0,6,0,0"
+                                                      ItemsSource="{Binding LanguageModelSelectionModes}"
+                                                      DisplayMemberPath="DisplayName"
+                                                      SelectedValuePath="Mode"
+                                                      SelectedValue="{Binding SelectedAgent.LanguageModelSelectionMode, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="2">
+                                                    <TextBlock Text="{DynamicResource AgentConfiguration.Target}"
+                                                       FontWeight="SemiBold"/>
+                                            <Grid Margin="0,6,0,0">
+                                                <ComboBox ItemsSource="{Binding AvailableLanguageModels}"
+                                                          DisplayMemberPath="DisplayName"
+                                                          SelectedValuePath="Key"
+                                                          SelectedValue="{Binding SelectedAgent.SelectedLanguageModelKey, UpdateSourceTrigger=PropertyChanged}"
+                                                          Visibility="{Binding IsSpecificLanguageModelSelectionVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                                <ComboBox ItemsSource="{Binding AvailableCapabilityLayers}"
+                                                          DisplayMemberPath="DisplayName"
+                                                          SelectedValuePath="Key"
+                                                          SelectedValue="{Binding SelectedAgent.SelectedCapabilityLayerKey, UpdateSourceTrigger=PropertyChanged}"
+                                                          Visibility="{Binding IsCapabilityLayerSelectionVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Grid>
+
+                                     <TextBlock Margin="0,8,0,0"
+                                               Foreground="#FFD3F6FF"
+                                               TextWrapping="Wrap"
+                                               Text="{Binding SelectedAgentLanguageModelBindingSummary}"/>
+                                 </StackPanel>
+
+                                 <Border Margin="0,0,0,12"
+                                         Style="{StaticResource GlassCardBorderStyle}">
+                                     <StackPanel>
+                                         <DockPanel>
+                                             <TextBlock Text="{DynamicResource AgentConfiguration.DefaultToolKits}"
+                                                        FontWeight="SemiBold"/>
+                                             <Button DockPanel.Dock="Right"
+                                                     Width="120"
+                                                     Command="{Binding AddDefaultToolKitCommand}"
+                                                            Content="{DynamicResource AgentConfiguration.DefaultToolKits.Add}"/>
+                                         </DockPanel>
+
+                                         <TextBlock Margin="0,8,0,0"
+                                                    Foreground="#D9FFFFFF"
+                                                    TextWrapping="Wrap"
+                                                   Text="{DynamicResource AgentConfiguration.DefaultToolKits.Hint}"/>
+
+                                         <ListView Margin="0,10,0,0"
+                                                   ItemsSource="{Binding SelectedAgent.DefaultToolKits}"
+                                                   Style="{StaticResource ConfigurationListViewStyle}"
+                                                   ItemContainerStyle="{StaticResource ConfigurationListViewItemStyle}">
+                                             <ListView.ItemTemplate>
+                                                 <DataTemplate DataType="{x:Type models:AgentToolKitSelectionDefinition}">
+                                                     <Border Style="{StaticResource GlassCardBorderStyle}">
+                                                         <Grid>
+                                                             <Grid.ColumnDefinitions>
+                                                                 <ColumnDefinition Width="*"/>
+                                                                 <ColumnDefinition Width="Auto"/>
+                                                                 <ColumnDefinition Width="Auto"/>
+                                                                 <ColumnDefinition Width="Auto"/>
+                                                             </Grid.ColumnDefinitions>
+
+                                                             <ComboBox Grid.Column="0"
+                                                                       ItemsSource="{Binding DataContext.AvailableToolKits, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                       DisplayMemberPath="DisplayName"
+                                                                       SelectedValuePath="Key"
+                                                                       SelectedValue="{Binding ToolKitKey, UpdateSourceTrigger=PropertyChanged}"/>
+                                                             <Button Grid.Column="1"
+                                                                     Width="60"
+                                                                     Margin="8,0,0,0"
+                                                                     Command="{Binding DataContext.MoveDefaultToolKitUpCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                     CommandParameter="{Binding}"
+                                                                        Content="{DynamicResource Common.MoveUp}"/>
+                                                             <Button Grid.Column="2"
+                                                                     Width="60"
+                                                                     Margin="8,0,0,0"
+                                                                     Command="{Binding DataContext.MoveDefaultToolKitDownCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                     CommandParameter="{Binding}"
+                                                                        Content="{DynamicResource Common.MoveDown}"/>
+                                                             <Button Grid.Column="3"
+                                                                     Width="60"
+                                                                     Margin="8,0,0,0"
+                                                                     Command="{Binding DataContext.RemoveDefaultToolKitCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                     CommandParameter="{Binding}"
+                                                                        Content="{DynamicResource Common.Delete}"/>
+                                                         </Grid>
+                                                     </Border>
+                                                 </DataTemplate>
+                                             </ListView.ItemTemplate>
+                                         </ListView>
+                                     </StackPanel>
+                                 </Border>
+
+                                 <Border Margin="0,0,0,12"
+                                         Style="{StaticResource GlassCardBorderStyle}">
+                                     <StackPanel>
+                                         <DockPanel>
+                                             <CheckBox Content="启用Persona"
+                                                       FontWeight="SemiBold"
+                                                       IsChecked="{Binding SelectedAgent.IsPersonaEnabled, UpdateSourceTrigger=PropertyChanged}"/>
+                                             <Button DockPanel.Dock="Right"
+                                                     Width="120"
+                                                     Command="{Binding ReloadPersonasCommand}"
+                                                     Content="刷新Persona"/>
+                                         </DockPanel>
+
+                                         <Grid Margin="0,10,0,0">
+                                             <Grid.ColumnDefinitions>
+                                                 <ColumnDefinition Width="150"/>
+                                                 <ColumnDefinition Width="12"/>
+                                                 <ColumnDefinition Width="*"/>
+                                             </Grid.ColumnDefinitions>
+
+                                             <TextBlock Grid.Column="0"
+                                                        VerticalAlignment="Center"
+                                                        Text="选用的Persona"
+                                                        FontWeight="SemiBold"/>
+                                             <ComboBox Grid.Column="2"
+                                                       ItemsSource="{Binding AvailablePersonas}"
+                                                       DisplayMemberPath="DisplayName"
+                                                       SelectedValuePath="Key"
+                                                       SelectedValue="{Binding SelectedAgent.SelectedPersonaId, UpdateSourceTrigger=PropertyChanged}"/>
+                                         </Grid>
+                                     </StackPanel>
+                                 </Border>
+
+                                 <StackPanel Margin="0,0,0,12">
+                                     <TextBlock Text="{DynamicResource AgentConfiguration.SystemPrompt}"
+                                                FontWeight="SemiBold"/>
+                                    <TextBox Margin="0,6,0,0"
+                                             MinHeight="110"
+                                             AcceptsReturn="True"
+                                             TextWrapping="Wrap"
+                                             VerticalScrollBarVisibility="Auto"
+                                             Text="{Binding SelectedAgent.SystemPrompt, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+
+                                <StackPanel Margin="0,0,0,12">
+                                    <DockPanel>
+                                        <TextBlock Text="{DynamicResource AgentConfiguration.ToolPermissions}"
+                                                   FontWeight="SemiBold"/>
+                                        <WrapPanel DockPanel.Dock="Right"
+                                                   HorizontalAlignment="Right">
+                                            <Button Width="120"
+                                                    Margin="8,0,0,0"
+                                                    Command="{Binding ReloadToolsCommand}"
+                                                        Content="{DynamicResource AgentConfiguration.ReloadTools}"/>
+                                            <Button Width="96"
+                                                    Margin="8,0,0,0"
+                                                    Command="{Binding AllowAllToolPermissionsCommand}"
+                                                        Content="{DynamicResource Common.AllowAll}"/>
+                                            <Button Width="96"
+                                                    Margin="8,0,0,0"
+                                                    Command="{Binding DisableAllToolPermissionsCommand}"
+                                                        Content="{DynamicResource Common.DisableAll}"/>
+                                            <Button Width="108"
+                                                    Margin="8,0,0,0"
+                                                    Command="{Binding RequireConfirmationAllToolPermissionsCommand}"
+                                                        Content="{DynamicResource Common.RequireConfirmationAll}"/>
+                                        </WrapPanel>
+                                    </DockPanel>
+
+                                    <ListView Margin="0,8,0,0"
+                                              ItemsSource="{Binding SelectedAgent.ToolPermissions}"
+                                              Style="{StaticResource ConfigurationListViewStyle}"
+                                              ItemContainerStyle="{StaticResource ConfigurationListViewItemStyle}">
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate DataType="{x:Type models:AgentToolPermissionDefinition}">
+                                                <Border MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                        Style="{StaticResource GlassCardBorderStyle}">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="220"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <StackPanel Margin="0,0,12,0">
+                                                            <DockPanel LastChildFill="False">
+                                                                <TextBlock FontSize="13"
+                                                                           FontWeight="SemiBold"
+                                                                           Text="{Binding ToolDisplayName}"/>
+                                                                <Border DockPanel.Dock="Right"
+                                                                        Margin="8,0,0,0"
+                                                                        Padding="6,2"
+                                                                        Background="#33000000"
+                                                                        BorderBrush="#44FFFFFF"
+                                                                        BorderThickness="1"
+                                                                        CornerRadius="8"
+                                                                        Visibility="{Binding IsMissing, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                                    <TextBlock FontSize="10"
+                                                                               Text="{DynamicResource AgentConfiguration.ToolMissing}"/>
+                                                                </Border>
+                                                            </DockPanel>
+                                                            <TextBlock Margin="0,6,0,0"
+                                                                       Foreground="#D9FFFFFF"
+                                                                       TextWrapping="Wrap"
+                                                                       MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Grid}}"
+                                                                       Text="{Binding ToolDescription}"/>
+                                                            <TextBlock Margin="0,8,0,0"
+                                                                       Foreground="#FFD3F6FF"
+                                                                       Text="{Binding GlobalAvailabilityText}"/>
+                                                        </StackPanel>
+
+                                                        <ComboBox Grid.Column="1"
+                                                                  VerticalAlignment="Center"
+                                                                  ItemsSource="{Binding DataContext.PermissionModes, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                  DisplayMemberPath="DisplayName"
+                                                                  SelectedValuePath="Mode"
+                                                                  SelectedValue="{Binding Permission, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
+                                </StackPanel>
+
+                                <Border Style="{StaticResource GlassCardBorderStyle}">
+                                    <StackPanel>
+                                        <CheckBox IsChecked="{Binding SelectedAgent.IsStructuredXmlIO, UpdateSourceTrigger=PropertyChanged}"
+                                                  Content="{DynamicResource AgentConfiguration.UseStructuredXmlIo}"
+                                                  FontWeight="SemiBold"/>
+
+                                        <Border Margin="0,10,0,0">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsStructuredEditorVisible}" Value="True">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="12"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel>
+                                                    <TextBlock Text="{DynamicResource AgentConfiguration.InputDescription}"
+                                                               FontWeight="SemiBold"/>
+                                                    <TextBox Margin="0,6,0,0"
+                                                             MinHeight="90"
+                                                             AcceptsReturn="True"
+                                                             TextWrapping="Wrap"
+                                                             VerticalScrollBarVisibility="Auto"
+                                                             Text="{Binding SelectedAgent.InputDescription, UpdateSourceTrigger=PropertyChanged}"/>
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Column="2">
+                                                    <TextBlock Text="{DynamicResource AgentConfiguration.OutputDescription}"
+                                                               FontWeight="SemiBold"/>
+                                                    <TextBox Margin="0,6,0,0"
+                                                             MinHeight="90"
+                                                             AcceptsReturn="True"
+                                                             TextWrapping="Wrap"
+                                                             VerticalScrollBarVisibility="Auto"
+                                                             Text="{Binding SelectedAgent.OutputDescription, UpdateSourceTrigger=PropertyChanged}"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <Border Margin="0,10,0,0"
+                                                Visibility="{Binding IsStructuredEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="12"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel>
+                                                    <TextBlock Text="{DynamicResource AgentConfiguration.InputXmlNodes}"
+                                                               FontWeight="SemiBold"/>
+                                                    <Grid Margin="0,8,0,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="6"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="6"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Button Grid.Column="0"
+                                                                Command="{Binding AddInputRootNodeCommand}"
+                                                                Content="{DynamicResource AgentConfiguration.AddRootChildNode}"/>
+                                                        <Button Grid.Column="2"
+                                                                Command="{Binding AddInputChildNodeCommand}"
+                                                                Content="{DynamicResource AgentConfiguration.AddChildNode}"/>
+                                                        <Button Grid.Column="4"
+                                                                Command="{Binding RemoveInputNodeCommand}"
+                                                                Content="{DynamicResource Common.Remove}"/>
+                                                    </Grid>
+                                                    <TreeView x:Name="InputSchemaTreeView"
+                                                              Margin="0,8,0,0"
+                                                              Height="240"
+                                                              ItemsSource="{Binding SelectedAgent.InputSchemaRoot.Children}"
+                                                              Style="{StaticResource AeroTreeViewStyle}"
+                                                              ItemContainerStyle="{StaticResource AeroTreeViewItemStyle}"
+                                                              SelectedItemChanged="OnInputSchemaTreeViewSelectedItemChanged"/>
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Column="2">
+                                                    <TextBlock Text="{DynamicResource AgentConfiguration.OutputXmlNodes}"
+                                                               FontWeight="SemiBold"/>
+                                                    <Grid Margin="0,8,0,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="6"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="6"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Button Grid.Column="0"
+                                                                Command="{Binding AddOutputRootNodeCommand}"
+                                                                Content="{DynamicResource AgentConfiguration.AddRootChildNode}"/>
+                                                        <Button Grid.Column="2"
+                                                                Command="{Binding AddOutputChildNodeCommand}"
+                                                                Content="{DynamicResource AgentConfiguration.AddChildNode}"/>
+                                                        <Button Grid.Column="4"
+                                                                Command="{Binding RemoveOutputNodeCommand}"
+                                                                Content="{DynamicResource Common.Remove}"/>
+                                                    </Grid>
+                                                    <TreeView x:Name="OutputSchemaTreeView"
+                                                              Margin="0,8,0,0"
+                                                              Height="240"
+                                                              ItemsSource="{Binding SelectedAgent.OutputSchemaRoot.Children}"
+                                                              Style="{StaticResource AeroTreeViewStyle}"
+                                                              ItemContainerStyle="{StaticResource AeroTreeViewItemStyle}"
+                                                              SelectedItemChanged="OnOutputSchemaTreeViewSelectedItemChanged"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Margin="0,12,0,0"
+                                        Style="{StaticResource GlassCardBorderStyle}">
+                                    <StackPanel>
+                                        <TextBlock Text="{DynamicResource AgentConfiguration.PromptBuildTest}"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="13"/>
+                                        <TextBlock Margin="0,6,0,0"
+                                                   Foreground="#D9FFFFFF"
+                                                   TextWrapping="Wrap"
+                                                   Text="{Binding PromptBuildHintText}"/>
+
+                                        <Grid Margin="0,12,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="8"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="12"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Button Grid.Column="0"
+                                                    Width="108"
+                                                    Height="32"
+                                                    Command="{Binding BuildPromptPreviewCommand}"
+                                                    Content="{DynamicResource AgentConfiguration.BuildPrompt}"/>
+
+                                            <Button Grid.Column="2"
+                                                    Width="96"
+                                                    Height="32"
+                                                    Command="{Binding CopyPromptPreviewCommand}"
+                                                    Content="{DynamicResource AgentConfiguration.CopyResult}"/>
+
+                                            <TextBox Grid.Column="4"
+                                                     MinHeight="120"
+                                                     Padding="8,6"
+                                                     AcceptsReturn="True"
+                                                     VerticalScrollBarVisibility="Auto"
+                                                     TextWrapping="Wrap"
+                                                     IsReadOnly="True"
+                                                     Text="{Binding PromptBuildResult, Mode=OneWay}"/>
+                                        </Grid>
+
+                                        <TextBlock Margin="0,8,0,0"
+                                                   TextWrapping="Wrap"
+                                                   Text="{Binding PromptBuildStatusMessage}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="#FFD3F6FF"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding HasPromptBuildError}" Value="True">
+                                                            <Setter Property="Foreground" Value="#FFFFB3B3"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Border Grid.Row="2"
+                    Style="{StaticResource GlassCardBorderStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="{Binding ConfigurationFilePath}"
+                                   Foreground="#D9FFFFFF"
+                                   TextWrapping="Wrap"/>
+                        <TextBlock Margin="0,6,0,0"
+                                   Text="{Binding StatusMessage}"
+                                   TextWrapping="Wrap">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="#FFD3F6FF"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasValidationError}" Value="True">
+                                            <Setter Property="Foreground" Value="#FFFFB3B3"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+                    <Button Grid.Column="1"
+                            Margin="12,0,0,0"
+                            Width="180"
+                            Command="{Binding OpenConfigurationDirectoryCommand}"
+                            Content="{DynamicResource Common.OpenConfigurationDirectory}"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

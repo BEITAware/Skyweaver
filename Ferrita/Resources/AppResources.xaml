@@ -1,0 +1,25 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:converters="clr-namespace:Ferrita.Converters"
+                    xmlns:chatSessionControlViews="clr-namespace:Ferrita.Controls.ChatSessionControl.Views"
+                    xmlns:chatSessionControlViewModels="clr-namespace:Ferrita.Controls.ChatSessionControl.ViewModels"
+                    xmlns:nodeEditorControlViews="clr-namespace:Ferrita.Controls.NodeEditorControl.Views"
+                    xmlns:nodeEditorControlViewModels="clr-namespace:Ferrita.Controls.NodeEditorControl.ViewModels">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Themes/ThemesDictionary.xaml"/>
+        <ResourceDictionary Source="Controls/ControlsDictionary.xaml"/>
+        <ResourceDictionary Source="ScriptsControls/ScriptsControlsDictionary.xaml"/>
+        <ResourceDictionary Source="Controls/CheckBoxComboBoxStyles.xaml"/>
+        <ResourceDictionary Source="Controls/AeroComboBoxStyles.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
+    <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+
+    <DataTemplate DataType="{x:Type chatSessionControlViewModels:ChatSessionControlViewModel}">
+        <chatSessionControlViews:ChatSessionControl/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type nodeEditorControlViewModels:NodeEditorControlViewModel}">
+        <nodeEditorControlViews:NodeEditorControl/>
+    </DataTemplate>
+</ResourceDictionary>

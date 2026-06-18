@@ -1,0 +1,93 @@
+<Window x:Class="Ferrita.Windows.LateralFileSystemFolderDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{DynamicResource LateralFolder.Title}"
+        Width="520"
+        Height="270"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Icon="/Ferrita;component/Resources/Ferrita.ico"
+        Background="{DynamicResource Layer_1}">
+    <Border Padding="16"
+            BorderBrush="{DynamicResource BorderBrush}"
+            BorderThickness="1"
+            Background="{DynamicResource Layer_1}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock x:Name="PromptTextBlock"
+                       Grid.Row="0"
+                       FontSize="15"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,12"
+                       Text="{DynamicResource LateralFolder.Prompt.Create}"/>
+
+            <TextBlock x:Name="ParentHintTextBlock"
+                       Grid.Row="1"
+                       Margin="0,0,0,12"
+                       Visibility="Collapsed"
+                       Foreground="#FFD6E8FF"
+                       TextWrapping="Wrap"/>
+
+            <TextBlock Grid.Row="2"
+                       Text="{DynamicResource LateralFolder.DisplayName.Label}"
+                       Margin="0,0,0,6"/>
+
+            <TextBox x:Name="NameTextBox"
+                     Grid.Row="3"
+                     Height="30"
+                     VerticalContentAlignment="Center"
+                     Margin="0,0,0,12"/>
+
+            <TextBlock x:Name="SourcePathLabel"
+                       Grid.Row="4"
+                       Text="{DynamicResource LateralFolder.SourcePath.Label}"
+                       Margin="0,0,0,6"/>
+
+            <Grid x:Name="SourcePathPanel"
+                  Grid.Row="5"
+                  Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox x:Name="SourcePathTextBox"
+                         Grid.Column="0"
+                         Height="30"
+                         VerticalContentAlignment="Center"/>
+
+                <Button Grid.Column="2"
+                        Width="96"
+                        Height="30"
+                        Click="BrowseButton_Click"
+                        Content="{DynamicResource Common.BrowseEllipsis}"/>
+            </Grid>
+
+            <StackPanel Grid.Row="6"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <Button x:Name="ConfirmButton"
+                        Width="108"
+                        Height="30"
+                        Margin="0,0,8,0"
+                        IsDefault="True"
+                        Click="ConfirmButton_Click"
+                        Content="{DynamicResource Common.Confirm}"/>
+                <Button Width="92"
+                        Height="30"
+                        IsCancel="True"
+                        Content="{DynamicResource Common.Cancel}"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

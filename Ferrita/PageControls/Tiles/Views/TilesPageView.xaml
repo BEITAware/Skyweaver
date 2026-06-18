@@ -1,0 +1,1347 @@
+<UserControl x:Class="Ferrita.PageControls.Tiles.Views.TilesPageView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:PresentationOptions="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+             xmlns:local="clr-namespace:Ferrita.PageControls.Tiles.Views"
+             x:Name="Root"
+             mc:Ignorable="d"
+             d:DesignHeight="700"
+             d:DesignWidth="1100"
+             PreviewMouseMove="OnPageViewPreviewMouseMove"
+             PreviewMouseLeftButtonUp="OnPageViewPreviewMouseLeftButtonUp">
+
+    <UserControl.Resources>
+        <local:SizeToBoolConverter x:Key="SizeToBoolConverter"/>
+        <local:TileImageBrushConverter x:Key="TileImageBrushConverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+
+        <!-- 性能优化画刷：冻结画刷，避免在ItemsControl列表项模板中重复实例化，减少渲染开销 -->
+        <LinearGradientBrush x:Key="SelectedTextForegroundBrush" StartPoint="0,0" EndPoint="0,1" PresentationOptions:Freeze="True">
+            <GradientStop Color="#FFFFFFFF" Offset="0"/>
+            <GradientStop Color="#FF90D0FF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="TileBaseBorderBrush" StartPoint="0.5,0" EndPoint="0.5,1" PresentationOptions:Freeze="True">
+            <GradientStop Color="#55FFFFFF" Offset="0"/>
+            <GradientStop Color="#25FFFFFF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="TileBaseBackgroundBrush" StartPoint="0.5,0" EndPoint="0.5,1" PresentationOptions:Freeze="True">
+            <GradientStop Color="#25171718" Offset="0"/>
+            <GradientStop Color="#15FFFFFF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <RadialGradientBrush x:Key="TileBaseRadialBackgroundBrush" RadiusX="1.27972" RadiusY="0.744935" Center="0.819209,0.896333" GradientOrigin="0.819209,0.896333" PresentationOptions:Freeze="True">
+            <RadialGradientBrush.GradientStops>
+                <GradientStop Color="#00171718" Offset="0"/>
+                <GradientStop Color="#00BBBBBB" Offset="0.88"/>
+                <GradientStop Color="#20FFFFFF" Offset="1"/>
+            </RadialGradientBrush.GradientStops>
+            <RadialGradientBrush.RelativeTransform>
+                <TransformGroup>
+                    <SkewTransform CenterX="0.819209" CenterY="0.896333" AngleX="-6.516" AngleY="0"/>
+                    <RotateTransform CenterX="0.819209" CenterY="0.896333" Angle="-33.36"/>
+                </TransformGroup>
+            </RadialGradientBrush.RelativeTransform>
+        </RadialGradientBrush>
+
+        <LinearGradientBrush x:Key="TileDimBorderBrush" StartPoint="0.5,0" EndPoint="0.5,1" PresentationOptions:Freeze="True">
+            <GradientStop Color="#866B99D0" Offset="0"/>
+            <GradientStop Color="#981C4675" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="TileDimBackgroundBrush" StartPoint="0.5,0" EndPoint="0.5,1" PresentationOptions:Freeze="True">
+            <GradientStop Color="#04171718" Offset="0"/>
+            <GradientStop Color="#05FFFFFF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <RadialGradientBrush x:Key="TileDimRadialBackgroundBrush" RadiusX="1.27972" RadiusY="0.744936" Center="0.81921,0.896333" GradientOrigin="0.81921,0.896333" PresentationOptions:Freeze="True">
+            <RadialGradientBrush.GradientStops>
+                <GradientStop Color="#04171718" Offset="0.00899281"/>
+                <GradientStop Color="#00BBBBBB" Offset="0.888489"/>
+                <GradientStop Color="#08FFFFFF" Offset="1"/>
+            </RadialGradientBrush.GradientStops>
+            <RadialGradientBrush.RelativeTransform>
+                <TransformGroup>
+                    <SkewTransform CenterX="0.81921" CenterY="0.896333" AngleX="-6.51607" AngleY="0"/>
+                    <RotateTransform CenterX="0.81921" CenterY="0.896333" Angle="-33.3648"/>
+                </TransformGroup>
+            </RadialGradientBrush.RelativeTransform>
+        </RadialGradientBrush>
+
+        <RadialGradientBrush x:Key="TileBrightRadialBackgroundBrush" RadiusX="1.27972" RadiusY="0.744937" Center="0.819209,0.896334" GradientOrigin="0.819209,0.896334" PresentationOptions:Freeze="True">
+            <RadialGradientBrush.GradientStops>
+                <GradientStop Color="#04171718" Offset="0"/>
+                <GradientStop Color="#00BBBBBB" Offset="0.901079"/>
+                <GradientStop Color="#22FFFFFF" Offset="1"/>
+            </RadialGradientBrush.GradientStops>
+            <RadialGradientBrush.RelativeTransform>
+                <TransformGroup>
+                    <SkewTransform CenterX="0.819209" CenterY="0.896334" AngleX="-6.51622" AngleY="0"/>
+                    <RotateTransform CenterX="0.819209" CenterY="0.896334" Angle="-33.3648"/>
+                </TransformGroup>
+            </RadialGradientBrush.RelativeTransform>
+        </RadialGradientBrush>
+
+        <LinearGradientBrush x:Key="TileHoverGlowBorderBrush" StartPoint="0,0" EndPoint="1,1" PresentationOptions:Freeze="True">
+            <GradientStop Color="#A0FFFFFF" Offset="0"/>
+            <GradientStop Color="#40FFFFFF" Offset="0.5"/>
+            <GradientStop Color="#A0A0C0FF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <RadialGradientBrush x:Key="TileHoverGlowBackgroundBrush" RadiusX="1" RadiusY="1" Center="0.5,0.5" GradientOrigin="0.5,0.5" PresentationOptions:Freeze="True">
+            <GradientStop Color="#18FFFFFF" Offset="0"/>
+            <GradientStop Color="#00FFFFFF" Offset="1"/>
+        </RadialGradientBrush>
+
+        <LinearGradientBrush x:Key="LockVisualStrokeBrush" StartPoint="0.5,-0.0677364" EndPoint="0.5,1.06773" PresentationOptions:Freeze="True">
+            <LinearGradientBrush.GradientStops>
+                <GradientStop Color="#FF1E518E" Offset="0"/>
+                <GradientStop Color="#FF061F3C" Offset="1"/>
+            </LinearGradientBrush.GradientStops>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="LockVisualFillBrush" StartPoint="0.5,-0.0712617" EndPoint="0.5,1.07126" PresentationOptions:Freeze="True">
+            <LinearGradientBrush.GradientStops>
+                <GradientStop Color="#04171718" Offset="0"/>
+                <GradientStop Color="#05FFFFFF" Offset="1"/>
+            </LinearGradientBrush.GradientStops>
+        </LinearGradientBrush>
+
+        <RadialGradientBrush x:Key="LockVisualRadialFillBrush" RadiusX="1.27972" RadiusY="0.744936" Center="0.81921,0.896333" GradientOrigin="0.81921,0.896333" PresentationOptions:Freeze="True">
+            <RadialGradientBrush.GradientStops>
+                <GradientStop Color="#490D0D1C" Offset="0"/>
+                <GradientStop Color="#145754AE" Offset="0.944245"/>
+                <GradientStop Color="#237F7BFF" Offset="1"/>
+            </RadialGradientBrush.GradientStops>
+            <RadialGradientBrush.RelativeTransform>
+                <TransformGroup>
+                    <SkewTransform CenterX="0.81921" CenterY="0.896333" AngleX="-6.51601" AngleY="0"/>
+                    <RotateTransform CenterX="0.81921" CenterY="0.896333" Angle="-33.3647"/>
+                </TransformGroup>
+            </RadialGradientBrush.RelativeTransform>
+        </RadialGradientBrush>
+
+        <LinearGradientBrush x:Key="TileRunningBackgroundBrush" StartPoint="0,0" EndPoint="0,1" PresentationOptions:Freeze="True">
+            <GradientStop Color="#1000B0FF" Offset="0"/>
+            <GradientStop Color="#080050A0" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="TileCompletedBorderBrush" StartPoint="0,0" EndPoint="1,1" PresentationOptions:Freeze="True">
+            <GradientStop Color="#FFE5A93B" Offset="0"/>
+            <GradientStop Color="#FFFFDF73" Offset="0.5"/>
+            <GradientStop Color="#FFB8860B" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="TileCompletedBackgroundBrush" StartPoint="0.5,0" EndPoint="0.5,1" PresentationOptions:Freeze="True">
+            <GradientStop Color="#2500F5D4" Offset="0"/>
+            <GradientStop Color="#1501B5A0" Offset="1"/>
+        </LinearGradientBrush>
+
+        <RadialGradientBrush x:Key="AeroBgDefaultBrush" Center="0.5,0.88" GradientOrigin="0.5,0.88" RadiusX="0.5" RadiusY="0.5" PresentationOptions:Freeze="True">
+            <GradientStop Color="#36D6FE" Offset="0"/>
+            <GradientStop Color="#0C6AB5" Offset="0.45"/>
+            <GradientStop Color="#01162B" Offset="0.9"/>
+        </RadialGradientBrush>
+
+        <RadialGradientBrush x:Key="AeroBgHoverBrush" Center="0.5,0.85" GradientOrigin="0.5,0.85" RadiusX="0.5" RadiusY="0.5" PresentationOptions:Freeze="True">
+            <GradientStop Color="#5CE2FF" Offset="0"/>
+            <GradientStop Color="#0D7CD4" Offset="0.45"/>
+            <GradientStop Color="#01162B" Offset="0.9"/>
+        </RadialGradientBrush>
+
+        <RadialGradientBrush x:Key="AeroBgActiveBrush" Center="0.5,0.9" GradientOrigin="0.5,0.9" RadiusX="0.5" RadiusY="0.5" PresentationOptions:Freeze="True">
+            <GradientStop Color="#20B0D6" Offset="0"/>
+            <GradientStop Color="#084C83" Offset="0.5"/>
+            <GradientStop Color="#000C18" Offset="0.9"/>
+        </RadialGradientBrush>
+
+        <RadialGradientBrush x:Key="AeroNeonGlowBrush" Center="0.5,0.5" GradientOrigin="0.5,0.5" RadiusX="0.5" RadiusY="0.5" PresentationOptions:Freeze="True">
+            <GradientStop Color="#965AD2FF" Offset="0"/>
+            <GradientStop Color="#335AD2FF" Offset="0.45"/>
+            <GradientStop Color="#005AD2FF" Offset="0.7"/>
+        </RadialGradientBrush>
+
+        <LinearGradientBrush x:Key="AeroGlassReflectBrush" StartPoint="0.5,0" EndPoint="0.5,1" PresentationOptions:Freeze="True">
+            <GradientStop Color="#73FFFFFF" Offset="0"/>
+            <GradientStop Color="#38FFFFFF" Offset="0.4"/>
+            <GradientStop Color="#00FFFFFF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="ArrowIconStrokeBrush" StartPoint="0,0" EndPoint="1,1" PresentationOptions:Freeze="True">
+            <GradientStop Color="#FFFFFF" Offset="0"/>
+            <GradientStop Color="#D6ECFF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <Style x:Key="HeaderButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontFamily" Value="Segoe UI Light, Microsoft YaHei Light, Arial"/>
+            <Setter Property="FontSize" Value="32"/>
+            <Setter Property="FontWeight" Value="Light"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Background="Transparent">
+                            <TextBlock x:Name="TextDisplay"
+                                       Text="{TemplateBinding Content}"
+                                       FontFamily="{TemplateBinding FontFamily}"
+                                       FontSize="{TemplateBinding FontSize}"
+                                       FontWeight="{TemplateBinding FontWeight}">
+                                <TextBlock.Foreground>
+                                    <LinearGradientBrush x:Name="TextBrush" StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop x:Name="Stop1" Color="#7A8CB0E0" Offset="0"/>
+                                        <GradientStop x:Name="Stop2" Color="#4A5A80B0" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </TextBlock.Foreground>
+                            </TextBlock>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation Storyboard.TargetName="Stop1" Storyboard.TargetProperty="Color" To="#B0C2EAEE" Duration="0:0:0.2"/>
+                                            <ColorAnimation Storyboard.TargetName="Stop2" Storyboard.TargetProperty="Color" To="#8090A0D0" Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation Storyboard.TargetName="Stop1" Storyboard.TargetProperty="Color" To="#7A8CB0E0" Duration="0:0:0.2"/>
+                                            <ColorAnimation Storyboard.TargetName="Stop2" Storyboard.TargetProperty="Color" To="#4A5A80B0" Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                            <Trigger Property="Tag" Value="Selected">
+                                <Setter TargetName="TextDisplay" Property="FontWeight" Value="Normal"/>
+                                <Setter TargetName="TextDisplay" Property="Foreground" Value="{StaticResource SelectedTextForegroundBrush}"/>
+                                <Setter TargetName="TextDisplay" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect Color="#FF00D8FF" BlurRadius="15" Opacity="0.85" ShadowDepth="0"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="Transparent" PreviewMouseWheel="OnPreviewMouseWheel">
+        <Rectangle Stretch="Fill" IsHitTestVisible="False">
+            <Rectangle.Fill>
+                <SolidColorBrush Color="White"/>
+            </Rectangle.Fill>
+            <Rectangle.Effect>
+                <local:TilesPageBackgroundEffect Time="{Binding BackgroundTime, ElementName=Root}"
+                                                 AspectRatio="{Binding BackgroundAspectRatio, ElementName=Root}"/>
+            </Rectangle.Effect>
+        </Rectangle>
+
+        <Grid Margin="60,30,60,30">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,30" VerticalAlignment="Center">
+                <Button x:Name="BtnLiveTiles"
+                        Content="{DynamicResource TilesPage.Header.LiveTiles}"
+                        Click="BtnLiveTiles_Click"
+                        Style="{StaticResource HeaderButtonStyle}"/>
+                <Button x:Name="BtnLiveSession"
+                        Content="{DynamicResource TilesPage.Header.LiveSession}"
+                        Click="BtnLiveSession_Click"
+                        Style="{StaticResource HeaderButtonStyle}"
+                        Margin="40,0,0,0"/>
+            </StackPanel>
+
+            <Grid Grid.Row="1" ClipToBounds="True">
+                <Grid x:Name="PageLiveTiles" RenderTransformOrigin="0.5,0.5">
+                    <Grid.RenderTransform>
+                        <TranslateTransform X="0" Y="0"/>
+                    </Grid.RenderTransform>
+
+                    <ScrollViewer x:Name="TileScrollViewer"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Hidden"
+                                  Focusable="False"
+                                  CanContentScroll="False"
+                                  Margin="10,0,10,0">
+                        <ScrollViewer.Resources>
+                            <Style TargetType="ScrollBar">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Opacity" Value="0.6"/>
+                            </Style>
+                        </ScrollViewer.Resources>
+
+                        <ItemsControl x:Name="TileGroupsItemsControl"
+                                      ItemsSource="{Binding TileGroups}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="20,0,20,30">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+
+                                        <TextBox Text="{Binding DisplayName, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                 Margin="2,0,0,12"
+                                                 Padding="6,0,6,2"
+                                                 MinWidth="120"
+                                                 FontSize="22"
+                                                 FontWeight="Light"
+                                                 Foreground="#CCFFFFFF"
+                                                 CaretBrush="White"
+                                                 Background="Transparent"
+                                                 BorderThickness="0"
+                                                 FontFamily="Segoe UI Light, Microsoft YaHei Light"/>
+
+                                        <Grid x:Name="GroupGrid"
+                                              Grid.Row="1"
+                                              Width="792"
+                                              Height="528"
+                                              ClipToBounds="False">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="132"/>
+                                                <RowDefinition Height="132"/>
+                                                <RowDefinition Height="132"/>
+                                                <RowDefinition Height="132"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="132"/>
+                                                <ColumnDefinition Width="132"/>
+                                                <ColumnDefinition Width="132"/>
+                                                <ColumnDefinition Width="132"/>
+                                                <ColumnDefinition Width="132"/>
+                                                <ColumnDefinition Width="132"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <ItemsControl Grid.RowSpan="4"
+                                                          Grid.ColumnSpan="6"
+                                                          ItemsSource="{Binding Tiles}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <Grid>
+                                                            <Grid.RowDefinitions>
+                                                                <RowDefinition Height="132"/>
+                                                                <RowDefinition Height="132"/>
+                                                                <RowDefinition Height="132"/>
+                                                                <RowDefinition Height="132"/>
+                                                            </Grid.RowDefinitions>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="132"/>
+                                                                <ColumnDefinition Width="132"/>
+                                                                <ColumnDefinition Width="132"/>
+                                                                <ColumnDefinition Width="132"/>
+                                                                <ColumnDefinition Width="132"/>
+                                                                <ColumnDefinition Width="132"/>
+                                                            </Grid.ColumnDefinitions>
+                                                        </Grid>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemContainerStyle>
+                                                    <Style TargetType="ContentPresenter">
+                                                        <Setter Property="Grid.Row" Value="{Binding Row}"/>
+                                                        <Setter Property="Grid.Column" Value="{Binding Column}"/>
+                                                        <Setter Property="Grid.RowSpan" Value="{Binding RowSpan}"/>
+                                                        <Setter Property="Grid.ColumnSpan" Value="{Binding ColumnSpan}"/>
+                                                        <Setter Property="Panel.ZIndex" Value="0"/>
+                                                        <EventSetter Event="Loaded" Handler="OnTilePresenterLoaded"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsDragging}" Value="True">
+                                                                <Setter Property="Panel.ZIndex" Value="20"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ItemsControl.ItemContainerStyle>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Button AutomationProperties.AutomationId="{Binding Code}" Command="{Binding RunCommand}"
+                                                                Margin="6"
+                                                                Cursor="Hand"
+                                                                Background="Transparent"
+                                                                BorderThickness="0"
+                                                                FocusVisualStyle="{x:Null}"
+                                                                PreviewMouseLeftButtonDown="OnTilePreviewMouseLeftButtonDown">
+                                                            <Button.ContextMenu>
+                                                                <ContextMenu>
+                                                                    <MenuItem Header="{DynamicResource TilesPage.ContextMenu.Run}" Command="{Binding RunCommand}"/>
+                                                                    <MenuItem Header="{DynamicResource TilesPage.ContextMenu.RemoveTile}" Command="{Binding RemoveCommand}"/>
+                                                                    <MenuItem Header="{DynamicResource TilesPage.ContextMenu.LockUnlock}" Command="{Binding ToggleLockCommand}"/>
+                                                                     <MenuItem Header="查看回复" Command="{Binding ViewRepliesCommand}" Visibility="{Binding IsStickyNote, Converter={StaticResource BoolToVisConverter}}"/>
+                                                                    <Separator Background="#33FFFFFF"/>
+                                                                    <MenuItem Header="{DynamicResource TilesPage.ContextMenu.Size}">
+                                                                        <MenuItem Header="{DynamicResource TilesPage.ContextMenu.Size.Small}" Command="{Binding SetSizeCommand}" CommandParameter="1x1" IsCheckable="True" IsChecked="{Binding Size, Converter={StaticResource SizeToBoolConverter}, ConverterParameter=1x1}"/>
+                                                                        <MenuItem Header="{DynamicResource TilesPage.ContextMenu.Size.Wide}" Command="{Binding SetSizeCommand}" CommandParameter="1x2" IsCheckable="True" IsChecked="{Binding Size, Converter={StaticResource SizeToBoolConverter}, ConverterParameter=1x2}"/>
+                                                                        <MenuItem Header="{DynamicResource TilesPage.ContextMenu.Size.Large}" Command="{Binding SetSizeCommand}" CommandParameter="2x2" IsCheckable="True" IsChecked="{Binding Size, Converter={StaticResource SizeToBoolConverter}, ConverterParameter=2x2}"/>
+                                                                    </MenuItem>
+                                                                    <MenuItem Header="{DynamicResource TilesPage.ContextMenu.CustomImage}" Command="{Binding CustomImageCommand}"/>
+                                                                    <MenuItem Header="{DynamicResource TilesPage.ContextMenu.CustomIcon}" Visibility="{Binding IsNon2x2, Converter={StaticResource BoolToVisConverter}}">
+                                                                        <MenuItem Header="{DynamicResource TilesPage.ContextMenu.CustomIcon.Create}" Command="{Binding SetIconCommand}" CommandParameter="pack://application:,,,/Resources/Create.png"/>
+                                                                        <MenuItem Header="{DynamicResource TilesPage.ContextMenu.CustomIcon.Chores}" Command="{Binding SetIconCommand}" CommandParameter="pack://application:,,,/Resources/Chores.png"/>
+                                                                        <MenuItem Header="{DynamicResource TilesPage.ContextMenu.CustomIcon.Investigate}" Command="{Binding SetIconCommand}" CommandParameter="pack://application:,,,/Resources/Investigate.png"/>
+                                                                        <MenuItem Header="{DynamicResource TilesPage.ContextMenu.CustomIcon.Default}" Command="{Binding SetIconCommand}" CommandParameter="pack://application:,,,/Resources/Default.png"/>
+                                                                    </MenuItem>
+                                                                </ContextMenu>
+                                                            </Button.ContextMenu>
+                                                            <Button.Template>
+                                                                <ControlTemplate TargetType="Button">
+                                                                    <Grid x:Name="TileRoot"
+                                                                          RenderTransformOrigin="0.5,0.5"
+                                                                          CacheMode="BitmapCache">
+                                                                        <Grid.RenderTransform>
+                                                                            <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                                                        </Grid.RenderTransform>
+
+                                                                        <Border x:Name="BaseBorder" CornerRadius="4" BorderThickness="1" BorderBrush="{StaticResource TileBaseBorderBrush}" Background="{StaticResource TileBaseBackgroundBrush}"/>
+
+                                                                        <Border x:Name="BaseRadialBorder" CornerRadius="4" Opacity="0.75" Background="{StaticResource TileBaseRadialBackgroundBrush}"/>
+
+                                                                        <Border x:Name="DimLayer" CornerRadius="4" BorderThickness="1" Opacity="0" IsHitTestVisible="False" BorderBrush="{StaticResource TileDimBorderBrush}" Background="{StaticResource TileDimBackgroundBrush}"/>
+
+                                                                        <Border x:Name="DimRadialLayer" CornerRadius="4" Opacity="0" IsHitTestVisible="False" Background="{StaticResource TileDimRadialBackgroundBrush}"/>
+
+                                                                        <Border x:Name="BrightLayer" CornerRadius="4" BorderThickness="1" BorderBrush="#FFFFFFFF" Opacity="0" IsHitTestVisible="False" Background="{StaticResource TileBrightRadialBackgroundBrush}"/>
+
+                                                                        <Border x:Name="CustomImageBorder"
+                                                                                CornerRadius="4"
+                                                                                Margin="1"
+                                                                                Background="{Binding CustomImageSource, Converter={StaticResource TileImageBrushConverter}}"
+                                                                                Visibility="Collapsed"/>
+
+                                                                        <Border x:Name="HoverGlow" BorderThickness="1" CornerRadius="4" Opacity="0" IsHitTestVisible="False" BorderBrush="{StaticResource TileHoverGlowBorderBrush}" Background="{StaticResource TileHoverGlowBackgroundBrush}"/>
+
+                                                                        <Border x:Name="LockVisual" CornerRadius="4" Opacity="0" IsHitTestVisible="False">
+                                                                            <Viewbox Width="388.195" Height="324.089" Canvas.Left="0" Canvas.Top="0">
+                                                                                <Canvas Width="388.195" Height="324.089">
+                                                                                    <Path Width="388.195" Height="324.089" Canvas.Left="-0.000244141" Canvas.Top="0" Stretch="Fill" Data="F1 M 4.99976,1L 383.195,1C 385.404,1 387.195,2.79102 387.195,5L 387.195,319.089C 387.195,321.299 385.404,323.089 383.195,323.089L 4.99976,323.089C 2.79053,323.089 0.999756,321.299 0.999756,319.089L 0.999756,5C 0.999756,2.79102 2.79053,1 4.99976,1 Z" StrokeThickness="2" StrokeLineJoin="Round" Stroke="{StaticResource LockVisualStrokeBrush}" Fill="{StaticResource LockVisualFillBrush}"/>
+                                                                                    <Path Width="386.195" Height="322.089" Canvas.Left="0.999756" Canvas.Top="1" Stretch="Fill" Data="F1 M 4.99976,1L 383.195,1C 385.404,1 387.195,2.79102 387.195,5L 387.195,319.089C 387.195,321.299 385.404,323.089 383.195,323.089L 4.99976,323.089C 2.79053,323.089 0.999756,321.299 0.999756,319.089L 0.999756,5C 0.999756,2.79102 2.79053,1 4.99976,1 Z" Fill="{StaticResource LockVisualRadialFillBrush}"/>
+                                                                                </Canvas>
+                                                                            </Viewbox>
+                                                                        </Border>
+
+                                                                        <Border x:Name="RunningBackground" CornerRadius="4" Opacity="0" BorderThickness="1" BorderBrush="#3500B0FF" IsHitTestVisible="False" Background="{StaticResource TileRunningBackgroundBrush}"/>
+
+                                                                        <Border x:Name="CompletedBackground" CornerRadius="4" Opacity="0" BorderThickness="1.5" IsHitTestVisible="False" BorderBrush="{StaticResource TileCompletedBorderBrush}" Background="{StaticResource TileCompletedBackgroundBrush}"/>
+                                                                          <Grid x:Name="StickyNoteContainer" Visibility="Collapsed">
+                                                                              <Grid.ColumnDefinitions>
+                                                                                  <ColumnDefinition Width="12"/>
+                                                                                  <ColumnDefinition Width="*"/>
+                                                                              </Grid.ColumnDefinitions>
+                                                                              <Grid.RowDefinitions>
+                                                                                  <RowDefinition Height="*"/>
+                                                                                  <RowDefinition Height="12"/>
+                                                                              </Grid.RowDefinitions>
+
+                                                                              <!-- 纸张底板拼接 -->
+                                                                              <!-- 1. 主体部分 (横跨两列，占满第0行) -->
+                                                                              <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" CornerRadius="4,4,0,0" IsHitTestVisible="False">
+                                                                                  <Border.Style>
+                                                                                      <Style TargetType="Border">
+                                                                                          <Style.Triggers>
+                                                                                              <DataTrigger Binding="{Binding StickyNoteColor}" Value="Beige">
+                                                                                                  <Setter Property="Background" Value="#38FFF5E6"/>
+                                                                                              </DataTrigger>
+                                                                                              <DataTrigger Binding="{Binding StickyNoteColor}" Value="Green">
+                                                                                                  <Setter Property="Background" Value="#2CE2F4E7"/>
+                                                                                              </DataTrigger>
+                                                                                              <DataTrigger Binding="{Binding StickyNoteColor}" Value="Purple">
+                                                                                                  <Setter Property="Background" Value="#2CF2E6FF"/>
+                                                                                              </DataTrigger>
+                                                                                          </Style.Triggers>
+                                                                                      </Style>
+                                                                                  </Border.Style>
+                                                                              </Border>
+
+                                                                              <!-- 2. 右下角部分 (占第1行, 第1列) -->
+                                                                              <Border Grid.Row="1" Grid.Column="1" CornerRadius="0,0,4,0" IsHitTestVisible="False">
+                                                                                  <Border.Style>
+                                                                                      <Style TargetType="Border">
+                                                                                          <Style.Triggers>
+                                                                                              <DataTrigger Binding="{Binding StickyNoteColor}" Value="Beige">
+                                                                                                  <Setter Property="Background" Value="#38FFF5E6"/>
+                                                                                              </DataTrigger>
+                                                                                              <DataTrigger Binding="{Binding StickyNoteColor}" Value="Green">
+                                                                                                  <Setter Property="Background" Value="#2CE2F4E7"/>
+                                                                                              </DataTrigger>
+                                                                                              <DataTrigger Binding="{Binding StickyNoteColor}" Value="Purple">
+                                                                                                  <Setter Property="Background" Value="#2CF2E6FF"/>
+                                                                                              </DataTrigger>
+                                                                                          </Style.Triggers>
+                                                                                      </Style>
+                                                                                  </Border.Style>
+                                                                              </Border>
+
+                                                                              <!-- 3. 左下角切角拼块 (占第1行, 第0列) -->
+                                                                              <!-- 绘制纸底板在该格内的部分：即右上三角形 (0,0) -> (12,0) -> (12,12) -->
+                                                                              <Path Grid.Row="1" Grid.Column="0" Data="M 0,0 L 12,0 L 12,12 Z" Stretch="Fill" IsHitTestVisible="False">
+                                                                                  <Path.Style>
+                                                                                      <Style TargetType="Path">
+                                                                                          <Style.Triggers>
+                                                                                              <DataTrigger Binding="{Binding StickyNoteColor}" Value="Beige">
+                                                                                                  <Setter Property="Fill" Value="#38FFF5E6"/>
+                                                                                              </DataTrigger>
+                                                                                              <DataTrigger Binding="{Binding StickyNoteColor}" Value="Green">
+                                                                                                  <Setter Property="Fill" Value="#2CE2F4E7"/>
+                                                                                              </DataTrigger>
+                                                                                              <DataTrigger Binding="{Binding StickyNoteColor}" Value="Purple">
+                                                                                                  <Setter Property="Fill" Value="#2CF2E6FF"/>
+                                                                                              </DataTrigger>
+                                                                                          </Style.Triggers>
+                                                                                      </Style>
+                                                                                  </Path.Style>
+                                                                              </Path>
+
+                                                                              <!-- 真正输入框 (横跨所有行列，保留 Margin 留白以避免内容贴边) -->
+                                                                              <TextBox Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="2"
+                                                                                       x:Name="StickyNoteTextBox"
+                                                                                       Margin="12,12,12,16"
+                                                                                       Text="{Binding StickyNoteText, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                                                       AcceptsReturn="True"
+                                                                                       TextWrapping="Wrap"
+                                                                                       VerticalScrollBarVisibility="Auto"
+                                                                                       BorderThickness="0"
+                                                                                       FontSize="12"
+                                                                                       Foreground="#EFFFFFFF"
+                                                                                       Background="Transparent"
+                                                                                       CaretBrush="White"
+                                                                                       VerticalAlignment="Stretch"
+                                                                                       HorizontalAlignment="Stretch">
+                                                                                  <TextBox.Style>
+                                                                                      <Style TargetType="TextBox">
+                                                                                          <Setter Property="Template">
+                                                                                              <Setter.Value>
+                                                                                                  <ControlTemplate TargetType="TextBox">
+                                                                                                      <Border Background="Transparent">
+                                                                                                          <ScrollViewer x:Name="PART_ContentHost"/>
+                                                                                                      </Border>
+                                                                                                  </ControlTemplate>
+                                                                                              </Setter.Value>
+                                                                                          </Setter>
+                                                                                      </Style>
+                                                                                  </TextBox.Style>
+                                                                              </TextBox>
+
+                                                                              <!-- 左下角折页组件 (占第1行, 第0列) -->
+                                                                              <!-- 它是翻折过来的角：直角顶点也是在右上 (12,0) -->
+                                                                              <Path Grid.Row="1" Grid.Column="0" Data="M 0,0 L 12,0 L 12,12 Z" Stretch="Fill" IsHitTestVisible="False">
+                                                                                  <Path.Style>
+                                                                                      <Style TargetType="Path">
+                                                                                          <Style.Triggers>
+                                                                                              <DataTrigger Binding="{Binding StickyNoteColor}" Value="Beige">
+                                                                                                  <Setter Property="Fill" Value="#D0FFE4B5"/>
+                                                                                              </DataTrigger>
+                                                                                              <DataTrigger Binding="{Binding StickyNoteColor}" Value="Green">
+                                                                                                  <Setter Property="Fill" Value="#D0C0F0C0"/>
+                                                                                              </DataTrigger>
+                                                                                              <DataTrigger Binding="{Binding StickyNoteColor}" Value="Purple">
+                                                                                                  <Setter Property="Fill" Value="#D0E0D0F0"/>
+                                                                                              </DataTrigger>
+                                                                                          </Style.Triggers>
+                                                                                      </Style>
+                                                                                  </Path.Style>
+                                                                                  <Path.Effect>
+                                                                                      <DropShadowEffect Color="Black" BlurRadius="3" ShadowDepth="1" Direction="45" Opacity="0.4"/>
+                                                                                  </Path.Effect>
+                                                                              </Path>
+                                                                                <!-- Aero风格警告/感叹号图标 -->
+                                                                                <Grid x:Name="AeroWarningIcon" 
+                                                                                      Grid.ColumnSpan="2" Grid.RowSpan="2"
+                                                                                      Width="22" Height="22" 
+                                                                                      HorizontalAlignment="Right" VerticalAlignment="Top" 
+                                                                                      Margin="0,-4,-4,0" 
+                                                                                      Cursor="Hand"
+                                                                                      Visibility="{Binding HasUnreadReplies, Converter={StaticResource BoolToVisConverter}}"
+                                                                                      MouseEnter="AeroWarningIcon_MouseEnter">
+                                                                                    <Grid.Resources>
+                                                                                        <LinearGradientBrush x:Key="AeroBgBrush" StartPoint="0,0" EndPoint="0,1">
+                                                                                            <GradientStop Color="#A0FF5252" Offset="0"/>
+                                                                                            <GradientStop Color="#C0D32F2F" Offset="1"/>
+                                                                                        </LinearGradientBrush>
+                                                                                        <RadialGradientBrush x:Key="AeroGlowBrush">
+                                                                                            <GradientStop Color="#60FFFFFF" Offset="0"/>
+                                                                                            <GradientStop Color="#00FFFFFF" Offset="1"/>
+                                                                                        </RadialGradientBrush>
+                                                                                        <LinearGradientBrush x:Key="AeroGlassBrush" StartPoint="0,0" EndPoint="0,1">
+                                                                                            <GradientStop Color="#80FFFFFF" Offset="0"/>
+                                                                                            <GradientStop Color="#00FFFFFF" Offset="1"/>
+                                                                                        </LinearGradientBrush>
+                                                                                    </Grid.Resources>
+                                                                                    <Grid>
+                                                                                        <Grid.Clip>
+                                                                                            <EllipseGeometry Center="11,11" RadiusX="11" RadiusY="11"/>
+                                                                                        </Grid.Clip>
+                                                                                        <Border Background="{StaticResource AeroBgBrush}"/>
+                                                                                        <Ellipse Fill="{StaticResource AeroGlowBrush}" Opacity="0.8"/>
+                                                                                        <Ellipse Fill="{StaticResource AeroGlassBrush}" Width="18" Height="11" VerticalAlignment="Top" Margin="2,0.5,2,0"/>
+                                                                                    </Grid>
+                                                                                    <Ellipse Stroke="#000812" StrokeThickness="1"/>
+                                                                                    <TextBlock Text="!" 
+                                                                                               Foreground="White" 
+                                                                                               FontWeight="ExtraBold" 
+                                                                                               FontSize="13" 
+                                                                                               HorizontalAlignment="Center" 
+                                                                                               VerticalAlignment="Center" 
+                                                                                               Margin="0,-1,0,0">
+                                                                                        <TextBlock.Effect>
+                                                                                            <DropShadowEffect Color="Black" BlurRadius="2" ShadowDepth="1" Opacity="0.8"/>
+                                                                                        </TextBlock.Effect>
+                                                                                    </TextBlock>
+                                                                                    <Grid.ToolTip>
+                                                                                        <ToolTip Background="Transparent" BorderThickness="0" HasDropShadow="True">
+                                                                                            <Border CornerRadius="8" Background="#CC101D30" BorderBrush="#8036D6FE" BorderThickness="1.5" Padding="12,8" MaxWidth="300">
+                                                                                                <Border.Effect>
+                                                                                                    <DropShadowEffect Color="#FF36D6FE" BlurRadius="12" ShadowDepth="0" Opacity="0.5"/>
+                                                                                                </Border.Effect>
+                                                                                                <StackPanel>
+                                                                                                    <TextBlock Text="最新代理回复 (3日内)" Foreground="#FF36D6FE" FontSize="12" FontWeight="Bold" Margin="0,0,0,6"/>
+                                                                                                    <ItemsControl ItemsSource="{Binding ThreeDaysReplies}">
+                                                                                                        <ItemsControl.ItemTemplate>
+                                                                                                            <DataTemplate>
+                                                                                                                <StackPanel Margin="0,3,0,3">
+                                                                                                                    <Grid>
+                                                                                                                        <Grid.ColumnDefinitions>
+                                                                                                                            <ColumnDefinition Width="Auto"/>
+                                                                                                                            <ColumnDefinition Width="*"/>
+                                                                                                                            <ColumnDefinition Width="Auto"/>
+                                                                                                                        </Grid.ColumnDefinitions>
+                                                                                                                        <TextBlock Text="{Binding Creator}" Foreground="#FFFFDF73" FontSize="11" FontWeight="SemiBold"/>
+                                                                                                                        <TextBlock Grid.Column="2" Text="{Binding DisplayDateTime}" Foreground="#80FFFFFF" FontSize="9" HorizontalAlignment="Right" Margin="10,0,0,0"/>
+                                                                                                                    </Grid>
+                                                                                                                    <TextBlock Text="{Binding Content}" Foreground="White" FontSize="11" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                                                                                                                    <Border BorderBrush="#20FFFFFF" BorderThickness="0,0,0,1" Margin="0,4,0,2"/>
+                                                                                                                </StackPanel>
+                                                                                                            </DataTemplate>
+                                                                                                        </ItemsControl.ItemTemplate>
+                                                                                                    </ItemsControl>
+                                                                                                </StackPanel>
+                                                                                            </Border>
+                                                                                        </ToolTip>
+                                                                                    </Grid.ToolTip>
+                                                                                </Grid>
+                                                                          </Grid>
+
+                                                                        <Grid Margin="15" IsHitTestVisible="False">
+                                                                            <Grid.RowDefinitions>
+                                                                                <RowDefinition Height="Auto"/>
+                                                                                <RowDefinition Height="*"/>
+                                                                                <RowDefinition Height="Auto"/>
+                                                                            </Grid.RowDefinitions>
+
+                                                                            <ContentControl x:Name="IconControl"
+                                                                                            Content="{Binding}"
+                                                                                            Width="42"
+                                                                                            Height="42"
+                                                                                            HorizontalAlignment="Left"
+                                                                                            VerticalAlignment="Top">
+                                                                                <ContentControl.ContentTemplate>
+                                                                                    <DataTemplate>
+                                                                                        <Grid>
+                                                                                            <Path x:Name="SvgPath"
+                                                                                                  Data="{Binding Icon}"
+                                                                                                  Fill="#E8F4FF"
+                                                                                                  Stretch="Uniform"
+                                                                                                  HorizontalAlignment="Center"
+                                                                                                  VerticalAlignment="Center"
+                                                                                                  Visibility="Visible"/>
+                                                                                            <Image x:Name="PngImage"
+                                                                                                   Source="{Binding Icon}"
+                                                                                                   Stretch="Uniform"
+                                                                                                   HorizontalAlignment="Center"
+                                                                                                   VerticalAlignment="Center"
+                                                                                                   Visibility="Collapsed"/>
+                                                                                        </Grid>
+                                                                                        <DataTemplate.Triggers>
+                                                                                            <DataTrigger Binding="{Binding IsImageIcon}" Value="True">
+                                                                                                <Setter TargetName="SvgPath" Property="Visibility" Value="Collapsed"/>
+                                                                                                <Setter TargetName="PngImage" Property="Visibility" Value="Visible"/>
+                                                                                            </DataTrigger>
+                                                                                        </DataTemplate.Triggers>
+                                                                                    </DataTemplate>
+                                                                                </ContentControl.ContentTemplate>
+                                                                            </ContentControl>
+
+                                                                            <TextBlock x:Name="NameText"
+                                                                                       Grid.Row="2"
+                                                                                       Text="{Binding Name}"
+                                                                                       Foreground="#EFEFEF"
+                                                                                       FontSize="14"
+                                                                                       FontWeight="SemiBold"
+                                                                                       FontFamily="Segoe UI, Microsoft YaHei"
+                                                                                       TextTrimming="CharacterEllipsis"
+                                                                                       VerticalAlignment="Bottom"
+                                                                                       HorizontalAlignment="Left"/>
+
+                                                                            <!-- Live Session Start Text on top-left -->
+                                                                            <TextBlock x:Name="LiveSessionText"
+                                                                                       Grid.RowSpan="3"
+                                                                                       Text="{DynamicResource TilesPage.LiveSession.StartText}"
+                                                                                       Foreground="#EFEFEF"
+                                                                                       FontSize="14"
+                                                                                       FontWeight="SemiBold"
+                                                                                       FontFamily="Segoe UI, Microsoft YaHei"
+                                                                                       TextTrimming="CharacterEllipsis"
+                                                                                       HorizontalAlignment="Left"
+                                                                                       VerticalAlignment="Top"
+                                                                                       Visibility="Collapsed"/>
+
+                                                                            <!-- Live Session Aero Play Button on bottom-right -->
+                                                                            <Grid x:Name="LiveSessionAeroButton"
+                                                                                  Grid.RowSpan="3"
+                                                                                  Width="42"
+                                                                                  Height="42"
+                                                                                  HorizontalAlignment="Right"
+                                                                                  VerticalAlignment="Bottom"
+                                                                                  Visibility="Collapsed">
+                                                                                <Grid.Effect>
+                                                                                    <DropShadowEffect x:Name="AeroGlow" Color="#36D6FE" BlurRadius="6" Opacity="0" ShadowDepth="0"/>
+                                                                                </Grid.Effect>
+                                                                                <Grid>
+                                                                                    <Grid.Clip>
+                                                                                        <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21"/>
+                                                                                    </Grid.Clip>
+                                                                                    <Border x:Name="AeroBgDefault" Background="{StaticResource AeroBgDefaultBrush}"/>
+                                                                                    <Border x:Name="AeroBgHover" Opacity="0" Background="{StaticResource AeroBgHoverBrush}"/>
+                                                                                    <Border x:Name="AeroBgActive" Opacity="0" Background="{StaticResource AeroBgActiveBrush}"/>
+                                                                                    <Ellipse x:Name="AeroNeonGlow" Width="38" Height="46" VerticalAlignment="Bottom" Margin="0,0,0,-12" Opacity="0.8" Fill="{StaticResource AeroNeonGlowBrush}">
+                                                                                        <Ellipse.Effect>
+                                                                                            <BlurEffect Radius="4"/>
+                                                                                        </Ellipse.Effect>
+                                                                                    </Ellipse>
+                                                                                    <Ellipse x:Name="AeroGlassReflect" Width="36" Height="24" VerticalAlignment="Top" Margin="3,1,3,0" Opacity="1" Fill="{StaticResource AeroGlassReflectBrush}"/>
+                                                                                </Grid>
+                                                                                <Ellipse Width="42" Height="42" StrokeThickness="1" Stroke="#000812"/>
+                                                                                <Ellipse Width="40" Height="40" StrokeThickness="1" Opacity="0.3" Stroke="White" Margin="1"/>
+                                                                                <Viewbox Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-3.5,0,0,0">
+                                                                                    <Path x:Name="ArrowIcon" Data="M 25,50 L 75,50 M 50,25 L 75,50 L 50,75" StrokeThickness="12" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" RenderTransformOrigin="0.5,0.5" Opacity="1" Stroke="{StaticResource ArrowIconStrokeBrush}">
+                                                                                        <Path.RenderTransform>
+                                                                                            <ScaleTransform x:Name="ArrowScale" ScaleX="1" ScaleY="1"/>
+                                                                                        </Path.RenderTransform>
+                                                                                    </Path>
+                                                                                </Viewbox>
+                                                                            </Grid>
+
+                                                                            <Grid x:Name="RunningOverlay" Grid.RowSpan="3" Margin="0" Visibility="Collapsed">
+                                                                                <!-- 1x1 布局 -->
+                                                                                <Grid x:Name="Layout1x1" Visibility="Collapsed">
+                                                                                    <Grid.RowDefinitions>
+                                                                                        <RowDefinition Height="Auto"/>
+                                                                                        <RowDefinition Height="*"/>
+                                                                                        <RowDefinition Height="Auto"/>
+                                                                                    </Grid.RowDefinitions>
+                                                                                    <TextBlock Grid.Row="0" Text="{Binding Name}" Foreground="#FFFFFFFF" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis">
+                                                                                        <TextBlock.Effect>
+                                                                                            <DropShadowEffect Color="Black" BlurRadius="3" ShadowDepth="1" Opacity="0.7"/>
+                                                                                        </TextBlock.Effect>
+                                                                                    </TextBlock>
+                                                                                    <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                                                                        <TextBlock Text="{Binding StatusText}" Foreground="#CCFFFFFF" FontSize="11" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" TextAlignment="Left" Height="42">
+                                                                                            <TextBlock.Effect>
+                                                                                                <DropShadowEffect Color="Black" BlurRadius="3" ShadowDepth="1" Opacity="0.7"/>
+                                                                                            </TextBlock.Effect>
+                                                                                        </TextBlock>
+                                                                                    </StackPanel>
+                                                                                    <TextBlock Grid.Row="2" Text="运行中..." Foreground="#8000B0FF" FontSize="9" FontWeight="SemiBold">
+                                                                                        <TextBlock.Effect>
+                                                                                            <DropShadowEffect Color="Black" BlurRadius="3" ShadowDepth="1" Opacity="0.7"/>
+                                                                                        </TextBlock.Effect>
+                                                                                    </TextBlock>
+                                                                                </Grid>
+
+                                                                                <!-- 2x1 布局 (Wpf 里面 Wide size = 1x2) -->
+                                                                                <Grid x:Name="Layout2x1" Visibility="Collapsed">
+                                                                                    <Grid.RowDefinitions>
+                                                                                        <RowDefinition Height="Auto"/>
+                                                                                        <RowDefinition Height="*"/>
+                                                                                        <RowDefinition Height="Auto"/>
+                                                                                    </Grid.RowDefinitions>
+                                                                                    
+                                                                                    <!-- 顶部标题 -->
+                                                                                    <TextBlock Grid.Row="0" Text="{Binding Name}" Foreground="#FFFFFFFF" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis">
+                                                                                        <TextBlock.Effect>
+                                                                                            <DropShadowEffect Color="Black" BlurRadius="3" ShadowDepth="1" Opacity="0.7"/>
+                                                                                        </TextBlock.Effect>
+                                                                                    </TextBlock>
+                                                                                    
+                                                                                    <!-- 中间：状态与胶囊元数据 -->
+                                                                                    <Grid Grid.Row="1" Margin="0,4,0,4">
+                                                                                        <Grid.RowDefinitions>
+                                                                                            <RowDefinition Height="Auto"/>
+                                                                                            <RowDefinition Height="*"/>
+                                                                                        </Grid.RowDefinitions>
+                                                                                        
+                                                                                        <TextBlock Grid.Row="0" Text="{Binding StatusText, StringFormat='状态: {0}'}" Foreground="#CCFFFFFF" FontSize="12" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" TextAlignment="Left">
+                                                                                            <TextBlock.Effect>
+                                                                                                <DropShadowEffect Color="Black" BlurRadius="3" ShadowDepth="1" Opacity="0.7"/>
+                                                                                            </TextBlock.Effect>
+                                                                                        </TextBlock>
+
+                                                                                        <WrapPanel Grid.Row="1" Margin="0,6,0,0" VerticalAlignment="Center">
+                                                                                            <Border Background="{DynamicResource ButtonIdleBrush}" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="0,0,4,4" SnapsToDevicePixels="True">
+                                                                                                <Border.Style>
+                                                                                                    <Style TargetType="Border">
+                                                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                                                        <Style.Triggers>
+                                                                                                            <DataTrigger Binding="{Binding FlowName}" Value="">
+                                                                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                                            </DataTrigger>
+                                                                                                            <DataTrigger Binding="{Binding FlowName}" Value="{x:Null}">
+                                                                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                                            </DataTrigger>
+                                                                                                        </Style.Triggers>
+                                                                                                    </Style>
+                                                                                                </Border.Style>
+                                                                                                <TextBlock FontSize="10" Foreground="#E0FFFFFF" Text="{Binding FlowName, StringFormat='会话流: {0}'}">
+                                                                                                    <TextBlock.Effect>
+                                                                                                        <DropShadowEffect Color="Black" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>
+                                                                                                    </TextBlock.Effect>
+                                                                                                </TextBlock>
+                                                                                            </Border>
+                                                                                            <Border Background="{DynamicResource ButtonIdleBrush}" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="0,0,4,4" SnapsToDevicePixels="True">
+                                                                                                <Border.Style>
+                                                                                                    <Style TargetType="Border">
+                                                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                                                        <Style.Triggers>
+                                                                                                            <DataTrigger Binding="{Binding CurrentNodeTitle}" Value="">
+                                                                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                                            </DataTrigger>
+                                                                                                            <DataTrigger Binding="{Binding CurrentNodeTitle}" Value="{x:Null}">
+                                                                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                                            </DataTrigger>
+                                                                                                        </Style.Triggers>
+                                                                                                    </Style>
+                                                                                                </Border.Style>
+                                                                                                <TextBlock FontSize="10" Foreground="#E0FFFFFF" Text="{Binding CurrentNodeTitle, StringFormat='节点: {0}'}">
+                                                                                                    <TextBlock.Effect>
+                                                                                                        <DropShadowEffect Color="Black" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>
+                                                                                                    </TextBlock.Effect>
+                                                                                                </TextBlock>
+                                                                                            </Border>
+                                                                                            <Border Background="{DynamicResource ButtonIdleBrush}" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="0,0,4,4" SnapsToDevicePixels="True">
+                                                                                                <Border.Style>
+                                                                                                    <Style TargetType="Border">
+                                                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                                                        <Style.Triggers>
+                                                                                                            <DataTrigger Binding="{Binding CurrentAgentId}" Value="">
+                                                                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                                            </DataTrigger>
+                                                                                                            <DataTrigger Binding="{Binding CurrentAgentId}" Value="{x:Null}">
+                                                                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                                            </DataTrigger>
+                                                                                                        </Style.Triggers>
+                                                                                                    </Style>
+                                                                                                </Border.Style>
+                                                                                                <TextBlock FontSize="10" Foreground="#E0FFFFFF" Text="{Binding CurrentAgentId, StringFormat='代理: {0}'}">
+                                                                                                    <TextBlock.Effect>
+                                                                                                        <DropShadowEffect Color="Black" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>
+                                                                                                    </TextBlock.Effect>
+                                                                                                </TextBlock>
+                                                                                            </Border>
+                                                                                            <Border Background="{DynamicResource ButtonIdleBrush}" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="0,0,4,4" SnapsToDevicePixels="True">
+                                                                                                <Border.Style>
+                                                                                                    <Style TargetType="Border">
+                                                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                                                        <Style.Triggers>
+                                                                                                            <DataTrigger Binding="{Binding ModelId}" Value="">
+                                                                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                                            </DataTrigger>
+                                                                                                            <DataTrigger Binding="{Binding ModelId}" Value="{x:Null}">
+                                                                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                                            </DataTrigger>
+                                                                                                        </Style.Triggers>
+                                                                                                    </Style>
+                                                                                                </Border.Style>
+                                                                                                <TextBlock FontSize="10" Foreground="#E0FFFFFF" Text="{Binding ModelId, StringFormat='模型: {0}'}">
+                                                                                                    <TextBlock.Effect>
+                                                                                                        <DropShadowEffect Color="Black" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>
+                                                                                                    </TextBlock.Effect>
+                                                                                                </TextBlock>
+                                                                                            </Border>
+                                                                                        </WrapPanel>
+                                                                                    </Grid>
+
+                                                                                    <!-- 底部提示 -->
+                                                                                    <TextBlock Grid.Row="2" Text="运行中..." Foreground="#8000B0FF" FontSize="9" FontWeight="SemiBold">
+                                                                                        <TextBlock.Effect>
+                                                                                            <DropShadowEffect Color="Black" BlurRadius="3" ShadowDepth="1" Opacity="0.7"/>
+                                                                                        </TextBlock.Effect>
+                                                                                    </TextBlock>
+                                                                                </Grid>
+
+                                                                                <!-- 2x2 布局 -->
+                                                                                <Grid x:Name="Layout2x2" Visibility="Collapsed">
+                                                                                    <Grid.RowDefinitions>
+                                                                                        <RowDefinition Height="Auto"/>
+                                                                                        <RowDefinition Height="Auto"/>
+                                                                                        <RowDefinition Height="*"/>
+                                                                                        <RowDefinition Height="Auto"/>
+                                                                                    </Grid.RowDefinitions>
+                                                                                    
+                                                                                    <Grid Grid.Row="0">
+                                                                                        <TextBlock Text="{Binding Name}" Foreground="#FFFFFFFF" FontSize="16" FontWeight="Bold" TextTrimming="CharacterEllipsis">
+                                                                                            <TextBlock.Effect>
+                                                                                                <DropShadowEffect Color="Black" BlurRadius="3" ShadowDepth="1" Opacity="0.7"/>
+                                                                                            </TextBlock.Effect>
+                                                                                        </TextBlock>
+                                                                                    </Grid>
+
+                                                                                    <!-- 玻璃胶囊元数据展示 -->
+                                                                                    <WrapPanel Grid.Row="1" Margin="0,4,0,6">
+                                                                                        <Border Background="{DynamicResource ButtonIdleBrush}" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="0,0,4,4" SnapsToDevicePixels="True">
+                                                                                            <Border.Style>
+                                                                                                <Style TargetType="Border">
+                                                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                                                    <Style.Triggers>
+                                                                                                        <DataTrigger Binding="{Binding FlowName}" Value="">
+                                                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                                        </DataTrigger>
+                                                                                                        <DataTrigger Binding="{Binding FlowName}" Value="{x:Null}">
+                                                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                                        </DataTrigger>
+                                                                                                    </Style.Triggers>
+                                                                                                </Style>
+                                                                                            </Border.Style>
+                                                                                            <TextBlock FontSize="10" Foreground="#E0FFFFFF" Text="{Binding FlowName, StringFormat='会话流: {0}'}">
+                                                                                                <TextBlock.Effect>
+                                                                                                    <DropShadowEffect Color="Black" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>
+                                                                                                </TextBlock.Effect>
+                                                                                            </TextBlock>
+                                                                                        </Border>
+                                                                                        <Border Background="{DynamicResource ButtonIdleBrush}" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="0,0,4,4" SnapsToDevicePixels="True">
+                                                                                            <Border.Style>
+                                                                                                <Style TargetType="Border">
+                                                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                                                    <Style.Triggers>
+                                                                                                        <DataTrigger Binding="{Binding CurrentNodeTitle}" Value="">
+                                                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                                        </DataTrigger>
+                                                                                                        <DataTrigger Binding="{Binding CurrentNodeTitle}" Value="{x:Null}">
+                                                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                                        </DataTrigger>
+                                                                                                    </Style.Triggers>
+                                                                                                </Style>
+                                                                                            </Border.Style>
+                                                                                            <TextBlock FontSize="10" Foreground="#E0FFFFFF" Text="{Binding CurrentNodeTitle, StringFormat='节点: {0}'}">
+                                                                                                <TextBlock.Effect>
+                                                                                                    <DropShadowEffect Color="Black" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>
+                                                                                                </TextBlock.Effect>
+                                                                                            </TextBlock>
+                                                                                        </Border>
+                                                                                        <Border Background="{DynamicResource ButtonIdleBrush}" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="0,0,4,4" SnapsToDevicePixels="True">
+                                                                                            <Border.Style>
+                                                                                                <Style TargetType="Border">
+                                                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                                                    <Style.Triggers>
+                                                                                                        <DataTrigger Binding="{Binding CurrentAgentId}" Value="">
+                                                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                                        </DataTrigger>
+                                                                                                        <DataTrigger Binding="{Binding CurrentAgentId}" Value="{x:Null}">
+                                                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                                        </DataTrigger>
+                                                                                                    </Style.Triggers>
+                                                                                                </Style>
+                                                                                            </Border.Style>
+                                                                                            <TextBlock FontSize="10" Foreground="#E0FFFFFF" Text="{Binding CurrentAgentId, StringFormat='代理: {0}'}">
+                                                                                                <TextBlock.Effect>
+                                                                                                    <DropShadowEffect Color="Black" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>
+                                                                                                </TextBlock.Effect>
+                                                                                            </TextBlock>
+                                                                                        </Border>
+                                                                                        <Border Background="{DynamicResource ButtonIdleBrush}" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="10" Padding="8,2" Margin="0,0,4,4" SnapsToDevicePixels="True">
+                                                                                            <Border.Style>
+                                                                                                <Style TargetType="Border">
+                                                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                                                    <Style.Triggers>
+                                                                                                        <DataTrigger Binding="{Binding ModelId}" Value="">
+                                                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                                        </DataTrigger>
+                                                                                                        <DataTrigger Binding="{Binding ModelId}" Value="{x:Null}">
+                                                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                                        </DataTrigger>
+                                                                                                    </Style.Triggers>
+                                                                                                </Style>
+                                                                                            </Border.Style>
+                                                                                            <TextBlock FontSize="10" Foreground="#E0FFFFFF" Text="{Binding ModelId, StringFormat='模型: {0}'}">
+                                                                                                <TextBlock.Effect>
+                                                                                                    <DropShadowEffect Color="Black" BlurRadius="2" ShadowDepth="1" Opacity="0.5"/>
+                                                                                                </TextBlock.Effect>
+                                                                                            </TextBlock>
+                                                                                        </Border>
+                                                                                    </WrapPanel>
+
+                                                                                    <!-- 输出面板 (完全透明，没有背景) -->
+                                                                                    <Border Grid.Row="2" Width="230" Height="92" Background="Transparent" BorderThickness="0" CornerRadius="4" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                                                                        <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled" local:ScrollViewerHelper.AutoScrollToEnd="True">
+                                                                                            <TextBlock Text="{Binding LatestOutput}" Foreground="#DDFFFFFF" FontSize="10" FontFamily="Consolas, Courier New, Segoe UI" TextWrapping="Wrap" Margin="6">
+                                                                                                <TextBlock.Effect>
+                                                                                                    <DropShadowEffect Color="Black" BlurRadius="2" ShadowDepth="1" Opacity="0.6"/>
+                                                                                                </TextBlock.Effect>
+                                                                                            </TextBlock>
+                                                                                        </ScrollViewer>
+                                                                                    </Border>
+
+                                                                                    <TextBlock Grid.Row="3" Text="{Binding StatusText, StringFormat='状态: {0}'}" Foreground="#88FFFFFF" FontSize="10" Margin="0,4,0,0" TextTrimming="CharacterEllipsis">
+                                                                                        <TextBlock.Effect>
+                                                                                            <DropShadowEffect Color="Black" BlurRadius="3" ShadowDepth="1" Opacity="0.7"/>
+                                                                                        </TextBlock.Effect>
+                                                                                    </TextBlock>
+                                                                                </Grid>
+
+                                                                                <!-- 2x2 完成状态布局 -->
+                                                                                <Grid x:Name="Layout2x2Completed" Visibility="Collapsed">
+                                                                                    <Grid.RowDefinitions>
+                                                                                        <RowDefinition Height="*"/>
+                                                                                        <RowDefinition Height="Auto"/>
+                                                                                    </Grid.RowDefinitions>
+                                                                                    
+                                                                                    <!-- 文本框占满上方整个区域 -->
+                                                                                    <Border Grid.Row="0" Margin="0,0,0,8" Background="Transparent" BorderThickness="0" CornerRadius="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                                                                        <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled" local:ScrollViewerHelper.AutoScrollToEnd="True">
+                                                                                            <TextBlock Text="{Binding LatestOutput}" Foreground="#DDFFFFFF" FontSize="10" FontFamily="Consolas, Courier New, Segoe UI" TextWrapping="Wrap" Margin="4">
+                                                                                                <TextBlock.Effect>
+                                                                                                    <DropShadowEffect Color="Black" BlurRadius="2" ShadowDepth="1" Opacity="0.6"/>
+                                                                                                </TextBlock.Effect>
+                                                                                            </TextBlock>
+                                                                                        </ScrollViewer>
+                                                                                    </Border>
+                                                                                    
+                                                                                    <!-- 最底下的任务名称 -->
+                                                                                    <TextBlock Grid.Row="1" Text="{Binding Name}" Foreground="#EFEFEF" FontSize="14" FontWeight="SemiBold" FontFamily="Segoe UI, Microsoft YaHei" TextTrimming="CharacterEllipsis" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                                                                                        <TextBlock.Effect>
+                                                                                            <DropShadowEffect Color="Black" BlurRadius="3" ShadowDepth="1" Opacity="0.7"/>
+                                                                                        </TextBlock.Effect>
+                                                                                    </TextBlock>
+                                                                                </Grid>
+                                                                            </Grid>
+                                                                        </Grid>
+                                                                    </Grid>
+                                                                    <ControlTemplate.Triggers>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Trigger.EnterActions>
+                                                                                <BeginStoryboard>
+                                                                                    <Storyboard>
+                                                                                        <DoubleAnimation Storyboard.TargetName="HoverGlow" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.18"/>
+                                                                                        <DoubleAnimation Storyboard.TargetName="TileRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.03" Duration="0:0:0.15" DecelerationRatio="0.8"/>
+                                                                                        <DoubleAnimation Storyboard.TargetName="TileRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.03" Duration="0:0:0.15" DecelerationRatio="0.8"/>
+                                                                                        <DoubleAnimation Storyboard.TargetName="AeroBgHover" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.18"/>
+                                                                                        <DoubleAnimation Storyboard.TargetName="AeroGlow" Storyboard.TargetProperty="Opacity" To="0.7" Duration="0:0:0.18"/>
+                                                                                        <DoubleAnimation Storyboard.TargetName="AeroGlow" Storyboard.TargetProperty="BlurRadius" To="10" Duration="0:0:0.18"/>
+                                                                                        <DoubleAnimation Storyboard.TargetName="AeroNeonGlow" Storyboard.TargetProperty="Opacity" To="0.95" Duration="0:0:0.18"/>
+                                                                                    </Storyboard>
+                                                                                </BeginStoryboard>
+                                                                            </Trigger.EnterActions>
+                                                                            <Trigger.ExitActions>
+                                                                                <BeginStoryboard>
+                                                                                    <Storyboard>
+                                                                                        <DoubleAnimation Storyboard.TargetName="HoverGlow" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.15"/>
+                                                                                        <DoubleAnimation Storyboard.TargetName="TileRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.15" AccelerationRatio="0.8"/>
+                                                                                        <DoubleAnimation Storyboard.TargetName="TileRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.15" AccelerationRatio="0.8"/>
+                                                                                        <DoubleAnimation Storyboard.TargetName="AeroBgHover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.15"/>
+                                                                                        <DoubleAnimation Storyboard.TargetName="AeroGlow" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.15"/>
+                                                                                        <DoubleAnimation Storyboard.TargetName="AeroGlow" Storyboard.TargetProperty="BlurRadius" To="6" Duration="0:0:0.15"/>
+                                                                                        <DoubleAnimation Storyboard.TargetName="AeroNeonGlow" Storyboard.TargetProperty="Opacity" To="0.8" Duration="0:0:0.15"/>
+                                                                                    </Storyboard>
+                                                                                </BeginStoryboard>
+                                                                            </Trigger.ExitActions>
+                                                                        </Trigger>
+                                                                        <Trigger Property="IsPressed" Value="True">
+                                                                            <Trigger.EnterActions>
+                                                                                <BeginStoryboard>
+                                                                                    <Storyboard>
+                                                                                        <DoubleAnimation Storyboard.TargetName="TileRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="0.975" Duration="0:0:0.09">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <CubicEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="TileRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="0.975" Duration="0:0:0.09">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <CubicEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="AeroBgActive" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.09"/>
+                                                                                        <DoubleAnimation Storyboard.TargetName="AeroGlassReflect" Storyboard.TargetProperty="Opacity" To="0.6" Duration="0:0:0.09"/>
+                                                                                        <DoubleAnimation Storyboard.TargetName="ArrowScale" Storyboard.TargetProperty="ScaleX" To="0.92" Duration="0:0:0.09"/>
+                                                                                        <DoubleAnimation Storyboard.TargetName="ArrowScale" Storyboard.TargetProperty="ScaleY" To="0.92" Duration="0:0:0.09"/>
+                                                                                        <DoubleAnimation Storyboard.TargetName="ArrowIcon" Storyboard.TargetProperty="Opacity" To="0.85" Duration="0:0:0.09"/>
+                                                                                    </Storyboard>
+                                                                                </BeginStoryboard>
+                                                                            </Trigger.EnterActions>
+                                                                            <Trigger.ExitActions>
+                                                                                <BeginStoryboard>
+                                                                                    <Storyboard>
+                                                                                        <DoubleAnimation Storyboard.TargetName="TileRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.14">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <CubicEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="TileRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.14">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <CubicEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="AeroBgActive" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.14"/>
+                                                                                        <DoubleAnimation Storyboard.TargetName="AeroGlassReflect" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.14"/>
+                                                                                        <DoubleAnimation Storyboard.TargetName="ArrowScale" Storyboard.TargetProperty="ScaleX" To="1" Duration="0:0:0.14"/>
+                                                                                        <DoubleAnimation Storyboard.TargetName="ArrowScale" Storyboard.TargetProperty="ScaleY" To="1" Duration="0:0:0.14"/>
+                                                                                        <DoubleAnimation Storyboard.TargetName="ArrowIcon" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.14"/>
+                                                                                    </Storyboard>
+                                                                                </BeginStoryboard>
+                                                                            </Trigger.ExitActions>
+                                                                        </Trigger>
+                                                                        <DataTrigger Binding="{Binding IsStickyNote}" Value="True">
+                                                                             <Setter TargetName="IconControl" Property="Visibility" Value="Collapsed"/>
+                                                                             <Setter TargetName="NameText" Property="Visibility" Value="Collapsed"/>
+                                                                             <Setter TargetName="StickyNoteContainer" Property="Visibility" Value="Visible"/>
+                                                                             <Setter Property="Command" Value="{x:Null}"/>
+                                                                             <Setter Property="Cursor" Value="Arrow"/>
+                                                                         </DataTrigger>
+                                                                         <DataTrigger Binding="{Binding Name}" Value="Live Session">
+                                                                            <Setter TargetName="IconControl" Property="Visibility" Value="Collapsed"/>
+                                                                            <Setter TargetName="NameText" Property="Visibility" Value="Collapsed"/>
+                                                                            <Setter TargetName="LiveSessionText" Property="Visibility" Value="Visible"/>
+                                                                            <Setter TargetName="LiveSessionAeroButton" Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding HasCustomImage}" Value="True">
+                                                                            <Setter TargetName="CustomImageBorder" Property="Visibility" Value="Visible"/>
+                                                                            <Setter TargetName="IconControl" Property="Visibility" Value="Collapsed"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding IsDragging}" Value="True">
+                                                                            <DataTrigger.EnterActions>
+                                                                                <BeginStoryboard>
+                                                                                    <Storyboard>
+                                                                                        <DoubleAnimation Storyboard.TargetName="TileRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="0.9" Duration="0:0:0.16">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <QuinticEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="TileRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="0.9" Duration="0:0:0.16">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <QuinticEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="BaseBorder" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.16">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <QuinticEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="BaseRadialBorder" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.16">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <QuinticEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="BrightLayer" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.16">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <QuinticEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                    </Storyboard>
+                                                                                </BeginStoryboard>
+                                                                            </DataTrigger.EnterActions>
+                                                                            <DataTrigger.ExitActions>
+                                                                                <BeginStoryboard>
+                                                                                    <Storyboard>
+                                                                                        <DoubleAnimation Storyboard.TargetName="TileRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.26">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <BackEase EasingMode="EaseOut" Amplitude="0.12"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="TileRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.26">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <BackEase EasingMode="EaseOut" Amplitude="0.12"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="BaseBorder" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.26">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <BackEase EasingMode="EaseOut" Amplitude="0.12"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="BaseRadialBorder" Storyboard.TargetProperty="Opacity" To="0.75" Duration="0:0:0.26">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <BackEase EasingMode="EaseOut" Amplitude="0.12"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="BrightLayer" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.26">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <BackEase EasingMode="EaseOut" Amplitude="0.12"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                    </Storyboard>
+                                                                                </BeginStoryboard>
+                                                                            </DataTrigger.ExitActions>
+                                                                            <Setter TargetName="TileRoot" Property="Opacity" Value="0.95"/>
+                                                                            <Setter TargetName="TileRoot" Property="Effect">
+                                                                                <Setter.Value>
+                                                                                    <DropShadowEffect Color="#FF00B0FF" BlurRadius="10" Opacity="0.7" ShadowDepth="2"/>
+                                                                                </Setter.Value>
+                                                                            </Setter>
+                                                                        </DataTrigger>
+                                                                        <MultiDataTrigger>
+                                                                            <MultiDataTrigger.Conditions>
+                                                                                <Condition Binding="{Binding DataContext.IsAnyTileDragging, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True"/>
+                                                                                <Condition Binding="{Binding IsDragging}" Value="False"/>
+                                                                            </MultiDataTrigger.Conditions>
+                                                                            <MultiDataTrigger.EnterActions>
+                                                                                <BeginStoryboard>
+                                                                                    <Storyboard>
+                                                                                        <DoubleAnimation Storyboard.TargetName="BaseBorder" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.15">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <CubicEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="BaseRadialBorder" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.15">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <CubicEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="DimLayer" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.15">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <CubicEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="DimRadialLayer" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.15">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <CubicEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                    </Storyboard>
+                                                                                </BeginStoryboard>
+                                                                            </MultiDataTrigger.EnterActions>
+                                                                            <MultiDataTrigger.ExitActions>
+                                                                                <BeginStoryboard>
+                                                                                    <Storyboard>
+                                                                                        <DoubleAnimation Storyboard.TargetName="BaseBorder" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.25">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <CubicEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="BaseRadialBorder" Storyboard.TargetProperty="Opacity" To="0.75" Duration="0:0:0.25">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <CubicEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="DimLayer" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.25">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <CubicEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                        <DoubleAnimation Storyboard.TargetName="DimRadialLayer" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.25">
+                                                                                            <DoubleAnimation.EasingFunction>
+                                                                                                <CubicEase EasingMode="EaseOut"/>
+                                                                                            </DoubleAnimation.EasingFunction>
+                                                                                        </DoubleAnimation>
+                                                                                    </Storyboard>
+                                                                                </BeginStoryboard>
+                                                                            </MultiDataTrigger.ExitActions>
+                                                                        </MultiDataTrigger>
+                                                                        <DataTrigger Binding="{Binding IsCompletedState}" Value="True">
+                                                                            <Setter TargetName="CompletedBackground" Property="Opacity" Value="1"/>
+                                                                            <Setter TargetName="BaseBorder" Property="Opacity" Value="0"/>
+                                                                            <Setter TargetName="BaseRadialBorder" Property="Opacity" Value="0"/>
+                                                                        </DataTrigger>
+                                                                        
+                                                                        <MultiDataTrigger>
+                                                                            <MultiDataTrigger.Conditions>
+                                                                                <Condition Binding="{Binding IsCompletedState}" Value="True"/>
+                                                                                <Condition Binding="{Binding Size}" Value="2x2"/>
+                                                                            </MultiDataTrigger.Conditions>
+                                                                            <Setter TargetName="IconControl" Property="Visibility" Value="Collapsed"/>
+                                                                            <Setter TargetName="NameText" Property="Visibility" Value="Collapsed"/>
+                                                                            <Setter TargetName="RunningOverlay" Property="Visibility" Value="Visible"/>
+                                                                            <Setter TargetName="Layout2x2Completed" Property="Visibility" Value="Visible"/>
+                                                                        </MultiDataTrigger>
+
+                                                                        <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                                            <Setter TargetName="IconControl" Property="Visibility" Value="Collapsed"/>
+                                                                            <Setter TargetName="NameText" Property="Visibility" Value="Collapsed"/>
+                                                                            <Setter TargetName="RunningOverlay" Property="Visibility" Value="Visible"/>
+                                                                            <Setter TargetName="RunningBackground" Property="Opacity" Value="0.75"/>
+                                                                        </DataTrigger>
+                                                                        <MultiDataTrigger>
+                                                                            <MultiDataTrigger.Conditions>
+                                                                                <Condition Binding="{Binding IsRunning}" Value="True"/>
+                                                                                <Condition Binding="{Binding Size}" Value="1x1"/>
+                                                                            </MultiDataTrigger.Conditions>
+                                                                            <Setter TargetName="Layout1x1" Property="Visibility" Value="Visible"/>
+                                                                        </MultiDataTrigger>
+                                                                        <MultiDataTrigger>
+                                                                            <MultiDataTrigger.Conditions>
+                                                                                <Condition Binding="{Binding IsRunning}" Value="True"/>
+                                                                                <Condition Binding="{Binding Size}" Value="1x2"/>
+                                                                            </MultiDataTrigger.Conditions>
+                                                                            <Setter TargetName="Layout2x1" Property="Visibility" Value="Visible"/>
+                                                                        </MultiDataTrigger>
+                                                                        <MultiDataTrigger>
+                                                                            <MultiDataTrigger.Conditions>
+                                                                                <Condition Binding="{Binding IsRunning}" Value="True"/>
+                                                                                <Condition Binding="{Binding Size}" Value="2x2"/>
+                                                                            </MultiDataTrigger.Conditions>
+                                                                            <Setter TargetName="Layout2x2" Property="Visibility" Value="Visible"/>
+                                                                        </MultiDataTrigger>
+                                                                    </ControlTemplate.Triggers>
+                                                                </ControlTemplate>
+                                                            </Button.Template>
+                                                        </Button>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+
+                                            <Border Grid.Row="{Binding DropRow}"
+                                                    Grid.Column="{Binding DropColumn}"
+                                                    Grid.RowSpan="{Binding DropRowSpan}"
+                                                    Grid.ColumnSpan="{Binding DropColumnSpan}"
+                                                    Margin="6"
+                                                    CornerRadius="4"
+                                                    BorderBrush="#D8FFFFFF"
+                                                    BorderThickness="2"
+                                                    Background="#20FFFFFF"
+                                                    IsHitTestVisible="False"
+                                                    Visibility="{Binding IsDropPreviewVisible, Converter={StaticResource BoolToVisConverter}}"/>
+                                        </Grid>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+
+                <Grid x:Name="PageLiveSession" Visibility="Collapsed" RenderTransformOrigin="0.5,0.5">
+                    <Grid.RenderTransform>
+                        <TranslateTransform X="0" Y="0"/>
+                    </Grid.RenderTransform>
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="{DynamicResource TilesPage.LiveSession.Title}"
+                                   FontSize="48"
+                                   FontWeight="ExtraLight"
+                                   Foreground="#FF00B0FF"
+                                   HorizontalAlignment="Center">
+                            <TextBlock.Effect>
+                                <DropShadowEffect Color="#FF00B0FF" BlurRadius="20" Opacity="0.4" ShadowDepth="0"/>
+                            </TextBlock.Effect>
+                        </TextBlock>
+                        <TextBlock Text="{DynamicResource TilesPage.LiveSession.Description}"
+                                   Margin="0,15,0,0"
+                                   FontSize="16"
+                                   Foreground="#80A0C0D0"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

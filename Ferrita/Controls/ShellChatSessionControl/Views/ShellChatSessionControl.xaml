@@ -1,0 +1,629 @@
+﻿<UserControl x:Class="Ferrita.Controls.ShellChatSessionControl.Views.ShellChatSessionControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:chatModels="clr-namespace:Ferrita.Controls.ChatSessionControl.Models"
+             xmlns:chatViews="clr-namespace:Ferrita.Controls.ChatSessionControl.Views"
+             xmlns:viewModels="clr-namespace:Ferrita.Controls.ShellChatSessionControl.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewModels:ShellChatSessionControlViewModel, IsDesignTimeCreatable=False}"
+             d:DesignHeight="560"
+             d:DesignWidth="800"
+             Background="Transparent">
+    <UserControl.Resources>
+        <DrawingBrush x:Key="ShellSoftGlassSliceBrush" Stretch="Fill">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <DrawingGroup.Children>
+                        <GeometryDrawing Geometry="F1 M 0.160156,0.159668L 1386.16,0.159668L 1386.16,223.646L 0.160156,223.646L 0.160156,0.159668 Z ">
+                            <GeometryDrawing.Brush>
+                                <LinearGradientBrush StartPoint="0.1,1.6" EndPoint="2.5,1.6">
+                                    <LinearGradientBrush.RelativeTransform>
+                                        <TransformGroup>
+                                            <SkewTransform AngleX="-60" CenterX="0.1" CenterY="1.6"/>
+                                            <RotateTransform Angle="-70" CenterX="0.1" CenterY="1.6"/>
+                                        </TransformGroup>
+                                    </LinearGradientBrush.RelativeTransform>
+                                    <GradientStop Color="#2CFFFFFF" Offset="0"/>
+                                    <GradientStop Color="#10FFFFFF" Offset="0.12"/>
+                                    <GradientStop Color="#00FFFFFF" Offset="0.34"/>
+                                    <GradientStop Color="#24FFFFFF" Offset="0.42"/>
+                                    <GradientStop Color="#06FFFFFF" Offset="0.7"/>
+                                    <GradientStop Color="#36FFFFFF" Offset="1"/>
+                                </LinearGradientBrush>
+                            </GeometryDrawing.Brush>
+                        </GeometryDrawing>
+                    </DrawingGroup.Children>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+
+        <LinearGradientBrush x:Key="ShellUserBubbleBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#552B5B75" Offset="0"/>
+            <GradientStop Color="#15122F42" Offset="0.35"/>
+            <GradientStop Color="#4515324A" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="ShellAssistantBubbleBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#55395A6E" Offset="0"/>
+            <GradientStop Color="#150E2838" Offset="0.35"/>
+            <GradientStop Color="#45122530" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="ShellBubbleTopSheenBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#30FFFFFF" Offset="0"/>
+            <GradientStop Color="#10FFFFFF" Offset="0.48"/>
+            <GradientStop Color="#00FFFFFF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="ShellBubbleBottomGlowBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#001878A8" Offset="0"/>
+            <GradientStop Color="#0A1E6585" Offset="0.42"/>
+            <GradientStop Color="#25248596" Offset="1"/>
+        </LinearGradientBrush>
+
+        <Style x:Key="ShellMessageBubbleBorderStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="BorderBrush" Value="#4080C0D8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#000000" BlurRadius="6" ShadowDepth="1.5" Opacity="0.25"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="TextMessagePartTemplate" DataType="{x:Type chatModels:ChatMessagePartModel}">
+            <TextBlock Text="{Binding Content}"
+                       Foreground="#FFE7FBFF"
+                       TextWrapping="Wrap"
+                       FontSize="13"
+                       LineHeight="18"/>
+        </DataTemplate>
+
+        <DataTemplate x:Key="StatusMessagePartTemplate" DataType="{x:Type chatModels:ChatMessagePartModel}">
+            <Border Background="#20162B34"
+                    BorderBrush="#55A8F0FF"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="8">
+                <StackPanel>
+                    <TextBlock Text="{Binding Title}"
+                               Foreground="#FFBDEBFF"
+                               FontWeight="SemiBold"
+                               FontSize="12"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding Title, Converter={StaticResource NullToVisibilityConverter}}"/>
+                    <TextBlock Text="{Binding Content}"
+                               Foreground="#DDEDFBFF"
+                               TextWrapping="Wrap"
+                               FontSize="12"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ToolCallMessagePartTemplate" DataType="{x:Type chatModels:ChatMessagePartModel}">
+            <Border MinHeight="32"
+                    Margin="0,0,0,2"
+                    Padding="7,5"
+                    CornerRadius="6"
+                    Background="{StaticResource ShellSoftGlassSliceBrush}"
+                    BorderBrush="#448AEFFF"
+                    BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="24"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Width="20"
+                            Height="20"
+                            CornerRadius="4"
+                            Background="#22000000"
+                            BorderBrush="#448AEFFF"
+                            BorderThickness="1">
+                        <Image Source="{Binding ToolPresentationState.IconPath}"
+                               Stretch="Uniform"
+                               Margin="3"/>
+                    </Border>
+                    <TextBlock Grid.Column="1"
+                               Margin="7,0,0,0"
+                               Text="{Binding ToolPresentationState.ToolDisplayName}"
+                               Foreground="#FFF5FAFF"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ToolOutputMessagePartTemplate" DataType="{x:Type chatModels:ChatMessagePartModel}">
+            <Border Background="#20162B34"
+                    BorderBrush="#55A8F0FF"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="8">
+                <StackPanel>
+                    <TextBlock Text="{Binding Title}"
+                               Foreground="#FFBDEBFF"
+                               FontWeight="SemiBold"
+                               FontSize="12"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding Title, Converter={StaticResource NullToVisibilityConverter}}"/>
+                    <TextBlock Text="{Binding Content}"
+                               Foreground="#FFEAFDFF"
+                               TextWrapping="Wrap"
+                               FontFamily="Consolas, Microsoft YaHei UI"
+                               FontSize="12"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="StructuredXmlMessagePartTemplate" DataType="{x:Type chatModels:ChatMessagePartModel}">
+            <Border Background="#18191F32"
+                    BorderBrush="#55B0A7FF"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="8">
+                <TextBlock Text="{Binding Content}"
+                           Foreground="#DDEDFBFF"
+                           FontFamily="Consolas, Microsoft YaHei UI"
+                           FontSize="12"
+                           TextWrapping="Wrap"/>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ImageMessagePartTemplate" DataType="{x:Type chatModels:ChatMessagePartModel}">
+            <Grid Width="124" Height="124" HorizontalAlignment="Left">
+                <Border Background="{StaticResource ShellSoftGlassSliceBrush}"
+                        BorderBrush="#5596FCFF"
+                        BorderThickness="1"
+                        CornerRadius="6"/>
+                <Image Source="{Binding ResourcePath}"
+                       Width="112"
+                       Height="112"
+                       Stretch="Uniform"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ReasoningMessagePartTemplate" DataType="{x:Type chatModels:ChatMessagePartModel}">
+            <Expander IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
+                      Background="#1414232C"
+                      BorderBrush="#4476D7EE"
+                      BorderThickness="1">
+                <Expander.Header>
+                    <TextBlock Text="{Binding Title}"
+                               Foreground="#FFD5F5FF"
+                               FontWeight="SemiBold"
+                               FontSize="12"/>
+                </Expander.Header>
+                <TextBlock Text="{Binding Content}"
+                           Margin="8"
+                           Foreground="#DDEDFBFF"
+                           FontFamily="Consolas, Microsoft YaHei UI"
+                           FontSize="12"
+                           TextWrapping="Wrap"/>
+            </Expander>
+        </DataTemplate>
+
+        <chatViews:ChatMessagePartTemplateSelector x:Key="ShellMessagePartTemplateSelector"
+                                                   TextTemplate="{StaticResource TextMessagePartTemplate}"
+                                                   CodeTemplate="{StaticResource StructuredXmlMessagePartTemplate}"
+                                                   StatusTemplate="{StaticResource StatusMessagePartTemplate}"
+                                                   PlaceholderTemplate="{StaticResource StatusMessagePartTemplate}"
+                                                   ToolCallTemplate="{StaticResource ToolCallMessagePartTemplate}"
+                                                   ToolOutputTemplate="{StaticResource ToolOutputMessagePartTemplate}"
+                                                   StructuredXmlTemplate="{StaticResource StructuredXmlMessagePartTemplate}"
+                                                   ImageTemplate="{StaticResource ImageMessagePartTemplate}"
+                                                   ReasoningTemplate="{StaticResource ReasoningMessagePartTemplate}"/>
+
+        <DataTemplate x:Key="ShellBubbleContentTemplate" DataType="{x:Type chatModels:ChatMessageModel}">
+            <StackPanel>
+                <DockPanel Margin="0,0,0,6" LastChildFill="False">
+                    <TextBlock Text="{Binding DisplayName}"
+                               Foreground="#FFBDEBFF"
+                               FontWeight="SemiBold"
+                               FontSize="11"
+                               TextWrapping="Wrap"/>
+                    <TextBlock DockPanel.Dock="Right"
+                               Text="{Binding TimestampText}"
+                               Foreground="#80FFFFFF"
+                               FontSize="10"
+                               VerticalAlignment="Center"/>
+                </DockPanel>
+                <ItemsControl ItemsSource="{Binding Parts}"
+                              ItemTemplateSelector="{StaticResource ShellMessagePartTemplateSelector}">
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="Margin" Value="0,0,0,7"/>
+                            <Setter Property="Visibility" Value="{Binding IsUserVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+                </ItemsControl>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ShellUserMessageTemplate" DataType="{x:Type chatModels:ChatMessageModel}">
+            <Grid Margin="0,0,0,12"
+                  HorizontalAlignment="Stretch"
+                  ClipToBounds="True">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="42"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0"
+                        HorizontalAlignment="Right"
+                        MaxWidth="330"
+                        Margin="24,0,8,0"
+                        Style="{StaticResource ShellMessageBubbleBorderStyle}"
+                        Background="{StaticResource ShellUserBubbleBackgroundBrush}">
+                    <Grid>
+                        <Border Height="20"
+                                Margin="1"
+                                VerticalAlignment="Top"
+                                CornerRadius="11,11,4,4"
+                                Background="{StaticResource ShellBubbleTopSheenBrush}"
+                                IsHitTestVisible="False"
+                                Opacity="0.5"/>
+                        <Border Height="12"
+                                Margin="1"
+                                VerticalAlignment="Bottom"
+                                CornerRadius="0,0,11,11"
+                                Background="{StaticResource ShellBubbleBottomGlowBrush}"
+                                IsHitTestVisible="False"
+                                Opacity="0.6"/>
+                        <ContentControl Margin="12,9"
+                                        Content="{Binding}"
+                                        ContentTemplate="{StaticResource ShellBubbleContentTemplate}"/>
+                    </Grid>
+                </Border>
+                <Border Grid.Column="1"
+                        Width="36"
+                        Height="36"
+                        VerticalAlignment="Top"
+                        HorizontalAlignment="Right"
+                        Margin="0,2,0,0"
+                        Background="{DynamicResource ChatAvatarBackgroundGlassBrush}">
+                    <Border CornerRadius="12" Margin="1" ClipToBounds="True">
+                        <Image Source="{Binding AvatarPath}" Stretch="Uniform"/>
+                    </Border>
+                </Border>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ShellAssistantMessageTemplate" DataType="{x:Type chatModels:ChatMessageModel}">
+            <Grid Margin="0,0,0,12"
+                  HorizontalAlignment="Stretch"
+                  ClipToBounds="True">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="42"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0"
+                        Width="36"
+                        Height="36"
+                        VerticalAlignment="Top"
+                        HorizontalAlignment="Left"
+                        Margin="0,2,0,0"
+                        Background="{DynamicResource ChatAvatarBackgroundGlassBrush}">
+                    <Border CornerRadius="12" Margin="1" ClipToBounds="True">
+                        <Image Source="{Binding AvatarPath}" Stretch="Uniform"/>
+                    </Border>
+                </Border>
+                <Border Grid.Column="1"
+                        HorizontalAlignment="Left"
+                        MaxWidth="330"
+                        Margin="8,0,24,0"
+                        Style="{StaticResource ShellMessageBubbleBorderStyle}"
+                        Background="{StaticResource ShellAssistantBubbleBackgroundBrush}">
+                    <Grid>
+                        <Border Height="20"
+                                Margin="1"
+                                VerticalAlignment="Top"
+                                CornerRadius="11,11,4,4"
+                                Background="{StaticResource ShellBubbleTopSheenBrush}"
+                                IsHitTestVisible="False"
+                                Opacity="0.4"/>
+                        <Border Height="12"
+                                Margin="1"
+                                VerticalAlignment="Bottom"
+                                CornerRadius="0,0,11,11"
+                                Background="{StaticResource ShellBubbleBottomGlowBrush}"
+                                IsHitTestVisible="False"
+                                Opacity="0.5"/>
+                        <ContentControl Margin="12,9"
+                                        Content="{Binding}"
+                                        ContentTemplate="{StaticResource ShellBubbleContentTemplate}"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ShellSystemMessageTemplate" DataType="{x:Type chatModels:ChatMessageModel}">
+            <Border Margin="48,0,48,12"
+                    Padding="10"
+                    CornerRadius="8"
+                    Background="#33111824"
+                    BorderBrush="#5596FCFF"
+                    BorderThickness="1">
+                <ContentControl Content="{Binding}" ContentTemplate="{StaticResource ShellBubbleContentTemplate}"/>
+            </Border>
+        </DataTemplate>
+
+        <chatViews:ChatMessageTemplateSelector x:Key="ShellChatMessageTemplateSelector"
+                                               UserTemplate="{StaticResource ShellUserMessageTemplate}"
+                                               AssistantTemplate="{StaticResource ShellAssistantMessageTemplate}"
+                                               SystemTemplate="{StaticResource ShellSystemMessageTemplate}"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="16,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Center" Margin="68,0,0,0">
+                <TextBlock Text="{DynamicResource ShellChat.Title}"
+                           Foreground="White"
+                           FontSize="16"
+                           FontWeight="SemiBold"/>
+                <TextBlock Text="{Binding StatusText}"
+                           Foreground="#80FFFFFF"
+                           FontSize="11"
+                           Margin="0,2,0,0"/>
+            </StackPanel>
+            <Button Grid.Column="1"
+                    Command="{Binding CloseCommand}"
+                    Width="54"
+                    Height="24"
+                    ToolTip="{DynamicResource ShellChat.Tooltip.Close}"
+                    Cursor="Hand"
+                    VerticalAlignment="Top"
+                    Margin="0,-8,0,0">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Border x:Name="bg"
+                                    CornerRadius="0,0,6,6"
+                                    Background="#80C42E2E"
+                                    BorderBrush="#60FFFFFF"
+                                    BorderThickness="1,0,1,1"/>
+                            
+                            <Border x:Name="topGlow"
+                                    CornerRadius="0,0,0,0"
+                                    Height="11"
+                                    VerticalAlignment="Top"
+                                    Margin="1,0,1,0"
+                                    Opacity="0.8">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#70FFFFFF" Offset="0"/>
+                                        <GradientStop Color="#10FFFFFF" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                            </Border>
+
+                            <Border x:Name="bottomGlow"
+                                    CornerRadius="0,0,6,6"
+                                    Opacity="0">
+                                <Border.Background>
+                                    <RadialGradientBrush GradientOrigin="0.5,1" Center="0.5,1" RadiusX="0.8" RadiusY="0.8">
+                                        <GradientStop Color="#B0FF9999" Offset="0"/>
+                                        <GradientStop Color="#00FF4444" Offset="1"/>
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                            </Border>
+
+                            <Path x:Name="xPath"
+                                  Data="M 0 0 L 10 10 M 10 0 L 0 10"
+                                  Stroke="White"
+                                  StrokeThickness="1.5"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  Margin="0,2,0,0">
+                                <Path.Effect>
+                                    <DropShadowEffect Color="#80000000" BlurRadius="2" ShadowDepth="1"/>
+                                </Path.Effect>
+                            </Path>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <EventTrigger RoutedEvent="MouseEnter">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="bottomGlow" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <EventTrigger RoutedEvent="MouseLeave">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="bottomGlow" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.3"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bg" Property="Background" Value="#FF9E1B1B"/>
+                                <Setter TargetName="bottomGlow" Property="Opacity" Value="0.5"/>
+                                <Setter TargetName="topGlow" Property="Opacity" Value="0.2"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </Grid>
+
+        <Border Grid.Row="1"
+                Background="#E0050810"
+                BorderBrush="#20FFFFFF"
+                BorderThickness="0,1,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="260"/>
+                    <ColumnDefinition Width="1"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0" Margin="12">
+                    <Grid>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled">
+                            <ContentControl Content="{Binding LatestToolCallPart.ToolPresentationView}">
+                                <ContentControl.Style>
+                                    <Style TargetType="ContentControl">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasLatestToolCall}" Value="False">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ContentControl.Style>
+                            </ContentControl>
+                        </ScrollViewer>
+                        <TextBlock Text="{DynamicResource ShellChat.NoToolCalls}"
+                                   Foreground="#70FFFFFF"
+                                   FontSize="12"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   TextWrapping="Wrap">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasLatestToolCall}" Value="False">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </Grid>
+
+                <Border Grid.Column="1" Background="#20FFFFFF" Margin="0,16"/>
+
+                <Grid Grid.Column="2" Margin="8,8,12,8">
+                    <ListBox x:Name="MessagesListBox"
+                             VerticalAlignment="Stretch"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             ItemsSource="{Binding Messages}"
+                             ItemTemplateSelector="{StaticResource ShellChatMessageTemplateSelector}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             ScrollViewer.CanContentScroll="True" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
+                             VirtualizingPanel.ScrollUnit="Pixel"
+                             Padding="0,12,18,0">
+                        <ListBox.Template>
+                            <ControlTemplate TargetType="ListBox">
+                                <Border Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        Padding="{TemplateBinding Padding}"
+                                        ClipToBounds="True">
+                                    <ScrollViewer Focusable="False"
+                                                  HorizontalScrollBarVisibility="Disabled"
+                                                  VerticalScrollBarVisibility="Auto"
+                                                  CanContentScroll="True">
+                                        <ItemsPresenter/>
+                                    </ScrollViewer>
+                                </Border>
+                            </ControlTemplate>
+                        </ListBox.Template>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0"/>
+                                <Setter Property="Focusable" Value="False"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <ContentPresenter/>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2"
+                Background="Transparent"
+                BorderBrush="Transparent"
+                BorderThickness="0"
+                CornerRadius="0,0,12,12"
+                Padding="16,12,16,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0">
+                    <Grid.Resources>
+                        <ResourceDictionary>
+                            <ResourceDictionary.MergedDictionaries>
+                                <ResourceDictionary Source="/Ferrita;component/Resources/Controls/CascadePreferenceImplicitStyles.xaml"/>
+                            </ResourceDictionary.MergedDictionaries>
+                        </ResourceDictionary>
+                    </Grid.Resources>
+                    <TextBox x:Name="InputTextBox"
+                             Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
+                             MaxHeight="80"
+                             TextWrapping="Wrap"
+                             VerticalScrollBarVisibility="Auto"
+                             HorizontalScrollBarVisibility="Disabled"
+                             AcceptsReturn="True"
+                             PreviewKeyDown="InputTextBox_PreviewKeyDown" TextChanged="InputTextBox_TextChanged"
+                             AllowDrop="True"
+                             PreviewDragOver="InputTextBox_PreviewDragOver"
+                             PreviewDrop="InputTextBox_PreviewDrop"/>
+                    <TextBlock Text="{DynamicResource ShellChat.InputPlaceholder}"
+                               Foreground="#55FFFFFF"
+                               FontSize="13"
+                               Margin="{Binding Padding, ElementName=InputTextBox}"
+                               IsHitTestVisible="False"
+                               VerticalAlignment="Top">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Text, ElementName=InputTextBox}" Value="">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Text, ElementName=InputTextBox}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+
+                <Button Grid.Column="1"
+                        Style="{StaticResource ChatSessionSendButtonStyle}"
+                        Command="{Binding ComposerPrimaryCommand}"
+                        Content="{Binding ComposerPrimaryButtonText}"
+                        Width="64"
+                        Height="32"
+                        Margin="12,0,0,0"
+                        VerticalAlignment="Bottom"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

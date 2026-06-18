@@ -1,0 +1,219 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    
+    <!-- Application level -->
+    <system:String x:Key="App_Title">Ferrita Installation Wizard</system:String>
+    <system:String x:Key="Window_Title">Ferrita Installation Wizard</system:String>
+    
+    <!-- Tab names -->
+    <system:String x:Key="Tab_Welcome">Welcome</system:String>
+    <system:String x:Key="Tab_License">License Agreement</system:String>
+    <system:String x:Key="Tab_SelectDirectory">Select Path</system:String>
+    <system:String x:Key="Tab_Ferrita">Ferrita</system:String>
+    <system:String x:Key="Tab_Progress">Installation Progress</system:String>
+    <system:String x:Key="Tab_Complete">Complete</system:String>
+    
+    <!-- Welcome page -->
+    <system:String x:Key="Welcome_Title">Welcome to Ferrita Setup</system:String>
+    <system:String x:Key="Welcome_Text1">Weaving the future we once had. This wizard will guide you through the installation of Ferrita.</system:String>
+    <system:String x:Key="Welcome_Text2">Ferrita is an LLM Agent Harness. This wizard will extract core runtimes and configure local executions.</system:String>
+    <system:String x:Key="Welcome_Text3">It is recommended that you close all other applications before continuing, allowing the installer to update system files without restarting.</system:String>
+    <system:String x:Key="Welcome_LanguageSelectLabel">Select Language:</system:String>
+    <system:String x:Key="Welcome_ClickNextHint">Click "Next" to continue, or "Cancel" to exit the wizard.</system:String>
+    
+    <!-- License page -->
+    <system:String x:Key="License_Title">License Agreement</system:String>
+    <system:String x:Key="License_SubTitle">Please read the following license terms carefully before installing Ferrita.</system:String>
+    <system:String x:Key="License_Text">Creative Commons CC0 1.0 Universal
+==================================
+
+CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE LEGAL SERVICES. DISTRIBUTION OF THIS DOCUMENT DOES NOT CREATE AN ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES REGARDING THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS PROVIDED HEREUNDER, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS PROVIDED HEREUNDER.
+
+Statement of Purpose
+--------------------
+
+The laws of most jurisdictions throughout the world automatically confer exclusive Copyright and Related Rights (defined below) upon the creator and subsequent owner(s) (each and all, an "owner") of an original work of authorship and/or a database (each, a "Work").
+
+Certain owners wish to permanently relinquish those rights to a Work for the purpose of contributing to a commons of creative, cultural and scientific works ("Commons") that the public can reliably and without fear of later claims of infringement build upon, modify, incorporate in other works, reuse and redistribute as freely as possible in any form whatsoever and for any purposes, including without limitation commercial purposes. These owners may contribute to the Commons to promote the ideal of a free culture and the further production of creative, cultural and scientific works, or without reputation or promotion.
+
+In furtherance of these purposes and/or expectations, the person associating CC0 with a Work (the "Affirmer") hereby publicly associates CC0 with the Work and elects to treat the Work as public domain.
+
+1. Copyright and Related Rights.
+--------------------------------
+
+A Work made available under CC0 may be protected by copyright and related or neighboring rights ("Copyright and Related Rights"). Copyright and Related Rights include, but are not limited to, the following:
+
+  i. the right to reproduce, adapt, distribute, perform, display, communicate, and translate a Work;
+  ii. moral rights retained by the original author(s) and/or performer(s);
+  iii. publicity and privacy rights pertaining to a person's image or likeness depicted in a Work;
+  iv. rights protecting against unfair competition in relation to a Work, subject to the limitations in Paragraph 4(a), below;
+  v. rights protecting the extraction, dissemination, use and reuse of data in a Work;
+  vi. database rights (such as those arising under Directive 96/9/EC of the European Parliament and of the Council of 11 March 1996 on the legal protection of databases, and under any national implementation thereof, including any amended or successor version of such directive); and
+  vii. other similar, equivalent or corresponding rights throughout the world based on applicable law or treaty, and any national implementations thereof.
+
+2. Waiver.
+----------
+
+To the greatest extent permitted by, but not in contravention of, applicable law, Affirmer hereby overtly, fully, permanently, irrevocably and unconditionally waives, abandons, and surrenders all of Affirmer's Copyright and Related Rights and associated claims and causes of action, whether now known or unknown (including existing as well as future claims and causes of action), in the Work (i) in all territories worldwide, (ii) for the maximum duration provided by applicable law or treaty (including future time extensions), (iii) in any current or future medium and for any number of copies, and (iv) for any purpose whatsoever, including without limitation commercial, advertising or promotional purposes (the "Waiver"). Affirmer makes the Waiver for the benefit of each member of the public at large and to the detriment of Affirmer's heirs and successors, fully intending that such Waiver shall not be subject to revocation, rescission, cancellation, termination, or any other legal or equitable action to project the Work from the Commons.</system:String>
+
+    <!-- Destination directory page -->
+    <system:String x:Key="Dir_Title">Choose Install Location</system:String>
+    <system:String x:Key="Dir_SubTitle">The wizard will install Ferrita in the following folder.</system:String>
+    <system:String x:Key="Dir_TargetFolderLabel">Destination Folder:</system:String>
+    <system:String x:Key="Dir_Browse">Browse...</system:String>
+    <system:String x:Key="Dir_SpaceRequired">Space Required:</system:String>
+    <system:String x:Key="Dir_SpaceAvailable">Space Available:</system:String>
+
+    <!-- Language Model Configuration sub-page -->
+    <system:String x:Key="LM_SubStepTitle">Language Model</system:String>
+    <system:String x:Key="LM_Title">Language Model Settings</system:String>
+    <system:String x:Key="LM_SubTitle">Configure your language models so Ferrita can connect to model APIs.</system:String>
+    <system:String x:Key="LM_BtnAdd">Add</system:String>
+    <system:String x:Key="LM_BtnDuplicate">Duplicate</system:String>
+    <system:String x:Key="LM_BtnDelete">Delete</system:String>
+    <system:String x:Key="LM_LabelDisplayName">Display Name:</system:String>
+    <system:String x:Key="LM_LabelProtocol">Protocol:</system:String>
+    <system:String x:Key="LM_LabelContextWindow">Context Window (Tokens):</system:String>
+    <system:String x:Key="LM_LabelModalities">Supported Modalities:</system:String>
+    <system:String x:Key="LM_ModalityImage">Image</system:String>
+    <system:String x:Key="LM_ModalityAudio">Audio</system:String>
+    <system:String x:Key="LM_ModalityVideo">Video</system:String>
+    <system:String x:Key="LM_ModalityDocument">Document</system:String>
+    <system:String x:Key="LM_Google_ModelId">Model ID:</system:String>
+    <system:String x:Key="LM_Google_ApiKey">API Key:</system:String>
+    <system:String x:Key="LM_Google_BaseUrl">Base URL:</system:String>
+    <system:String x:Key="LM_Google_UseTemp">Use Temperature</system:String>
+    <system:String x:Key="LM_Google_UseTopP">Use Top P</system:String>
+    <system:String x:Key="LM_Google_UseMaxTokens">Use Max Output Tokens</system:String>
+    <system:String x:Key="LM_Google_UseThinkingLevel">Use Thinking Level</system:String>
+    <system:String x:Key="LM_Google_UseThinkingBudget">Use Thinking Budget</system:String>
+    <system:String x:Key="LM_Google_IncludeThoughts">Include Thoughts</system:String>
+    <system:String x:Key="LM_Meai_ModelId">Model ID:</system:String>
+    <system:String x:Key="LM_Meai_ApiKey">API Key:</system:String>
+    <system:String x:Key="LM_Meai_BaseUrl">Base URL:</system:String>
+    <system:String x:Key="LM_Meai_UseTemp">Use Temperature</system:String>
+    <system:String x:Key="LM_Meai_UseTopP">Use Top P</system:String>
+    <system:String x:Key="LM_Meai_UseMaxTokens">Use Max Output Tokens</system:String>
+    <system:String x:Key="LM_Meai_UsePresence">Use Presence Penalty</system:String>
+    <system:String x:Key="LM_Meai_UseFrequency">Use Frequency Penalty</system:String>
+    <system:String x:Key="LM_Meai_UseSeed">Use Seed</system:String>
+    <system:String x:Key="LM_Meai_UseReasoningEffort">Use Reasoning Effort</system:String>
+    <system:String x:Key="LM_Meai_UseReasoningOutput">Use Reasoning Output</system:String>
+
+    <!-- Capability Layers sub-page -->
+    <system:String x:Key="Layer_SubStepTitle">Capability Layers</system:String>
+    <system:String x:Key="Layer_Title">Capability Layers Settings</system:String>
+    <system:String x:Key="Layer_SubTitle">Ferrita supports routing models based on capability layers. Associate models with the three built-in layers.</system:String>
+    <system:String x:Key="Layer_BtnAddRef">Add Model Ref</system:String>
+    <system:String x:Key="Layer_ContextCompression_Name">Context Compression</system:String>
+    <system:String x:Key="Layer_ContextCompression_Desc">Summarizes and compresses long conversation histories.</system:String>
+    <system:String x:Key="Layer_UtilityIFast_Name">Utility I (Fast)</system:String>
+    <system:String x:Key="Layer_UtilityIFast_Desc">Handles simple streams or high-frequency assistant tasks.</system:String>
+    <system:String x:Key="Layer_UtilityIISmart_Name">Utility II (Smart)</system:String>
+    <system:String x:Key="Layer_UtilityIISmart_Desc">Solves complex logical reasoning and core programming tasks.</system:String>
+
+    <!-- Agents sub-page -->
+    <system:String x:Key="Agent_SubStepTitle">Agents</system:String>
+    <system:String x:Key="Agent_Title">Preset Agent Configurations</system:String>
+    <system:String x:Key="Agent_SubTitle">Ferrita provides preset agent roles. Check the ones you want to enable. You can modify them anytime.</system:String>
+    <system:String x:Key="Agent_RadioSpecificLM">Specific Language Model</system:String>
+    <system:String x:Key="Agent_RadioCapabilityLayer">Capability Layer</system:String>
+    <system:String x:Key="Agent_NiceChatter_Name">NiceChatter</system:String>
+    <system:String x:Key="Agent_NiceChatter_Desc">Friendly assistant to help you with chat and daily tasks.</system:String>
+    <system:String x:Key="Agent_Coder_Name">Coder</system:String>
+    <system:String x:Key="Agent_Coder_Desc">Professional programming agent, excels at workspace collaboration to solve code tasks.</system:String>
+    <system:String x:Key="Agent_CoderWithPowershell_Name">Coder With Powershell</system:String>
+    <system:String x:Key="Agent_CoderWithPowershell_Desc">Programming agent with CLI permission, runs PowerShell commands to debug workspace code.</system:String>
+    <system:String x:Key="Agent_Puterperson_Name">Puterperson</system:String>
+    <system:String x:Key="Agent_Puterperson_Desc">Embodiment of your computer, helps automate complex OS tasks.</system:String>
+    <system:String x:Key="Agent_Investigator_Name">Investigator</system:String>
+    <system:String x:Key="Agent_Investigator_Desc">Exploration sub-agent, performs deep codebase searches and layout inspection.</system:String>
+
+    <!-- Session Flow sub-page -->
+    <system:String x:Key="Flow_SubStepTitle">Session Flow</system:String>
+    <system:String x:Key="Flow_Title">Session Flow Configuration</system:String>
+    <system:String x:Key="Flow_SubTitle">Select agents to auto-generate default flow node graphs. Each selection generates an individual graph XML file.</system:String>
+    <system:String x:Key="Flow_Desc_Template">Auto-generate default session flow graph file ({1}.xml) using {0}.</system:String>
+    <system:String x:Key="Flow_GraphNameFormat">{0} Session Flow</system:String>
+
+
+    <!-- System Integration sub-page -->
+    <system:String x:Key="Integration_SubStepTitle">System Integration</system:String>
+    <system:String x:Key="Integration_Title">System Integration Options</system:String>
+    <system:String x:Key="Integration_SubTitle">Select integration preferences for Ferrita and your operating system.</system:String>
+    <system:String x:Key="Integration_Shortcut">Create shortcut on Desktop</system:String>
+    <system:String x:Key="Integration_StartMenu">Add Ferrita to Start Menu programs</system:String>
+    <system:String x:Key="Integration_Startup">Auto-start Ferrita in background tray mode on Windows login</system:String>
+    <system:String x:Key="Integration_Service">Register as Windows System Service for continuous agent capacity</system:String>
+    <system:String x:Key="Integration_Shell">Enable File Explorer context menu integration (Recommended)</system:String>
+    <system:String x:Key="Integration_ShellDesc1">• Adds "Ask Ferrita..." to context menus of files, folders, and background whitespace.</system:String>
+    <system:String x:Key="Integration_ShellDesc2">• Launch Shell Chat interactions directly by right-clicking elements in Explorer.</system:String>
+    <system:String x:Key="Integration_ShellDesc3">• Only writes to Current User (HKCU) registry, no admin privileges required.</system:String>
+
+    <!-- Progress page -->
+    <system:String x:Key="Progress_SubStepTitle">Progress</system:String>
+    <system:String x:Key="Progress_Title">Installing</system:String>
+    <system:String x:Key="Progress_SubTitle">Please wait while the wizard deploys Ferrita to your system...</system:String>
+
+    <!-- Complete page -->
+    <system:String x:Key="Complete_SubStepTitle">Complete</system:String>
+    <system:String x:Key="Complete_Title">Ferrita Setup Completed</system:String>
+    <system:String x:Key="Complete_Text1">Ferrita has been successfully installed on your computer.</system:String>
+    <system:String x:Key="Complete_Text2">Click "Complete" to close this wizard and exit setup.</system:String>
+    <system:String x:Key="Complete_Launch">Launch Ferrita now</system:String>
+
+    <!-- Button & Footer labels -->
+    <system:String x:Key="Btn_Back">&lt; Back</system:String>
+    <system:String x:Key="Btn_Next">Next &gt;</system:String>
+    <system:String x:Key="Btn_Cancel">Cancel</system:String>
+    <system:String x:Key="Btn_Install">Install</system:String>
+    <system:String x:Key="Btn_Complete">Complete</system:String>
+
+    <!-- Footer status values -->
+    <system:String x:Key="Status_ReadyToInstall">Ready to install</system:String>
+    <system:String x:Key="Status_ReadingLicense">Reading License Agreement</system:String>
+    <system:String x:Key="Status_SelectDirectory">Selecting installation directory</system:String>
+    <system:String x:Key="Status_ConfigureLM">Configuring Language Model API</system:String>
+    <system:String x:Key="Status_ConfigureLayers">Configuring Capability Layers</system:String>
+    <system:String x:Key="Status_ConfigureAgents">Configuring Agents</system:String>
+    <system:String x:Key="Status_PrepareFlows">Preparing default session flows</system:String>
+    <system:String x:Key="Status_SelectIntegration">Selecting system integration options</system:String>
+    <system:String x:Key="Status_Installing">Installing, please do not close the program...</system:String>
+    <system:String x:Key="Status_InstallComplete">Installation completed successfully</system:String>
+
+    <!-- Install progress values -->
+    <system:String x:Key="Progress_PrepareFiles">Preparing files...</system:String>
+    <system:String x:Key="Progress_ExtractCore">Extracting Ferrita core runtime...</system:String>
+    <system:String x:Key="Progress_ExtractDB">Extracting vector database engine (AerialCity)...</system:String>
+    <system:String x:Key="Progress_DeployDaemon">Configuring background tray mode (Ferrita)...</system:String>
+    <system:String x:Key="Progress_ConfigureNetwork">Configuring local ports and network channels (Tunnel-Next)...</system:String>
+    <system:String x:Key="Progress_CreateShortcuts">Creating system shortcuts and initializing environment variables...</system:String>
+    <system:String x:Key="Progress_CleanCache">Cleaning up temporary installer cache...</system:String>
+
+    <!-- Dialogs and Prompts -->
+    <system:String x:Key="Msg_Title_Warning">Warning</system:String>
+    <system:String x:Key="Msg_Title_Info">Information</system:String>
+    <system:String x:Key="Msg_Title_Exit">Exit Setup</system:String>
+    <system:String x:Key="Msg_KeepAtLeastOneLM">The system must retain at least one language model configuration.</system:String>
+    <system:String x:Key="Msg_SelectAtLeastOneAgent">Please select and enable at least one agent to continue.</system:String>
+    <system:String x:Key="Msg_Launching">Launching Ferrita...</system:String>
+    <system:String x:Key="Msg_ConfirmExit">Are you sure you want to exit the Ferrita Installation Wizard?</system:String>
+    <system:String x:Key="Browse_Description">Select the installation folder for Ferrita</system:String>
+    
+    <!-- Shell integration text -->
+    <system:String x:Key="Shell_Menu_Text">Ask Ferrita...</system:String>
+
+    <!-- Lateral File System sub-page -->
+    <system:String x:Key="LFS_SubStepTitle">LateralFS</system:String>
+    <system:String x:Key="LFS_Title">Lateral File System Settings (LateralFS)</system:String>
+    <system:String x:Key="LFS_SubTitle">Enabling the Lateral File System provides high-performance virtualized file mounts.</system:String>
+    <system:String x:Key="LFS_EnableLabel">Enable Lateral File System (LateralFS)</system:String>
+    <system:String x:Key="LFS_EnableHint">If enabled, setup will attempt to enable the Windows Projected File System (ProjFS) feature.</system:String>
+    <system:String x:Key="LFS_WorkingDirLabel">LateralFS Working Root Directory:</system:String>
+    <system:String x:Key="LFS_Browse">Browse...</system:String>
+    <system:String x:Key="LFS_BrowseDescription">Select the working root directory for LateralFS</system:String>
+    <system:String x:Key="Status_ConfigureLFS">Configuring Lateral File System (LateralFS)</system:String>
+    <system:String x:Key="Progress_EnableProjFS">Configuring Windows Projected File System (ProjFS)...</system:String>
+    
+</ResourceDictionary>

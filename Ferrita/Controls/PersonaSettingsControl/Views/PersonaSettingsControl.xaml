@@ -1,0 +1,569 @@
+<UserControl x:Class="Ferrita.Controls.PersonaSettingsControl.Views.PersonaSettingsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:Ferrita.Controls.PersonaSettingsControl.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewModels:PersonaSettingsControlViewModel, IsDesignTimeCreatable=True}"
+             d:DesignHeight="700" d:DesignWidth="800"
+             PreviewKeyDown="OnPreviewKeyDown">
+    
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Ferrita;component/Resources/Controls/CascadePreferenceImplicitStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="AeroNavigationButtonStyle" TargetType="Button">
+                <Setter Property="Width" Value="52"/>
+                <Setter Property="Height" Value="52"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Grid Background="Transparent">
+                                <Path x:Name="ArrowPath" 
+                                      Data="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}" 
+                                      Stroke="White" 
+                                      StrokeThickness="3.5" 
+                                      StrokeStartLineCap="Round" 
+                                      StrokeEndLineCap="Round" 
+                                      StrokeLineJoin="Round"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center">
+                                    <Path.Effect>
+                                        <DropShadowEffect Color="Black" BlurRadius="6" ShadowDepth="1.5" Opacity="0.5"/>
+                                    </Path.Effect>
+                                </Path>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="ArrowPath" Property="Stroke" Value="#D0F0FF"/>
+                                    <Setter TargetName="ArrowPath" Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect Color="#A0E0FF" BlurRadius="10" ShadowDepth="0" Opacity="0.8"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="ArrowPath" Property="Stroke" Value="#A0E0FF"/>
+                                    <Setter TargetName="ArrowPath" Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect Color="#50A0FF" BlurRadius="6" ShadowDepth="0" Opacity="0.9"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="PersonaOrbButtonStyle" TargetType="Button">
+                <Setter Property="Width" Value="160"/>
+                <Setter Property="Height" Value="160"/>
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+                <Setter Property="Margin" Value="24,0,24,0"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <ContentPresenter/>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="AeroCollapseToggleButtonStyle" TargetType="ToggleButton">
+                <Setter Property="Width" Value="48"/>
+                <Setter Property="Height" Value="48"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Grid>
+                                <!-- Transparent Ellipse to preserve hit-testing area -->
+                                <Ellipse x:Name="BgEllipse" Fill="Transparent" Stroke="Transparent" StrokeThickness="1"/>
+                                <Path x:Name="ArrowPath" Data="M 16,21 L 24,29 L 32,21" Stroke="White" StrokeThickness="3.5"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                      RenderTransformOrigin="0.5,0.5">
+                                    <Path.RenderTransform>
+                                        <RotateTransform x:Name="ArrowRotate" Angle="0"/>
+                                    </Path.RenderTransform>
+                                    <Path.Effect>
+                                        <DropShadowEffect Color="Black" BlurRadius="6" ShadowDepth="1.5" Opacity="0.5"/>
+                                    </Path.Effect>
+                                </Path>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="ArrowPath" Property="Stroke" Value="#D0F0FF"/>
+                                    <Setter TargetName="ArrowPath" Property="Effect">
+                                        <Setter.Value>
+                                            <DropShadowEffect Color="#A0E0FF" BlurRadius="10" ShadowDepth="0" Opacity="0.8"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="ArrowPath"
+                                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                                 To="180" Duration="0:0:0.25"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="ArrowPath"
+                                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                                 To="0" Duration="0:0:0.25"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="AeroFormLabelStyle" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#EAF8FFFF"/>
+                <Setter Property="FontFamily" Value="{DynamicResource AeroFontFamily}"/>
+                <Setter Property="FontSize" Value="12.5"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Margin" Value="0,0,0,6"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.4"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="AeroFormDescriptionStyle" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#B8EAF8FF"/>
+                <Setter Property="FontFamily" Value="{DynamicResource AeroFontFamily}"/>
+                <Setter Property="FontSize" Value="11.5"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+                <Setter Property="LineHeight" Value="16"/>
+                <Setter Property="Margin" Value="0,-2,0,8"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.35"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="PersonaTitleStyle" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="FontFamily" Value="{DynamicResource AeroFontFamily}"/>
+                <Setter Property="FontSize" Value="28"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="#000000" BlurRadius="8" ShadowDepth="2" Opacity="0.6"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="PersonaDescStyle" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#D0F0FF"/>
+                <Setter Property="FontFamily" Value="{DynamicResource AeroFontFamily}"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="TextAlignment" Value="Center"/>
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+                <Setter Property="MaxWidth" Value="500"/>
+                <Setter Property="LineHeight" Value="20"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="#000000" BlurRadius="4" ShadowDepth="1.5" Opacity="0.5"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="OrbTranslate"
+                                     Storyboard.TargetProperty="Y"
+                                     From="-5" To="5" Duration="0:0:2.5"
+                                     AutoReverse="True" RepeatBehavior="Forever">
+                        <DoubleAnimation.EasingFunction>
+                            <QuadraticEase EasingMode="EaseInOut"/>
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </UserControl.Triggers>
+
+    <Grid x:Name="RootGrid">
+        <!-- Aero风格复杂渐变背景 -->
+        <Grid x:Name="AeroBackgroundGrid">
+            <!-- 第一层：纯色底色层（由后台代码通过平滑动画进行切换） -->
+            <Border x:Name="BaseColorLayer" />
+
+            <!-- 第二层：径向底色变体（为基础底色增加纵深和暗角感） -->
+            <Border Opacity="0.45">
+                <Border.Background>
+                    <RadialGradientBrush Center="0.5,0.3" RadiusX="1.2" RadiusY="1.2">
+                        <GradientStop Color="#00000000" Offset="0"/>
+                        <GradientStop Color="#90000000" Offset="1"/>
+                    </RadialGradientBrush>
+                </Border.Background>
+            </Border>
+
+            <!-- 第三层：充满动感的主色调极光发光（北极光/Aero极光风格，位于右上角） -->
+            <Border x:Name="PersonaColorGlowLayer" Opacity="0.4">
+                <Border.Background>
+                    <RadialGradientBrush Center="0.85,0.15" RadiusX="0.9" RadiusY="0.9">
+                        <GradientStop x:Name="GlowColorStop" Color="#FF808080" Offset="0"/>
+                        <GradientStop Color="#00000000" Offset="1"/>
+                    </RadialGradientBrush>
+                </Border.Background>
+            </Border>
+
+            <!-- 第四层：左上角柔和的白色环境光，用于调和色调并增强Aero的发光感 -->
+            <Border Opacity="0.25">
+                <Border.Background>
+                    <RadialGradientBrush Center="0.15,0.2" RadiusX="0.75" RadiusY="0.75">
+                        <GradientStop Color="#FFFFFFFF" Offset="0"/>
+                        <GradientStop Color="#00FFFFFF" Offset="1"/>
+                    </RadialGradientBrush>
+                </Border.Background>
+            </Border>
+
+            <!-- 第五层：Aero斜向条纹 / 高陡度反射玻璃扫掠面（经典的Vista/Win7外观） -->
+            <Border Opacity="0.18">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#FFFFFFFF" Offset="0"/>
+                        <GradientStop Color="#FFFFFFFF" Offset="0.32"/>
+                        <GradientStop Color="#00FFFFFF" Offset="0.35"/>
+                        <GradientStop Color="#00FFFFFF" Offset="0.58"/>
+                        <GradientStop Color="#50FFFFFF" Offset="0.78"/>
+                        <GradientStop Color="#00FFFFFF" Offset="0.9"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+            </Border>
+
+            <!-- 第六层：Vista Aurora Swirl 效果（优雅的曲线双色叠加） -->
+            <Border Opacity="0.12">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0.1,0.9" EndPoint="0.9,0.1">
+                        <GradientStop Color="#00FFFFFF" Offset="0"/>
+                        <GradientStop Color="#AFFFFFFF" Offset="0.45"/>
+                        <GradientStop Color="#00FFFFFF" Offset="0.5"/>
+                        <GradientStop Color="#20000000" Offset="0.505"/>
+                        <GradientStop Color="#00000000" Offset="0.75"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+            </Border>
+
+            <!-- 第七层：顶对底的微妙玻璃磨砂和折射渐变 -->
+            <Border Opacity="0.15">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                        <GradientStop Color="#40FFFFFF" Offset="0"/>
+                        <GradientStop Color="#00FFFFFF" Offset="0.25"/>
+                        <GradientStop Color="#00000000" Offset="0.75"/>
+                        <GradientStop Color="#50000000" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+            </Border>
+        </Grid>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Grid Margin="32,40,32,40">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Row 0: Selector area with MouseWheel support -->
+                <Grid Grid.Row="0" Background="Transparent" PreviewMouseWheel="OnTopRegionPreviewMouseWheel">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Orb & Arrow buttons -->
+                    <Grid Grid.Row="0" HorizontalAlignment="Center" Width="420">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0" Command="{Binding PrevPersonaCommand}" Style="{StaticResource AeroNavigationButtonStyle}" Tag="M 28,14 L 18,24 L 28,34"/>
+
+                        <Button Grid.Column="1"
+                                Command="{Binding ActivateSelectedPersonaCommand}"
+                                Style="{StaticResource PersonaOrbButtonStyle}">
+                            <!-- Gorgeous circular Aero glass orb icon -->
+                            <Grid Width="160" Height="160">
+                                <Grid.RenderTransform>
+                                    <TranslateTransform x:Name="OrbTranslate" Y="0"/>
+                                </Grid.RenderTransform>
+                                
+                                <!-- Drop Shadow Background -->
+                                <Ellipse Fill="#50000000">
+                                    <Ellipse.Effect>
+                                        <BlurEffect Radius="15" />
+                                    </Ellipse.Effect>
+                                </Ellipse>
+                                
+                                <!-- Base Color / Inner Gradient -->
+                                <Ellipse Margin="4"
+                                         Fill="{Binding SelectedPersona.OrbBrush}"/>
+                                
+                                <!-- Inner Rim Glow -->
+                                <Ellipse Margin="4" StrokeThickness="1.5">
+                                    <Ellipse.Stroke>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#B0FFFFFF" Offset="0"/>
+                                            <GradientStop Color="#15FFFFFF" Offset="0.5"/>
+                                            <GradientStop Color="#60FFFFFF" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Ellipse.Stroke>
+                                </Ellipse>
+                                
+                                <!-- Inner Shadow Rim -->
+                                <Ellipse Margin="5" StrokeThickness="1">
+                                    <Ellipse.Stroke>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#25000000" Offset="0"/>
+                                            <GradientStop Color="#85000000" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Ellipse.Stroke>
+                                </Ellipse>
+
+                                <!-- Top Crescent Highlight (Vista Gloss) -->
+                                <Path Margin="8,8,8,0" Height="68" VerticalAlignment="Top" Stretch="Fill" Data="M 0,34 A 72,34 0 0,1 144,34 A 72,72 0 0,0 0,34 Z">
+                                    <Path.Fill>
+                                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                            <GradientStop Color="#E5FFFFFF" Offset="0"/>
+                                            <GradientStop Color="#00FFFFFF" Offset="0.85"/>
+                                        </LinearGradientBrush>
+                                    </Path.Fill>
+                                </Path>
+                                
+                                <!-- Bottom Radial Glow Reflection -->
+                                <Ellipse Margin="20,110,20,10" Height="40" VerticalAlignment="Bottom" Opacity="0.55">
+                                    <Ellipse.Fill>
+                                        <RadialGradientBrush Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5" GradientOrigin="0.5,0.5">
+                                            <GradientStop Color="#FFFFFFFF" Offset="0"/>
+                                            <GradientStop Color="#00FFFFFF" Offset="1"/>
+                                        </RadialGradientBrush>
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                            </Grid>
+                        </Button>
+
+                        <Button Grid.Column="2" Command="{Binding NextPersonaCommand}" Style="{StaticResource AeroNavigationButtonStyle}" Tag="M 18,14 L 28,24 L 18,34"/>
+                    </Grid>
+
+                    <!-- Persona Name -->
+                    <TextBlock Grid.Row="1" Text="{Binding SelectedPersona.Name}" Style="{StaticResource PersonaTitleStyle}" Margin="0,20,0,0"/>
+
+                    <!-- Persona Description -->
+                    <TextBlock Grid.Row="2" Text="{Binding SelectedPersona.Description}" Style="{StaticResource PersonaDescStyle}" Margin="0,12,0,0"/>
+
+                    <!-- Toggle Config Panel Button (Downward V) -->
+                    <ToggleButton Grid.Row="3" Margin="0,28,0,0" HorizontalAlignment="Center"
+                                  IsChecked="{Binding IsConfigPanelExpanded, Mode=TwoWay}"
+                                  Style="{StaticResource AeroCollapseToggleButtonStyle}"/>
+                </Grid>
+
+                <!-- Row 1: Collapsible configuration panel -->
+                <Grid Grid.Row="1">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="MaxHeight" Value="0"/>
+                            <Setter Property="Opacity" Value="0"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsConfigPanelExpanded}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="MaxHeight" To="800" Duration="0:0:0.4">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <QuadraticEase EasingMode="EaseInOut"/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.3"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="MaxHeight" To="0" Duration="0:0:0.35">
+                                                    <DoubleAnimation.EasingFunction>
+                                                        <QuadraticEase EasingMode="EaseInOut"/>
+                                                    </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation>
+                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+
+                    <!-- Premium Glass Card container (no background, no border, deep shadow) -->
+                    <Border Margin="0,20,0,0" Padding="24,24,24,24" Background="Transparent" BorderThickness="0" UseLayoutRounding="True">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#000000" BlurRadius="25" ShadowDepth="6" Opacity="0.4"/>
+                        </Border.Effect>
+
+                        <StackPanel>
+                            <!-- Panel Header -->
+                            <TextBlock Text="{DynamicResource PersonaSettings.ConfigTitle}" 
+                                       Foreground="White" FontSize="16" FontWeight="Bold" Margin="0,0,0,16">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect Color="#000000" BlurRadius="4" ShadowDepth="1" Opacity="0.5"/>
+                                </TextBlock.Effect>
+                            </TextBlock>
+
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Persona 名称" Style="{StaticResource AeroFormLabelStyle}"/>
+                                    <TextBlock Text="用于列表显示，也会作为 Persona 规约中的身份标签。"
+                                               Style="{StaticResource AeroFormDescriptionStyle}"/>
+                                    <TextBox Text="{Binding SelectedPersona.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Persona 描述" Style="{StaticResource AeroFormLabelStyle}"/>
+                                    <TextBlock Text="概括这个 Persona 的核心气质、关系感和长期对话倾向。"
+                                               Style="{StaticResource AeroFormDescriptionStyle}"/>
+                                    <TextBox Text="{Binding SelectedPersona.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Configuration Rows -->
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Agent Name -->
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="{DynamicResource PersonaSettings.AgentName}" Style="{StaticResource AeroFormLabelStyle}"/>
+                                    <TextBlock Text="模型在对话中使用的自称；留空则不强制指定。"
+                                               Style="{StaticResource AeroFormDescriptionStyle}"/>
+                                    <TextBox Text="{Binding SelectedPersona.AgentName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+
+                                <!-- User Name -->
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="{DynamicResource PersonaSettings.UserName}" Style="{StaticResource AeroFormLabelStyle}"/>
+                                    <TextBlock Text="Persona 对用户的称呼方式；可写名字、昵称或关系称谓。"
+                                               Style="{StaticResource AeroFormDescriptionStyle}"/>
+                                    <TextBox Text="{Binding SelectedPersona.UserName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Tone -->
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="{DynamicResource PersonaSettings.Tone}" Style="{StaticResource AeroFormLabelStyle}"/>
+                                    <TextBlock Text="描述说话风格，例如温和、犀利、克制、活泼或专业。"
+                                               Style="{StaticResource AeroFormDescriptionStyle}"/>
+                                    <TextBox Text="{Binding SelectedPersona.Tone, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+
+                                <!-- Modal Particles -->
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="{DynamicResource PersonaSettings.ModalParticles}" Style="{StaticResource AeroFormLabelStyle}"/>
+                                    <TextBlock Text="常用语气词或口癖，多个词可用逗号分隔；请保持克制。"
+                                               Style="{StaticResource AeroFormDescriptionStyle}"/>
+                                    <TextBox Text="{Binding SelectedPersona.ModalParticles, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Response Speed Slider -->
+                            <StackPanel Margin="0,0,0,20">
+                                <Grid Margin="0,0,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{DynamicResource PersonaSettings.ResponseSpeed}" Style="{StaticResource AeroFormLabelStyle}"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding SelectedPersona.ResponseSpeed, StringFormat={}{0:F0}}" 
+                                               Foreground="White" FontSize="12.5" FontWeight="Bold"/>
+                                </Grid>
+                                <TextBlock Text="数值越高越直接迅速，数值越低越从容细致。"
+                                           Style="{StaticResource AeroFormDescriptionStyle}"/>
+                                <Slider Minimum="0" Maximum="100" TickFrequency="1" IsSnapToTickEnabled="True" 
+                                        Value="{Binding SelectedPersona.ResponseSpeed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+
+                            <!-- Custom Persona Prompt -->
+                            <StackPanel>
+                                <TextBlock Text="{DynamicResource PersonaSettings.Prompt}" Style="{StaticResource AeroFormLabelStyle}"/>
+                                <TextBlock Text="写入额外行为规约、禁忌和表达习惯；会追加到代理系统提示词中。"
+                                           Style="{StaticResource AeroFormDescriptionStyle}"/>
+                                <TextBox Text="{Binding SelectedPersona.Prompt, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                         AcceptsReturn="True" TextWrapping="Wrap" MinHeight="100" VerticalScrollBarVisibility="Auto" AcceptsTab="True"/>
+                            </StackPanel>
+
+                            <Grid Margin="0,14,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           Foreground="#D0F0FF"
+                                           TextWrapping="Wrap"
+                                           Text="{Binding StatusMessage}"/>
+                                <Button Grid.Column="1"
+                                        Width="112"
+                                        Margin="12,0,0,0"
+                                        Command="{Binding DeleteSelectedPersonaCommand}"
+                                        Content="删除Persona"/>
+                                <Button Grid.Column="2"
+                                        Width="128"
+                                        Margin="12,0,0,0"
+                                        Command="{Binding RefreshSelectedPersonaColorCommand}"
+                                        Content="刷新颜色"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

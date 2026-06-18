@@ -1,0 +1,186 @@
+<UserControl x:Class="Ferrita.Tools.VectorineCreateXamlToolInvocationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+        <!-- 集成自 LightBackgroundGlass.xaml 的 Layer_18 画笔（已修改 Stretch 为 Fill 以铺满卡片） -->
+        <DrawingBrush x:Key="LightBackgroundGlassBrush" Stretch="Fill">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <DrawingGroup.Children>
+                        <GeometryDrawing Geometry="F1 M 4,0.99939L 1180.48,0.99939C 1182.14,0.99939 1183.48,2.34265 1183.48,3.99939L 1183.48,814.088C 1183.48,815.745 1182.14,817.088 1180.48,817.088L 4,817.088C 2.34314,817.088 1,815.745 1,814.088L 1,3.99939C 1,2.34265 2.34314,0.99939 4,0.99939 Z ">
+                            <GeometryDrawing.Brush>
+                                <RadialGradientBrush RadiusX="1.01282" RadiusY="0.917797" Center="0.5,0.97775" GradientOrigin="0.5,0.97775">
+                                    <RadialGradientBrush.GradientStops>
+                                        <GradientStop Color="#4DC9CACA" Offset="0"/>
+                                        <GradientStop Color="#0E445E7C" Offset="0.988506"/>
+                                    </RadialGradientBrush.GradientStops>
+                                    <RadialGradientBrush.RelativeTransform>
+                                        <TransformGroup>
+                                            <SkewTransform CenterX="0.5" CenterY="0.97775" AngleX="5.23488" AngleY="0"/>
+                                            <RotateTransform CenterX="0.5" CenterY="0.97775" Angle="70.494"/>
+                                        </TransformGroup>
+                                    </RadialGradientBrush.RelativeTransform>
+                                </RadialGradientBrush>
+                            </GeometryDrawing.Brush>
+                        </GeometryDrawing>
+                        <GeometryDrawing Geometry="F1 M 4,1L 1180.48,1C 1182.14,1 1183.48,2.34326 1183.48,4.00012L 1183.48,814.089C 1183.48,815.745 1182.14,817.089 1180.48,817.089L 4,817.089C 2.34314,817.089 1,815.745 1,814.089L 1,4.00012C 1,2.34326 2.34314,1 4,1 Z ">
+                            <GeometryDrawing.Brush>
+                                <RadialGradientBrush RadiusX="1.18083" RadiusY="0.766859" Center="0.499999,0.0498997" GradientOrigin="0.499999,0.0498997">
+                                    <RadialGradientBrush.GradientStops>
+                                        <GradientStop Color="#2AFFFFFF" Offset="0"/>
+                                        <GradientStop Color="#14FFFFFF" Offset="0.247126"/>
+                                        <GradientStop Color="#00FFFFFF" Offset="0.461686"/>
+                                    </RadialGradientBrush.GradientStops>
+                                    <RadialGradientBrush.RelativeTransform>
+                                        <TransformGroup/>
+                                    </RadialGradientBrush.RelativeTransform>
+                                </RadialGradientBrush>
+                            </GeometryDrawing.Brush>
+                        </GeometryDrawing>
+                        <GeometryDrawing Geometry="F1 M 4,1L 1180.48,1C 1182.14,1 1183.48,2.34326 1183.48,4.00012L 1183.48,814.089C 1183.48,815.745 1182.14,817.089 1180.48,817.089L 4,817.089C 2.34314,817.089 1,815.745 1,814.089L 1,4.00012C 1,2.34326 2.34314,1 4,1 Z ">
+                            <GeometryDrawing.Pen>
+                                <Pen Thickness="2" LineJoin="Round">
+                                    <Pen.Brush>
+                                        <RadialGradientBrush RadiusX="2.14746" RadiusY="0.676245" Center="0.499999,0.499998" GradientOrigin="0.499999,0.499998">
+                                            <RadialGradientBrush.GradientStops>
+                                                <GradientStop Color="#67FFFFFF" Offset="0"/>
+                                                <GradientStop Color="#00FFFFFF" Offset="1"/>
+                                            </RadialGradientBrush.GradientStops>
+                                            <RadialGradientBrush.RelativeTransform>
+                                                <TransformGroup>
+                                                    <SkewTransform CenterX="0.499999" CenterY="0.499998" AngleX="7.47052" AngleY="0"/>
+                                                    <RotateTransform CenterX="0.499999" CenterY="0.499998" Angle="48.7353"/>
+                                                </TransformGroup>
+                                            </RadialGradientBrush.RelativeTransform>
+                                        </RadialGradientBrush>
+                                    </Pen.Brush>
+                                </Pen>
+                            </GeometryDrawing.Pen>
+                        </GeometryDrawing>
+                    </DrawingGroup.Children>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+
+        <!-- 集成自 VectorineBG.xaml 的 Layer_25 画笔（已修改 Stretch 为 Fill 以铺满容器） -->
+        <DrawingBrush x:Key="VectorineBGBrush" Stretch="Fill">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <DrawingGroup.Children>
+                        <GeometryDrawing Geometry="F1 M 33.1602,0.159912L 880.494,0.159912C 898.719,0.159912 913.494,14.9346 913.494,33.1599L 913.494,769.827C 913.494,788.052 898.719,802.827 880.494,802.827L 33.1602,802.827C 14.9348,802.827 0.160156,788.052 0.160156,769.827L 0.160156,33.1599C 0.160156,14.9346 14.9348,0.159912 33.1602,0.159912 Z ">
+                            <GeometryDrawing.Pen>
+                                <Pen Thickness="0.32" LineJoin="Round" Brush="#FF000000"/>
+                            </GeometryDrawing.Pen>
+                            <GeometryDrawing.Brush>
+                                <LinearGradientBrush StartPoint="0.5,-0.0157722" EndPoint="0.5,1.01577">
+                                    <LinearGradientBrush.GradientStops>
+                                        <GradientStop Color="#FF2B2B2B" Offset="0"/>
+                                        <GradientStop Color="#FF000000" Offset="1"/>
+                                    </LinearGradientBrush.GradientStops>
+                                </LinearGradientBrush>
+                            </GeometryDrawing.Brush>
+                        </GeometryDrawing>
+                    </DrawingGroup.Children>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+
+        <!-- 集成自 VectorineBGWhite.xaml 的 Layer_25 画笔（已修改 Stretch 为 Fill 以铺满容器） -->
+        <DrawingBrush x:Key="VectorineBGWhiteBrush" Stretch="Fill">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <DrawingGroup.Children>
+                        <GeometryDrawing Geometry="F1 M 33.1602,0.160034L 880.495,0.160034C 898.72,0.160034 913.495,14.9347 913.495,33.16L 913.495,769.827C 913.495,788.052 898.72,802.827 880.495,802.827L 33.1602,802.827C 14.9348,802.827 0.160156,788.052 0.160156,769.827L 0.160156,33.16C 0.160156,14.9347 14.9348,0.160034 33.1602,0.160034 Z ">
+                            <GeometryDrawing.Pen>
+                                <Pen Thickness="0.32" LineJoin="Round" Brush="#FF000000"/>
+                            </GeometryDrawing.Pen>
+                            <GeometryDrawing.Brush>
+                                <LinearGradientBrush StartPoint="0.499999,-0.0157722" EndPoint="0.499999,1.01577">
+                                    <LinearGradientBrush.GradientStops>
+                                        <GradientStop Color="#FFFFFFFF" Offset="0"/>
+                                        <GradientStop Color="#FFC3C3C3" Offset="0.51"/>
+                                        <GradientStop Color="#FF878787" Offset="1"/>
+                                    </LinearGradientBrush.GradientStops>
+                                </LinearGradientBrush>
+                            </GeometryDrawing.Brush>
+                        </GeometryDrawing>
+                    </DrawingGroup.Children>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+    </UserControl.Resources>
+
+    <Border Background="{StaticResource LightBackgroundGlassBrush}"
+            BorderBrush="#5598E8FF"
+            BorderThickness="1"
+            CornerRadius="10"
+            Padding="12">
+        <StackPanel>
+            <!-- 标题栏部分 -->
+            <DockPanel LastChildFill="False">
+                <TextBlock Text="Vectorine 实时渲染（XAML LiveView）"
+                           Foreground="#FFF0FBFF"
+                           FontWeight="SemiBold"
+                           FontSize="13"/>
+            </DockPanel>
+
+            <!-- 副标题栏部分（传入的 Title 参数） -->
+            <TextBlock Margin="0,4,0,0"
+                       Text="{Binding TitleText}"
+                       Foreground="#FFB9E7FF"
+                       FontSize="11"
+                       TextWrapping="Wrap"
+                       Visibility="{Binding HasTitle, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+            <!-- 标题栏下方：流式传输时的代码区 -->
+            <Border Margin="0,10,0,0"
+                    Padding="10"
+                    Background="#22FFFFFF"
+                    BorderBrush="#3347C8FF"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Visibility="{Binding ShowCode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ScrollViewer MaxHeight="200"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto">
+                    <TextBox Text="{Binding XamlText, Mode=OneWay}"
+                             IsReadOnly="True"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             Foreground="#FFF0FBFF"
+                             FontFamily="Consolas"
+                             FontSize="11"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap" />
+                </ScrollViewer>
+            </Border>
+
+            <!-- 标题栏下方：渲染完毕后的 XAML 渲染区 -->
+            <Border Margin="0,10,0,0"
+                    Padding="12"
+                    BorderThickness="1"
+                    BorderBrush="#447FDFFF"
+                    CornerRadius="8"
+                    Visibility="{Binding ShowPreview, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="{StaticResource VectorineBGBrush}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsWhiteBackground}" Value="True">
+                                <Setter Property="Background" Value="{StaticResource VectorineBGWhiteBrush}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <!-- 动态载入 XAML 树，并在具有优雅背景的视口中渲染 -->
+                <Grid Height="350">
+                    <ContentControl Content="{Binding RenderedContent}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </Border>
+</UserControl>

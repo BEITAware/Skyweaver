@@ -1,0 +1,604 @@
+<UserControl x:Class="Ferrita.Controls.ToolConfigurationControl.Views.ToolConfigurationControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:Ferrita.Controls.ToolConfigurationControl.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewModels:ToolConfigurationControlViewModel, IsDesignTimeCreatable=True}"
+             d:DesignHeight="920"
+             d:DesignWidth="1240">
+    <UserControl.Resources>
+        <Style x:Key="ConfigurationListViewStyle"
+               TargetType="ListView"
+               BasedOn="{StaticResource AeroListViewStyle}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="8"/>
+        </Style>
+
+        <Style x:Key="ConfigurationListViewItemStyle"
+               TargetType="ListViewItem"
+               BasedOn="{StaticResource AeroListViewItemStyle}">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Grid>
+                            <Border x:Name="HoverOverlay"
+                                    Background="{StaticResource MenuItemHoverBrush}"
+                                    Opacity="0"
+                                    IsHitTestVisible="False"/>
+                            <Border x:Name="SelectedOverlay"
+                                    Background="{StaticResource MenuItemClickedBrush}"
+                                    Opacity="0"
+                                    IsHitTestVisible="False"/>
+                            <ContentPresenter/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" TargetName="HoverOverlay" Value="0.2"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Opacity" TargetName="SelectedOverlay" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="GlassCardBorderStyle"
+               TargetType="Border"
+               BasedOn="{StaticResource ChatSessionHeaderBorderStyle}">
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Padding" Value="12,10"/>
+        </Style>
+
+        <Style x:Key="CapsuleBorderStyle"
+               TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource ButtonIdleBrush}"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="MinWidth" Value="58"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Margin" Value="0,0,6,6"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+        </Style>
+
+        <DataTemplate x:Key="ToolDetailTemplate">
+            <StackPanel>
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="72"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Width="56"
+                            Height="56"
+                            Margin="0,4,12,0"
+                            Background="#15000000"
+                            BorderBrush="#40FFFFFF"
+                            BorderThickness="1"
+                            CornerRadius="12">
+                        <Image Width="28"
+                               Height="28"
+                               Source="{Binding IconPath}"
+                               Stretch="Uniform"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                    </Border>
+
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="{Binding DisplayName}"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"/>
+                        <TextBlock Margin="0,6,0,0"
+                                   Text="{Binding Description}"
+                                   TextWrapping="Wrap"/>
+                        <WrapPanel Margin="0,10,0,0">
+                            <Border Style="{StaticResource CapsuleBorderStyle}">
+                                <TextBlock VerticalAlignment="Center"
+                                           FontSize="11"
+                                           Text="{Binding AvailabilityText}"/>
+                            </Border>
+                            <Border Style="{StaticResource CapsuleBorderStyle}">
+                                <TextBlock VerticalAlignment="Center"
+                                           FontSize="11"
+                                           Text="{Binding ParameterCountText}"/>
+                            </Border>
+                            <Border Style="{StaticResource CapsuleBorderStyle}">
+                                <TextBlock VerticalAlignment="Center"
+                                           FontSize="11"
+                                           Text="{Binding ConfigurationModeText}"/>
+                            </Border>
+                        </WrapPanel>
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock Text="{DynamicResource ToolConfiguration.Metadata}"
+                           FontSize="14"
+                           FontWeight="SemiBold"/>
+                <Border Margin="0,10,0,0"
+                        Style="{StaticResource GlassCardBorderStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="0"
+                                   Margin="0,0,10,8"
+                                   FontWeight="SemiBold"
+                                   Text="{DynamicResource ToolConfiguration.Icon}"/>
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="1"
+                                   Margin="0,0,0,8"
+                                   Text="{Binding IconSummaryText}"
+                                   TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="0"
+                                   Margin="0,0,10,8"
+                                   FontWeight="SemiBold"
+                                   Text="{DynamicResource ToolConfiguration.ImplementationType}"/>
+                        <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
+                                   Margin="0,0,0,8"
+                                   Text="{Binding ImplementationTypeName}"
+                                   TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="0"
+                                   Margin="0,0,10,8"
+                                   FontWeight="SemiBold"
+                                   Text="{DynamicResource ToolConfiguration.DefinitionSource}"/>
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="1"
+                                   Margin="0,0,0,8"
+                                   Foreground="#FFD3F6FF"
+                                   Text="{Binding DynamicDefinitionHint}"
+                                   TextWrapping="Wrap"/>
+
+                        <TextBlock Grid.Row="3"
+                                   Grid.Column="0"
+                                   Margin="0,0,10,0"
+                                   FontWeight="SemiBold"
+                                   Text="{DynamicResource ToolConfiguration.InvocationTemplate}"/>
+                        <TextBox Grid.Row="3"
+                                 Grid.Column="1"
+                                 MinHeight="96"
+                                 AcceptsReturn="True"
+                                 IsReadOnly="True"
+                                 TextWrapping="Wrap"
+                                 VerticalScrollBarVisibility="Auto"
+                                 Text="{Binding RawInvocationTemplate, Mode=OneWay}"/>
+                    </Grid>
+                </Border>
+
+                <TextBlock Margin="0,16,0,0"
+                           Text="{DynamicResource ToolConfiguration.CustomConfiguration}"
+                           FontSize="14"
+                           FontWeight="SemiBold"/>
+                <Border Margin="0,10,0,0"
+                        Style="{StaticResource GlassCardBorderStyle}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding CustomConfigurationSummaryText}"
+                                   TextWrapping="Wrap"/>
+
+                        <ContentPresenter Margin="0,12,0,0"
+                                          Content="{Binding CustomConfigurationView}">
+                            <ContentPresenter.Style>
+                                <Style TargetType="ContentPresenter">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasCustomConfiguration}" Value="False">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ContentPresenter.Style>
+                        </ContentPresenter>
+
+                        <TextBlock Margin="0,12,0,0"
+                                   Foreground="#99FFFFFF"
+                                   Text="{DynamicResource ToolConfiguration.CustomConfigurationSavedHint}"
+                                   TextWrapping="Wrap">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasCustomConfiguration}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Margin="0,16,0,0"
+                           Text="{DynamicResource ToolConfiguration.Parameters}"
+                           FontSize="14"
+                           FontWeight="SemiBold"/>
+
+                <ItemsControl Margin="0,10,0,0"
+                              ItemsSource="{Binding Parameters}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Margin="0,0,0,10"
+                                    Style="{StaticResource GlassCardBorderStyle}">
+                                <StackPanel>
+                                    <DockPanel>
+                                        <TextBlock FontSize="13"
+                                                   FontWeight="SemiBold"
+                                                   Text="{Binding DisplayName}"/>
+                                        <TextBlock DockPanel.Dock="Right"
+                                                   Text="{Binding TypeDisplayName}"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#FFD3F6FF"/>
+                                    </DockPanel>
+
+                                    <TextBlock Margin="0,8,0,0"
+                                               Text="{Binding Description}"
+                                               TextWrapping="Wrap"/>
+
+                                    <WrapPanel Margin="0,10,0,0">
+                                        <Border Style="{StaticResource CapsuleBorderStyle}">
+                                            <TextBlock VerticalAlignment="Center"
+                                                       FontSize="11"
+                                                       Text="{Binding RequirementText}"/>
+                                        </Border>
+                                        <Border Style="{StaticResource CapsuleBorderStyle}">
+                                            <TextBlock VerticalAlignment="Center"
+                                                       FontSize="11"
+                                                       Text="{Binding DefaultValueText}"/>
+                                        </Border>
+                                        <Border Style="{StaticResource CapsuleBorderStyle}">
+                                            <TextBlock VerticalAlignment="Center"
+                                                       FontSize="11"
+                                                       Text="{Binding ExampleRawValueText}"/>
+                                        </Border>
+                                    </WrapPanel>
+
+                                    <TextBlock Margin="0,10,0,0"
+                                               Foreground="#FFD3F6FF"
+                                               Text="{Binding ConversionHint}"
+                                               TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <TextBlock Margin="0,2,0,0"
+                           Foreground="#99FFFFFF"
+                           Text="{DynamicResource ToolConfiguration.ParameterInputNote}"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource DocumentTabBackgroundBrush}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <Grid Margin="18">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0"
+                            Margin="0,0,0,16">
+                    <TextBlock Text="{Binding Title}"
+                               Style="{StaticResource AeroTextBlockStyle}"
+                               FontSize="16"
+                               FontWeight="SemiBold"/>
+                    <TextBlock Margin="0,6,0,0"
+                               Text="{Binding Description}"
+                               TextWrapping="Wrap"/>
+                    <TextBlock Margin="0,8,0,0"
+                               Foreground="#99FFFFFF"
+                               Text="{Binding DiscoveryHint}"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+
+                <Grid Grid.Row="1"
+                      Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="380"/>
+                        <ColumnDefinition Width="14"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <DockPanel Grid.Column="0">
+                        <StackPanel DockPanel.Dock="Top"
+                                    Margin="0,0,0,10">
+                            <TextBlock Text="{DynamicResource ToolConfiguration.ListTitle}"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"/>
+                            <WrapPanel Margin="0,10,0,0">
+                                <Border Style="{StaticResource CapsuleBorderStyle}">
+                                    <TextBlock VerticalAlignment="Center"
+                                               FontSize="11"
+                                               Text="{Binding SummaryText}"/>
+                                </Border>
+                            </WrapPanel>
+                        </StackPanel>
+
+                        <Grid DockPanel.Dock="Top"
+                              Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0"
+                                    Command="{Binding ReloadToolsCommand}"
+                                    Content="{DynamicResource Common.Reload}"/>
+                            <Button Grid.Column="2"
+                                    Command="{Binding EnableAllToolsCommand}"
+                                    Content="{DynamicResource Common.EnableAll}"/>
+                            <Button Grid.Column="4"
+                                    Command="{Binding DisableAllToolsCommand}"
+                                    Content="{DynamicResource Common.DisableAll}"/>
+                        </Grid>
+
+                        <Border CornerRadius="2"
+                                BorderThickness="1"
+                                Padding="4"
+                                SnapsToDevicePixels="True">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0.10059,1.65236"
+                                                     EndPoint="2.53982,1.65236"
+                                                     Opacity="0.5">
+                                    <LinearGradientBrush.RelativeTransform>
+                                        <TransformGroup>
+                                            <SkewTransform CenterX="0.10059"
+                                                           CenterY="1.65236"
+                                                           AngleX="-59.7491"
+                                                           AngleY="0"/>
+                                            <RotateTransform CenterX="0.10059"
+                                                             CenterY="1.65236"
+                                                             Angle="-70.8836"/>
+                                        </TransformGroup>
+                                    </LinearGradientBrush.RelativeTransform>
+                                    <GradientStop Color="#3BFFFFFF" Offset="0"/>
+                                    <GradientStop Color="#1DFFFFFF" Offset="0.0766283"/>
+                                    <GradientStop Color="#07FFFFFF" Offset="0.109195"/>
+                                    <GradientStop Color="#04FFFFFF" Offset="0.298851"/>
+                                    <GradientStop Color="#3AFFFFFF" Offset="0.327586"/>
+                                    <GradientStop Color="#1AFFFFFF" Offset="0.465517"/>
+                                    <GradientStop Color="#14FFFFFF" Offset="0.591954"/>
+                                    <GradientStop Color="#05FFFFFF" Offset="0.758621"/>
+                                    <GradientStop Color="#44FFFFFF" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Border.BorderBrush>
+                                <SolidColorBrush Color="#40000000"/>
+                            </Border.BorderBrush>
+
+                            <ListView ItemsSource="{Binding Tools}"
+                                      SelectedItem="{Binding SelectedTool}"
+                                      Style="{StaticResource ConfigurationListViewStyle}"
+                                      ItemContainerStyle="{StaticResource ConfigurationListViewItemStyle}">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource GlassCardBorderStyle}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="58"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <Border Width="44"
+                                                        Height="44"
+                                                        Margin="0,2,10,2"
+                                                        Background="#12000000"
+                                                        BorderBrush="#40FFFFFF"
+                                                        BorderThickness="1"
+                                                        CornerRadius="10">
+                                                    <Image Width="22"
+                                                           Height="22"
+                                                           Source="{Binding IconPath}"
+                                                           Stretch="Uniform"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                                </Border>
+
+                                                <StackPanel Grid.Column="1"
+                                                            Margin="0,0,10,0">
+                                                    <TextBlock Text="{Binding DisplayName}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold"
+                                                               TextWrapping="Wrap"/>
+                                                    <TextBlock Margin="0,6,0,0"
+                                                               Foreground="#D9FFFFFF"
+                                                               Text="{Binding Description}"
+                                                               TextWrapping="Wrap"/>
+                                                    <WrapPanel Margin="0,10,0,0">
+                                                        <Border Style="{StaticResource CapsuleBorderStyle}">
+                                                            <TextBlock VerticalAlignment="Center"
+                                                                       FontSize="11"
+                                                                       Text="{Binding ParameterCountText}"/>
+                                                        </Border>
+                                                        <Border Style="{StaticResource CapsuleBorderStyle}">
+                                                            <TextBlock VerticalAlignment="Center"
+                                                                       FontSize="11"
+                                                                       Text="{Binding ConfigurationModeText}"/>
+                                                        </Border>
+                                                    </WrapPanel>
+                                                </StackPanel>
+
+                                                <CheckBox Grid.Column="2"
+                                                          VerticalAlignment="Top"
+                                                          Margin="0,4,0,0"
+                                                          Content="{DynamicResource ToolConfiguration.Enabled}"
+                                                          IsChecked="{Binding IsEnabled, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </Border>
+                    </DockPanel>
+
+                    <Grid Grid.Column="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="{DynamicResource ToolConfiguration.Details}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"/>
+
+                        <Border Grid.Row="1"
+                                Margin="0,10,0,0"
+                                Style="{StaticResource GlassCardBorderStyle}">
+                            <Grid>
+                                <ContentControl Content="{Binding SelectedTool}"
+                                                ContentTemplate="{StaticResource ToolDetailTemplate}"/>
+
+                                <TextBlock HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Text="{DynamicResource ToolConfiguration.EmptySelection}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedTool}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+
+                <GroupBox Grid.Row="2"
+                          Header="{DynamicResource ToolConfiguration.ToolKits.Title}">
+                    <DockPanel Margin="10">
+                        <StackPanel DockPanel.Dock="Top"
+                                    Orientation="Horizontal"
+                                    Margin="0,0,0,10">
+                            <Button Width="120"
+                                    Command="{Binding AddToolKitCommand}"
+                                    Content="{DynamicResource ToolConfiguration.ToolKits.Add}"/>
+                            <Button Width="120"
+                                    Margin="8,0,0,0"
+                                    Command="{Binding RemoveToolKitCommand}"
+                                    Content="{DynamicResource ToolConfiguration.ToolKits.RemoveSelected}"/>
+                        </StackPanel>
+
+                        <TextBlock DockPanel.Dock="Top"
+                                   Margin="0,0,0,10"
+                                   Text="{Binding ToolKitSummaryText}"
+                                   TextWrapping="Wrap"/>
+
+                        <TextBlock DockPanel.Dock="Top"
+                                   Margin="0,0,0,10"
+                                   Foreground="#FFD3F6FF"
+                                   Text="{Binding StatusMessage}"
+                                   TextWrapping="Wrap"/>
+
+                        <ListView ItemsSource="{Binding ToolKits}"
+                                  SelectedItem="{Binding SelectedToolKit}"
+                                  Style="{StaticResource ConfigurationListViewStyle}"
+                                  ItemContainerStyle="{StaticResource ConfigurationListViewItemStyle}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource GlassCardBorderStyle}">
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal"
+                                                        Margin="0,0,0,8">
+                                                <TextBlock Width="72"
+                                                           VerticalAlignment="Center"
+                                                           Text="{DynamicResource ToolConfiguration.ToolKits.Name}"
+                                                           FontWeight="SemiBold"/>
+                                                <TextBox MinWidth="240"
+                                                         Text="{Binding Name, UpdateSourceTrigger=LostFocus}"/>
+                                                <Button Width="120"
+                                                        Margin="10,0,0,0"
+                                                        Command="{Binding DataContext.AddToolToToolKitCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        Content="{DynamicResource ToolConfiguration.ToolKits.AddTool}"/>
+                                            </StackPanel>
+
+                                            <TextBlock Margin="0,0,0,8"
+                                                       Text="{Binding ManagementHint}"
+                                                       TextWrapping="Wrap"/>
+
+                                            <ListView ItemsSource="{Binding Tools}"
+                                                      Style="{StaticResource ConfigurationListViewStyle}"
+                                                      ItemContainerStyle="{StaticResource ConfigurationListViewItemStyle}">
+                                                <ListView.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Style="{StaticResource GlassCardBorderStyle}">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <ComboBox Grid.Column="0"
+                                                                          ItemsSource="{Binding DataContext.ToolKitEligibleTools, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                          DisplayMemberPath="DisplayName"
+                                                                          SelectedValuePath="Name"
+                                                                          SelectedValue="{Binding ToolName, UpdateSourceTrigger=PropertyChanged}"/>
+                                                                <Button Grid.Column="1"
+                                                                        Width="60"
+                                                                        Margin="8,0,0,0"
+                                                                        Command="{Binding DataContext.MoveToolInToolKitUpCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                        CommandParameter="{Binding}"
+                                                                        Content="{DynamicResource Common.MoveUp}"/>
+                                                                <Button Grid.Column="2"
+                                                                        Width="60"
+                                                                        Margin="8,0,0,0"
+                                                                        Command="{Binding DataContext.MoveToolInToolKitDownCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                        CommandParameter="{Binding}"
+                                                                        Content="{DynamicResource Common.MoveDown}"/>
+                                                                <Button Grid.Column="3"
+                                                                        Width="60"
+                                                                        Margin="8,0,0,0"
+                                                                        Command="{Binding DataContext.RemoveToolFromToolKitCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                        CommandParameter="{Binding}"
+                                                                        Content="{DynamicResource Common.Delete}"/>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ListView.ItemTemplate>
+                                            </ListView>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </DockPanel>
+                </GroupBox>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

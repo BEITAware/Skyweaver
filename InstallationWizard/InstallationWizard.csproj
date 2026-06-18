@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>InstallationWizard</RootNamespace>
+    <AssemblyName>InstallationWizard</AssemblyName>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <ApplicationIcon>Resources\Setup.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\**\*" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+
+  <Target Name="CreateInstallerAppPayloadFolder" AfterTargets="Build;Publish">
+    <MakeDir Directories="$(TargetDir)App" />
+  </Target>
+
+</Project>

@@ -1,0 +1,411 @@
+<Window x:Class="Ferrita.Windows.UniversalNewDialog"
+        x:Name="DialogWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:Ferrita.Windows"
+        Title="{Binding MainTitle, ElementName=DialogWindow}"
+        Width="1040"
+        Height="660"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Icon="/Ferrita;component/Resources/Ferrita.ico"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown"
+        PreviewKeyDown="Window_PreviewKeyDown"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Ferrita;component/Resources/Controls/CascadePreferenceImplicitStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <CubicEase x:Key="UniversalNewEaseOut" EasingMode="EaseOut"/>
+            <CubicEase x:Key="UniversalNewEaseIn" EasingMode="EaseIn"/>
+
+            <RadialGradientBrush x:Key="UniversalSphereCoreBrush"
+                                 RadiusX="0.78"
+                                 RadiusY="0.78"
+                                 Center="0.5,0.85"
+                                 GradientOrigin="0.5,0.85">
+                <GradientStop Color="#00000000" Offset="0"/>
+                <GradientStop Color="#10000000" Offset="0.44"/>
+                <GradientStop Color="#68000000" Offset="0.82"/>
+                <GradientStop Color="#D8000000" Offset="1"/>
+            </RadialGradientBrush>
+
+            <LinearGradientBrush x:Key="UniversalSphereTopShineBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#FFFFFFFF" Offset="0"/>
+                <GradientStop Color="#AAFFFFFF" Offset="0.22"/>
+                <GradientStop Color="#00FFFFFF" Offset="1"/>
+            </LinearGradientBrush>
+
+            <RadialGradientBrush x:Key="UniversalSphereLowerShineBrush"
+                                 RadiusX="0.58"
+                                 RadiusY="0.42"
+                                 Center="0.5,0.5"
+                                 GradientOrigin="0.5,0.5">
+                <GradientStop Color="#3AFFFFFF" Offset="0"/>
+                <GradientStop Color="#00FFFFFF" Offset="0.72"/>
+            </RadialGradientBrush>
+
+            <LinearGradientBrush x:Key="UniversalPanelBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#D9242B38" Offset="0"/>
+                <GradientStop Color="#C8182232" Offset="0.58"/>
+                <GradientStop Color="#C20E121E" Offset="1"/>
+            </LinearGradientBrush>
+
+            <LinearGradientBrush x:Key="UniversalPanelBorderBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#96FFFFFF" Offset="0"/>
+                <GradientStop Color="#426DD0F1" Offset="0.55"/>
+                <GradientStop Color="#60657E9F" Offset="1"/>
+            </LinearGradientBrush>
+
+            <Style x:Key="UniversalOptionTitleStyle" TargetType="{x:Type TextBlock}">
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="FontSize" Value="17"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+                <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.62"/>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsHighlighted}" Value="True">
+                        <Setter Property="Foreground" Value="#FFFFDC7A"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                        <Setter Property="Foreground" Value="#FFF5FEFF"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="UniversalOptionAuxiliaryStyle" TargetType="{x:Type TextBlock}">
+                <Setter Property="Foreground" Value="#BBC8D3DA"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="LineHeight" Value="16"/>
+                <Setter Property="MaxWidth" Value="260"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding HasContentText}" Value="True">
+                        <Setter Property="Foreground" Value="#E1F5FAFF"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid x:Name="RootShell"
+          RenderTransformOrigin="0.5,0.5"
+          Opacity="0">
+        <Grid.RenderTransform>
+            <ScaleTransform x:Name="RootScale" ScaleX="0.96" ScaleY="0.96"/>
+        </Grid.RenderTransform>
+
+        <Canvas x:Name="DialogCanvas"
+                Margin="28"
+                ClipToBounds="True"
+                MouseWheel="OptionsRing_MouseWheel">
+            <Grid x:Name="MainSphere"
+                  Width="330"
+                  Height="330"
+                  Canvas.Left="105"
+                  Canvas.Top="145"
+                  Panel.ZIndex="20">
+                <Grid.CacheMode>
+                    <BitmapCache RenderAtScale="1"/>
+                </Grid.CacheMode>
+                <Grid.Effect>
+                    <DropShadowEffect Color="#000000" BlurRadius="14" ShadowDepth="8" Direction="315" Opacity="0.48"/>
+                </Grid.Effect>
+
+                <Grid x:Name="MainSphereClip"
+                      SizeChanged="ClipElementToEllipse"
+                      ClipToBounds="True">
+                    <Ellipse Fill="{StaticResource UniversalSphereCoreBrush}"/>
+
+                    <Image Source="{Binding MainIconSource, ElementName=DialogWindow}"
+                           Width="430"
+                           Height="430"
+                           Margin="-112,-18,0,0"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           Stretch="UniformToFill"
+                           Opacity="0.36"
+                           RenderOptions.BitmapScalingMode="HighQuality"
+                           IsHitTestVisible="False"/>
+
+                    <Ellipse Height="165"
+                             Width="264"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Top"
+                             Fill="{StaticResource UniversalSphereTopShineBrush}"
+                             IsHitTestVisible="False"/>
+
+                    <Ellipse Height="86"
+                             Width="198"
+                             Margin="0,0,0,22"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Bottom"
+                             Fill="{StaticResource UniversalSphereLowerShineBrush}"
+                             IsHitTestVisible="False"/>
+
+                    <Ellipse Stroke="#E8FFFFFF"
+                             StrokeThickness="1.1"
+                             Margin="2.6"
+                             Opacity="0.74"
+                             IsHitTestVisible="False"/>
+
+                    <Ellipse Stroke="#45000000"
+                             StrokeThickness="4"
+                             Margin="9"
+                             Opacity="0.54"
+                             IsHitTestVisible="False"/>
+
+                    <Grid Margin="42,48,42,40">
+                        <StackPanel VerticalAlignment="Top">
+                            <TextBlock Text="{Binding MainTitle, ElementName=DialogWindow}"
+                                       FontSize="31"
+                                       FontWeight="Bold"
+                                       Foreground="White"
+                                       TextWrapping="Wrap"
+                                       TextAlignment="Center">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect Color="#000000" BlurRadius="3" ShadowDepth="1" Opacity="0.7"/>
+                                </TextBlock.Effect>
+                            </TextBlock>
+                            <TextBlock Text="{Binding MainDescription, ElementName=DialogWindow}"
+                                       Margin="0,12,0,0"
+                                       FontSize="13.5"
+                                       LineHeight="20"
+                                       Foreground="#EAF2F7FF"
+                                       TextWrapping="Wrap"
+                                       TextAlignment="Center">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect Color="#000000" BlurRadius="2" ShadowDepth="1" Opacity="0.62"/>
+                                </TextBlock.Effect>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <Border x:Name="MainHintHost"
+                                VerticalAlignment="Bottom"
+                                Margin="0,0,0,8"
+                                Padding="12,7"
+                                CornerRadius="8"
+                                Background="#70150912"
+                                BorderBrush="#A0FFD178"
+                                BorderThickness="1"
+                                Opacity="0">
+                            <TextBlock x:Name="MainHintTextBlock"
+                                       Text="{Binding MainHint, ElementName=DialogWindow}"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="#FFFFE5A2"
+                                       TextWrapping="Wrap"
+                                       TextAlignment="Center"/>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Grid>
+
+            <ItemsControl x:Name="OptionsItemsControl"
+                          ItemsSource="{Binding SideItems, ElementName=DialogWindow}"
+                          Panel.ZIndex="30"
+                          MouseWheel="OptionsRing_MouseWheel">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="{x:Type ContentPresenter}">
+                        <Setter Property="Panel.ZIndex" Value="{Binding ZIndex}"/>
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type local:UniversalNewDialogOption}">
+                        <Grid Width="398"
+                              Height="124"
+                              Cursor="Hand"
+                              RenderTransformOrigin="0.13,0.5"
+                              MouseEnter="OptionItem_MouseEnter"
+                              MouseLeave="OptionItem_MouseLeave"
+                              MouseLeftButtonUp="OptionItem_MouseLeftButtonUp">
+                            <Grid.CacheMode>
+                                <BitmapCache RenderAtScale="1"/>
+                            </Grid.CacheMode>
+                            <Grid.RenderTransform>
+                                <ScaleTransform x:Name="OptionScale" ScaleX="1" ScaleY="1"/>
+                            </Grid.RenderTransform>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="108"/>
+                                <ColumnDefinition Width="14"/>
+                                <ColumnDefinition Width="276"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Grid Width="92"
+                                  Height="92"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center">
+                                <Grid.Effect>
+                                    <DropShadowEffect Color="#000000" BlurRadius="8" ShadowDepth="4" Direction="315" Opacity="0.42"/>
+                                </Grid.Effect>
+
+                                <Grid x:Name="OptionSphereClip"
+                                      SizeChanged="ClipElementToEllipse"
+                                      ClipToBounds="True">
+                                    <Ellipse Fill="{StaticResource UniversalSphereCoreBrush}"/>
+
+                                     <Image Source="{Binding IconSource}"
+                                            Width="58"
+                                            Height="58"
+                                            Margin="0,10,0,0"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Top"
+                                           Stretch="Uniform"
+                                           Opacity="0.95"
+                                           RenderOptions.BitmapScalingMode="HighQuality"
+                                           IsHitTestVisible="False">
+                                        <Image.Effect>
+                                            <DropShadowEffect Color="#000000" BlurRadius="3" ShadowDepth="1" Opacity="0.48"/>
+                                        </Image.Effect>
+                                    </Image>
+
+                                    <Ellipse Height="46"
+                                             Width="74"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Top"
+                                             Fill="{StaticResource UniversalSphereTopShineBrush}"
+                                             IsHitTestVisible="False"/>
+
+                                    <Ellipse Height="28"
+                                             Width="56"
+                                             Margin="0,0,0,7"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Bottom"
+                                             Fill="{StaticResource UniversalSphereLowerShineBrush}"
+                                             IsHitTestVisible="False"/>
+
+                                    <Ellipse Stroke="#D8FFFFFF"
+                                             StrokeThickness="0.8"
+                                             Margin="1.6"
+                                             Opacity="0.76"
+                                             IsHitTestVisible="False"/>
+                                </Grid>
+                            </Grid>
+
+                            <StackPanel x:Name="OptionTextStack"
+                                        Grid.Column="2"
+                                        VerticalAlignment="Center">
+                                <StackPanel.RenderTransform>
+                                    <TranslateTransform x:Name="OptionLabelTranslate"/>
+                                </StackPanel.RenderTransform>
+                                <TextBlock Text="{Binding Title}"
+                                           Style="{StaticResource UniversalOptionTitleStyle}"/>
+                                <TextBlock Text="{Binding AuxiliaryText}"
+                                           Margin="0,4,0,0"
+                                           Style="{StaticResource UniversalOptionAuxiliaryStyle}"
+                                           Visibility="{Binding HasAuxiliaryText, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            </StackPanel>
+
+                        </Grid>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsActiveVisual}" Value="True">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="OptionScale"
+                                                             Storyboard.TargetProperty="ScaleX"
+                                                             To="1.14"
+                                                             Duration="0:0:0.18"
+                                                             EasingFunction="{StaticResource UniversalNewEaseOut}"/>
+                                            <DoubleAnimation Storyboard.TargetName="OptionScale"
+                                                             Storyboard.TargetProperty="ScaleY"
+                                                             To="1.14"
+                                                             Duration="0:0:0.18"
+                                                             EasingFunction="{StaticResource UniversalNewEaseOut}"/>
+                                            <DoubleAnimation Storyboard.TargetName="OptionLabelTranslate"
+                                                             Storyboard.TargetProperty="X"
+                                                             To="8"
+                                                             Duration="0:0:0.18"
+                                                             EasingFunction="{StaticResource UniversalNewEaseOut}"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="OptionScale"
+                                                             Storyboard.TargetProperty="ScaleX"
+                                                             To="1"
+                                                             Duration="0:0:0.18"
+                                                             EasingFunction="{StaticResource UniversalNewEaseOut}"/>
+                                            <DoubleAnimation Storyboard.TargetName="OptionScale"
+                                                             Storyboard.TargetProperty="ScaleY"
+                                                             To="1"
+                                                             Duration="0:0:0.18"
+                                                             EasingFunction="{StaticResource UniversalNewEaseOut}"/>
+                                            <DoubleAnimation Storyboard.TargetName="OptionLabelTranslate"
+                                                             Storyboard.TargetProperty="X"
+                                                             To="0"
+                                                             Duration="0:0:0.18"
+                                                             EasingFunction="{StaticResource UniversalNewEaseOut}"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <Border x:Name="SettingPanel"
+                    Width="316"
+                    MinHeight="120"
+                    Canvas.Left="664"
+                    Canvas.Top="250"
+                    Padding="18,16"
+                    CornerRadius="10"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Opacity="0"
+                    Visibility="Collapsed"
+                    Panel.ZIndex="40">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="{Binding SettingPanelTitle, ElementName=DialogWindow}"
+                                   FontSize="15"
+                                   FontWeight="Bold"
+                                   Foreground="White"
+                                   TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding SettingPanelDescription, ElementName=DialogWindow}"
+                                   Margin="0,4,0,0"
+                                   FontSize="11.5"
+                                   Foreground="#C9D5DCE2"
+                                   TextWrapping="Wrap"
+                                   Visibility="{Binding HasSettingPanelDescription, ElementName=DialogWindow, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    </StackPanel>
+
+                    <ContentControl x:Name="SettingContentHost"
+                                    Grid.Row="2"
+                                    HorizontalContentAlignment="Stretch"/>
+                </Grid>
+            </Border>
+        </Canvas>
+    </Grid>
+</Window>

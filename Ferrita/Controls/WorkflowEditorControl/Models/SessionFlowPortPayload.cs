@@ -1,0 +1,131 @@
+using System.Xml.Linq;
+using Ferrita.Controls.LanguageModelConfigurationControl.Services;
+
+namespace Ferrita.Controls.WorkflowEditorControl.Models
+{
+    public enum SessionFlowPortPayloadKind
+    {
+        NaturalLanguage = 0,
+        XmlElement = 1
+    }
+
+    public sealed class SessionFlowPortPayload
+    {
+        private SessionFlowPortPayload(
+            SessionFlowPortPayloadKind kind,
+            string content,
+            string? xmlElementName = null,
+            IEnumerable<LanguageModelChatContentBlock>? contentBlocks = null)
+        {
+            Kind = kind;
+            Content = content ?? string.Empty;
+            XmlElementName = xmlElementName;
+            ContentBlocks = NormalizeContentBlocks(contentBlocks);
+        }
+
+        public SessionFlowPortPayloadKind Kind { get; }
+
+        public string Content { get; }
+
+        public string? XmlElementName { get; }
+
+        public IReadOnlyList<LanguageModelChatContentBlock> ContentBlocks { get; }
+
+        public bool IsNaturalLanguage => Kind == SessionFlowPortPayloadKind.NaturalLanguage;
+
+        public bool IsXmlElement => Kind == SessionFlowPortPayloadKind.XmlElement;
+
+        public static SessionFlowPortPayload FromNaturalLanguage(string text)
+        {
+            return new SessionFlowPortPayload(SessionFlowPortPayloadKind.NaturalLanguage, text ?? string.Empty);
+        }
+
+        public static SessionFlowPortPayload FromNaturalLanguage(
+            string text,
+            IEnumerable<LanguageModelChatContentBlock>? contentBlocks)
+        {
+            return new SessionFlowPortPayload(
+                SessionFlowPortPayloadKind.NaturalLanguage,
+                text ?? string.Empty,
+                contentBlocks: contentBlocks);
+        }
+
+        public static SessionFlowPortPayload FromXmlElement(XElement element)
+        {
+            ArgumentNullException.ThrowIfNull(element);
+
+            var clone = new XElement(element);
+            return new SessionFlowPortPayload(
+                SessionFlowPortPayloadKind.XmlElement,
+                clone.ToString(SaveOptions.DisableFormatting),
+                clone.Name.LocalName);
+        }
+
+        private static IReadOnlyList<LanguageModelChatContentBlock> NormalizeContentBlocks(
+            IEnumerable<LanguageModelChatContentBlock>? contentBlocks)
+        {
+            if (contentBlocks == null)
+            {
+                return Array.Empty<LanguageModelChatContentBlock>();
+            }
+
+            return contentBlocks
+                .Where(block => block != null)
+                .Select(block => block.Clone())
+                .ToArray();
+        }
+
+        public static SessionFlowPortPayload FromXmlText(string xmlText)
+        {
+            if (!TryParseXmlElement(xmlText, out var element, out var errorMessage))
+            {
+                throw new InvalidOperationException(errorMessage);
+            }
+
+            return FromXmlElement(element);
+        }
+
+        public XElement ToXElement()
+        {
+            if (!TryParseXmlElement(Content, out var element, out var errorMessage))
+            {
+                throw new InvalidOperationException(errorMessage);
+            }
+
+            return element;
+        }
+
+        public static bool TryParseXmlElement(
+            string? xmlText,
+            out XElement element,
+            out string errorMessage)
+        {
+            element = new XElement("Empty");
+            errorMessage = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(xmlText))
+            {
+                errorMessage = "XML 端口载荷不能为空。";
+                return false;
+            }
+
+            try
+            {
+                var document = XDocument.Parse(xmlText, LoadOptions.PreserveWhitespace);
+                if (document.Root == null)
+                {
+                    errorMessage = "XML 端口载荷缺少根节点。";
+                    return false;
+                }
+
+                element = new XElement(document.Root);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"XML 端口载荷解析失败：{ex.Message}";
+                return false;
+            }
+        }
+    }
+}

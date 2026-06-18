@@ -1,0 +1,189 @@
+<UserControl x:Class="Ferrita.Controls.FerritaPreferencesControl.Views.Pages.SemanticSearchPreferencesPageView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:Ferrita.Controls.FerritaPreferencesControl.ViewModels.Pages"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewModels:SemanticSearchPreferencesPageViewModel, IsDesignTimeCreatable=True}"
+             d:DesignHeight="640"
+             d:DesignWidth="860">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Ferrita;component/Resources/Controls/CascadePreferenceImplicitStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="PreferenceSectionTitleStyle" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#FF61D1F0"/>
+                <Setter Property="FontFamily" Value="{DynamicResource AeroFontFamily}"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+            </Style>
+
+            <Style x:Key="PreferenceLabelStyle" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#FFF4FAFF"/>
+                <Setter Property="FontFamily" Value="{DynamicResource AeroFontFamily}"/>
+                <Setter Property="FontSize" Value="12.5"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+
+            <Style x:Key="PreferenceMetaStyle" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#B9DBEEFF"/>
+                <Setter Property="FontFamily" Value="{DynamicResource AeroFontFamily}"/>
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+            </Style>
+
+            <Style x:Key="PreferenceValueStyle" TargetType="TextBlock" BasedOn="{StaticResource PreferenceMetaStyle}">
+                <Setter Property="Foreground" Value="#EAF8FFFF"/>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="16,10,16,20">
+            <TextBlock Text="{DynamicResource SemanticSearch.Page.Title}"
+                       Style="{StaticResource PreferenceSectionTitleStyle}"/>
+
+            <Grid Margin="0,12,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="8"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="16"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="8"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="16"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="8"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="170"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0"
+                           Grid.Column="0"
+                           Text="AerialCity RAG"
+                           Style="{StaticResource PreferenceLabelStyle}"/>
+                <CheckBox Grid.Row="0"
+                          Grid.Column="1"
+                          Grid.ColumnSpan="2"
+                          IsChecked="{Binding IsAerialCityRagEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          Content="{DynamicResource SemanticSearch.AerialCityRag.Content}"/>
+                <TextBlock Grid.Row="2"
+                           Grid.Column="1"
+                           Grid.ColumnSpan="2"
+                           Text="{DynamicResource SemanticSearch.AerialCityRag.Hint}"
+                           Style="{StaticResource PreferenceMetaStyle}"/>
+
+                <TextBlock Grid.Row="4"
+                           Grid.Column="0"
+                           Text="{DynamicResource SemanticSearch.EmbeddingModel.Label}"
+                           Style="{StaticResource PreferenceLabelStyle}"/>
+                <ComboBox Grid.Row="4"
+                          Grid.Column="1"
+                          Margin="0,0,10,0"
+                          ItemsSource="{Binding EmbeddingModels}"
+                          SelectedItem="{Binding SelectedEmbeddingModel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          DisplayMemberPath="DisplayName"/>
+                <Button Grid.Row="4"
+                        Grid.Column="2"
+                        MinWidth="96"
+                        Content="{DynamicResource Common.Refresh}"
+                        Command="{Binding RefreshEmbeddingModelsCommand}"/>
+                <TextBlock Grid.Row="6"
+                           Grid.Column="1"
+                           Grid.ColumnSpan="2"
+                           Text="{Binding SelectedEmbeddingModelSummary}"
+                           Style="{StaticResource PreferenceMetaStyle}"/>
+
+                <TextBlock Grid.Row="8"
+                           Grid.Column="0"
+                           Text="{DynamicResource SemanticSearch.EmbeddingConcurrency.Label}"
+                           Style="{StaticResource PreferenceLabelStyle}"/>
+                <Slider Grid.Row="8"
+                        Grid.Column="1"
+                        Margin="0,0,10,0"
+                        Minimum="{Binding MinimumEmbeddingConcurrency}"
+                        Maximum="{Binding MaximumEmbeddingConcurrency}"
+                        Value="{Binding EmbeddingConcurrency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        TickFrequency="1"
+                        IsSnapToTickEnabled="True"
+                        SmallChange="1"
+                        LargeChange="10"/>
+                <TextBlock Grid.Row="8"
+                           Grid.Column="2"
+                           MinWidth="96"
+                           Text="{Binding EmbeddingConcurrency}"
+                           Style="{StaticResource PreferenceValueStyle}"/>
+                <TextBlock Grid.Row="10"
+                           Grid.Column="1"
+                           Grid.ColumnSpan="2"
+                           Text="{Binding EmbeddingConcurrencySummary}"
+                           Style="{StaticResource PreferenceMetaStyle}"/>
+            </Grid>
+
+            <Border Margin="0,18,0,0"
+                    Height="1"
+                    Background="#30FFFFFF"/>
+
+            <TextBlock Margin="0,18,0,0"
+                       Text="{DynamicResource Common.ConfigurationStatus}"
+                       Style="{StaticResource PreferenceSectionTitleStyle}"/>
+
+            <Grid Margin="0,12,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="170"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0"
+                           Grid.Column="0"
+                           Text="{DynamicResource Directories.AerialCity.Label}"
+                           Style="{StaticResource PreferenceLabelStyle}"/>
+                <TextBlock Grid.Row="0"
+                           Grid.Column="1"
+                           Text="{Binding AerialCityDirectoryPath}"
+                           Style="{StaticResource PreferenceValueStyle}"/>
+
+                <TextBlock Grid.Row="2"
+                           Grid.Column="0"
+                           Text="{DynamicResource Common.ConfigurationFile}"
+                           Style="{StaticResource PreferenceLabelStyle}"/>
+                <TextBlock Grid.Row="2"
+                           Grid.Column="1"
+                           Text="{Binding ConfigurationFilePath}"
+                           Style="{StaticResource PreferenceValueStyle}"/>
+
+                <TextBlock Grid.Row="4"
+                           Grid.Column="0"
+                           Text="{DynamicResource Common.RecentStatus}"
+                           Style="{StaticResource PreferenceLabelStyle}"/>
+                <TextBlock Grid.Row="4"
+                           Grid.Column="1"
+                           Text="{Binding StatusMessage}"
+                           Style="{StaticResource PreferenceValueStyle}"/>
+            </Grid>
+
+            <StackPanel Margin="0,16,0,0"
+                        Orientation="Horizontal">
+                <Button MinWidth="132"
+                        Content="{DynamicResource Common.OpenConfigurationDirectory}"
+                        Command="{Binding OpenConfigurationDirectoryCommand}"/>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
