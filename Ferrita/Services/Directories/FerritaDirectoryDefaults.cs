@@ -11,6 +11,7 @@ namespace Ferrita.Services.Directories
         public const string DebugFolderName = "Debug";
         public const string SessionFlowsFolderName = "Nodegraphs";
         public const string AerialCityFolderName = "AerialCity";
+        public const string KnowledgeFolderName = "Knowledge";
         public const string DirectoriesFileName = "Directories.xml";
 
         public static string UserProfileDirectoryPath => ResolveUserProfileDirectoryPath();
@@ -39,6 +40,10 @@ namespace Ferrita.Services.Directories
             ApplicationDirectoryPath,
             AerialCityFolderName);
 
+        public static string DefaultKnowledgeDirectoryPath => Path.Combine(
+            ApplicationDirectoryPath,
+            KnowledgeFolderName);
+
         public static string DirectoriesConfigurationFilePath => Path.Combine(
             DefaultConfigurationDirectoryPath,
             DirectoriesFileName);
@@ -51,7 +56,8 @@ namespace Ferrita.Services.Directories
                 ConfigurationDirectoryPath = DefaultConfigurationDirectoryPath,
                 DebugDirectoryPath = DefaultDebugDirectoryPath,
                 SessionFlowsDirectoryPath = DefaultSessionFlowsDirectoryPath,
-                AerialCityDirectoryPath = DefaultAerialCityDirectoryPath
+                AerialCityDirectoryPath = DefaultAerialCityDirectoryPath,
+                KnowledgeDirectoryPath = DefaultKnowledgeDirectoryPath
             };
         }
 
@@ -75,7 +81,10 @@ namespace Ferrita.Services.Directories
                     DefaultSessionFlowsDirectoryPath),
                 AerialCityDirectoryPath = NormalizeDirectoryPath(
                     configuration.AerialCityDirectoryPath,
-                    DefaultAerialCityDirectoryPath)
+                    DefaultAerialCityDirectoryPath),
+                KnowledgeDirectoryPath = NormalizeDirectoryPath(
+                    configuration.KnowledgeDirectoryPath,
+                    DefaultKnowledgeDirectoryPath)
             };
         }
 

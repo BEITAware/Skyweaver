@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AerialCity\AerialCity.csproj" />
+    <ProjectReference Include="..\OKXML\OKXML.csproj" />
   </ItemGroup>
 
   <ItemGroup>

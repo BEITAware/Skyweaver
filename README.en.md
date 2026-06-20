@@ -1,4 +1,4 @@
-<h1 align="center">BEITA Skyweaver</h1>
+<h1 align="center">BEITA Ferrita</h1>
 
 <p align="center">
   <sub><em>Weaving the future we once had</em></sub>
@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="ReadmeResources/HeroImage2.png" alt="Skyweaver Hero Image">
+  <img src="ReadmeResources/HeroImage2.png" alt="Ferrita Hero Image">
 </p>
 
 <p align="center">
@@ -24,7 +24,7 @@
 <p align="center"><strong>Important Notice</strong></p>
 
 <p align="center">
-  Skyweaver is currently in its early development preview stage. It does not represent the final product.<br>
+  Ferrita is currently in its early development preview stage. It does not represent the final product.<br>
   At present, various aspects of the application are highly immature, and there may be compliance issues. We will work urgently to resolve these problems in subsequent releases.
 </p>
 
@@ -32,7 +32,7 @@
 
 ## An AI Agent Application from the Future
 
-Are you still using traditional AI agent applications confined within command-line terminals? Skyweaver carves out a completely different path. Unlike the headless terminal agents flooding the industry, Skyweaver is equipped with a meticulously designed user interface, crafted to bring you an AI agent application from the future. Adorned with a glassy texture and a beautiful aesthetic that feel as if they travelled through time from 2020, Skyweaver breathes AI directly into your life. Have you turned the utilization of AI into an indispensable pleasure in your daily life?
+Are you still using traditional AI agent applications confined within command-line terminals? Ferrita carves out a completely different path. Unlike the headless terminal agents flooding the industry, Ferrita is equipped with a meticulously designed user interface, crafted to bring you an AI agent application from the future. Adorned with a glassy texture and a beautiful aesthetic that feel as if they travelled through time from 2020, Ferrita breathes AI directly into your life. Have you turned the utilization of AI into an indispensable pleasure in your daily life?
 
 <p align="center">
   <img src="ReadmeResources/Screenshots/Chat_WebSearch.png" alt="Chat Web Search">
@@ -40,7 +40,7 @@ Are you still using traditional AI agent applications confined within command-li
 
 ## Intuitive User Interface
 
-Inspired by the classic Windows Aero design language, the application's default theme, **Aero 3**, further enhances its transparent, light, and elegant design, inheriting the beauty of dynamism and vitality. You will no longer worry about being intimidated by cold, lifeless user interfaces, because the experience Skyweaver offers is so gentle and moving.
+Inspired by the classic Windows Aero design language, the application's default theme, **Aero 3**, further enhances its transparent, light, and elegant design, inheriting the beauty of dynamism and vitality. You will no longer worry about being intimidated by cold, lifeless user interfaces, because the experience Ferrita offers is so gentle and moving.
 
 <p align="center">
   <img src="ReadmeResources/Screenshots/Persona_Toaster.png" alt="Persona Settings">
@@ -56,7 +56,7 @@ Completely distinct from the ubiquitous JSON tool calling architectures, this ap
 
 ## Configuring Language Models Has Never Been So Simple
 
-Skyweaver supports configuring various LLM APIs. Through an intuitive user interface, you can effortlessly configure, manage, and utilize a wide array of large language models. From OpenAI to Google, Skyweaver supports the native multimodal capabilities of numerous models and integrates them deeply.
+Ferrita supports configuring various LLM APIs. Through an intuitive user interface, you can effortlessly configure, manage, and utilize a wide array of large language models. From OpenAI to Google, Ferrita supports the native multimodal capabilities of numerous models and integrates them deeply.
 
 <p align="center">
   <img src="ReadmeResources/Screenshots/LanguageModelSettings.png" alt="Language Model Settings">
@@ -64,7 +64,7 @@ Skyweaver supports configuring various LLM APIs. Through an intuitive user inter
 
 ## AerialCity: Self-Developed Vector-Graph Database and RAG Infrastructure
 
-AerialCity is one of the core components of Skyweaver. It is a lightweight vector database with basic graph database support. AerialCity powers the application's semantic search capabilities, enabling agents to effortlessly search for information most relevant to their queries, even if expressed differently from the user's question. Furthermore, AerialCity is designed as a hybrid retrieval database, supporting the integration of vector search and keyword search, allowing agents to choose different retrieval methods based on their needs.
+AerialCity is one of the core components of Ferrita. It is a lightweight vector database with basic graph database support. AerialCity powers the application's semantic search capabilities, enabling agents to effortlessly search for information most relevant to their queries, even if expressed differently from the user's question. Furthermore, AerialCity is designed as a hybrid retrieval database, supporting the integration of vector search and keyword search, allowing agents to choose different retrieval methods based on their needs.
 
 <p align="center">
   <img src="ReadmeResources/Screenshots/AerialCity.png" alt="AerialCity RAG">

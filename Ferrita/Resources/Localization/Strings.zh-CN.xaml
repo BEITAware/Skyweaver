@@ -393,6 +393,8 @@
     <system:String x:Key="Directories.SessionFlows.Hint">设定会话流节点图保存的位置。默认在用户文件夹/Ferrita/Nodegraphs 之下。</system:String>
     <system:String x:Key="Directories.AerialCity.Label">AerialCity 目录</system:String>
     <system:String x:Key="Directories.AerialCity.Hint">设定 AerialCity RAG 数据库与映射文件保存的位置。默认在用户文件夹/Ferrita/AerialCity 之下。</system:String>
+    <system:String x:Key="Directories.Knowledge.Label">知识目录</system:String>
+    <system:String x:Key="Directories.Knowledge.Hint">设定知识库 Knowledge 保存的位置。默认在用户文件夹/Ferrita/Knowledge 之下。</system:String>
     <system:String x:Key="Directories.ConfigurationFile.Label">目录配置文件</system:String>
     <system:String x:Key="Directories.DefaultRoot.Label">默认根目录</system:String>
     <system:String x:Key="Directories.OpenConfigurationLocation">打开目录配置位置</system:String>
@@ -405,6 +407,7 @@
     <system:String x:Key="Directories.Status.DebugSaved">调试文件目录已保存。</system:String>
     <system:String x:Key="Directories.Status.SessionFlowsSaved">会话流目录已保存。</system:String>
     <system:String x:Key="Directories.Status.AerialCitySaved">AerialCity 目录已保存。</system:String>
+    <system:String x:Key="Directories.Status.KnowledgeSaved">知识目录已保存。</system:String>
     <system:String x:Key="Directories.Status.BrowseFailedFormat">选择目录失败：{0}</system:String>
     <system:String x:Key="Directories.Status.OpenDirectoryFailedFormat">打开目录失败：{0}</system:String>
     <system:String x:Key="Directories.Browse.ChatSessions">选择聊天会话保存目录</system:String>
@@ -412,6 +415,7 @@
     <system:String x:Key="Directories.Browse.Debug">选择调试文件保存目录</system:String>
     <system:String x:Key="Directories.Browse.SessionFlows">选择会话流保存目录</system:String>
     <system:String x:Key="Directories.Browse.AerialCity">选择 AerialCity 目录</system:String>
+    <system:String x:Key="Directories.Browse.Knowledge">选择知识目录</system:String>
 
     <system:String x:Key="ChatSession.Page.Title">聊天会话</system:String>
     <system:String x:Key="ChatSession.Page.Description">配置聊天会话中的思维链呈现方式。</system:String>
@@ -836,6 +840,7 @@
 
     <system:String x:Key="MainWindow.Title">Ferrita Alpha 预览版</system:String>
     <system:String x:Key="Splash.Title">Ferrita 预览版</system:String>
+    <system:String x:Key="Splash.Title.Preview">预览版</system:String>
 
     <system:String x:Key="ToolInvocation.Status.ReceivingParameters">正在接收参数</system:String>
     <system:String x:Key="ToolInvocation.Status.ParametersReceived">参数已接收，等待工具执行结果</system:String>
@@ -1692,6 +1697,14 @@
     <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.Label">节点名称</system:String>
     <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.EmptyText">默认最新的会话拥有节点</system:String>
 
+    <!-- OverwriteLateralFS Tool -->
+    <system:String x:Key="Tool.OverwriteLateralFS.DisplayName">覆盖合并 LateralFS 分支节点</system:String>
+    <system:String x:Key="Tool.OverwriteLateralFS.Description">完全用 LateralFS 节点的虚拟视图覆盖回其投影源目录。</system:String>
+    <system:String x:Key="Tool.OverwriteLateralFS.Param.NodeName.DisplayName">节点名称</system:String>
+    <system:String x:Key="Tool.OverwriteLateralFS.Param.NodeName.Description">要覆盖合并的 LateralFS 节点名称。</system:String>
+    <system:String x:Key="Tool.OverwriteLateralFS.Param.NodeName.Label">节点名称</system:String>
+    <system:String x:Key="Tool.OverwriteLateralFS.Param.NodeName.EmptyText">默认最新的会话拥有节点</system:String>
+
     <!-- InitializeLiveXAML Tool -->
     <system:String x:Key="Tool.InitializeLiveXAML.DisplayName">初始化 LiveXAML 视图对</system:String>
     <system:String x:Key="Tool.InitializeLiveXAML.Description">在当前工作区初始化一对新的 LiveXAML UI 视图定义文件及后台代码。</system:String>
@@ -1889,7 +1902,7 @@
     <system:String x:Key="TilesPage.ContextMenu.CustomImage">自定义图片...</system:String>
     <system:String x:Key="TilesPage.ContextMenu.CustomIcon">自定义图标...</system:String>
     <system:String x:Key="TilesPage.ContextMenu.CustomIcon.Create">创建</system:String>
-    <system:String x:Key="TilesPage.ContextMenu.CustomIcon.Chores">家务</system:String>
+    <system:String x:Key="TilesPage.ContextMenu.CustomIcon.Chores">杂务</system:String>
     <system:String x:Key="TilesPage.ContextMenu.CustomIcon.Investigate">调查</system:String>
     <system:String x:Key="TilesPage.ContextMenu.CustomIcon.Default">默认</system:String>
     <system:String x:Key="TilesPage.LiveSession.Title">实时会话</system:String>

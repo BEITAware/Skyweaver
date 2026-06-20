@@ -145,7 +145,7 @@ namespace Ferrita.Controls.FerritaPreferencesControl.Services
                     Order = 10
                 });
 
-                registry.RegisterPage("about-skyweaver", new PreferencePageInfo
+                registry.RegisterPage("about-ferrita", new PreferencePageInfo
                 {
                     Id = "preferences-open-source-licenses",
                     DisplayName = "开源许可证",

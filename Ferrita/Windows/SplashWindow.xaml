@@ -24,14 +24,13 @@
                    VerticalAlignment="Top"
                    Margin="237,74,0,0"
                    FontSize="36"
-                   FontWeight="Bold"
                    Foreground="White"
-                 Text="{DynamicResource Splash.Title}"
                    TextWrapping="Wrap"
                    TextAlignment="Center" FontFamily="Segoe UI">
             <TextBlock.Effect>
                 <DropShadowEffect ShadowDepth="2" Direction="330" Color="Black" Opacity="0.7" BlurRadius="3"/>
             </TextBlock.Effect>
+            <Run Text="Ferrita " FontWeight="Bold"/><Run Text="{DynamicResource Splash.Title.Preview}" FontWeight="Light"/>
         </TextBlock>
 
         <!-- 版权信息 -->

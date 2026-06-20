@@ -68,6 +68,10 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="8"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="14"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="8"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="170"/>
@@ -168,6 +172,25 @@
                            Grid.Column="1"
                            Grid.ColumnSpan="2"
                            Text="{DynamicResource Directories.AerialCity.Hint}"
+                           Style="{StaticResource PreferenceMetaStyle}"/>
+
+                <TextBlock Grid.Row="20"
+                           Grid.Column="0"
+                           Text="{DynamicResource Directories.Knowledge.Label}"
+                           Style="{StaticResource PreferenceLabelStyle}"/>
+                <TextBox Grid.Row="20"
+                         Grid.Column="1"
+                         Margin="0,0,10,0"
+                         Text="{Binding KnowledgeDirectoryPath, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"/>
+                <Button Grid.Row="20"
+                        Grid.Column="2"
+                        MinWidth="96"
+                        Content="{DynamicResource Common.BrowseEllipsis}"
+                        Command="{Binding BrowseKnowledgeDirectoryCommand}"/>
+                <TextBlock Grid.Row="22"
+                           Grid.Column="1"
+                           Grid.ColumnSpan="2"
+                           Text="{DynamicResource Directories.Knowledge.Hint}"
                            Style="{StaticResource PreferenceMetaStyle}"/>
             </Grid>
 

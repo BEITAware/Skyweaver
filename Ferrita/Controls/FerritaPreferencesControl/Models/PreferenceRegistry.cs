@@ -42,7 +42,7 @@ namespace Ferrita.Controls.FerritaPreferencesControl.Models
                 },
                 new()
                 {
-                    Id = "about-skyweaver",
+                    Id = "about-ferrita",
                     DisplayName = "关于Ferrita",
                     DisplayNameResourceKey = "Preferences.Group.AboutFerrita",
                     IsExpanded = true

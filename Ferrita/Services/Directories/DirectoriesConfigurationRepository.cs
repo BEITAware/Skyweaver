@@ -34,7 +34,8 @@ namespace Ferrita.Services.Directories
                     ConfigurationDirectoryPath = ((string?)root.Element("ConfigurationDirectory") ?? string.Empty).Trim(),
                     DebugDirectoryPath = ((string?)root.Element("DebugDirectory") ?? string.Empty).Trim(),
                     SessionFlowsDirectoryPath = ((string?)root.Element("SessionFlowsDirectory") ?? string.Empty).Trim(),
-                    AerialCityDirectoryPath = ((string?)root.Element("AerialCityDirectory") ?? string.Empty).Trim()
+                    AerialCityDirectoryPath = ((string?)root.Element("AerialCityDirectory") ?? string.Empty).Trim(),
+                    KnowledgeDirectoryPath = ((string?)root.Element("KnowledgeDirectory") ?? string.Empty).Trim()
                 });
             }
         }
@@ -55,7 +56,8 @@ namespace Ferrita.Services.Directories
                         new XElement("ConfigurationDirectory", normalizedConfiguration.ConfigurationDirectoryPath),
                         new XElement("DebugDirectory", normalizedConfiguration.DebugDirectoryPath),
                         new XElement("SessionFlowsDirectory", normalizedConfiguration.SessionFlowsDirectoryPath),
-                        new XElement("AerialCityDirectory", normalizedConfiguration.AerialCityDirectoryPath)));
+                        new XElement("AerialCityDirectory", normalizedConfiguration.AerialCityDirectoryPath),
+                        new XElement("KnowledgeDirectory", normalizedConfiguration.KnowledgeDirectoryPath)));
 
                 document.Save(ConfigurationFilePath);
             }

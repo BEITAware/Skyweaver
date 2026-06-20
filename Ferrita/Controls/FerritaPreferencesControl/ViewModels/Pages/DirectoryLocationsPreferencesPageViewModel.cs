@@ -33,6 +33,8 @@ namespace Ferrita.Controls.FerritaPreferencesControl.ViewModels.Pages
                 () => BrowseDirectory(L("Directories.Browse.SessionFlows", "选择会话流保存目录"), SessionFlowsDirectoryPath, path => SessionFlowsDirectoryPath = path));
             BrowseAerialCityDirectoryCommand = new RelayCommand(
                 () => BrowseDirectory(L("Directories.Browse.AerialCity", "选择 AerialCity 目录"), AerialCityDirectoryPath, path => AerialCityDirectoryPath = path));
+            BrowseKnowledgeDirectoryCommand = new RelayCommand(
+                () => BrowseDirectory(L("Directories.Browse.Knowledge", "选择知识目录"), KnowledgeDirectoryPath, path => KnowledgeDirectoryPath = path));
             OpenDirectoriesConfigurationDirectoryCommand = new RelayCommand(OpenDirectoriesConfigurationDirectory);
 
             LocalizationRuntime.Instance.LanguageChanged += (_, _) => RefreshLocalizedText();
@@ -100,6 +102,16 @@ namespace Ferrita.Controls.FerritaPreferencesControl.ViewModels.Pages
                 L("Directories.Status.AerialCitySaved", "AerialCity 目录已保存。"));
         }
 
+        public string KnowledgeDirectoryPath
+        {
+            get => _configuration.KnowledgeDirectoryPath;
+            set => SetDirectoryPath(
+                value,
+                _configuration.KnowledgeDirectoryPath,
+                path => _configuration.KnowledgeDirectoryPath = path,
+                L("Directories.Status.KnowledgeSaved", "知识目录已保存。"));
+        }
+
         public string StatusMessage
         {
             get => _statusMessage;
@@ -115,6 +127,8 @@ namespace Ferrita.Controls.FerritaPreferencesControl.ViewModels.Pages
         public ICommand BrowseSessionFlowsDirectoryCommand { get; }
 
         public ICommand BrowseAerialCityDirectoryCommand { get; }
+
+        public ICommand BrowseKnowledgeDirectoryCommand { get; }
 
         public ICommand OpenDirectoriesConfigurationDirectoryCommand { get; }
 
@@ -202,6 +216,7 @@ namespace Ferrita.Controls.FerritaPreferencesControl.ViewModels.Pages
             OnPropertyChanged(nameof(DebugDirectoryPath));
             OnPropertyChanged(nameof(SessionFlowsDirectoryPath));
             OnPropertyChanged(nameof(AerialCityDirectoryPath));
+            OnPropertyChanged(nameof(KnowledgeDirectoryPath));
             OnPropertyChanged(nameof(DirectoriesConfigurationFilePath));
             OnPropertyChanged(nameof(FixedConfigurationDirectoryPath));
             OnPropertyChanged(nameof(DefaultApplicationDirectoryPath));

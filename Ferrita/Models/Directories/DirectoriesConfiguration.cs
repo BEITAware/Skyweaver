@@ -9,6 +9,7 @@ namespace Ferrita.Models.Directories
         private string _debugDirectoryPath = string.Empty;
         private string _sessionFlowsDirectoryPath = string.Empty;
         private string _aerialCityDirectoryPath = string.Empty;
+        private string _knowledgeDirectoryPath = string.Empty;
 
         public string ChatSessionsDirectoryPath
         {
@@ -38,6 +39,12 @@ namespace Ferrita.Models.Directories
         {
             get => _aerialCityDirectoryPath;
             set => SetProperty(ref _aerialCityDirectoryPath, value?.Trim() ?? string.Empty);
+        }
+
+        public string KnowledgeDirectoryPath
+        {
+            get => _knowledgeDirectoryPath;
+            set => SetProperty(ref _knowledgeDirectoryPath, value?.Trim() ?? string.Empty);
         }
     }
 }

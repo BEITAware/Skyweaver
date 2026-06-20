@@ -43,6 +43,10 @@ namespace Ferrita.Services.Directories
             configuration => configuration.AerialCityDirectoryPath,
             FerritaDirectoryDefaults.DefaultAerialCityDirectoryPath);
 
+        public string KnowledgeDirectoryPath => GetDirectoryPath(
+            configuration => configuration.KnowledgeDirectoryPath,
+            FerritaDirectoryDefaults.DefaultKnowledgeDirectoryPath);
+
         public event EventHandler? ConfigurationChanged;
 
         public DirectoriesConfiguration GetConfiguration()
@@ -85,7 +89,8 @@ namespace Ferrita.Services.Directories
                 ConfigurationDirectoryPath = configuration.ConfigurationDirectoryPath,
                 DebugDirectoryPath = configuration.DebugDirectoryPath,
                 SessionFlowsDirectoryPath = configuration.SessionFlowsDirectoryPath,
-                AerialCityDirectoryPath = configuration.AerialCityDirectoryPath
+                AerialCityDirectoryPath = configuration.AerialCityDirectoryPath,
+                KnowledgeDirectoryPath = configuration.KnowledgeDirectoryPath
             };
         }
 
@@ -96,6 +101,7 @@ namespace Ferrita.Services.Directories
             Directory.CreateDirectory(configuration.DebugDirectoryPath);
             Directory.CreateDirectory(configuration.SessionFlowsDirectoryPath);
             Directory.CreateDirectory(configuration.AerialCityDirectoryPath);
+            Directory.CreateDirectory(configuration.KnowledgeDirectoryPath);
         }
     }
 }
