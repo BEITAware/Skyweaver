@@ -86,7 +86,7 @@ namespace Ferrita.Tools
             var requestedPath = arguments.GetString("FilePath") ?? string.Empty;
             var startLineHash = (arguments.GetString("StartLineHash") ?? string.Empty).Trim().ToLowerInvariant();
             var endLineHash = (arguments.GetString("EndLineHash") ?? string.Empty).Trim().ToLowerInvariant();
-            var replaceContent = arguments.GetString("ReplaceContent") ?? string.Empty;
+            var replaceContent = arguments.GetString("ReplaceContent");
             WriteTargetPath? targetPath = null;
 
             try
@@ -180,21 +180,38 @@ namespace Ferrita.Tools
                         BuildData(targetPath, settings, encodingDecision, originalBytes.LongLength, null, didWrite: false));
                 }
 
-                // 进行替换
-                var replacementLines = HashlineHelper.ParseFileLines(replaceContent);
-                if (replacementLines.Count > 0)
+                // 进行替换或删除
+                var newLines = new List<HashlineHelper.FileLine>();
+                if (string.IsNullOrEmpty(replaceContent))
                 {
-                    var lastReplacementLine = replacementLines[^1];
-                    if (string.IsNullOrEmpty(lastReplacementLine.LineBreak))
+                    // 如果 replaceContent 为空，则删除起始哈希与终止哈希之间的行，保留这两个锚行本身
+                    newLines.AddRange(originalLines.Take(startIndex + 1));
+                    if (endIndex > startIndex)
                     {
-                        lastReplacementLine.LineBreak = originalLines[endIndex].LineBreak;
+                        newLines.AddRange(originalLines.Skip(endIndex));
+                    }
+                    else
+                    {
+                        newLines.AddRange(originalLines.Skip(startIndex + 1));
                     }
                 }
+                else
+                {
+                    // 否则，用新内容替换整个块（包含起始与终止行）
+                    var replacementLines = HashlineHelper.ParseFileLines(replaceContent);
+                    if (replacementLines.Count > 0)
+                    {
+                        var lastReplacementLine = replacementLines[^1];
+                        if (string.IsNullOrEmpty(lastReplacementLine.LineBreak))
+                        {
+                            lastReplacementLine.LineBreak = originalLines[endIndex].LineBreak;
+                        }
+                    }
 
-                var newLines = new List<HashlineHelper.FileLine>();
-                newLines.AddRange(originalLines.Take(startIndex));
-                newLines.AddRange(replacementLines);
-                newLines.AddRange(originalLines.Skip(endIndex + 1));
+                    newLines.AddRange(originalLines.Take(startIndex));
+                    newLines.AddRange(replacementLines);
+                    newLines.AddRange(originalLines.Skip(endIndex + 1));
+                }
 
                 string updatedContent = string.Concat(newLines.Select(l => l.Text + l.LineBreak));
 
@@ -257,9 +274,10 @@ namespace Ferrita.Tools
                         isRequired: true),
                     new FerritaToolParameterDefinition(
                         "ReplaceContent",
-                        "The new content to replace the target block (inclusive).",
+                        "The new content to replace the target block (inclusive). If null or empty, the lines strictly between start and end hashes are deleted, and the start/end lines themselves are kept.",
                         FerritaToolParameterType.String,
-                        isRequired: true),
+                        isRequired: false,
+                        defaultValue: null),
                     new FerritaToolParameterDefinition(
                         "Encoding",
                         "Optional text encoding name. Default is utf-8.",

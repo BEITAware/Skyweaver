@@ -165,6 +165,21 @@ namespace Ferrita.Services.LateralFileSystem
             return result;
         }
 
+        public LateralFileSystemMergeResult OverwriteVirtualRoot(string nodeId)
+        {
+            LateralFileSystemMergeResult result;
+            lock (_syncRoot)
+            {
+                ThrowIfDisposed();
+                var workingRootDirectory = EnsureWorkingRootIsReadyForActivation();
+                _service.ActivateAll(workingRootDirectory);
+                result = _service.OverwriteVirtualRoot(workingRootDirectory, nodeId);
+            }
+
+            TreeChanged?.Invoke(this, EventArgs.Empty);
+            return result;
+        }
+
         public void SaveConfiguration(LateralFileSystemConfiguration configuration)
         {
             ArgumentNullException.ThrowIfNull(configuration);

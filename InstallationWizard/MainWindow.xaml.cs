@@ -553,6 +553,7 @@ namespace InstallationWizard
       <Tool Name=""KeywordSearch"" Permission=""RequireConfirmation"" />
       <Tool Name=""LoadToolKits"" Permission=""RequireConfirmation"" />
       <Tool Name=""MergeLateralFS"" Permission=""RequireConfirmation"" />
+      <Tool Name=""OverwriteLateralFS"" Permission=""RequireConfirmation"" />
       <Tool Name=""ReadDirectoryRecursive"" Permission=""RequireConfirmation"" />
       <Tool Name=""ReadImages"" Permission=""RequireConfirmation"" />
       <Tool Name=""ReadTextFile"" Permission=""RequireConfirmation"" />
@@ -620,6 +621,7 @@ namespace InstallationWizard
       <Tool Name=""KeywordSearch"" Permission=""Allow"" />
       <Tool Name=""LoadToolKits"" Permission=""Allow"" />
       <Tool Name=""MergeLateralFS"" Permission=""Allow"" />
+      <Tool Name=""OverwriteLateralFS"" Permission=""Allow"" />
       <Tool Name=""ReadDirectoryRecursive"" Permission=""Allow"" />
       <Tool Name=""ReadImages"" Permission=""Allow"" />
       <Tool Name=""ReadTextFile"" Permission=""Allow"" />
@@ -688,6 +690,7 @@ namespace InstallationWizard
       <Tool Name=""KeywordSearch"" Permission=""Allow"" />
       <Tool Name=""LoadToolKits"" Permission=""Allow"" />
       <Tool Name=""MergeLateralFS"" Permission=""Allow"" />
+      <Tool Name=""OverwriteLateralFS"" Permission=""Allow"" />
       <Tool Name=""ReadDirectoryRecursive"" Permission=""Allow"" />
       <Tool Name=""ReadImages"" Permission=""Allow"" />
       <Tool Name=""ReadTextFile"" Permission=""Allow"" />
@@ -749,6 +752,7 @@ namespace InstallationWizard
       <Tool Name=""KeywordSearch"" Permission=""Allow"" />
       <Tool Name=""LoadToolKits"" Permission=""Allow"" />
       <Tool Name=""MergeLateralFS"" Permission=""Allow"" />
+      <Tool Name=""OverwriteLateralFS"" Permission=""Allow"" />
       <Tool Name=""ReadDirectoryRecursive"" Permission=""Allow"" />
       <Tool Name=""ReadImages"" Permission=""Allow"" />
       <Tool Name=""ReadTextFile"" Permission=""Allow"" />
@@ -815,6 +819,7 @@ namespace InstallationWizard
       <Tool Name=""KeywordSearch"" Permission=""Allow"" />
       <Tool Name=""LoadToolKits"" Permission=""Disabled"" />
       <Tool Name=""MergeLateralFS"" Permission=""Disabled"" />
+      <Tool Name=""OverwriteLateralFS"" Permission=""Disabled"" />
       <Tool Name=""ReadDirectoryRecursive"" Permission=""Allow"" />
       <Tool Name=""ReadImages"" Permission=""Allow"" />
       <Tool Name=""ReadTextFile"" Permission=""Allow"" />

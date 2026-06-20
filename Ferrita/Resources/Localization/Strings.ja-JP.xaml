@@ -775,6 +775,8 @@
     <system:String x:Key="Directories.AerialCity.Label">AerialCity ディレクトリ</system:String>
 
     <system:String x:Key="Directories.AerialCity.Hint">AerialCity RAG データベースとマッピングファイルが保存される場所を設定します。デフォルトは ユーザーフォルダ/Ferrita/AerialCity です。</system:String>
+    <system:String x:Key="Directories.Knowledge.Label">知識ディレクトリ</system:String>
+    <system:String x:Key="Directories.Knowledge.Hint">知識ベース Knowledge が保存される場所を設定します。デフォルトは ユーザーフォルダ/Ferrita/Knowledge です。</system:String>
 
     <system:String x:Key="Directories.ConfigurationFile.Label">ディレクトリ設定ファイル</system:String>
 
@@ -799,6 +801,7 @@
     <system:String x:Key="Directories.Status.SessionFlowsSaved">セッションフローディレクトリが保存されました。</system:String>
 
     <system:String x:Key="Directories.Status.AerialCitySaved">AerialCity ディレクトリが保存されました。</system:String>
+    <system:String x:Key="Directories.Status.KnowledgeSaved">知識ディレクトリが保存されました。</system:String>
 
     <system:String x:Key="Directories.Status.BrowseFailedFormat">フォルダの選択に失敗しました: {0}</system:String>
 
@@ -813,6 +816,7 @@
     <system:String x:Key="Directories.Browse.SessionFlows">セッションフロー保存先フォルダを選択</system:String>
 
     <system:String x:Key="Directories.Browse.AerialCity">AerialCity フォルダを選択</system:String>
+    <system:String x:Key="Directories.Browse.Knowledge">知識フォルダを選択</system:String>
 
 
     <system:String x:Key="ChatSession.Page.Title">チャットセッション</system:String>
@@ -1494,6 +1498,7 @@
     <system:String x:Key="MainWindow.Title">Ferrita Alpha プレビュー</system:String>
 
     <system:String x:Key="Splash.Title">Ferrita プレビュー</system:String>
+    <system:String x:Key="Splash.Title.Preview">プレビュー</system:String>
 
 
     <system:String x:Key="ToolInvocation.Status.ReceivingParameters">パラメータを受信中</system:String>
@@ -3207,5 +3212,19 @@
     <system:String x:Key="AddTileDialog.Option.MoreTasks">その他のタスク...</system:String>
     <system:String x:Key="AddTileDialog.Option.MoreTasks.Description">保存されているすべてのスケジュールタスクから選択してタイルを追加します</system:String>
     <system:String x:Key="AddTileDialog.Button.Add">追加</system:String>
-    <system:String x:Key="AddTileDialog.Task.SessionFlowFormat">関連付けられたセッションフロー: {0}</system:String>
+    <!-- MergeLateralFS Tool -->
+    <system:String x:Key="Tool.MergeLateralFS.DisplayName">LateralFSブランチマージ</system:String>
+    <system:String x:Key="Tool.MergeLateralFS.Description">LateralFSノードで編集されたか、ローカル固有の変更を投影元のディレクトリにマージします。</system:String>
+    <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.DisplayName">ノード名</system:String>
+    <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.Description">マージするLateralFSノード名。</system:String>
+    <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.Label">ノード名</system:String>
+    <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.EmptyText">デフォルトで最新のセッション所有ノード</system:String>
+
+    <!-- OverwriteLateralFS Tool -->
+    <system:String x:Key="Tool.OverwriteLateralFS.DisplayName">LateralFSブランチ上書きマージ</system:String>
+    <system:String x:Key="Tool.OverwriteLateralFS.Description">完全にLateralFSノードの仮想ビューで投影元のディレクトリを上書きします。</system:String>
+    <system:String x:Key="Tool.OverwriteLateralFS.Param.NodeName.DisplayName">ノード名</system:String>
+    <system:String x:Key="Tool.OverwriteLateralFS.Param.NodeName.Description">上書きマージするLateralFSノード名。</system:String>
+    <system:String x:Key="Tool.OverwriteLateralFS.Param.NodeName.Label">ノード名</system:String>
+    <system:String x:Key="Tool.OverwriteLateralFS.Param.NodeName.EmptyText">デフォルトで最新 of セッション所有ノード</system:String>
 </ResourceDictionary>

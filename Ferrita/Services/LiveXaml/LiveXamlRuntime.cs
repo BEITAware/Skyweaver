@@ -71,7 +71,7 @@ namespace Ferrita.Services.LiveXaml
     {
         private const string XamlNamespace = "http://schemas.microsoft.com/winfx/2006/xaml";
         private const string MarkupCompatibilityNamespace = "http://schemas.openxmlformats.org/markup-compatibility/2006";
-        private const string GeneratedInitializationFlagFieldName = "__skyweaverLiveXamlIsInitialized";
+        private const string GeneratedInitializationFlagFieldName = "__ferritaLiveXamlIsInitialized";
         private const string GeneratedCodeAttributeFullName = "System.CodeDom.Compiler.GeneratedCodeAttribute";
 
         public static LiveXamlLoadResult Validate(string absoluteXamlFilePath, string? absoluteCodeBehindFilePath = null)
@@ -717,7 +717,7 @@ namespace Ferrita.Services.LiveXaml
                     if (string.IsNullOrWhiteSpace(targetName))
                     {
                         generatedNameIndex++;
-                        targetName = $"__skyweaverAutoEventTarget{generatedNameIndex}";
+                        targetName = $"__ferritaAutoEventTarget{generatedNameIndex}";
                         SetXamlName(element, targetName);
                     }
 

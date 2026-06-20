@@ -86,7 +86,7 @@ namespace Ferrita.Panels.MultiFunctionArea.ViewModels
 
         public static class TabTypes
         {
-            public const string FerritaPreferences = "skyweaver-preferences";
+            public const string FerritaPreferences = "ferrita-preferences";
             public const string WorkflowEditor = "session-flow-editor";
             public const string FileManager = "file-manager";
             public const string LateralFileSystemTree = "lateral-file-system-tree";

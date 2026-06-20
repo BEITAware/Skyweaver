@@ -1,10 +1,10 @@
-name: Build & Release Skyweaver Preview
+name: Build & Release Ferrita Preview
 
 # 触发条件：推送匹配 sw-preview-* 模式的 Tag
 on:
   push:
     tags:
-      - 'sw-preview-*'
+      - 'ferrita-preview-*'
 
 permissions:
   contents: write
@@ -31,22 +31,22 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       # ── 还原 NuGet 依赖 ──────────────────────────────────────
-      - name: Restore dependencies (Skyweaver)
-        run: dotnet restore Skyweaver/Skyweaver.csproj
+      - name: Restore dependencies (Ferrita)
+        run: dotnet restore Ferrita/Ferrita.csproj
 
       - name: Restore dependencies (InstallationWizard)
         run: |
           dotnet restore InstallationWizard/InstallationWizard.csproj
           nuget restore InstallationWizard/InstallationWizard.csproj || true
 
-      # ── 编译 Skyweaver 主程序（Release, ReadyToRun, 非单文件）──
-      - name: Publish Skyweaver
+      # ── 编译 Ferrita 主程序（Release, ReadyToRun, 非单文件）──
+      - name: Publish Ferrita
         run: |
-          dotnet publish Skyweaver/Skyweaver.csproj `
+          dotnet publish Ferrita/Ferrita.csproj `
             --configuration Release `
             --runtime win-x64 `
             --self-contained false `
-            --output ./publish/Skyweaver `
+            --output ./publish/Ferrita `
             /p:PublishReadyToRun=true `
             /p:PublishSingleFile=false
 
@@ -62,19 +62,19 @@ jobs:
       # Installer 期望的布局：
       #   InstallationWizard.exe
       #   App/
-      #     Skyweaver/
-      #       Skyweaver.exe
+      #     Ferrita/
+      #       Ferrita.exe
       #       ... (所有发布文件)
       - name: Assemble installer package
         run: |
           $installerOutput = "InstallationWizard/bin/Release/net48"
-          $appPayloadDir = "$installerOutput/App/Skyweaver"
+          $appPayloadDir = "$installerOutput/App/Ferrita"
 
-          # 确保 App/Skyweaver 目录存在
+          # 确保 App/Ferrita 目录存在
           New-Item -ItemType Directory -Force -Path $appPayloadDir | Out-Null
 
-          # 将 Skyweaver 发布产物复制到 Installer 的 App/Skyweaver/ 下
-          Copy-Item -Path "./publish/Skyweaver/*" -Destination $appPayloadDir -Recurse -Force
+          # 将 Ferrita 发布产物复制到 Installer 的 App/Ferrita/ 下
+          Copy-Item -Path "./publish/Ferrita/*" -Destination $appPayloadDir -Recurse -Force
 
           Write-Host "Installer package assembled at: $installerOutput"
           Write-Host "Payload files:"
@@ -84,7 +84,7 @@ jobs:
       - name: Compress to zip (maximum compression)
         run: |
           $installerOutput = "InstallationWizard/bin/Release/net48"
-          $zipPath = "./Skyweaver-Preview-${{ github.ref_name }}.zip"
+          $zipPath = "./Ferrita-Preview-${{ github.ref_name }}.zip"
 
           # 使用 7-Zip 进行高强度压缩（-mx=9 为最高压缩率）
           # GitHub Actions Windows runner 预装了 7-Zip
@@ -98,9 +98,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: "Skyweaver Preview ${{ github.ref_name }}"
+          name: "Ferrita Preview ${{ github.ref_name }}"
           body: |
-            编织我们曾有的未来：Skyweaver Preview
+            编织我们曾有的未来：Ferrita Preview
 
             ---
 
@@ -111,7 +111,7 @@ jobs:
             3. 运行 `InstallationWizard.exe` 启动安装向导
             4. 按照向导指引完成安装与配置
 
-            > ⚠️ **注意**：Skyweaver 目前处于早期预览阶段，不代表最终成果。需要 .NET 10 Desktop Runtime。
+            > ⚠️ **注意**：Ferrita 目前处于早期预览阶段，不代表最终成果。需要 .NET 10 Desktop Runtime。
 
             ---
 
@@ -122,8 +122,8 @@ jobs:
             3. Run `InstallationWizard.exe` to launch the setup wizard
             4. Follow the wizard to complete installation and configuration
 
-            > ⚠️ **Note**: Skyweaver is currently in early preview and does not represent the final product. Requires .NET 10 Desktop Runtime.
+            > ⚠️ **Note**: Ferrita is currently in early preview and does not represent the final product. Requires .NET 10 Desktop Runtime.
           draft: false
           prerelease: true
           files: |
-            ./Skyweaver-Preview-${{ github.ref_name }}.zip
+            ./Ferrita-Preview-${{ github.ref_name }}.zip

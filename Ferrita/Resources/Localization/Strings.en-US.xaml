@@ -394,6 +394,8 @@
     <system:String x:Key="Directories.SessionFlows.Hint">Sets where session flow nodegraphs are saved. The default is under user folder/Ferrita/Nodegraphs.</system:String>
     <system:String x:Key="Directories.AerialCity.Label">AerialCity Directory</system:String>
     <system:String x:Key="Directories.AerialCity.Hint">Sets where AerialCity RAG databases and mapping files are saved. The default is under user folder/Ferrita/AerialCity.</system:String>
+    <system:String x:Key="Directories.Knowledge.Label">Knowledge Directory</system:String>
+    <system:String x:Key="Directories.Knowledge.Hint">Sets where Knowledge bases are saved. The default is under user folder/Ferrita/Knowledge.</system:String>
     <system:String x:Key="Directories.ConfigurationFile.Label">Directory Configuration File</system:String>
     <system:String x:Key="Directories.DefaultRoot.Label">Default Root Directory</system:String>
     <system:String x:Key="Directories.OpenConfigurationLocation">Open Directory Configuration Location</system:String>
@@ -406,6 +408,7 @@
     <system:String x:Key="Directories.Status.DebugSaved">Debug directory saved.</system:String>
     <system:String x:Key="Directories.Status.SessionFlowsSaved">Session flow directory saved.</system:String>
     <system:String x:Key="Directories.Status.AerialCitySaved">AerialCity directory saved.</system:String>
+    <system:String x:Key="Directories.Status.KnowledgeSaved">Knowledge directory saved.</system:String>
     <system:String x:Key="Directories.Status.BrowseFailedFormat">Failed to choose directory: {0}</system:String>
     <system:String x:Key="Directories.Status.OpenDirectoryFailedFormat">Failed to open directory: {0}</system:String>
     <system:String x:Key="Directories.Browse.ChatSessions">Choose Chat Session Save Directory</system:String>
@@ -413,6 +416,7 @@
     <system:String x:Key="Directories.Browse.Debug">Choose Debug Save Directory</system:String>
     <system:String x:Key="Directories.Browse.SessionFlows">Choose Session Flow Save Directory</system:String>
     <system:String x:Key="Directories.Browse.AerialCity">Choose AerialCity Directory</system:String>
+    <system:String x:Key="Directories.Browse.Knowledge">Choose Knowledge Directory</system:String>
 
     <system:String x:Key="ChatSession.Page.Title">Chat Session</system:String>
     <system:String x:Key="ChatSession.Page.Description">Configure reasoning presentation in chat sessions.</system:String>
@@ -846,6 +850,7 @@
 
     <system:String x:Key="MainWindow.Title">Ferrita Alpha Preview</system:String>
     <system:String x:Key="Splash.Title">Ferrita Preview</system:String>
+    <system:String x:Key="Splash.Title.Preview">Preview</system:String>
 
     <system:String x:Key="ToolInvocation.Status.ReceivingParameters">Receiving parameters</system:String>
     <system:String x:Key="ToolInvocation.Status.ParametersReceived">Parameters received, waiting for tool result</system:String>
@@ -1745,6 +1750,14 @@
     <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.Description">Optional LateralFS node name to merge. If omitted, the newest LateralFS node owned by the current session is merged.</system:String>
     <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.Label">Node</system:String>
     <system:String x:Key="Tool.MergeLateralFS.Param.NodeName.EmptyText">Newest session-owned node</system:String>
+
+    <!-- OverwriteLateralFS Tool -->
+    <system:String x:Key="Tool.OverwriteLateralFS.DisplayName">Overwrite Lateral F S</system:String>
+    <system:String x:Key="Tool.OverwriteLateralFS.Description">Description placeholder</system:String>
+    <system:String x:Key="Tool.OverwriteLateralFS.Param.NodeName.DisplayName">NodeName</system:String>
+    <system:String x:Key="Tool.OverwriteLateralFS.Param.NodeName.Description">Optional LateralFS node name to overwrite. If omitted, the newest LateralFS node owned by the current session is overwritten.</system:String>
+    <system:String x:Key="Tool.OverwriteLateralFS.Param.NodeName.Label">Node</system:String>
+    <system:String x:Key="Tool.OverwriteLateralFS.Param.NodeName.EmptyText">Newest session-owned node</system:String>
 
     <!-- SWSniff Tool -->
     <system:String x:Key="Tool.SWSniff.DisplayName">SWSniff (Network Scanner)</system:String>
