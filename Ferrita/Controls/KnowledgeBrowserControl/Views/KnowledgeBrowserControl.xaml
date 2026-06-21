@@ -5,12 +5,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vm="clr-namespace:Ferrita.Controls.KnowledgeBrowserControl.ViewModels"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="900">
+             d:DesignHeight="600" d:DesignWidth="900"
+             d:DataContext="{d:DesignInstance Type=vm:KnowledgeBrowserControlViewModel, IsDesignTimeCreatable=False}">
 
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/Ferrita;component/Resources/Controls/CascadePreferenceImplicitStyles.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/Ferrita;component/Resources/Controls/TreeViewStyles.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/Ferrita;component/Resources/Controls/ListBoxStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <BooleanToVisibilityConverter x:Key="BoolToVis"/>
@@ -28,6 +31,14 @@
                 <GradientStop Color="#88FFFFFF" Offset="0.5"/>
                 <GradientStop Color="#00FFFFFF" Offset="1"/>
             </LinearGradientBrush>
+
+            <!-- FileSystemNode Template -->
+            <HierarchicalDataTemplate x:Key="FileSystemNodeTemplate" DataType="{x:Type vm:FileSystemNodeViewModel}" ItemsSource="{Binding Children}">
+                <StackPanel Orientation="Horizontal" Margin="2">
+                    <TextBlock Text="{Binding Icon}" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding Name}" Foreground="White" FontSize="13" VerticalAlignment="Center"/>
+                </StackPanel>
+            </HierarchicalDataTemplate>
 
             <!-- 侧面竖向 TabItem 样式 -->
             <Style x:Key="KBVerticalTabItemStyle" TargetType="{x:Type TabItem}">
@@ -253,12 +264,152 @@
                     <TextBlock Text="打开..." FontSize="11.5" Foreground="White"/>
                 </TabItem.Header>
                 <Grid Margin="30,25">
-                    <StackPanel VerticalAlignment="Top">
-                        <TextBlock Text="打开..." Foreground="White" FontSize="22" FontWeight="Bold"/>
-                        <TextBlock Text="打开知识库文件或文件夹" Foreground="#AAFFFFFF" FontSize="13" Margin="0,6,0,0"/>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <StackPanel Grid.Row="0" VerticalAlignment="Top">
+                        <TextBlock Text="打开 Wiki" Foreground="White" FontSize="22" FontWeight="Bold"/>
+                        <TextBlock Text="选择并打开一个现有的 OKXML Wiki 知识库" Foreground="#AAFFFFFF" FontSize="13" Margin="0,6,0,0"/>
                         <Border BorderBrush="#22FFFFFF" BorderThickness="0,0,0,1" Margin="0,20,0,0"/>
-                        <TextBlock Text="（功能待实现）" Foreground="#55FFFFFF" FontSize="12" Margin="0,20,0,0"/>
                     </StackPanel>
+
+                    <!-- Wiki 列表 -->
+                    <Grid Grid.Row="1" Margin="0,20,0,0">
+                        <ListBox Background="Transparent" BorderThickness="0"
+                                 ItemsSource="{Binding Wikis}"
+                                 SelectedItem="{Binding SelectedWiki}"
+                                 MouseDoubleClick="WikiListBox_MouseDoubleClick"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ListBox}}"/>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="Padding" Value="0"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <Viewbox Width="260" Height="253" Stretch="Uniform" Margin="5">
+                                                    <Canvas Width="424.26" Height="412.974" Clip="F1 M 0,0L 424.26,0L 424.26,412.974L 0,412.974L 0,0">
+                                                        <Canvas x:Name="Layer_19" Width="1122.69" Height="1587.9" Canvas.Left="0" Canvas.Top="0">
+                                                            <Image x:Name="Image" Source="pack://application:,,,/Resources/Wiki.png" Width="412" Height="377" Canvas.Left="0" Canvas.Top="0">
+                                                                <Image.RenderTransform>
+                                                                    <TransformGroup>
+                                                                        <MatrixTransform Matrix="0.851052,-0.110086,0.110086,0.851052,-0.000455379,45.3558"/>
+                                                                    </TransformGroup>
+                                                                </Image.RenderTransform>
+                                                            </Image>
+                                                            <Path x:Name="CardPath" Width="401" Height="401" Canvas.Left="23.2598" Canvas.Top="11.9736" Stretch="Fill" StrokeLineJoin="Round" Stroke="#6793F2FF" Data="F1 M 27.7598,12.4736L 419.76,12.4736C 421.969,12.4736 423.76,14.2646 423.76,16.4739L 423.76,408.474C 423.76,410.683 421.969,412.474 419.76,412.474L 27.7598,412.474C 25.5508,412.474 23.7598,410.683 23.7598,408.474L 23.7598,16.4739C 23.7598,14.2646 25.5508,12.4736 27.7598,12.4736 Z ">
+                                                                <Path.Fill>
+                                                                    <RadialGradientBrush RadiusX="1.01282" RadiusY="0.917797" Center="0.499999,0.97775" GradientOrigin="0.499999,0.97775">
+                                                                        <RadialGradientBrush.GradientStops>
+                                                                            <GradientStop Color="#C5C9CACA" Offset="0"/>
+                                                                            <GradientStop Color="#34445E7C" Offset="0.988506"/>
+                                                                        </RadialGradientBrush.GradientStops>
+                                                                        <RadialGradientBrush.RelativeTransform>
+                                                                            <TransformGroup>
+                                                                                <SkewTransform CenterX="0.499999" CenterY="0.97775" AngleX="5.23483" AngleY="0"/>
+                                                                                <RotateTransform CenterX="0.499999" CenterY="0.97775" Angle="70.4939"/>
+                                                                            </TransformGroup>
+                                                                        </RadialGradientBrush.RelativeTransform>
+                                                                    </RadialGradientBrush>
+                                                                </Path.Fill>
+                                                            </Path>
+                                                            <Path x:Name="Path_0" Width="400" Height="400" Canvas.Left="23.7603" Canvas.Top="12.4739" Stretch="Fill" Data="F1 M 27.7603,12.4739L 419.76,12.4739C 421.969,12.4739 423.76,14.2649 423.76,16.4739L 423.76,408.473C 423.76,410.682 421.969,412.473 419.76,412.473L 27.7603,412.473C 25.5513,412.473 23.7603,410.682 23.7603,408.473L 23.7603,16.4739C 23.7603,14.2649 25.5513,12.4739 27.7603,12.4739 Z ">
+                                                                <Path.Fill>
+                                                                    <RadialGradientBrush RadiusX="1.18083" RadiusY="0.766859" Center="0.5,0.0499018" GradientOrigin="0.5,0.0499018">
+                                                                        <RadialGradientBrush.GradientStops>
+                                                                            <GradientStop Color="#4FFFFFFF" Offset="0"/>
+                                                                            <GradientStop Color="#1FFFFFFF" Offset="0.260536"/>
+                                                                            <GradientStop Color="#00FFFFFF" Offset="0.455939"/>
+                                                                        </RadialGradientBrush.GradientStops>
+                                                                    </RadialGradientBrush>
+                                                                </Path.Fill>
+                                                            </Path>
+                                                            <Path x:Name="Path_1" Width="401" Height="401" Canvas.Left="23.2598" Canvas.Top="11.9736" Stretch="Fill" StrokeLineJoin="Round" Stroke="#6793F2FF" Data="F1 M 27.7598,12.4736L 419.76,12.4736C 421.969,12.4736 423.76,14.2644 423.76,16.4736L 423.76,408.474C 423.76,410.683 421.969,412.474 419.76,412.474L 27.7598,412.474C 25.5508,412.474 23.7598,410.683 23.7598,408.474L 23.7598,16.4736C 23.7598,14.2644 25.5508,12.4736 27.7598,12.4736 Z ">
+                                                                <Path.Fill>
+                                                                    <LinearGradientBrush StartPoint="0.0274609,0.229456" EndPoint="1.2125,0.229456">
+                                                                        <LinearGradientBrush.RelativeTransform>
+                                                                            <TransformGroup>
+                                                                                <SkewTransform CenterX="0.0274609" CenterY="0.229456" AngleX="6.38202" AngleY="0"/>
+                                                                                <RotateTransform CenterX="0.0274609" CenterY="0.229456" Angle="32.3018"/>
+                                                                            </TransformGroup>
+                                                                        </LinearGradientBrush.RelativeTransform>
+                                                                        <LinearGradientBrush.GradientStops>
+                                                                            <GradientStop Color="#00FFFFFF" Offset="0"/>
+                                                                            <GradientStop Color="#2CFFFFFF" Offset="0.254789"/>
+                                                                            <GradientStop Color="#00FFFFFF" Offset="0.513412"/>
+                                                                            <GradientStop Color="#39FFFFFF" Offset="0.701149"/>
+                                                                            <GradientStop Color="#00FFFFFF" Offset="0.720307"/>
+                                                                            <GradientStop Color="#33FFFFFF" Offset="0.856322"/>
+                                                                            <GradientStop Color="#03FFFFFF" Offset="0.89272"/>
+                                                                            <GradientStop Color="#00FFFFFF" Offset="0.988506"/>
+                                                                        </LinearGradientBrush.GradientStops>
+                                                                    </LinearGradientBrush>
+                                                                </Path.Fill>
+                                                            </Path>
+                                                            <ContentPresenter x:Name="ContentSite" Canvas.Left="45" Canvas.Top="35" Width="356" Height="350"/>
+                                                        </Canvas>
+                                                    </Canvas>
+                                                </Viewbox>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="CardPath" Property="Stroke" Value="#FF96FCFF"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter TargetName="CardPath" Property="Stroke" Value="#FFFFFFFF"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:WikiItemViewModel}">
+                                    <Grid Width="356" Height="350">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Text="{Binding WikiName}" Foreground="White" FontSize="26" FontWeight="Bold" TextTrimming="CharacterEllipsis" Margin="0,15,0,10"/>
+                                        <TextBlock Grid.Row="1" Text="{Binding Description}" Foreground="#D0FFFFFF" FontSize="15" LineHeight="22" TextWrapping="Wrap" Margin="0,5,0,5" TextTrimming="CharacterEllipsis"/>
+                                        <Grid Grid.Row="2" Margin="0,10,0,20">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Author, StringFormat='作者: {0}'}" Foreground="#AAFFFFFF" FontSize="13" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding CreatedAt, StringFormat='{}{0:yyyy-MM-dd}'}" Foreground="#AAFFFFFF" FontSize="13" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <TextBlock Text="未在知识首选项目录下找到任何 OKXML Wiki。请先使用 OKCreateWiki 工具创建知识库。"
+                                   Foreground="#55FFFFFF" FontSize="13.5" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,20,0,0"
+                                   TextWrapping="Wrap">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasNoWikis}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
                 </Grid>
             </TabItem>
 
@@ -267,13 +418,25 @@
                 <TabItem.Header>
                     <TextBlock Text="文件" FontSize="11.5" Foreground="White"/>
                 </TabItem.Header>
-                <Grid Margin="30,25">
-                    <StackPanel VerticalAlignment="Top">
-                        <TextBlock Text="文件" Foreground="White" FontSize="22" FontWeight="Bold"/>
-                        <TextBlock Text="管理知识库文件" Foreground="#AAFFFFFF" FontSize="13" Margin="0,6,0,0"/>
+                <Grid Margin="30,25" Visibility="{Binding IsWikiOpened, Converter={StaticResource BoolToVis}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <StackPanel Grid.Row="0" VerticalAlignment="Top">
+                        <TextBlock Text="知识库文档" Foreground="White" FontSize="22" FontWeight="Bold"/>
+                        <TextBlock Text="双击 XML 或 MD 格式的文档进行浏览" Foreground="#AAFFFFFF" FontSize="13" Margin="0,6,0,0"/>
                         <Border BorderBrush="#22FFFFFF" BorderThickness="0,0,0,1" Margin="0,20,0,0"/>
-                        <TextBlock Text="（功能待实现）" Foreground="#55FFFFFF" FontSize="12" Margin="0,20,0,0"/>
                     </StackPanel>
+
+                    <TreeView Grid.Row="1" Margin="0,20,0,0"
+                              Background="Transparent" BorderThickness="0"
+                              ItemsSource="{Binding FileTreeNodes}"
+                              ItemTemplate="{StaticResource FileSystemNodeTemplate}"
+                              ItemContainerStyle="{StaticResource AeroTreeViewItemStyle}"
+                              MouseDoubleClick="TreeView_MouseDoubleClick">
+                    </TreeView>
                 </Grid>
             </TabItem>
 
@@ -282,7 +445,7 @@
                 <TabItem.Header>
                     <TextBlock Text="浏览" FontSize="11.5" Foreground="White"/>
                 </TabItem.Header>
-                <Grid>
+                <Grid Visibility="{Binding IsWikiOpened, Converter={StaticResource BoolToVis}}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="36"/>
                         <RowDefinition Height="*"/>
@@ -325,12 +488,60 @@
                     </Border>
 
                     <!-- 浏览内容区域 -->
-                    <Grid Grid.Row="1" Margin="30,25">
-                        <StackPanel VerticalAlignment="Top">
-                            <TextBlock Text="浏览" Foreground="White" FontSize="22" FontWeight="Bold"/>
-                            <TextBlock Text="浏览知识库内容" Foreground="#AAFFFFFF" FontSize="13" Margin="0,6,0,0"/>
-                            <Border BorderBrush="#22FFFFFF" BorderThickness="0,0,0,1" Margin="0,20,0,0"/>
-                            <TextBlock Text="（功能待实现）" Foreground="#55FFFFFF" FontSize="12" Margin="0,20,0,0"/>
+                    <Grid Grid.Row="1" Margin="30,20">
+                        <!-- 已选中标签页时的文档查看器 -->
+                        <Grid x:Name="ActiveTabGrid">
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedBrowseTab}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <DockPanel Grid.Row="0" Margin="0,0,0,10">
+                                <TextBlock Text="{Binding SelectedBrowseTab.Title}" Foreground="White" FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding SelectedBrowseTab.FilePath}" Foreground="#66FFFFFF" FontSize="11" Margin="15,0,0,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                            </DockPanel>
+
+                            <TextBox x:Name="BrowseDocumentTextBox" Grid.Row="1"
+                                     Text="{Binding SelectedBrowseTab.Content, Mode=OneWay}"
+                                     IsReadOnly="True"
+                                     Focusable="False"
+                                     TextWrapping="Wrap"
+                                     Background="#E60A1017"
+                                     Foreground="#E6FFFFFF"
+                                     BorderBrush="#335596FC"
+                                     BorderThickness="1"
+                                     Padding="15"
+                                     FontFamily="Consolas, Microsoft YaHei UI, Arial"
+                                     FontSize="13.5"
+                                     VerticalScrollBarVisibility="Auto"
+                                     HorizontalScrollBarVisibility="Disabled"
+                                     SelectionChanged="BrowseDocumentTextBox_SelectionChanged"/>
+                        </Grid>
+
+                        <!-- 未打开任何文档时的占位提示 -->
+                        <StackPanel x:Name="NoTabPlaceholder" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedBrowseTab}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <TextBlock Text="未打开任何文档" Foreground="#55FFFFFF" FontSize="16" HorizontalAlignment="Center"/>
+                            <TextBlock Text="在左侧“文件”选项卡双击 XML 或 MD 文件以在此打开" Foreground="#33FFFFFF" FontSize="12" Margin="0,8,0,0" HorizontalAlignment="Center"/>
                         </StackPanel>
                     </Grid>
                 </Grid>
@@ -341,13 +552,164 @@
                 <TabItem.Header>
                     <TextBlock Text="检索" FontSize="11.5" Foreground="White"/>
                 </TabItem.Header>
-                <Grid Margin="30,25">
-                    <StackPanel VerticalAlignment="Top">
-                        <TextBlock Text="检索" Foreground="White" FontSize="22" FontWeight="Bold"/>
-                        <TextBlock Text="在知识库中进行语义检索" Foreground="#AAFFFFFF" FontSize="13" Margin="0,6,0,0"/>
+                <Grid Margin="30,25" Visibility="{Binding IsWikiOpened, Converter={StaticResource BoolToVis}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <StackPanel Grid.Row="0" VerticalAlignment="Top">
+                        <TextBlock Text="检索知识库" Foreground="White" FontSize="22" FontWeight="Bold"/>
+                        <TextBlock Text="并行检索余弦相似度（向量）和 BM25 词频（文本）结果" Foreground="#AAFFFFFF" FontSize="13" Margin="0,6,0,0"/>
                         <Border BorderBrush="#22FFFFFF" BorderThickness="0,0,0,1" Margin="0,20,0,0"/>
-                        <TextBlock Text="（功能待实现）" Foreground="#55FFFFFF" FontSize="12" Margin="0,20,0,0"/>
                     </StackPanel>
+
+                    <!-- 输入与操作区 -->
+                    <Grid Grid.Row="1" Margin="0,20,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                 Foreground="White" Background="#15FFFFFF" BorderBrush="#33FFFFFF" BorderThickness="1"
+                                 Padding="8,6" FontSize="13.5" KeyDown="SearchTextBox_KeyDown"/>
+                        <Button Grid.Column="1" Content="搜索" Command="{Binding SearchCommand}" Margin="10,0,0,0"
+                                Padding="15,6" Foreground="White" Background="#FF1F3854" BorderBrush="#FF2A3B55" BorderThickness="1"/>
+                    </Grid>
+
+                    <!-- 检索结果区 -->
+                    <Grid Grid.Row="2" Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="15"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- 左侧：语义向量余弦相似度检索结果 -->
+                        <Grid Grid.Column="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="余弦相似度检索 (语义向量)" Foreground="#FFFC96E5" FontSize="14" FontWeight="SemiBold"/>
+                            <ListBox x:Name="CosineListBox" Grid.Row="1" Margin="0,10,0,0"
+                                     Background="Transparent" BorderThickness="0"
+                                     ItemsSource="{Binding CosineResults}"
+                                     MouseDoubleClick="SearchResultListBox_MouseDoubleClick"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Setter Property="Padding" Value="0"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <Border x:Name="RootBorder" CornerRadius="6" Margin="0,0,0,8" Background="#10FFFFFF" BorderThickness="1" BorderBrush="#20FFFFFF">
+                                                        <ContentPresenter/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="RootBorder" Property="Background" Value="#20FFFFFF"/>
+                                                            <Setter TargetName="RootBorder" Property="BorderBrush" Value="#40FFFFFF"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter TargetName="RootBorder" Property="Background" Value="#25FFFFFF"/>
+                                                            <Setter TargetName="RootBorder" Property="BorderBrush" Value="#80FC96E5"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:SearchResultItemViewModel}">
+                                        <Border Padding="10">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="*"/>
+                                                </Grid.RowDefinitions>
+                                                <DockPanel Grid.Row="0">
+                                                    <TextBlock Text="📄" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding DisplayName}" Foreground="White" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                    <Border DockPanel.Dock="Right" Background="#33FC96E5" CornerRadius="4" Padding="6,2" HorizontalAlignment="Right">
+                                                        <TextBlock Text="{Binding Score, StringFormat='相似度: {0:F3}'}" Foreground="#FFFC96E5" FontSize="10" FontWeight="Bold"/>
+                                                    </Border>
+                                                </DockPanel>
+                                                <TextBlock Grid.Row="1" Text="{Binding Content}" Foreground="#AAFFFFFF" FontSize="11" Margin="0,6,0,0" TextWrapping="Wrap" MaxHeight="80" TextTrimming="CharacterEllipsis"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+
+                        <!-- 右侧：BM25文本词频检索结果 -->
+                        <Grid Grid.Column="2">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="BM25 词频检索 (关键词)" Foreground="#FF96FCFF" FontSize="14" FontWeight="SemiBold"/>
+                            <ListBox x:Name="Bm25ListBox" Grid.Row="1" Margin="0,10,0,0"
+                                     Background="Transparent" BorderThickness="0"
+                                     ItemsSource="{Binding Bm25Results}"
+                                     MouseDoubleClick="SearchResultListBox_MouseDoubleClick"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Setter Property="Padding" Value="0"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <Border x:Name="RootBorder" CornerRadius="6" Margin="0,0,0,8" Background="#10FFFFFF" BorderThickness="1" BorderBrush="#20FFFFFF">
+                                                        <ContentPresenter/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="RootBorder" Property="Background" Value="#20FFFFFF"/>
+                                                            <Setter TargetName="RootBorder" Property="BorderBrush" Value="#40FFFFFF"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter TargetName="RootBorder" Property="Background" Value="#25FFFFFF"/>
+                                                            <Setter TargetName="RootBorder" Property="BorderBrush" Value="#8096FCFF"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:SearchResultItemViewModel}">
+                                        <Border Padding="10">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="*"/>
+                                                </Grid.RowDefinitions>
+                                                <DockPanel Grid.Row="0">
+                                                    <TextBlock Text="📄" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding DisplayName}" Foreground="White" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                    <Border DockPanel.Dock="Right" Background="#3396FCFF" CornerRadius="4" Padding="6,2" HorizontalAlignment="Right">
+                                                        <TextBlock Text="{Binding Score, StringFormat='BM25得分: {0:F2}'}" Foreground="#FF96FCFF" FontSize="10" FontWeight="Bold"/>
+                                                    </Border>
+                                                </DockPanel>
+                                                <TextBlock Grid.Row="1" Text="{Binding Content}" Foreground="#AAFFFFFF" FontSize="11" Margin="0,6,0,0" TextWrapping="Wrap" MaxHeight="80" TextTrimming="CharacterEllipsis"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </Grid>
                 </Grid>
             </TabItem>
         </TabControl>

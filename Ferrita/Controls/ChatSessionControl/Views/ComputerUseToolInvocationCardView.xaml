@@ -1,0 +1,215 @@
+<UserControl x:Class="Ferrita.Controls.ChatSessionControl.Views.ComputerUseToolInvocationCardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:Ferrita.Controls.ChatSessionControl.Views"
+             mc:Ignorable="d"
+             Height="276.992"
+             ClipToBounds="False"
+             d:DesignWidth="700">
+    <UserControl.Resources>
+        <!-- 专为 Computer Use 系列工具设计的 Aero 玻璃背景色，美图自 ComputerUseTools.xaml -->
+        <RadialGradientBrush x:Key="ComputerUseToolCardBackgroundBrush"
+                             RadiusX="1.01282"
+                             RadiusY="0.917798"
+                             Center="0.499999,0.977751"
+                             GradientOrigin="0.499999,0.977751">
+            <RadialGradientBrush.GradientStops>
+                <GradientStop Color="#C5C9CACA" Offset="0"/>
+                <GradientStop Color="#34445E7C" Offset="0.988506"/>
+            </RadialGradientBrush.GradientStops>
+            <RadialGradientBrush.RelativeTransform>
+                <TransformGroup>
+                    <SkewTransform CenterX="0.499999" CenterY="0.977751" AngleX="5.23496" AngleY="0"/>
+                    <RotateTransform CenterX="0.499999" CenterY="0.977751" Angle="70.4939"/>
+                </TransformGroup>
+            </RadialGradientBrush.RelativeTransform>
+        </RadialGradientBrush>
+
+        <!-- 顶部强高光，美学参考自 ComputerUseTools.xaml -->
+        <RadialGradientBrush x:Key="ComputerUseToolCardTopLightBrush"
+                             RadiusX="1.18083"
+                             RadiusY="0.766861"
+                             Center="0.5,0.0499014"
+                             GradientOrigin="0.5,0.0499014">
+            <RadialGradientBrush.GradientStops>
+                <GradientStop Color="#4FFFFFFF" Offset="0"/>
+                <GradientStop Color="#1FFFFFFF" Offset="0.35249"/>
+                <GradientStop Color="#00FFFFFF" Offset="0.599617"/>
+            </RadialGradientBrush.GradientStops>
+        </RadialGradientBrush>
+
+        <!-- 八个停止点的高亮玻璃扫光，美学参考自 ComputerUseTools.xaml -->
+        <LinearGradientBrush x:Key="ComputerUseToolCardSheenBrush"
+                             StartPoint="0.0274611,0.229455"
+                             EndPoint="1.2125,0.229455">
+            <LinearGradientBrush.RelativeTransform>
+                <TransformGroup>
+                    <SkewTransform CenterX="0.0274611" CenterY="0.229455" AngleX="6.38225" AngleY="0"/>
+                    <RotateTransform CenterX="0.0274611" CenterY="0.229455" Angle="32.302"/>
+                </TransformGroup>
+            </LinearGradientBrush.RelativeTransform>
+            <LinearGradientBrush.GradientStops>
+                <GradientStop Color="#00FFFFFF" Offset="0"/>
+                <GradientStop Color="#2CFFFFFF" Offset="0.254789"/>
+                <GradientStop Color="#00FFFFFF" Offset="0.513412"/>
+                <GradientStop Color="#39FFFFFF" Offset="0.701149"/>
+                <GradientStop Color="#00FFFFFF" Offset="0.720307"/>
+                <GradientStop Color="#33FFFFFF" Offset="0.856322"/>
+                <GradientStop Color="#03FFFFFF" Offset="0.89272"/>
+                <GradientStop Color="#00FFFFFF" Offset="0.988506"/>
+            </LinearGradientBrush.GradientStops>
+        </LinearGradientBrush>
+
+        <SolidColorBrush x:Key="ComputerUseToolBrightTextBrush" Color="#F4FBFF"/>
+        <SolidColorBrush x:Key="ComputerUseToolSoftTextBrush" Color="#D9E5EB"/>
+        <SolidColorBrush x:Key="ComputerUseToolMutedTextBrush" Color="#B8C5CD"/>
+        <SolidColorBrush x:Key="ComputerUseToolCoolGrayTextBrush" Color="#AAB8C2"/>
+        <DropShadowEffect x:Key="ComputerUseToolTextShadowEffect"
+                          Color="#1A2D3C"
+                          BlurRadius="3"
+                          ShadowDepth="1"
+                          Opacity="0.45"/>
+    </UserControl.Resources>
+
+    <!-- 最外层 Grid，不进行任何裁剪以保证装饰图能够自由超出背景卡片 -->
+    <Grid ClipToBounds="False">
+        <!-- 1. 背景卡片层：固定高度 187.5，宽度自适应 -->
+        <Border Height="187.5"
+                VerticalAlignment="Top"
+                Margin="33.4565,46.8921,33.4565,0"
+                CornerRadius="8"
+                BorderBrush="#6793F2FF"
+                BorderThickness="1"
+                Background="{StaticResource ComputerUseToolCardBackgroundBrush}">
+            <Grid ClipToBounds="True">
+                <!-- 圆角内的扫光与高光特效 -->
+                <Border CornerRadius="7"
+                        Background="{StaticResource ComputerUseToolCardTopLightBrush}"
+                        IsHitTestVisible="False"/>
+                <Border CornerRadius="7"
+                        Background="{StaticResource ComputerUseToolCardSheenBrush}"
+                        IsHitTestVisible="False"/>
+
+                <!-- 内层内容布局，左边腾出足够宽度避开悬浮大图 -->
+                <Grid Margin="18,16,18,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="220"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <!-- 工具名称 -->
+                        <TextBlock Text="{Binding State.ToolDisplayName}"
+                                   FontFamily="Microsoft YaHei UI, Segoe UI"
+                                   FontSize="21"
+                                   FontWeight="Bold"
+                                   Foreground="{StaticResource ComputerUseToolBrightTextBrush}"
+                                   Effect="{StaticResource ComputerUseToolTextShadowEffect}"
+                                   TextWrapping="Wrap"/>
+                        
+                        <!-- 功能描述 -->
+                        <TextBlock Margin="0,4,0,0"
+                                   Text="{Binding Description}"
+                                   FontFamily="Segoe UI, Microsoft YaHei UI"
+                                   FontSize="12"
+                                   Foreground="{StaticResource ComputerUseToolSoftTextBrush}"
+                                   Effect="{StaticResource ComputerUseToolTextShadowEffect}"
+                                   TextWrapping="Wrap"/>
+                        
+                        <!-- 运行状态信息 -->
+                        <TextBlock Margin="0,5,0,0"
+                                   FontFamily="Consolas, Microsoft YaHei UI"
+                                   FontSize="11"
+                                   Foreground="{StaticResource ComputerUseToolMutedTextBrush}"
+                                   Effect="{StaticResource ComputerUseToolTextShadowEffect}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="{DynamicResource ToolInvocation.Status.ReceivingParameters}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding State.IsInvocationClosed}" Value="True">
+                                            <Setter Property="Text" Value="{DynamicResource ToolInvocation.Status.ParametersReceived}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding State.HasToolResult}" Value="True">
+                                            <Setter Property="Text" Value="{DynamicResource ToolInvocation.Status.ToolResultReceived}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <!-- 执行进度条 -->
+                        <Grid Margin="0,8,0,0">
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding State.HasToolProgress}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <StackPanel>
+                                <TextBlock Text="{Binding State.ToolProgressStatusText}"
+                                           FontFamily="Microsoft YaHei UI, Segoe UI"
+                                           FontSize="12"
+                                           Foreground="{StaticResource ComputerUseToolBrightTextBrush}"
+                                           Effect="{StaticResource ComputerUseToolTextShadowEffect}"
+                                           TextWrapping="Wrap"/>
+                                <ProgressBar Margin="0,4,0,0"
+                                             Height="6"
+                                             Minimum="0"
+                                             Maximum="100"
+                                             Foreground="#B493F2FF"
+                                             Background="#24000000"
+                                             BorderBrush="#4493F2FF"
+                                             Value="{Binding State.ToolProgressValue, Mode=OneWay}"
+                                             IsIndeterminate="{Binding State.IsToolProgressIndeterminate, Mode=OneWay}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- 执行结果展示 -->
+                        <Grid Margin="0,8,0,0">
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding State.HasToolResult}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <TextBlock Text="{Binding State.ToolResultContent}"
+                                       Foreground="{StaticResource ComputerUseToolBrightTextBrush}"
+                                       FontFamily="Consolas, Microsoft YaHei UI"
+                                       FontSize="12"
+                                       Effect="{StaticResource ComputerUseToolTextShadowEffect}"
+                                       TextWrapping="Wrap"
+                                       MaxHeight="60"/>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- 2. 溢出装饰大图：放在 Border 外侧，不受背景层裁剪，完美溢出边界 -->
+        <Image Source="{Binding ComputerUseIconPath}"
+               Width="412"
+               Height="377"
+               HorizontalAlignment="Left"
+               VerticalAlignment="Top"
+               Stretch="Uniform"
+               Opacity="0.32"
+               RenderOptions.BitmapScalingMode="HighQuality"
+               IsHitTestVisible="False">
+            <Image.RenderTransform>
+                <TransformGroup>
+                    <MatrixTransform Matrix="0.643727,-0.0832679,0.0832679,0.643727,-0.000575359,34.3065"/>
+                </TransformGroup>
+            </Image.RenderTransform>
+        </Image>
+    </Grid>
+</UserControl>

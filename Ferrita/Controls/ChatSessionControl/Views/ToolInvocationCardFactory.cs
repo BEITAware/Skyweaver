@@ -95,6 +95,40 @@ namespace Ferrita.Controls.ChatSessionControl.Views
 
         public string IconPath { get; }
 
+        public string ComputerUseIconPath
+        {
+            get
+            {
+                var toolName = State.ToolName;
+                if (string.IsNullOrEmpty(toolName)) return IconPath;
+
+                // 键盘相关
+                if (toolName.Contains("Key", StringComparison.OrdinalIgnoreCase) || 
+                    toolName.Contains("Type", StringComparison.OrdinalIgnoreCase) ||
+                    toolName.Contains("Press", StringComparison.OrdinalIgnoreCase) ||
+                    toolName.Contains("Hold", StringComparison.OrdinalIgnoreCase) ||
+                    toolName.Contains("Release", StringComparison.OrdinalIgnoreCase) ||
+                    toolName.Contains("TextInput", StringComparison.OrdinalIgnoreCase))
+                {
+                    return "pack://application:,,,/Resources/Keyboard.png";
+                }
+                
+                // 鼠标相关
+                if (toolName.Contains("Click", StringComparison.OrdinalIgnoreCase) || 
+                    toolName.Contains("Drag", StringComparison.OrdinalIgnoreCase) ||
+                    toolName.Contains("Move", StringComparison.OrdinalIgnoreCase) ||
+                    toolName.Contains("Scroll", StringComparison.OrdinalIgnoreCase) ||
+                    toolName.Contains("Hover", StringComparison.OrdinalIgnoreCase) ||
+                    toolName.Contains("Mouse", StringComparison.OrdinalIgnoreCase))
+                {
+                    return "pack://application:,,,/Resources/MouseClick.png";
+                }
+
+                // 其他通用
+                return "pack://application:,,,/Resources/ComputerUse.png";
+            }
+        }
+
         public ObservableCollection<ToolInvocationCardFieldViewModel> Fields { get; }
 
         public bool HasFields => Fields.Count > 0;
@@ -233,6 +267,41 @@ namespace Ferrita.Controls.ChatSessionControl.Views
                 .ToArray();
 
             return new WebBrowseToolInvocationCardView
+            {
+                DataContext = new ToolInvocationCardViewModel(
+                    context.State,
+                    context.EffectiveDefinition.Description,
+                    context.IconPath,
+                    fieldViewModels)
+            };
+        }
+
+        public static FrameworkElement CreateComputerUse(
+            FerritaToolInvocationPresentationContext context,
+            IEnumerable<ToolInvocationCardFieldDefinition>? fields = null)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            context.State.EnsureParameterDefinitions(context.EffectiveDefinition.Parameters);
+
+            var fieldViewModels = (fields ?? Array.Empty<ToolInvocationCardFieldDefinition>())
+                .Where(field => !string.IsNullOrWhiteSpace(field.ParameterName))
+                .Select(field =>
+                {
+                    var definition = context.EffectiveDefinition.Parameters.FirstOrDefault(parameter =>
+                        string.Equals(parameter.Name, field.ParameterName, StringComparison.OrdinalIgnoreCase));
+                    var parameterState = context.State.GetOrCreateParameterState(field.ParameterName, definition);
+                    var toolName = context.EffectiveDefinition.Name;
+                    return new ToolInvocationCardFieldViewModel(
+                        toolName,
+                        field.ParameterName,
+                        field.Label,
+                        parameterState,
+                        field.EmptyValueText);
+                })
+                .ToArray();
+
+            return new ComputerUseToolInvocationCardView
             {
                 DataContext = new ToolInvocationCardViewModel(
                     context.State,
