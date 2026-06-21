@@ -1,0 +1,16 @@
+SetWindowsHookEx
+UnhookWindowsHookEx
+CallNextHookEx
+KBDLLHOOKSTRUCT
+MSLLHOOKSTRUCT
+GetModuleHandle
+GetAsyncKeyState
+LRESULT
+WPARAM
+LPARAM
+PostThreadMessage
+GetMessage
+TranslateMessage
+DispatchMessage
+GetCurrentThreadId
+MSG

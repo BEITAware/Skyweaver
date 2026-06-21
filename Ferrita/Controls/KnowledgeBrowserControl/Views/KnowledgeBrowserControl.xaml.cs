@@ -1,3 +1,4 @@
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -12,14 +13,107 @@ namespace Ferrita.Controls.KnowledgeBrowserControl.Views
     public partial class KnowledgeBrowserControl : UserControl
     {
         private KnowledgeBrowserControlViewModel ViewModel => (KnowledgeBrowserControlViewModel)DataContext;
+        private BrowseTabItem? _lastSubscribedTab;
 
         public KnowledgeBrowserControl()
         {
             InitializeComponent();
             DataContext = new KnowledgeBrowserControlViewModel();
 
-            // 监听选中索引变化以更新标签页高亮
-            Loaded += (_, _) => UpdateBrowseTabHighlight();
+            Loaded += (_, _) =>
+            {
+                ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+                ViewModel.BrowseTabs.CollectionChanged += (s, e) => UpdateBrowseTabHighlight();
+                UpdateBrowseTabHighlight();
+            };
+        }
+
+        private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(KnowledgeBrowserControlViewModel.SelectedBrowseTabIndex))
+            {
+                UpdateBrowseTabHighlight();
+            }
+            else if (e.PropertyName == nameof(KnowledgeBrowserControlViewModel.SelectedBrowseTab))
+            {
+                if (_lastSubscribedTab != null)
+                {
+                    _lastSubscribedTab.PropertyChanged -= ActiveTab_PropertyChanged;
+                }
+
+                _lastSubscribedTab = ViewModel.SelectedBrowseTab;
+
+                if (_lastSubscribedTab != null)
+                {
+                    _lastSubscribedTab.PropertyChanged += ActiveTab_PropertyChanged;
+                    ScrollActiveTabToPosition();
+                }
+            }
+        }
+
+        private void ActiveTab_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(BrowseTabItem.ScrollTrigger))
+            {
+                ScrollActiveTabToPosition();
+            }
+        }
+
+        /// <summary>
+        /// 双击 Wiki 列表项以打开该 Wiki
+        /// </summary>
+        private void WikiListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is ListBox listBox && listBox.SelectedItem is WikiItemViewModel wiki)
+            {
+                ViewModel.OpenWiki(wiki);
+            }
+        }
+
+        /// <summary>
+        /// 双击文件树节点以打开文档
+        /// </summary>
+        private void TreeView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is TreeView treeView && treeView.SelectedItem is FileSystemNodeViewModel node)
+            {
+                if (!node.IsDirectory)
+                {
+                    string ext = System.IO.Path.GetExtension(node.FullPath).ToLower();
+                    if (ext == ".xml" || ext == ".md")
+                    {
+                        ViewModel.OpenDocumentTab(node.FullPath);
+                        e.Handled = true;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 双击检索结果列表项定位并滚动到相应文档区域
+        /// </summary>
+        private void SearchResultListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is ListBox listBox && listBox.SelectedItem is SearchResultItemViewModel item)
+            {
+                ViewModel.OpenSearchResult(item);
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
+        /// 在检索输入框按下 Enter 键触发搜索
+        /// </summary>
+        private void SearchTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                if (ViewModel.SearchCommand.CanExecute(null))
+                {
+                    ViewModel.SearchCommand.Execute(null);
+                    e.Handled = true;
+                }
+            }
         }
 
         /// <summary>
@@ -63,6 +157,39 @@ namespace Ferrita.Controls.KnowledgeBrowserControl.Views
                     }
                 }
             }), System.Windows.Threading.DispatcherPriority.Render);
+        }
+
+        /// <summary>
+        /// 限制文本框选中以防止高亮和用户选定
+        /// </summary>
+        private void BrowseDocumentTextBox_SelectionChanged(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox && textBox.SelectionLength > 0)
+            {
+                textBox.SelectionLength = 0;
+            }
+        }
+
+        /// <summary>
+        /// 将文档浏览器定位到选中搜索结果的偏移位置并滚动使其可见
+        /// </summary>
+        private void ScrollActiveTabToPosition()
+        {
+            if (ViewModel.SelectedBrowseTab == null || BrowseDocumentTextBox == null) return;
+
+            var tab = ViewModel.SelectedBrowseTab;
+            if (tab.ScrollToOffset >= 0)
+            {
+                BrowseDocumentTextBox.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    int start = Math.Min(tab.ScrollToOffset, BrowseDocumentTextBox.Text.Length);
+                    int lineIndex = BrowseDocumentTextBox.GetLineIndexFromCharacterIndex(start);
+                    if (lineIndex >= 0)
+                    {
+                        BrowseDocumentTextBox.ScrollToLine(lineIndex);
+                    }
+                }), System.Windows.Threading.DispatcherPriority.Background);
+            }
         }
 
         /// <summary>
