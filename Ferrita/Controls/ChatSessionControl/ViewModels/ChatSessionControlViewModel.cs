@@ -962,11 +962,11 @@ namespace Ferrita.Controls.ChatSessionControl.ViewModels
         {
             try
             {
-                var diagnostics = await Task.Run(() =>
+                var diagnostics = await Task.Run(async () =>
                 {
                     var compilationResult = _flowBindingService.CompileBinding(sessionModel.FlowBinding);
                     var validationSummary = BuildSessionFlowValidationSummary(sessionModel, compilationResult);
-                    var snapshot = _contextWindowService.CreateSnapshot(sessionModel, compilationResult);
+                    var snapshot = await _contextWindowService.CreateSnapshotAsync(sessionModel, compilationResult).ConfigureAwait(false);
                     return new InitialSessionDiagnostics(validationSummary, snapshot);
                 }).ConfigureAwait(false);
 
@@ -1075,11 +1075,11 @@ namespace Ferrita.Controls.ChatSessionControl.ViewModels
 
             if (refreshContextWindow)
             {
-                RefreshContextWindowStatusFromBackend();
+                _ = RefreshContextWindowStatusFromBackendAsync();
             }
         }
 
-        private void RefreshContextWindowStatusFromBackend()
+        private async Task RefreshContextWindowStatusFromBackendAsync()
         {
             if (_sessionModel == null)
             {
@@ -1089,7 +1089,8 @@ namespace Ferrita.Controls.ChatSessionControl.ViewModels
 
             try
             {
-                ApplyContextWindowSnapshot(_contextWindowService.CreateSnapshot(_sessionModel));
+                var snapshot = await _contextWindowService.CreateSnapshotAsync(_sessionModel).ConfigureAwait(false);
+                ApplyContextWindowSnapshot(snapshot);
             }
             catch (Exception ex)
             {

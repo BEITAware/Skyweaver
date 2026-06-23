@@ -106,6 +106,24 @@ namespace Ferrita.Controls.LanguageModelConfigurationControl.Services
                 {
                     reasoningText = prop.GetValue(response) as string;
                 }
+
+                if (string.IsNullOrEmpty(reasoningText))
+                {
+                    // 回退：通过 ModelReaderWriter 序列化获取 choices[0].message.reasoning_content
+                    var data = System.ClientModel.Primitives.ModelReaderWriter.Write(response);
+                    using var doc = JsonDocument.Parse(data);
+                    if (doc.RootElement.TryGetProperty("choices", out var choicesProp) &&
+                        choicesProp.ValueKind == JsonValueKind.Array &&
+                        choicesProp.GetArrayLength() > 0)
+                    {
+                        var firstChoice = choicesProp[0];
+                        if (firstChoice.TryGetProperty("message", out var messageProp) &&
+                            messageProp.TryGetProperty("reasoning_content", out var reasoningProp))
+                        {
+                            reasoningText = reasoningProp.GetString();
+                        }
+                    }
+                }
             }
             catch {}
 
@@ -469,14 +487,41 @@ namespace Ferrita.Controls.LanguageModelConfigurationControl.Services
                                     }
                                     else
                                     {
-                                        var rawUri = block.ResourcePath ?? block.Content;
-                                        if (!string.IsNullOrWhiteSpace(rawUri))
+                                        var path = block.ResourcePath ?? block.Content;
+                                        if (!string.IsNullOrWhiteSpace(path) &&
+                                            File.Exists(path) &&
+                                            LanguageModelMediaResourcePolicy.CanReadLocalMediaFile(path, block.Kind, block.MediaType, out var mediaType, out _))
                                         {
-                                            contentParts.Add(new
+                                            try
                                             {
-                                                type = "image",
-                                                image = rawUri
-                                            });
+                                                var localBytes = File.ReadAllBytes(path);
+                                                var base64 = Convert.ToBase64String(localBytes);
+                                                contentParts.Add(new
+                                                {
+                                                    type = "image",
+                                                    image = $"data:{mediaType};base64,{base64}"
+                                                });
+                                            }
+                                            catch
+                                            {
+                                                contentParts.Add(new
+                                                {
+                                                    type = "image",
+                                                    image = path
+                                                });
+                                            }
+                                        }
+                                        else
+                                        {
+                                            var rawUri = block.ResourcePath ?? block.Content;
+                                            if (!string.IsNullOrWhiteSpace(rawUri))
+                                            {
+                                                contentParts.Add(new
+                                                {
+                                                    type = "image",
+                                                    image = rawUri
+                                                });
+                                            }
                                         }
                                     }
                                     break;
@@ -705,6 +750,22 @@ namespace Ferrita.Controls.LanguageModelConfigurationControl.Services
                 if (prop != null)
                 {
                     return prop.GetValue(update) as string ?? string.Empty;
+                }
+
+                // 回退：通过 ModelReaderWriter 获取 SerializedAdditionalRawData 中的 reasoning_content
+                var internalChoiceDeltaProp = typeof(StreamingChatCompletionUpdate).GetProperty("InternalChoiceDelta", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (internalChoiceDeltaProp != null)
+                {
+                    var choiceDelta = internalChoiceDeltaProp.GetValue(update);
+                    if (choiceDelta != null)
+                    {
+                        var data = System.ClientModel.Primitives.ModelReaderWriter.Write(choiceDelta);
+                        using var doc = JsonDocument.Parse(data);
+                        if (doc.RootElement.TryGetProperty("reasoning_content", out var reasoningProp))
+                        {
+                            return reasoningProp.GetString() ?? string.Empty;
+                        }
+                    }
                 }
             }
             catch {}

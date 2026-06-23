@@ -696,14 +696,41 @@ namespace Ferrita.Controls.LanguageModelConfigurationControl.Services
                             }
                             else
                             {
-                                var rawUri = block.ResourcePath ?? block.Content;
-                                if (!string.IsNullOrWhiteSpace(rawUri))
+                                var path = block.ResourcePath ?? block.Content;
+                                if (!string.IsNullOrWhiteSpace(path) &&
+                                    File.Exists(path) &&
+                                    LanguageModelMediaResourcePolicy.CanReadLocalMediaFile(path, block.Kind, block.MediaType, out var mediaType, out _))
                                 {
-                                    blocks.Add(new
+                                    try
                                     {
-                                        type = "input_image",
-                                        image_url = rawUri
-                                    });
+                                        var localBytes = File.ReadAllBytes(path);
+                                        var base64 = Convert.ToBase64String(localBytes);
+                                        blocks.Add(new
+                                        {
+                                            type = "input_image",
+                                            image_url = $"data:{mediaType};base64,{base64}"
+                                        });
+                                    }
+                                    catch
+                                    {
+                                        blocks.Add(new
+                                        {
+                                            type = "input_image",
+                                            image_url = path
+                                        });
+                                    }
+                                }
+                                else
+                                {
+                                    var rawUri = block.ResourcePath ?? block.Content;
+                                    if (!string.IsNullOrWhiteSpace(rawUri))
+                                    {
+                                        blocks.Add(new
+                                        {
+                                            type = "input_image",
+                                            image_url = rawUri
+                                        });
+                                    }
                                 }
                             }
                             break;
