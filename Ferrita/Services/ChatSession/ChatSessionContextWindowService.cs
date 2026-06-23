@@ -5,6 +5,7 @@ using Ferrita.Controls.LanguageModelConfigurationControl.Services;
 using Ferrita.Controls.WorkflowEditorControl.Models;
 using Ferrita.Controls.WorkflowEditorControl.Services;
 using Ferrita.Models.ChatSession;
+using Ferrita.Services.AgentLoop;
 
 namespace Ferrita.Services.ChatSession
 {
@@ -40,26 +41,32 @@ namespace Ferrita.Services.ChatSession
         private readonly ChatSessionFlowBindingService _flowBindingService;
         private readonly AgentConfigurationRepository _agentConfigurationRepository;
         private readonly IAgentLanguageModelResolver _languageModelResolver;
+        private readonly AgentLoopTokenCounter _tokenCounter;
 
         public ChatSessionContextWindowService()
             : this(
                 new ChatSessionFlowBindingService(),
                 new AgentConfigurationRepository(new AgentConfigurationPathProvider()),
-                new AgentLanguageModelResolver())
+                new AgentLanguageModelResolver(),
+                new AgentLoopTokenCounter())
         {
         }
 
         public ChatSessionContextWindowService(
             ChatSessionFlowBindingService flowBindingService,
             AgentConfigurationRepository agentConfigurationRepository,
-            IAgentLanguageModelResolver languageModelResolver)
+            IAgentLanguageModelResolver languageModelResolver,
+            AgentLoopTokenCounter tokenCounter)
         {
             _flowBindingService = flowBindingService ?? throw new ArgumentNullException(nameof(flowBindingService));
             _agentConfigurationRepository = agentConfigurationRepository ?? throw new ArgumentNullException(nameof(agentConfigurationRepository));
             _languageModelResolver = languageModelResolver ?? throw new ArgumentNullException(nameof(languageModelResolver));
+            _tokenCounter = tokenCounter ?? throw new ArgumentNullException(nameof(tokenCounter));
         }
 
-        public ChatSessionContextWindowSnapshot CreateSnapshot(ChatSessionModel session)
+        public async Task<ChatSessionContextWindowSnapshot> CreateSnapshotAsync(
+            ChatSessionModel session,
+            CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(session);
 
@@ -84,18 +91,37 @@ namespace Ferrita.Services.ChatSession
             }
 
             var projectedMessages = ChatSessionTurnHistoryBuilder.BuildForNextTurn(session, currentUserText: null);
+            var compactionFilePath = ChatSessionResourceLayout.GetCompactionFilePath(session);
+
+            int estimatedTokenCount = 0;
+            try
+            {
+                var tokenCountResult = await _tokenCounter.CountAsync(
+                    window.Model,
+                    projectedMessages,
+                    compactionFilePath,
+                    progressCallback: null,
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
+                estimatedTokenCount = tokenCountResult.TokenCount;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[ChatSessionContextWindowService] Failed to count tokens: {ex.Message}");
+            }
+
             return new ChatSessionContextWindowSnapshot
             {
-                EstimatedTokenCount = 0,
+                EstimatedTokenCount = estimatedTokenCount,
                 ContextWindowTokens = window.ContextWindowTokens,
                 AgentName = window.AgentName,
                 ModelName = window.ModelName
             };
         }
 
-        public ChatSessionContextWindowSnapshot CreateSnapshot(
+        public async Task<ChatSessionContextWindowSnapshot> CreateSnapshotAsync(
             ChatSessionModel session,
-            SessionFlowCompilationResult compilationResult)
+            SessionFlowCompilationResult compilationResult,
+            CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(session);
             ArgumentNullException.ThrowIfNull(compilationResult);
@@ -120,9 +146,27 @@ namespace Ferrita.Services.ChatSession
             }
 
             var projectedMessages = ChatSessionTurnHistoryBuilder.BuildForNextTurn(session, currentUserText: null);
+            var compactionFilePath = ChatSessionResourceLayout.GetCompactionFilePath(session);
+
+            int estimatedTokenCount = 0;
+            try
+            {
+                var tokenCountResult = await _tokenCounter.CountAsync(
+                    window.Model,
+                    projectedMessages,
+                    compactionFilePath,
+                    progressCallback: null,
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
+                estimatedTokenCount = tokenCountResult.TokenCount;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[ChatSessionContextWindowService] Failed to count tokens: {ex.Message}");
+            }
+
             return new ChatSessionContextWindowSnapshot
             {
-                EstimatedTokenCount = 0,
+                EstimatedTokenCount = estimatedTokenCount,
                 ContextWindowTokens = window.ContextWindowTokens,
                 AgentName = window.AgentName,
                 ModelName = window.ModelName
@@ -177,7 +221,8 @@ namespace Ferrita.Services.ChatSession
             return new ContextWindowCandidate(
                 model.EffectiveContextWindowTokens,
                 string.IsNullOrWhiteSpace(nodeTitle) ? agent.DisplayNameOrFallback : nodeTitle.Trim(),
-                GetModelDisplayName(model));
+                GetModelDisplayName(model),
+                model);
         }
 
         private Dictionary<string, AgentDefinition> LoadAgentMap()
@@ -212,6 +257,7 @@ namespace Ferrita.Services.ChatSession
         private sealed record ContextWindowCandidate(
             int ContextWindowTokens,
             string AgentName,
-            string ModelName);
+            string ModelName,
+            LanguageModelDefinition Model);
     }
 }

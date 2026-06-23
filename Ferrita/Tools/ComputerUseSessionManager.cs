@@ -472,6 +472,36 @@ namespace Ferrita.Tools
             return string.Empty;
         }
 
+        private static bool AreElementsEqual(AutomationElement? el1, AutomationElement? el2)
+        {
+            if (el1 == null || el2 == null) return false;
+            try
+            {
+                if (el1.Equals(el2)) return true;
+            }
+            catch
+            {
+                // 忽略异常
+            }
+
+            try
+            {
+                // 备用比较：边界和类型、名称相同
+                var r1 = el1.BoundingRectangle;
+                var r2 = el2.BoundingRectangle;
+                if (r1 == r2 && el1.ControlType == el2.ControlType && el1.Name == el2.Name)
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                // 忽略异常
+            }
+
+            return false;
+        }
+
         public static string CaptureAndSaveScreenshot(string sessionId)
         {
             if (!s_sessions.TryGetValue(sessionId, out var session))
@@ -500,11 +530,31 @@ namespace Ferrita.Tools
             if (!session.IsAssistiveEnabled)
             {
                 session.ScreenshotCounter++;
-                return $"<FerritaPreservedContent><Image Path=\"{System.Security.SecurityElement.Escape(fullPath)}\" /></FerritaPreservedContent>";
+                
+                string focusText = "";
+                try
+                {
+                    using var automation = new UIA3Automation();
+                    var focused = automation.FocusedElement();
+                    if (focused != null)
+                    {
+                        string name = System.Security.SecurityElement.Escape(GetNameSafe(focused));
+                        string controlType = System.Security.SecurityElement.Escape(GetControlTypeSafeString(focused));
+                        string automationId = System.Security.SecurityElement.Escape(GetAutomationIdSafe(focused));
+                        focusText = $"\n<FocusedElement>\n  <ControlType>{controlType}</ControlType>\n  <Name>{name}</Name>\n  <AutomationId>{automationId}</AutomationId>\n</FocusedElement>\nCurrently focused element: (ControlType: {controlType}, Name: \"{name}\", AutomationId: \"{automationId}\")\n";
+                    }
+                }
+                catch
+                {
+                    // 忽略获取焦点属性异常
+                }
+
+                return $"{focusText}<FerritaPreservedContent><Image Path=\"{System.Security.SecurityElement.Escape(fullPath)}\" /></FerritaPreservedContent>";
             }
 
             // 辅助模式：遍历并标注元素
             var targetElements = new List<AutomationElement>();
+            AutomationElement? focusedElement = null;
             try
             {
                 using var cts = new CancellationTokenSource(3000);
@@ -513,6 +563,8 @@ namespace Ferrita.Tools
                 using var automation = new UIA3Automation();
                 var desktop = automation.GetDesktop();
                 TraverseElements(desktop, bounds, targetElements, 0, token);
+
+                focusedElement = automation.FocusedElement();
             }
             catch (Exception ex)
             {
@@ -522,11 +574,17 @@ namespace Ferrita.Tools
             // 更新 session.LatestElements
             session.LatestElements.Clear();
             int id = 1;
+            int focusedId = -1;
             foreach (var el in targetElements)
             {
                 var rect = GetBoundingRectangleSafe(el);
                 if (rect.Width <= 0 || rect.Height <= 0) continue;
                 session.LatestElements[id] = rect;
+
+                if (focusedElement != null && AreElementsEqual(el, focusedElement))
+                {
+                    focusedId = id;
+                }
                 id++;
             }
 
@@ -610,6 +668,10 @@ namespace Ferrita.Tools
                 xmlBuilder.AppendLine($"    <BoundingRectangleY1>{y1}</BoundingRectangleY1>");
                 xmlBuilder.AppendLine($"    <BoundingRectangleX2>{x2}</BoundingRectangleX2>");
                 xmlBuilder.AppendLine($"    <BoundingRectangleY2>{y2}</BoundingRectangleY2>");
+                if (xmlId == focusedId)
+                {
+                    xmlBuilder.AppendLine("    <Focused>true</Focused>");
+                }
                 xmlBuilder.AppendLine("  </Element>");
 
                 xmlId++;
@@ -618,7 +680,29 @@ namespace Ferrita.Tools
 
             string elementsXml = xmlBuilder.ToString();
 
-            return $"{elementsXml}\n<FerritaPreservedContent><Image Path=\"{System.Security.SecurityElement.Escape(fullPath)}\" /></FerritaPreservedContent>\n<FerritaPreservedContent><Image Path=\"{System.Security.SecurityElement.Escape(labeledFullPath)}\" /></FerritaPreservedContent>";
+            string focusedElementText = "";
+            if (focusedElement != null)
+            {
+                string name = System.Security.SecurityElement.Escape(GetNameSafe(focusedElement));
+                string controlType = System.Security.SecurityElement.Escape(GetControlTypeSafeString(focusedElement));
+                string automationId = System.Security.SecurityElement.Escape(GetAutomationIdSafe(focusedElement));
+
+                focusedElementText = $"\n<FocusedElement>\n" +
+                                     (focusedId != -1 ? $"  <Id>{focusedId}</Id>\n" : "") +
+                                     $"  <ControlType>{controlType}</ControlType>\n" +
+                                     $"  <Name>{name}</Name>\n" +
+                                     $"  <AutomationId>{automationId}</AutomationId>\n" +
+                                     $"</FocusedElement>\n" +
+                                     $"Currently focused element: " +
+                                     (focusedId != -1 ? $"Element #{focusedId} " : "") +
+                                     $"(ControlType: {controlType}, Name: \"{name}\", AutomationId: \"{automationId}\")\n";
+            }
+            else
+            {
+                focusedElementText = "\nCurrently focused element: None/Unknown\n";
+            }
+
+            return $"{elementsXml}\n{focusedElementText}\n<FerritaPreservedContent><Image Path=\"{System.Security.SecurityElement.Escape(fullPath)}\" /></FerritaPreservedContent>\n<FerritaPreservedContent><Image Path=\"{System.Security.SecurityElement.Escape(labeledFullPath)}\" /></FerritaPreservedContent>";
         }
 
         public static Bitmap ScaleImage(Bitmap source, int targetWidth, int targetHeight)

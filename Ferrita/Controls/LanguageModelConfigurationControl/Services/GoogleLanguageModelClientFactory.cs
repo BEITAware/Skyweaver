@@ -650,7 +650,11 @@ namespace Ferrita.Controls.LanguageModelConfigurationControl.Services
             IReadOnlyList<LanguageModelChatMessage> messages,
             CancellationToken cancellationToken)
         {
-            var payload = await BuildRequestPayloadAsync(settings, messages, null, cancellationToken).ConfigureAwait(false);
+            var generateContentPayload = await BuildRequestPayloadAsync(settings, messages, null, cancellationToken).ConfigureAwait(false);
+            var payload = new GoogleCountTokensRequest
+            {
+                GenerateContentRequest = generateContentPayload
+            };
             var action = $"{NormalizeModelIdForPath(settings.ModelId)}:countTokens";
             var request = new HttpRequestMessage(HttpMethod.Post, BuildApiUri(settings, $"v1beta/models/{action}"));
             request.Headers.Add("x-goog-api-key", settings.ApiKey);
@@ -1677,6 +1681,12 @@ namespace Ferrita.Controls.LanguageModelConfigurationControl.Services
             string FileUri,
             string MediaType,
             string? Name);
+
+        private sealed class GoogleCountTokensRequest
+        {
+            [JsonPropertyName("generateContentRequest")]
+            public GoogleGenerateContentRequest? GenerateContentRequest { get; init; }
+        }
 
         private sealed class GoogleGenerateContentRequest
         {

@@ -856,8 +856,7 @@ namespace Ferrita.Services.AgentLoop
                             currentTokenCount = 0;
                         }
 
-                        bool isCompactionPreconditionMet = !request.MinCompactionEnabled || isMinCompacted;
-                        if (isCompactionPreconditionMet && currentTokenCount >= triggerTokenCount)
+                        if (currentTokenCount >= triggerTokenCount)
                         {
                             isMinCompacted = false;
 

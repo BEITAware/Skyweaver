@@ -108,7 +108,9 @@ namespace Ferrita.Controls.ChatSessionControl.Views
                     toolName.Contains("Press", StringComparison.OrdinalIgnoreCase) ||
                     toolName.Contains("Hold", StringComparison.OrdinalIgnoreCase) ||
                     toolName.Contains("Release", StringComparison.OrdinalIgnoreCase) ||
-                    toolName.Contains("TextInput", StringComparison.OrdinalIgnoreCase))
+                    toolName.Contains("TextInput", StringComparison.OrdinalIgnoreCase) ||
+                    toolName.Contains("WriteText", StringComparison.OrdinalIgnoreCase) ||
+                    toolName.Contains("Write", StringComparison.OrdinalIgnoreCase))
                 {
                     return "pack://application:,,,/Resources/Keyboard.png";
                 }

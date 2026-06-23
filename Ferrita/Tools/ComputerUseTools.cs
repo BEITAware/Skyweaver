@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -869,11 +870,11 @@ namespace Ferrita.Tools
 
         private static readonly FerritaToolDefinition s_definition = new(
             ToolName,
-            "向操作系统键盘仿真发送输入的纯文本，会自动处理转义的换行字符。",
+            "向操作系统剪贴板写入纯文本并发送 Ctrl+V 组合键将其粘贴至当前焦点，避免中文等输入法问题。",
             "Device",
             [
                 new FerritaToolParameterDefinition("SessionId", "会话的唯一标识 ID。", FerritaToolParameterType.String, isRequired: true),
-                new FerritaToolParameterDefinition("TextContent", "要录入输入的文本内容。", FerritaToolParameterType.String, isRequired: true)
+                new FerritaToolParameterDefinition("TextContent", "要粘贴的文本内容。", FerritaToolParameterType.String, isRequired: true)
             ],
             defaultAgentPermission: FerritaToolDefaultAgentPermission.Allow,
             defaultToolKitKeys: ["computer"]);
@@ -883,7 +884,7 @@ namespace Ferrita.Tools
         public override string GetPromptDescription(FerritaToolPromptDescriptionContext context)
         {
             ArgumentNullException.ThrowIfNull(context);
-            return "模拟键盘文本录入，并将 '\\n' 自动映射转义成敲击键盘的 Enter 键。";
+            return "将文本写入系统剪贴板，并通过模拟 Ctrl+V 进行粘贴。适合长文本或为避免输入法干扰时使用。";
         }
 
         public override FrameworkElement? CreateInvocationPresentation(FerritaToolInvocationPresentationContext context)
@@ -906,8 +907,227 @@ namespace Ferrita.Tools
         {
             var text = arguments.GetString("TextContent") ?? string.Empty;
 
-            // 自动转义换行：把 \r\n 换成 \n，接着把文本段以 \n 分割，中间插入 Enter 键输入
-            string normalizedText = text.Replace("\r\n", "\n");
+            bool cbSuccess = SetClipboardText(text);
+            if (!cbSuccess)
+            {
+                return FerritaToolResult.Failure("无法设置系统剪贴板文本。");
+            }
+
+            Keyboard.TypeSimultaneously(ParseKey("CONTROL"), ParseKey("V"));
+
+            // 操作完成后等待 0.5s 再进行截图
+            await Task.Delay(500, cancellationToken).ConfigureAwait(false);
+
+            var screenshotXml = ComputerUseSessionManager.CaptureAndSaveScreenshot(sessionId);
+            return FerritaToolResult.Success($"{screenshotXml}\nPasted text content via clipboard successfully.");
+        }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool OpenClipboard(IntPtr hWndNewOwner);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool CloseClipboard();
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool EmptyClipboard();
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern IntPtr SetClipboardData(uint uFormat, IntPtr hMem);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr GlobalAlloc(uint uFlags, UIntPtr dwBytes);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr GlobalLock(IntPtr hMem);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool GlobalUnlock(IntPtr hMem);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr GlobalFree(IntPtr hMem);
+
+        private const uint CF_UNICODETEXT = 13;
+        private const uint GMEM_MOVEABLE = 0x0002;
+
+        private static bool SetClipboardTextNative(string text)
+        {
+            if (text == null) text = string.Empty;
+
+            for (int i = 0; i < 10; i++)
+            {
+                if (OpenClipboard(IntPtr.Zero))
+                {
+                    try
+                    {
+                        if (EmptyClipboard())
+                        {
+                            if (text.Length == 0)
+                            {
+                                return true;
+                            }
+
+                            int bytesCount = (text.Length + 1) * 2;
+                            IntPtr hMem = GlobalAlloc(GMEM_MOVEABLE, (UIntPtr)bytesCount);
+                            if (hMem != IntPtr.Zero)
+                            {
+                                IntPtr pMem = GlobalLock(hMem);
+                                if (pMem != IntPtr.Zero)
+                                {
+                                    try
+                                    {
+                                        Marshal.Copy(text.ToCharArray(), 0, pMem, text.Length);
+                                        Marshal.WriteInt16(pMem, text.Length * 2, 0); // Null terminator
+                                    }
+                                    finally
+                                    {
+                                        GlobalUnlock(hMem);
+                                    }
+
+                                    if (SetClipboardData(CF_UNICODETEXT, hMem) != IntPtr.Zero)
+                                    {
+                                        return true;
+                                    }
+                                    else
+                                    {
+                                        GlobalFree(hMem);
+                                    }
+                                }
+                                else
+                                {
+                                    GlobalFree(hMem);
+                                }
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        CloseClipboard();
+                    }
+                }
+                Thread.Sleep(50);
+            }
+            return false;
+        }
+
+        private static bool SetClipboardText(string text)
+        {
+            // 1. 尝试使用 Native Win32 API 写入剪贴板，这不需要 OLE/STA 线程，最稳定
+            if (SetClipboardTextNative(text))
+            {
+                return true;
+            }
+
+            // 2. 备用：在 STA 线程中通过 WPF Clipboard 写入
+            bool success = false;
+            var thread = new Thread(() =>
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    try
+                    {
+                        if (string.IsNullOrEmpty(text))
+                        {
+                            System.Windows.Clipboard.Clear();
+                        }
+                        else
+                        {
+                            System.Windows.Clipboard.SetText(text);
+                        }
+                        success = true;
+                        break;
+                    }
+                    catch
+                    {
+                        Thread.Sleep(50);
+                    }
+                }
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            thread.Join();
+
+            if (success) return true;
+
+            // 3. 备用：在 STA 线程中通过 WinForms Clipboard 写入
+            var thread2 = new Thread(() =>
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    try
+                    {
+                        if (string.IsNullOrEmpty(text))
+                        {
+                            System.Windows.Forms.Clipboard.Clear();
+                        }
+                        else
+                        {
+                            System.Windows.Forms.Clipboard.SetText(text, System.Windows.Forms.TextDataFormat.UnicodeText);
+                        }
+                        success = true;
+                        break;
+                    }
+                    catch
+                    {
+                        Thread.Sleep(50);
+                    }
+                }
+            });
+            thread2.SetApartmentState(ApartmentState.STA);
+            thread2.Start();
+            thread2.Join();
+
+            return success;
+        }
+    }
+
+    // ==========================================
+    // 7b. ComputerWriteText
+    // ==========================================
+    public sealed class ComputerWriteTextTool : ComputerUseActionToolBase
+    {
+        public const string ToolName = "ComputerWriteText";
+
+        private static readonly FerritaToolDefinition s_definition = new(
+            ToolName,
+            "向操作系统键盘仿真发送输入的纯文本，会自动处理转义的换行字符（模拟物理键盘敲击录入）。",
+            "Device",
+            [
+                new FerritaToolParameterDefinition("SessionId", "会话的唯一标识 ID。", FerritaToolParameterType.String, isRequired: true),
+                new FerritaToolParameterDefinition("TextContent", "要录入输入的文本内容。", FerritaToolParameterType.String, isRequired: true)
+            ],
+            defaultAgentPermission: FerritaToolDefaultAgentPermission.Allow,
+            defaultToolKitKeys: ["computer"]);
+
+        public override FerritaToolDefinition Definition => s_definition;
+
+        public override string GetPromptDescription(FerritaToolPromptDescriptionContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+            return "模拟键盘文本录入，并将 '\\n' 自动映射转义成敲击键盘的 Enter 键。通常情况下请勿使用此工具。使用ComputerTextInput工具录入文本稳定性更佳。";
+        }
+
+        public override FrameworkElement? CreateInvocationPresentation(FerritaToolInvocationPresentationContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+            return ToolInvocationCardFactory.CreateComputerUse(
+                context,
+                [
+                    new ToolInvocationCardFieldDefinition("Session ID", "SessionId"),
+                    new ToolInvocationCardFieldDefinition("Text", "TextContent")
+                ]);
+        }
+
+        public override async Task<FerritaToolResult> ExecuteActionAsync(
+            FerritaToolContext context,
+            FerritaToolArguments arguments,
+            string sessionId,
+            ComputerUseSession session,
+            CancellationToken cancellationToken)
+        {
+            var text = arguments.GetString("TextContent") ?? string.Empty;
+
+            // 自动转义换行：把字面值 \\r\\n 和 \\n，以及实际的 \r\n 替换为 \n，接着以 \n 分割，中间插入 Enter 键输入
+            string normalizedText = text.Replace("\\r\\n", "\n").Replace("\\n", "\n").Replace("\r\n", "\n");
             var lines = normalizedText.Split('\n');
             for (int i = 0; i < lines.Length; i++)
             {
@@ -1633,4 +1853,140 @@ namespace Ferrita.Tools
             return FerritaToolResult.Success($"{screenshotXml}\nReleased key '{keyStr}' successfully.");
         }
     }
+
+    // ==========================================
+    // 18. ComputerScroll
+    // ==========================================
+    public sealed class ComputerScrollTool : ComputerUseActionToolBase
+    {
+        public const string ToolName = "ComputerScroll";
+
+        private static readonly FerritaToolDefinition s_definition = new(
+            ToolName,
+            "在当前计算机操作会话的指定位置上（如果提供）或当前鼠标位置上模拟鼠标滚轮滚动。",
+            "Device",
+            [
+                new FerritaToolParameterDefinition("SessionId", "会话的唯一标识 ID。", FerritaToolParameterType.String, isRequired: true),
+                new FerritaToolParameterDefinition("Lines", "要滚动的行数，正数表示向上滚动，负数表示向下滚动。", FerritaToolParameterType.Number, isRequired: true),
+                new FerritaToolParameterDefinition("XPos", "鼠标要移动到的点击/滚动位置 of X 坐标值。与 Element 互斥。", FerritaToolParameterType.Integer, isRequired: false),
+                new FerritaToolParameterDefinition("YPos", "鼠标要移动到的点击/滚动位置 of Y 坐标值。与 Element 互斥。", FerritaToolParameterType.Integer, isRequired: false),
+                new FerritaToolParameterDefinition("Element", "鼠标要移动到的目标元素标号。与坐标参数互斥。", FerritaToolParameterType.Integer, isRequired: false)
+            ],
+            defaultAgentPermission: FerritaToolDefaultAgentPermission.Allow,
+            defaultToolKitKeys: ["computer"]);
+
+        public override FerritaToolDefinition Definition => s_definition;
+
+        public override string GetPromptDescription(FerritaToolPromptDescriptionContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+            return "在指定的坐标、元素标号或当前鼠标位置执行鼠标滚轮滚动操作（Lines 正数向上，负数向下）。";
+        }
+
+        public override FrameworkElement? CreateInvocationPresentation(FerritaToolInvocationPresentationContext context)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+            return ToolInvocationCardFactory.CreateComputerUse(
+                context,
+                [
+                    new ToolInvocationCardFieldDefinition("Session ID", "SessionId"),
+                    new ToolInvocationCardFieldDefinition("Lines", "Lines"),
+                    new ToolInvocationCardFieldDefinition("X", "XPos"),
+                    new ToolInvocationCardFieldDefinition("Y", "YPos"),
+                    new ToolInvocationCardFieldDefinition("Element", "Element")
+                ]);
+        }
+
+        public override async Task<FerritaToolResult> ExecuteActionAsync(
+            FerritaToolContext context,
+            FerritaToolArguments arguments,
+            string sessionId,
+            ComputerUseSession session,
+            CancellationToken cancellationToken)
+        {
+            // 位置校验
+            bool hasCoords = HasParameterValue(arguments, "XPos") && HasParameterValue(arguments, "YPos");
+            bool hasElement = HasParameterValue(arguments, "Element");
+            bool hasX = HasParameterValue(arguments, "XPos");
+            bool hasY = HasParameterValue(arguments, "YPos");
+
+            if ((hasX || hasY) && (!hasX || !hasY))
+            {
+                return FerritaToolResult.Failure("XPos和YPos坐标参数必须成对提供。");
+            }
+
+            if (hasCoords && hasElement)
+            {
+                return FerritaToolResult.Failure("不能同时提供坐标参数(XPos, YPos)和元素参数(Element)。");
+            }
+
+            double lines = (double)arguments.GetNumber("Lines");
+
+            int actualX = -1, actualY = -1, xpos = -1, ypos = -1;
+            bool shouldMove = false;
+
+            if (hasElement)
+            {
+                int elementId = arguments.GetInteger("Element");
+                if (!session.LatestElements.TryGetValue(elementId, out var rect))
+                {
+                    return FerritaToolResult.Failure($"未找到标号为 {elementId} 的元素。可能页面已刷新或该标号无效。");
+                }
+                actualX = (rect.Left + rect.Right) / 2;
+                actualY = (rect.Top + rect.Bottom) / 2;
+                xpos = (int)Math.Round(((rect.Left + rect.Right) / 2.0 - session.Screen.Bounds.Left) * session.Scale);
+                ypos = (int)Math.Round(((rect.Top + rect.Bottom) / 2.0 - session.Screen.Bounds.Top) * session.Scale);
+                shouldMove = true;
+            }
+            else if (hasCoords)
+            {
+                xpos = arguments.GetInteger("XPos");
+                ypos = arguments.GetInteger("YPos");
+                var (ax, ay) = ComputerUseSessionManager.MapToActualScreen(sessionId, xpos, ypos);
+                actualX = ax;
+                actualY = ay;
+                shouldMove = true;
+            }
+
+            if (shouldMove)
+            {
+                // 获取当前鼠标位置计算距离
+                var currentPos = Mouse.Position;
+                double distance = Math.Sqrt(Math.Pow(actualX - currentPos.X, 2) + Math.Pow(actualY - currentPos.Y, 2));
+                var currentSpeed = Mouse.MovePixelsPerMillisecond;
+                try
+                {
+                    if (distance > 0)
+                    {
+                        Mouse.MovePixelsPerMillisecond = Math.Max(5.0, distance / 300.0);
+                    }
+                    Mouse.MoveTo(new System.Drawing.Point(actualX, actualY));
+                }
+                finally
+                {
+                    Mouse.MovePixelsPerMillisecond = currentSpeed;
+                }
+            }
+
+            // 模拟滚动
+            Mouse.Scroll(lines);
+
+            // 操作完成后等待 0.5s 再进行截图
+            await Task.Delay(500, cancellationToken).ConfigureAwait(false);
+
+            var screenshotXml = ComputerUseSessionManager.CaptureAndSaveScreenshot(sessionId);
+            string locationMsg;
+            if (shouldMove)
+            {
+                locationMsg = hasElement ? $"element {arguments.GetInteger("Element")} center ({xpos}, {ypos}) [Screen: ({actualX}, {actualY})]" : $"({xpos}, {ypos}) [Screen: ({actualX}, {actualY})]";
+            }
+            else
+            {
+                locationMsg = "current cursor position";
+            }
+
+            return FerritaToolResult.Success($"{screenshotXml}\nScrolled {lines} lines at {locationMsg}.");
+        }
+    }
 }
+
