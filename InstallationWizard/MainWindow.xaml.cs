@@ -577,7 +577,7 @@ namespace InstallationWizard
     <DisplayName>Coder</DisplayName>
     <AvatarPath>pack://application:,,,/Resources/GuideBot.png</AvatarPath>
     <SystemPrompt>系统指令
-你是 Ferrita，一个编程智能体。你和用户共享一个工作区，你的职责是与他们协作，直到他们的目标得到真正的解决。
+你是 Ferrita，一个人工智能代理。你和用户共享一个工作区，你的职责是与他们协作，直到他们的目标得到真正的解决。
 通用指南：
 你将资深工程师的判断力带入工作，但这种判断是建立在敏锐的观察之上，而非过早下定论。你要先阅读代码库，克制简单盲目的假设，让既有系统的架构引导你如何行动。
 你更倾向于使用代码库中现有的模式、框架 and 本地辅助 API，而不是自己发明一套全新的抽象风格。
@@ -620,8 +620,8 @@ namespace InstallationWizard
       <Tool Name=""InitializePlan"" Permission=""Allow"" />
       <Tool Name=""KeywordSearch"" Permission=""Allow"" />
       <Tool Name=""LoadToolKits"" Permission=""Allow"" />
-      <Tool Name=""MergeLateralFS"" Permission=""Allow"" />
-      <Tool Name=""OverwriteLateralFS"" Permission=""Allow"" />
+      <Tool Name=""MergeLateralFS"" Permission=""RequireConfirmation"" />
+      <Tool Name=""OverwriteLateralFS"" Permission=""RequireConfirmation"" />
       <Tool Name=""ReadDirectoryRecursive"" Permission=""Allow"" />
       <Tool Name=""ReadImages"" Permission=""Allow"" />
       <Tool Name=""ReadTextFile"" Permission=""Allow"" />
@@ -645,7 +645,7 @@ namespace InstallationWizard
     <DisplayName>Coder With Powershell</DisplayName>
     <AvatarPath>pack://application:,,,/Resources/GuideBot.png</AvatarPath>
     <SystemPrompt>系统指令
-你是 Ferrita，一个编程智能体。你和用户共享一个工作区，你的职责是与他们协作，直到他们的目标得到真正的解决。
+你是 Ferrita，一个人工智能代理。你和用户共享一个工作区，你的职责是与他们协作，直到他们的目标得到真正的解决。
 通用指南：
 你将资深工程师的判断力带入工作，但这种判断是建立在敏锐的观察之上，而非过早下定论。你要先阅读代码库，克制简单盲目的假设，让既有系统的架构引导你如何行动。
 你更倾向于使用代码库中现有的模式、框架和本地辅助 API，而不是自己发明一套全新的抽象风格。
@@ -689,8 +689,8 @@ namespace InstallationWizard
       <Tool Name=""InitializePlan"" Permission=""Allow"" />
       <Tool Name=""KeywordSearch"" Permission=""Allow"" />
       <Tool Name=""LoadToolKits"" Permission=""Allow"" />
-      <Tool Name=""MergeLateralFS"" Permission=""Allow"" />
-      <Tool Name=""OverwriteLateralFS"" Permission=""Allow"" />
+      <Tool Name=""MergeLateralFS"" Permission=""RequireConfirmation"" />
+      <Tool Name=""OverwriteLateralFS"" Permission=""RequireConfirmation"" />
       <Tool Name=""ReadDirectoryRecursive"" Permission=""Allow"" />
       <Tool Name=""ReadImages"" Permission=""Allow"" />
       <Tool Name=""ReadTextFile"" Permission=""Allow"" />
@@ -751,8 +751,8 @@ namespace InstallationWizard
       <Tool Name=""InitializePlan"" Permission=""Allow"" />
       <Tool Name=""KeywordSearch"" Permission=""Allow"" />
       <Tool Name=""LoadToolKits"" Permission=""Allow"" />
-      <Tool Name=""MergeLateralFS"" Permission=""Allow"" />
-      <Tool Name=""OverwriteLateralFS"" Permission=""Allow"" />
+      <Tool Name=""MergeLateralFS"" Permission=""RequireConfirmation"" />
+      <Tool Name=""OverwriteLateralFS"" Permission=""RequireConfirmation"" />
       <Tool Name=""ReadDirectoryRecursive"" Permission=""Allow"" />
       <Tool Name=""ReadImages"" Permission=""Allow"" />
       <Tool Name=""ReadTextFile"" Permission=""Allow"" />
@@ -775,19 +775,12 @@ namespace InstallationWizard
   <Agent AgentId=""Investigator"">
     <DisplayName>Investigator</DisplayName>
     <AvatarPath>pack://application:,,,/Resources/GuideBot.png</AvatarPath>
-    <SystemPrompt>系统指令
-你是 Ferrita，一个编程智能体。你和用户共享一个工作区，你的职责是与他们协作，直到他们的目标得到真正的解决。
-通用指南：
-你将资深工程师的判断力带入工作，但这种判断是建立在敏锐的观察之上，而非过早下定论。你要先阅读代码库，克制简单盲目的假设，让既有系统的架构引导你如何行动。
-你更倾向于使用代码库中现有的模式、框架和本地辅助 API，而不是自己发明一套全新的抽象风格。
-只有当抽象能够消除真正的复杂性、减少有意义的重复，或明显符合既有的本地模式时，你才会引入它。
-你应让测试覆盖率随着风险和影响范围的大小而调整：对于局部的微调，保持测试的聚焦；当实现涉及共享行为、跨模块契约或面向用户的业务流时，则需要扩大测试覆盖范围。
-你尽可能多调用工具，少直接输出自然语言。只有和用户交互或交付成果时使用自然语言。</SystemPrompt>
+    <SystemPrompt>你是代码库与文件系统探索者。你的任务是进行复杂的代码库探索。你将使用多项工具深入探查代码库，满足主代理的任务需求，并使用Passdown工具交付满足要求的结果。探索尽可能详尽。输出内容准确而丰富。不要编造不存在的内容或猜测的内容，只返回你的确通过工具探索过的内容。</SystemPrompt>
     <IsStructuredXmlIO>false</IsStructuredXmlIO>
     <InputDescription>任务需求</InputDescription>
     <OutputDescription>按照任务需求探索代码库所得的结果。尽可能详细。</OutputDescription>
     <RuntimeRole>SubAgentOnly</RuntimeRole>
-    <SubAgentIntroduction>你是代码库与文件系统探索者。你的任务是进行复杂的代码库探索。你将使用多项工具深入探查代码库，满足主代理的任务需求，并使用Passdown工具交付满足要求的结果。探索尽可能详尽。输出内容准确而丰富。不要编造不存在的内容或猜测的内容，只返回你的确通过工具探索过的内容。</SubAgentIntroduction>
+    <SubAgentIntroduction>代码库与文件系统探索者。请在需要探索复杂目录时并行调用多个这种子代理来降低任务负担并加速交付。</SubAgentIntroduction>
     <LanguageModelSelectionMode>SpecificLanguageModel</LanguageModelSelectionMode>
     <SelectedLanguageModelKey></SelectedLanguageModelKey>
     <SelectedCapabilityLayerKey></SelectedCapabilityLayerKey>
@@ -835,6 +828,77 @@ namespace InstallationWizard
       <Tool Name=""WebSearch"" Permission=""Disabled"" />
       <Tool Name=""Wget"" Permission=""Disabled"" />
       <Tool Name=""WorkspaceNoteTemplate"" Permission=""Disabled"" />
+    </ToolPermissions>
+    <InputSchema />
+    <OutputSchema />
+  </Agent>
+  <Agent AgentId=""GPSubAgent"">
+    <DisplayName>GPSubAgent</DisplayName>
+    <AvatarPath>pack://application:,,,/Resources/GuideBot.png</AvatarPath>
+    <SystemPrompt>系统指令
+你是 Ferrita，一种人工智能代理。你和用户共享一个工作区，你的职责是与他们协作，直到他们的目标得到真正的解决。
+通用指南：
+你将资深工程师的判断力带入工作，但这种判断是建立在敏锐的观察之上，而非过早下定论。你要先阅读代码库，克制简单盲目的假设，让既有系统的架构引导你如何行动。
+你更倾向于使用代码库中现有的模式、框架和本地辅助 API，而不是自己发明一套全新的抽象风格。
+只有当抽象能够消除真正的复杂性、减少有意义的重复，或明显符合既有的本地模式时，你才会引入它。
+你应让测试覆盖率随着风险和影响范围的大小而调整：对于局部的微调，保持测试的聚焦；当实现涉及共享行为、跨模块契约或面向用户的业务流时，则需要扩大测试覆盖范围。
+你尽可能多调用工具，少直接输出自然语言。只有和用户交互或交付成果时使用自然语言。
+作为通用子代理（General Purpose Subagent），你的职责是严格按照主智能体派发的任务要求进行工作，自主决定和调用最适合的工具（如文件读写、搜索、代码编辑或执行命令等）来解决问题。
+在完成任务或需要回传结果时，你必须恰当且显式地调用 PassToMainAgent 工具，将你所得的最终 payload（如修改后的代码、分析报告或状态反馈）回传给主智能体。请记住，你无法使用 Passdown 工具，也无法直接通过自然语言回复主智能体。你的所有交付和回复必须通过调用 PassToMainAgent 工具完成。若有任务要求，必须严格百分之百遵循。你是通用子代理（General Purpose Subagent）。你代表主智能体在后台自主运行。你拥有全面的文件、代码库操作及命令执行等工具使用权限。你必须严格遵循主智能体下达的任务目标，当任务执行完毕或需要反馈时，恰当并显式地调用 PassToMainAgent 工具将最终结果回传给主智能体。请严格执行主智能体要求的每一个步骤，切勿遗漏。</SystemPrompt>
+    <IsStructuredXmlIO>false</IsStructuredXmlIO>
+    <InputDescription>任务需求</InputDescription>
+    <OutputDescription>根据任务要求执行并交付的最终结果。必须使用 PassToMainAgent 工具回传。</OutputDescription>
+    <RuntimeRole>SubAgentOnly</RuntimeRole>
+    <SubAgentIntroduction>你是通用子代理（General Purpose Subagent）。你代表主智能体在后台自主运行。你拥有全面的文件、代码库操作及命令执行等工具使用权限。你必须严格遵循主智能体下达的任务目标，当任务执行完毕或需要反馈时，恰当并显式地调用 PassToMainAgent 工具将最终结果回传给主智能体。请严格执行主智能体要求的每一个步骤，切勿遗漏。</SubAgentIntroduction>
+    <LanguageModelSelectionMode>SpecificLanguageModel</LanguageModelSelectionMode>
+    <SelectedLanguageModelKey></SelectedLanguageModelKey>
+    <SelectedCapabilityLayerKey></SelectedCapabilityLayerKey>
+    <IsPersonaEnabled>false</IsPersonaEnabled>
+    <SelectedPersonaId>aero</SelectedPersonaId>
+    <DefaultToolKits>
+      <ToolKit Key=""Investigate"" />
+      <ToolKit Key=""Web"" />
+    </DefaultToolKits>
+    <ToolPermissions>
+      <Tool Name=""CheckPlanItem"" Permission=""Allow"" />
+      <Tool Name=""CreateLateralFS"" Permission=""Allow"" />
+      <Tool Name=""Curl"" Permission=""Allow"" />
+      <Tool Name=""EditFile_Advanced"" Permission=""Allow"" />
+      <Tool Name=""EditFile_Rewrite"" Permission=""Allow"" />
+      <Tool Name=""EditFile_SearchReplace"" Permission=""Allow"" />
+      <Tool Name=""EditPlan"" Permission=""Allow"" />
+      <Tool Name=""ExecutePowershellCommand"" Permission=""Allow"" />
+      <Tool Name=""FileSystemIO_CreateFile"" Permission=""Allow"" />
+      <Tool Name=""FileSystemIO_DeleteDirectory"" Permission=""Allow"" />
+      <Tool Name=""FileSystemIO_DeleteFile"" Permission=""Allow"" />
+      <Tool Name=""FileSystemIO_NewDirectory"" Permission=""Allow"" />
+      <Tool Name=""FileSystemIO_RenameFile"" Permission=""Allow"" />
+      <Tool Name=""GlobSearch"" Permission=""Allow"" />
+      <Tool Name=""GrepSearch"" Permission=""Allow"" />
+      <Tool Name=""InheritLateralFS"" Permission=""Allow"" />
+      <Tool Name=""InitializeAerialCityRAG"" Permission=""Allow"" />
+      <Tool Name=""InitializeLiveXAML"" Permission=""Allow"" />
+      <Tool Name=""InitializePlan"" Permission=""Allow"" />
+      <Tool Name=""KeywordSearch"" Permission=""Allow"" />
+      <Tool Name=""LoadToolKits"" Permission=""Allow"" />
+      <Tool Name=""MergeLateralFS"" Permission=""RequireConfirmation"" />
+      <Tool Name=""OverwriteLateralFS"" Permission=""RequireConfirmation"" />
+      <Tool Name=""ReadDirectoryRecursive"" Permission=""Allow"" />
+      <Tool Name=""ReadImages"" Permission=""Allow"" />
+      <Tool Name=""ReadTextFile"" Permission=""Allow"" />
+      <Tool Name=""ReadThumbnails"" Permission=""Allow"" />
+      <Tool Name=""SemanticSearch"" Permission=""Allow"" />
+      <Tool Name=""SharpSpray"" Permission=""Allow"" />
+      <Tool Name=""ShowLiveXAML"" Permission=""Allow"" />
+      <Tool Name=""FerritaContextSnapshot"" Permission=""Allow"" />
+      <Tool Name=""SpawnSubAgent"" Permission=""Disabled"" />
+      <Tool Name=""SWSniff"" Permission=""Allow"" />
+      <Tool Name=""UpdateAerialCityDB"" Permission=""Allow"" />
+      <Tool Name=""WebBrowse"" Permission=""Allow"" />
+      <Tool Name=""WebSearch"" Permission=""Allow"" />
+      <Tool Name=""Wget"" Permission=""Allow"" />
+      <Tool Name=""WorkspaceNoteTemplate"" Permission=""Allow"" />
+      <Tool Name=""PassToMainAgent"" Permission=""Allow"" />
     </ToolPermissions>
     <InputSchema />
     <OutputSchema />
@@ -1074,6 +1138,8 @@ To the greatest extent permitted by, but not in contravention of, applicable law
                             description = "计算机的化身，帮助用户深度操作计算机系统并自动化完成复杂的工作。";
                         else if (agentId == "Investigator")
                             description = "探索型子智能体，主要执行代码库的深度搜索、文件树分析与结构调查。";
+                        else if (agentId == "GPSubAgent")
+                            description = "通用子智能体，根据主智能体派发的任务，自主规划并使用各种工具协助解决任务。";
 
                         var parsedMode = AgentLanguageModelSelectionMode.SpecificLanguageModel;
                         if (Enum.TryParse<AgentLanguageModelSelectionMode>(agent.Element("LanguageModelSelectionMode")?.Value, true, out var pm))
@@ -2453,6 +2519,11 @@ To the greatest extent permitted by, but not in contravention of, applicable law
                     {
                         opt.DisplayName = TryFindResource("Agent_Investigator_Name") as string ?? "Investigator";
                         opt.Description = TryFindResource("Agent_Investigator_Desc") as string ?? "探索型子智能体，主要执行代码库的深度搜索、文件树分析与结构调查。";
+                    }
+                    else if (opt.AgentId == "GPSubAgent")
+                    {
+                        opt.DisplayName = TryFindResource("Agent_GPSubAgent_Name") as string ?? "General Purpose Subagent";
+                        opt.Description = TryFindResource("Agent_GPSubAgent_Desc") as string ?? "通用子智能体，根据主智能体派发的任务，自主规划并使用各种工具协助解决任务。";
                     }
 
                     opt.RaisePropertyChanged(nameof(opt.DisplayName));
