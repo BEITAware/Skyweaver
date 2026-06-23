@@ -129,6 +129,8 @@ To the greatest extent permitted by, but not in contravention of, applicable law
     <system:String x:Key="Agent_Puterperson_Desc">Embodiment of your computer, helps automate complex OS tasks.</system:String>
     <system:String x:Key="Agent_Investigator_Name">Investigator</system:String>
     <system:String x:Key="Agent_Investigator_Desc">Exploration sub-agent, performs deep codebase searches and layout inspection.</system:String>
+    <system:String x:Key="Agent_GPSubAgent_Name">General Purpose Subagent</system:String>
+    <system:String x:Key="Agent_GPSubAgent_Desc">General-purpose sub-agent, autonomously plans and uses tools based on tasks assigned by the main agent.</system:String>
 
     <!-- Session Flow sub-page -->
     <system:String x:Key="Flow_SubStepTitle">Session Flow</system:String>

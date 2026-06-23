@@ -4,7 +4,7 @@ name: Build & Release Ferrita Preview
 on:
   push:
     tags:
-      - 'ferrita-preview-*'
+      - 'BwFe-preview-*'
 
 permissions:
   contents: write

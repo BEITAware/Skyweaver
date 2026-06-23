@@ -129,6 +129,8 @@
     <system:String x:Key="Agent_Puterperson_Desc">计算机的化身，帮助用户深度操作计算机系统并自动化完成复杂的工作。</system:String>
     <system:String x:Key="Agent_Investigator_Name">Investigator</system:String>
     <system:String x:Key="Agent_Investigator_Desc">探索型子智能体，主要执行代码库的深度搜索、文件树分析与结构调查。</system:String>
+    <system:String x:Key="Agent_GPSubAgent_Name">General Purpose Subagent</system:String>
+    <system:String x:Key="Agent_GPSubAgent_Desc">通用子智能体，根据主智能体派发的任务，自主规划并使用各种工具协助解决任务。</system:String>
 
     <!-- 会话流子页面 -->
     <system:String x:Key="Flow_SubStepTitle">会话流</system:String>
