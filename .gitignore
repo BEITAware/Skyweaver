@@ -393,3 +393,6 @@ REF/
 **/*.xcf
 _gitrepo/
 Skyweaver/_buildcheck/
+
+# Local vector database and search wiki data
+aerial_data/
